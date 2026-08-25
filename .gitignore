@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# Stage 2: CMS public use files are large and re-derivable. Commit the small
+# JSON the pipeline emits, never the source archives.
+data/raw/
+*.zip

@@ -1,0 +1,1456 @@
+<title>The Whole Bill</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%2312141A%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%225%22%20width%3D%2210%22%20height%3D%222%22%20fill%3D%22%2386603E%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%223%22%20fill%3D%22%23A87A43%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2210%22%20width%3D%2210%22%20height%3D%2212%22%20fill%3D%22%23D99A3F%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2222%22%20width%3D%2210%22%20height%3D%225%22%20fill%3D%22%23F0C98D%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&display=swap">
+<style>
+:root{
+  --paper:#FAF7F2; --paper-card:#FFFDFA; --paper-tint:#F5F0E7;
+  --pk:#1A1815; --pb:#443E36; --pm:#6B6459; --plabel:#786E5B;
+  --prule:#E3DDD2; --prule-soft:#EFEAE1; --pctrl:#988B76;
+
+  --ink:#12141A; --ink-surface:#171A22; --ink-raised:#1A1D26; --ink-chip:#232836;
+  --irule:#1F2330; --irule-2:#262A35; --ictrl:#5E6472;
+  --ik:#E8E6E1; --ib:#B9BCC4; --im:#8A8F9C; --ilabel:#8B92A4; --ifaint:#7C8395;
+
+  --c1:#F0C98D; --c2:#D99A3F; --c3:#A87A43; --c4:#86603E; --c4l:#C39258;
+  --amber-deep:#9E6B1C; --teal:#3FB5AE;
+
+  --chart-h:500px;
+  --pad:clamp(24px,5vw,96px);
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--pk);-webkit-font-smoothing:antialiased}
+img{max-width:100%}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1}
+.wrap{max-width:1248px;margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
+
+section.paper{background:var(--paper);background-image:repeating-linear-gradient(to bottom,rgba(26,24,21,.030) 0 1px,transparent 1px 34px);color:var(--pk)}
+.inkzone{background:var(--ink);color:var(--ik)}
+section.ink{background:var(--ink);color:var(--ik)}
+
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.17em;text-transform:uppercase}
+.eyebrow.p{color:var(--amber-deep)} .eyebrow.i{color:var(--teal)}
+.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ilabel)}
+.lbl.p{color:var(--plabel);font-size:11px}
+
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(38px,5.6vw,80px);line-height:1.01;letter-spacing:-.023em;margin:0;text-wrap:pretty}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:pretty}
+h1 em{font-style:italic;color:var(--amber-deep)}
+p{margin:0;text-wrap:pretty}
+.lede{font-size:clamp(17px,1.5vw,21px);line-height:1.56;color:var(--pb)}
+.body{font-size:16.5px;line-height:1.68;color:var(--pb)}
+.note{font-size:13px;line-height:1.55;color:var(--pm)}
+.note-i{font-size:12.5px;line-height:1.55;color:var(--ifaint)}
+
+.stack{display:flex;flex-direction:column}
+.row{display:flex}
+.grow{flex-grow:1}
+.rule{height:1px;background:var(--prule)}
+
+/* ---------- hero ---------- */
+.masthead{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:40px 0 22px;border-bottom:1px solid var(--prule);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
+.brand svg{display:block;flex-shrink:0}
+.wordmark{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.012em;line-height:1;white-space:nowrap}
+.domain{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em}
+.nav{display:flex;gap:clamp(16px,2.4vw,34px);font-size:13.5px;color:var(--pm)}
+.hero-inner{padding:clamp(48px,7vw,104px) 0 clamp(40px,6vw,72px);display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:clamp(28px,4vw,72px);align-items:end}
+.dateline{border-left:2px solid var(--amber-deep);padding:2px 0 2px 20px;display:flex;flex-direction:column;gap:11px;margin-bottom:6px}
+.dateline .k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-deep)}
+.dateline p{font-size:14.5px;line-height:1.6;color:var(--pb)}
+.dateline b{font-weight:500;color:var(--pk)}
+.scope{margin-top:18px;font-size:13.5px;line-height:1.6;color:var(--pm);max-width:540px}
+.scope b{font-weight:500;color:var(--pk)}
+.areapick{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.areapick button{font-family:var(--sans);font-size:13px;padding:8px 13px;border-radius:2px;border:1px solid var(--pctrl);background:var(--paper-card);color:var(--pk);cursor:pointer}
+.areapick button:hover{background:var(--paper-tint)}
+.zipbar{display:flex;gap:12px;align-items:center;margin-top:44px;flex-wrap:wrap}
+.zipfield{display:flex;align-items:center;border:1px solid var(--pk);border-radius:2px;overflow:hidden;background:var(--paper-card)}
+.zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;font-family:var(--mono);font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--pm);border-right:1px solid var(--prule)}
+.zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent}
+.zipfield .v::placeholder{color:#A79A85}
+.dateline b{font-weight:500;color:var(--pk)}
+.btn-dark{height:62px;padding:0 34px;background:var(--pk);color:var(--paper);border:none;border-radius:2px;font-family:var(--sans);font-size:16px;font-weight:500;cursor:pointer}
+.btn-ghost{height:50px;padding:0 24px;background:var(--paper-card);color:var(--pk);border:1px solid var(--pctrl);border-radius:2px;font-family:var(--sans);font-size:15px;cursor:pointer}
+.footline{display:flex;justify-content:space-between;gap:20px;padding-bottom:40px;font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;color:var(--pm);flex-wrap:wrap}
+
+/* ---------- narrative ---------- */
+.sec{padding:clamp(64px,9vw,104px) 0}
+.split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,5vw,88px);align-items:start}
+.cmp{display:flex;flex-direction:column;gap:34px;margin-top:56px}
+.cmp-row{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center}
+.cmp-lab{text-align:right;display:flex;flex-direction:column;gap:5px}
+.cmp-bars{display:flex;align-items:center;gap:16px;min-width:0}
+.track{display:flex;border-radius:1px;overflow:hidden;flex-grow:1;min-width:0}
+.callout{margin-top:40px;border-left:2px solid var(--amber-deep);padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:4px}
+
+/* ---------- sticky results ---------- */
+.sticky{position:sticky;top:0;z-index:20;background:rgba(26,29,38,.92);backdrop-filter:saturate(1.2) blur(8px);-webkit-backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--irule-2)}
+.sticky.pinned{box-shadow:0 8px 22px -12px rgba(0,0,0,.85);border-bottom-color:#2F3542}
+.sticky-in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:58px;flex-wrap:nowrap;overflow-x:auto}
+.sticky .who{font-family:var(--mono);font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:var(--im);white-space:nowrap}
+.figs{display:flex;gap:clamp(16px,2.6vw,38px);align-items:center}
+.fig{display:flex;align-items:center;gap:9px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fig .n{font-family:var(--mono);font-size:15px}
+.fig .t{font-size:13px;color:var(--im)}
+.unit{position:relative;display:inline-flex;align-items:center;padding:3px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);cursor:pointer;flex-shrink:0;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+.unit:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
+.unit-thumb{position:absolute;top:3px;left:3px;height:calc(100% - 6px);border-radius:999px;background:var(--c2);box-shadow:0 1px 8px -2px rgba(217,154,63,.75);transition:transform .28s cubic-bezier(.4,0,.2,1),width .28s cubic-bezier(.4,0,.2,1)}
+.unit-l{position:relative;z-index:1;font-size:12.5px;line-height:1;padding:8px 15px;color:var(--im);transition:color .2s;white-space:nowrap;user-select:none}
+.unit-l.on{color:#1E1509;font-weight:500}
+
+/* ---------- instrument ---------- */
+.instr{display:grid;grid-template-columns:452px minmax(0,1fr);gap:0}
+.panel{border-right:1px solid var(--irule);padding:44px clamp(24px,3vw,40px) 52px 0;display:flex;flex-direction:column;gap:30px}
+.out{padding:44px 0 52px clamp(24px,3.4vw,48px);display:flex;flex-direction:column;gap:26px;min-width:0}
+.field{display:flex;flex-direction:column;gap:9px}
+.ctrl{height:46px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;font-size:15px}
+.ctrl.mono{font-family:var(--mono);font-size:16px}
+.step{width:32px;height:34px;background:var(--ink-chip);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--im);font-size:16px}
+.seg{display:flex;gap:6px}
+.seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--irule-2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
+.seg > div.on,.seg > button.on{background:#2C3140;border-color:#3D4457;color:var(--ik);font-weight:500}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;margin:6px 0 0;cursor:pointer;display:block}
+input[type=range]:focus{outline:none}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--ink-chip);border-radius:2px}
+input[type=range]::-moz-range-track{height:4px;background:var(--ink-chip);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--ik);border:3px solid var(--ink);margin-top:-7px}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--ik);border:3px solid var(--ink)}
+input[type=range]::-moz-range-progress{height:4px;background:var(--teal);border-radius:2px}
+select.ctrl{appearance:none;-webkit-appearance:none;color:var(--ik);font-family:var(--sans);width:100%;background-image:none;cursor:pointer}
+select.ctrl option{background:var(--ink-raised);color:var(--ik)}
+button.step{border:none;cursor:pointer;font-family:var(--sans)}
+.warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:3px;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
+.bignum{font-family:var(--mono);font-size:clamp(48px,7vw,86px);font-weight:300;line-height:1;letter-spacing:-.035em;color:var(--c2)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:20px 22px;display:flex;flex-direction:column;gap:7px}
+.card-i .v{font-family:var(--mono);font-size:27px;letter-spacing:-.02em}
+.card-i.hi{border-color:#34302A} .card-i.hi .v,.card-i.hi .t{color:var(--c2)}
+.card-i .t{font-size:13px;color:var(--im)}
+.callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:3px;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
+
+/* ---------- waterfall ---------- */
+.wf{display:flex;align-items:flex-end;gap:clamp(14px,3vw,44px);margin-top:clamp(48px,8vw,120px);height:var(--chart-h)}
+.wcol{flex-grow:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;height:var(--chart-h)}
+.wcol > *{flex-shrink:0}
+.band{flex-shrink:0;border-radius:0}
+.band.top{border-radius:1px 1px 0 0} .band.bot{border-radius:0 0 1px 1px}
+.wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap}
+.wlab.big{font-size:clamp(18px,2.1vw,30px)}
+.wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
+.wkick{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--c2);margin-bottom:9px}
+.wdiv{width:2px;background:var(--irule-2);height:var(--chart-h);flex-shrink:0;align-self:flex-end}
+.wcaps{display:flex;gap:clamp(14px,3vw,44px);margin-top:20px}
+.wcap{flex-grow:1;display:flex;gap:9px;align-items:flex-start;min-width:0}
+.sw{width:11px;height:11px;border-radius:2px;flex-shrink:0;margin-top:4px}
+.wcap span{font-size:13.5px;line-height:1.5;color:var(--im)}
+
+/* ---------- comparison ---------- */
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:13px 20px;border-radius:2px;font-size:14px;font-weight:500;cursor:pointer;background:var(--ink-raised);color:var(--im);border:1px solid var(--ictrl);transition:background .18s,color .18s,border-color .18s}
+.pill.on{background:var(--teal);color:#0C1F1E;border-color:var(--teal)}
+.prov{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:3px;padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:44px;align-items:start}
+.bars{display:flex;flex-direction:column;gap:19px}
+.bar-row{display:grid;grid-template-columns:210px minmax(0,1fr);gap:24px;align-items:center}
+.bar-t{display:flex;flex-direction:column;gap:3px}
+.bar-t .a{font-size:14.5px;font-weight:500} .bar-t .b{font-size:12.5px;color:var(--ifaint)}
+.bar-w{display:flex;align-items:center;gap:16px;min-width:0}
+.bar-bg{flex-grow:1;height:44px;background:var(--ink-raised);border-radius:1px;min-width:0;display:flex;overflow:hidden}
+.bar-ghost{height:100%;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
+.bar-fill{height:100%;flex-shrink:0;border-radius:1px;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-v{width:112px;flex-shrink:0;font-family:var(--mono);font-size:clamp(18px,2vw,24px);letter-spacing:-.02em;text-align:right}
+.summary{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px}
+.save{background:var(--ink-surface);border:1px solid #24382F;border-radius:3px;padding:24px 26px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
+.save .v{font-family:var(--mono);font-size:clamp(34px,4.4vw,52px);font-weight:300;line-height:1;letter-spacing:-.032em;color:var(--teal)}
+.save .v2{font-family:var(--mono);font-size:clamp(24px,2.8vw,34px);font-weight:300;line-height:1;letter-spacing:-.025em}
+.vsep{width:1px;align-self:stretch;background:var(--irule)}
+.cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
+.range{height:26px;background:var(--ink-raised);border-radius:1px;position:relative}
+.range .band-t{position:absolute;top:0;bottom:0;background:rgba(63,181,174,.30);border-left:2px solid var(--teal);border-right:2px solid var(--teal)}
+.range .mk{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ik);transition:left .35s cubic-bezier(.4,0,.2,1)}
+.range .now{position:absolute;right:0;top:0;bottom:0;width:3px;background:var(--c2)}
+
+
+/* ---------- mobile pass ---------- */
+@media (max-width:760px){
+  /* the sticky bar goes two-row: context + switch, then the three figures */
+  .sticky-in{display:grid;grid-template-columns:1fr auto;grid-template-areas:"who unit" "figs figs";
+             height:auto;padding-top:8px;padding-bottom:9px;gap:7px 12px;overflow:visible}
+  .sticky .who{display:block;grid-area:who;align-self:center;font-size:10.5px;letter-spacing:.07em;
+               min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .unit{grid-area:unit;justify-self:end}
+  .figs{grid-area:figs;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px}
+  .fig{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"dot t" "n n";
+       gap:1px 6px;align-items:center;white-space:normal}
+  .fig .dot{grid-area:dot;width:6px;height:6px}
+  .fig .t{grid-area:t;font-size:11px;line-height:1.2}
+  .fig .n{grid-area:n;font-size:14px}
+  .fig.sm-hide{display:grid}
+
+  /* touch targets */
+  .step{width:44px;height:44px}
+  .ctrl{height:50px}
+  select.ctrl{height:50px}
+  .unit-l{padding:12px 16px}
+  input[type=range]{height:44px;margin:2px 0 0}
+  input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-10px}
+  input[type=range]::-moz-range-thumb{width:20px;height:20px}
+  .areapick button{padding:12px 15px;min-height:44px}
+  .seg > div,.seg > button{height:48px}
+  .btn-dark{height:56px}
+  .btn-ghost{height:48px}
+  .zipfield .k,.zipfield .v{height:56px}
+  .zipfield .v{width:auto;flex:1;min-width:0}
+  .zipbar{flex-wrap:nowrap}
+
+  /* legibility */
+  .eyebrow{font-size:12px}
+  .lbl,.lbl.p{font-size:11.5px}
+  .note,.note-i,.fn{font-size:13.5px}
+  .domain{font-size:12.5px}
+  .meth td,.meth th{font-size:13.5px}
+  .meth th{font-size:10.5px}
+  .wcap span{font-size:11.5px}
+  .wlab{font-size:11.5px;letter-spacing:0}
+  .wlab.big{font-size:13px}
+  .wlab.total{font-size:17px}
+  .wkick{font-size:9px;letter-spacing:.1em}
+  .cstat{padding:18px 20px}
+  .letter .bd{font-size:16.5px}
+}
+
+/* ---------- the cliff ---------- */
+.cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:3px;background:var(--ink-surface);overflow:hidden}
+.cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
+.cstat .t{font-size:13.5px;color:var(--im)}
+.cstat .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(26px,3.4vw,42px);font-weight:300;letter-spacing:-.03em;line-height:1}
+.cstat .s{font-size:12.5px;color:var(--ifaint)}
+.chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:22px 24px}
+.chartbox svg{display:block;width:100%;height:auto}
+
+/* ---------- lives ---------- */
+.livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
+.bigstat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,84px);font-weight:300;line-height:1;letter-spacing:-.04em;color:var(--amber-deep)}
+.bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
+.disclose{margin-top:48px;border-top:1px solid var(--prule);padding-top:26px;display:flex;flex-direction:column;gap:16px}
+
+/* ---------- critics / act ---------- */
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
+.card-p{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;padding:34px 36px;display:flex;flex-direction:column;gap:16px}
+.meth table{width:100%;border-collapse:collapse;font-size:14.5px}
+.meth th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--plabel);font-weight:400;padding:0 16px 10px 0;border-bottom:1px solid var(--prule)}
+.meth td{padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;color:var(--pb);line-height:1.6}
+.meth td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--pk);white-space:nowrap}
+.meth h3{font-family:var(--serif);font-size:clamp(22px,2.2vw,27px);font-weight:400;margin:0;letter-spacing:-.01em}
+.meth .card-p{gap:14px}
+.tag{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:2px;white-space:nowrap}
+.tag.stat{background:#DDE9DF;color:#245239}
+.tag.surv{background:#E4E0EC;color:#413659}
+.tag.mod{background:#F5E7CE;color:#7A4E0C}
+a.q{color:var(--amber-deep);text-decoration:none;border-bottom:1px solid rgba(158,107,28,.35)}
+a.q:hover{border-bottom-color:var(--amber-deep)}
+.quote{font-family:var(--serif);font-size:clamp(23px,2.3vw,29px);font-style:italic;line-height:1.24}
+.fn{font-size:13px;line-height:1.55;color:var(--pm);border-top:1px solid var(--prule-soft);padding-top:14px}
+.actgrid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:36px;align-items:start}
+.letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;display:flex;flex-direction:column}
+.letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
+.letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:17.5px;line-height:1.72;color:#2A2620}
+.letter .ft{display:flex;gap:10px;padding:22px 36px;border-top:1px solid var(--prule-soft);align-items:center;flex-wrap:wrap}
+mark{background:#F7EDDC;color:inherit;padding:1px 4px}
+.chk{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--prule);border-radius:2px;font-size:14px}
+.chk.on{background:var(--paper-tint)} .chk.off{background:var(--paper-card);color:var(--pm)}
+.box{width:15px;height:15px;border-radius:2px;flex-shrink:0}
+.box.on{background:var(--amber-deep);display:flex;align-items:center;justify-content:center}
+.box.off{border:1px solid var(--pctrl)}
+footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-height:1.6}
+
+@media (max-width:1100px){
+  :root{--chart-h:380px}
+  .instr{grid-template-columns:minmax(0,1fr)}
+  .panel{border-right:none;border-bottom:1px solid var(--irule);padding:36px 0 40px}
+  .out{padding:36px 0 40px}
+  .prov,.summary,.actgrid{grid-template-columns:minmax(0,1fr)}
+  .split{grid-template-columns:minmax(0,1fr);gap:28px}
+  .grid2{grid-template-columns:minmax(0,1fr);gap:20px}
+  .livesgrid{grid-template-columns:minmax(0,1fr);gap:34px}
+  .cliffstats{grid-template-columns:minmax(0,1fr)}
+  .cstat{border-right:none;border-bottom:1px solid var(--irule)}
+  .sticky-in{gap:16px}
+  .hero-inner{grid-template-columns:minmax(0,1fr);gap:36px}
+  .meth .grid2{gap:20px}
+}
+@media (max-width:760px){
+  :root{--chart-h:260px}
+  .cmp-row{grid-template-columns:minmax(0,1fr);gap:10px}
+  .cmp-lab{text-align:left}
+  .bar-row{grid-template-columns:minmax(0,1fr);gap:8px}
+  .bar-v{width:auto;text-align:left}
+  .cards{grid-template-columns:minmax(0,1fr)}
+  .wlab,.wkick{font-size:10px;letter-spacing:0}
+  .wcap span{font-size:11px}
+  .sw{width:9px;height:9px}
+  .nav{display:none}
+  .hero-inner{grid-template-columns:minmax(0,1fr)}
+  .letter .hd,.letter .ft{padding-left:24px;padding-right:24px}
+  .letter .ft p{text-align:left;max-width:none}
+  .card-p{padding:26px 24px}
+  .wf{gap:8px}
+  .wcaps{gap:8px}
+}
+</style>
+
+<!-- ============ 01 HERO ============ -->
+<section class="paper">
+  <div class="wrap">
+    <div class="masthead">
+      <a class="brand" href="#">
+        <svg width="13" height="24" viewBox="0 0 13 24" aria-hidden="true">
+          <rect x="0" y="0" width="13" height="2.5" fill="#86603E"></rect>
+          <rect x="0" y="2.5" width="13" height="3.5" fill="#A87A43"></rect>
+          <rect x="0" y="6" width="13" height="12" fill="#D99A3F"></rect>
+          <rect x="0" y="18" width="13" height="6" fill="#F0C98D"></rect>
+        </svg>
+        <span class="wordmark">The Whole Bill</span>
+      </a>
+      <nav class="nav"><a class="q" href="#/methodology" style="color:inherit;border:none">Methodology &amp; sources</a></nav>
+    </div>
+    <div class="hero-inner">
+      <div>
+      <div class="eyebrow p" style="margin-bottom:32px">A healthcare cost calculator</div>
+      <h1>What does your healthcare <em>actually</em> cost?</h1>
+      <p class="lede" style="margin-top:36px;max-width:560px">Not the number on your paystub. The whole number &mdash; including the share your employer pays on your behalf, which is your money too.</p>
+      <div class="zipbar">
+        <div class="zipfield">
+          <div class="k">Zip</div>
+          <input class="v" id="zip" inputmode="numeric" maxlength="5" placeholder="06106" value="06106" aria-label="ZIP code">
+        </div>
+        <button class="btn-dark" id="zipGo">Show me &rarr;</button>
+      </div>
+      <p class="note" style="margin-top:24px">About 90 seconds. Your income and household details stay in your browser.</p>
+      <div class="scope" id="scope"></div>
+      <div class="areapick" id="areapick"></div>
+      </div>
+
+      <aside class="dateline">
+        <div class="k">What changed this year</div>
+        <p>The enhanced premium tax credits expired on 31 December 2025. The 400% subsidy cliff is back.</p>
+        <p>Marketplace enrollees are paying <b>58% more</b> in premiums, average deductibles hit a record <b>$3,786</b>, and roughly <b>five million people</b> dropped out of coverage.</p>
+        <p style="color:var(--pm);font-size:13px">KFF analysis of 2026 Marketplace enrollment.</p>
+      </aside>
+    </div>
+    <div class="footline">
+      <span>&darr; Scroll</span>
+      <span class="domain">thewholebill.org</span>
+      <span>Modeled from KFF, CMS &amp; Census data &middot; sample figures</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 NARRATIVE ============ -->
+<section class="paper">
+  <div class="wrap sec">
+    <div class="split">
+      <div class="stack">
+        <div class="eyebrow p" style="margin-bottom:26px">01 &middot; The part you don&rsquo;t see</div>
+        <h2>You see about a quarter of it.</h2>
+      </div>
+      <div class="stack" style="gap:20px">
+        <p class="body">When your employer &ldquo;covers&rdquo; your health insurance, they are not giving you a gift. They are spending part of your compensation on a product, and handing you the product instead of the money.</p>
+        <p class="body">Economists broadly agree this cost lands on wages. It is yours. It just never appears on a paystub, so almost nobody counts it &mdash; which is exactly why healthcare costs feel survivable in the abstract and ruinous in practice.</p>
+      </div>
+    </div>
+
+    <div class="rule" style="margin:56px 0 0"></div>
+
+    <div class="cmp">
+      <div class="cmp-row">
+        <div class="cmp-lab">
+          <div style="font-size:14.5px;font-weight:500">On your paystub</div>
+          <div class="note">Premium deduction + Medicare tax</div>
+        </div>
+        <div class="cmp-bars">
+          <div class="track" style="flex-grow:1;min-width:0"><div id="narrSmall" style="width:26.2%;height:52px;background:var(--c1)"></div></div>
+          <div class="num" style="font-size:22px;color:var(--pm)" data-fig="emp.visible">$8,278</div>
+        </div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-lab">
+          <div style="font-size:14.5px;font-weight:500">What it really costs</div>
+          <div class="note">Everything, all in</div>
+        </div>
+        <div class="cmp-bars">
+          <div class="track" style="height:64px">
+            <div id="narrVis" style="width:26.2%;background:var(--c1)"></div>
+            <div id="narrRest" style="width:73.8%;background:var(--c2)"></div>
+          </div>
+          <div class="num" style="font-size:30px" data-fig="emp.total">$31,578</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="lbl p" style="color:var(--amber-deep)">Never on a paystub</div>
+      <div style="font-family:var(--serif);font-size:30px;font-style:italic;color:var(--amber-deep)"><span data-fig="emp.invisible">$23,300</span> <span data-uw="a">a year</span></div>
+    </div>
+
+    <div class="rule" style="margin:56px 0 24px"></div>
+    <div class="row" style="gap:56px;flex-wrap:wrap">
+      <p class="note" style="max-width:520px">All figures are <span data-uw="per">per year</span> unless labelled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark plan premiums are modeled.</p>
+      <p class="note" style="max-width:360px">Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INK ZONE (sticky results bar spans 03-05) ============ -->
+<div class="inkzone">
+
+  <div class="sticky">
+    <div class="wrap sticky-in">
+      <div class="who" id="who-line"></div>
+      <div class="figs">
+        <div class="fig"><span class="dot" style="background:var(--c2)"></span><span class="t">Employer</span><span class="n" data-fig="emp.total">$31,578</span></div>
+        <div class="fig sm-hide"><span class="dot" style="background:var(--ictrl)"></span><span class="t">Marketplace</span><span class="n" data-fig="mkt.household">$27,200</span></div>
+        <div class="fig"><span class="dot" style="background:var(--teal)"></span><span class="t">Universal</span><span class="n" id="stickyU" data-fig="uni.total" style="color:var(--teal)">$9,800</span></div>
+      </div>
+      <button class="unit" id="unit" type="button" role="switch" aria-checked="false" aria-label="Show figures per year or per month">
+        <span class="unit-thumb" aria-hidden="true"></span>
+        <span class="unit-l on" data-u="y">Year</span>
+        <span class="unit-l" data-u="m">Month</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ---- 03 THE INSTRUMENT ---- -->
+  <section class="ink">
+    <div class="wrap">
+      <div class="instr">
+        <div class="panel">
+          <div class="stack" style="gap:7px">
+            <div style="font-family:var(--serif);font-size:30px;letter-spacing:-.01em">Tell it about you</div>
+            <div style="font-size:13.5px;color:var(--im);line-height:1.55">Every number to the right updates as you type.</div>
+          </div>
+          <div class="field">
+            <div class="lbl">State</div>
+            <select class="ctrl" id="area">
+              <option value="CT-1">Connecticut &mdash; Hartford area</option>
+              <option value="NY-4">New York &mdash; NYC area</option>
+              <option value="PA-9">Pennsylvania &mdash; Philadelphia</option>
+              <option value="TX-26">Texas &mdash; Dallas area</option>
+              <option value="FL-27">Florida &mdash; Miami area</option>
+            </select>
+            <div class="note-i" id="areaNote"></div>
+          </div>
+          <div class="row" style="gap:14px">
+            <div class="field grow">
+              <div class="lbl">Household</div>
+              <div class="ctrl" style="padding-right:6px"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="row" style="gap:4px"><button type="button" class="step" id="sizeDown">&minus;</button><button type="button" class="step" id="sizeUp">+</button></span></div>
+            </div>
+            <div class="field grow">
+              <div class="lbl">Ages</div>
+              <div class="ctrl mono" style="letter-spacing:.04em">41, 39, 12, 9</div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="row" style="justify-content:space-between;align-items:baseline">
+              <div class="lbl">Household income</div>
+              <div class="num" style="font-size:19px" id="incomeVal">$95,000</div>
+            </div>
+            <input type="range" id="income" min="12000" max="260000" step="1000" value="95000" aria-label="Household income">
+            <div class="row num" style="justify-content:space-between;font-size:11px;color:var(--ifaint);margin-top:5px"><span>$12k</span><span id="fplVal"></span><span>$260k</span></div>
+          </div>
+          <div class="field">
+            <div class="lbl">How you&rsquo;re covered now</div>
+            <div class="seg" id="route"><button type="button" data-r="employer" class="on">Employer</button><button type="button" data-r="marketplace">Marketplace</button><button type="button" data-r="none">Uninsured</button></div>
+          </div>
+          <div class="field">
+            <div class="lbl" id="deductLbl">Your premium deduction</div>
+            <div class="row" style="gap:6px;flex-wrap:wrap">
+              <div class="ctrl mono" style="width:150px;justify-content:flex-start" id="deduct">$263.46</div>
+              <div class="ctrl" style="gap:14px;color:var(--im);font-size:14px"><span>every 2 weeks</span><span style="font-size:11px;color:var(--ifaint)">&#9662;</span></div>
+            </div>
+            <div class="note-i">Pre-filled from the KFF 2025 employer survey average. Override it with your own.</div>
+          </div>
+        </div>
+
+        <div class="out">
+          <div class="row" style="justify-content:space-between;align-items:baseline;gap:16px">
+            <div class="lbl">Live estimate</div>
+            <div class="note-i">Modeled &middot; not a quote</div>
+          </div>
+          <div class="stack" style="gap:4px;padding-bottom:26px;border-bottom:1px solid var(--irule)">
+            <div style="font-size:14px;color:var(--im)">What your household&rsquo;s healthcare costs, <span data-uw="per">per year</span></div>
+            <div class="bignum" data-fig="route.whole">$32,171</div>
+            <div style="font-size:14px;color:var(--im);margin-top:8px" id="bigSub"></div>
+          </div>
+          <div class="cards" id="cards"></div>
+          <div id="elig"></div>
+          <p class="note-i">Employer premiums are KFF 2025 survey averages. Subsidy maths follows the IRS 2026 applicable-percentage table exactly. Benchmark plan premiums and out-of-pocket spend are <b style="color:var(--c2);font-weight:400">modeled placeholders</b> until the CMS public-use files are wired in.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- 04 THE REVEAL ---- -->
+  <section class="ink">
+    <div class="wrap sec">
+      <div class="split">
+        <div class="stack" style="gap:16px">
+          <div class="eyebrow i">02 &middot; The reveal</div>
+          <h2>Here is <em style="font-style:italic;color:var(--c2)">the whole bill</em>.</h2>
+        </div>
+        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Four things add up to what your household&rsquo;s healthcare costs. You only ever see the first one &mdash; the rest is spent on your behalf.</p>
+      </div>
+
+      <div class="wf" id="wf"></div>
+      <p class="note-i" id="wfNote" style="margin-top:18px"></p>
+      <div class="wcaps" id="wcaps"></div>
+    </div>
+  </section>
+
+  <!-- ---- 05 THE COMPARISON ---- -->
+  <section class="ink">
+    <div class="wrap sec" style="display:flex;flex-direction:column;gap:30px">
+      <div class="split">
+        <div class="stack" style="gap:15px">
+          <div class="eyebrow i">03 &middot; The comparison</div>
+          <h2>Three ways to pay for the same care.</h2>
+        </div>
+        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Nobody agrees on what single-payer would cost. So pick whose estimate you trust &mdash; including the ones written to make it look bad.</p>
+      </div>
+
+      <div class="stack" style="gap:14px">
+        <div class="lbl">Financing model</div>
+        <div class="pills" id="pills"></div>
+      </div>
+
+      <div class="prov">
+        <div class="stack" style="gap:7px">
+          <div class="lbl" style="color:var(--teal)">Who produced this estimate</div>
+          <div style="font-size:14.5px;line-height:1.6;color:var(--ib)" id="who"></div>
+        </div>
+        <div class="stack" style="gap:7px">
+          <div class="lbl">How solid is this figure</div>
+          <div style="font-size:14.5px;line-height:1.6;color:var(--im)"><span id="basis" style="color:var(--c2)"></span> &mdash; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">see the arithmetic</a>.</div>
+        </div>
+      </div>
+
+      <p class="note-i" style="margin-top:-16px">None of these studies published a per-household figure. The numbers below are our allocation of each national estimate onto this household &mdash; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">the methodology page shows exactly how</a>, and you can change the assumptions.</p>
+
+      <div class="bars">
+        <div class="bar-row">
+          <div class="bar-t"><div class="a">Through your employer</div><div class="b">What you pay today</div></div>
+          <div class="bar-w">
+            <div class="bar-bg"><div class="bar-fill" id="empFill" style="width:100%;background:var(--c2)"></div></div>
+            <div class="bar-v num" data-fig="emp.total">$31,578</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-t"><div class="a">On the marketplace</div><div class="b" id="mktSub">&nbsp;</div></div>
+          <div class="bar-w">
+            <div class="bar-bg"><div class="bar-fill" id="mktFill" style="background:var(--ictrl)"></div><div class="bar-ghost" id="mktGhost"></div></div>
+            <div class="bar-v num" style="color:var(--ib)" data-fig="mkt.household">$27,200</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-t"><div class="a" style="color:var(--teal)">Under universal coverage</div><div class="b">No bill at the point of care</div></div>
+          <div class="bar-w">
+            <div class="bar-bg"><div class="bar-fill" id="uFill" style="width:31%;background:var(--teal)"></div></div>
+            <div class="bar-v num" id="uVal" data-fig="uni.total" style="color:var(--teal)">$9,800</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="note-i" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b>. Your employer&rsquo;s premium share counts, because it is your compensation routed around your paycheck. A marketplace subsidy does not &mdash; that is paid by taxpayers, and is shown hatched.</p>
+
+      <div class="summary">
+        <div class="save">
+          <div class="stack" style="gap:5px">
+            <div style="font-size:13.5px;color:var(--im)">Your household would keep</div>
+            <div class="v" id="save" data-fig="uni.savings"></div>
+            <div style="font-size:13px;color:var(--ifaint)" data-uw="every">every year</div>
+          </div>
+          <div class="vsep"></div>
+          <div class="stack" style="gap:5px">
+            <div style="font-size:13.5px;color:var(--im)">Over a decade</div>
+            <div class="v2" id="decade" data-fig="uni.decade"></div>
+            <div style="font-size:13px;color:var(--ifaint)">before wage growth</div>
+          </div>
+        </div>
+        <div class="cobra">
+          <div class="lbl" style="color:var(--c2)">If you lost your job tomorrow</div>
+          <div class="row" style="align-items:baseline;gap:10px">
+            <div class="num" style="font-size:32px;letter-spacing:-.025em;color:var(--c2)" data-fig="cobra.annual">$2,244</div>
+            <div style="font-size:13.5px;color:var(--im)"><span data-uw="slash">/ month</span>, COBRA</div>
+          </div>
+          <div class="note-i">The employer share does not disappear. It moves onto your card.</div>
+        </div>
+      </div>
+
+      <div class="stack" style="gap:11px;border-top:1px solid var(--irule);padding-top:22px">
+        <div class="row" style="justify-content:space-between;align-items:baseline;gap:16px">
+          <div class="lbl">Where every model lands</div>
+          <div class="note-i">All four estimates, against what you pay now</div>
+        </div>
+        <div class="range">
+          <div class="band-t" id="rangeBand"></div>
+          <div class="mk" id="mk" style="left:31%"></div>
+          <div class="now"></div>
+        </div>
+        <div class="row num" style="justify-content:space-between;font-size:11.5px;color:var(--ifaint);gap:12px">
+          <span>$0</span>
+          <span style="color:var(--teal)"><span data-fig="uni.rangeLo">$8,400</span> &mdash; <span data-fig="uni.rangeHi">$14,600</span> &nbsp;every model</span>
+          <span style="color:var(--c2)"><span data-fig="emp.total">$31,578</span> &nbsp;today</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- 04 THE CLIFF ---- -->
+  <section class="ink" id="cliff">
+    <div class="wrap sec" style="display:flex;flex-direction:column;gap:32px">
+      <div class="split">
+        <div class="stack" style="gap:15px">
+          <div class="eyebrow i">04 &middot; The cliff</div>
+          <h2>One dollar, <em style="font-style:italic;color:var(--c2)">nine thousand dollars</em>.</h2>
+        </div>
+        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
+      </div>
+
+      <div class="cliffstats">
+        <div class="cstat"><div class="t">A dollar under the line</div><div class="v" id="cliffUnder"></div><div class="s" id="cliffUnderSub"></div></div>
+        <div class="cstat"><div class="t">A dollar over it</div><div class="v" style="color:var(--c2)" id="cliffOver"></div><div class="s">no credit at all</div></div>
+        <div class="cstat" style="border:none"><div class="t">The difference</div><div class="v" style="color:var(--c2)" id="cliffDrop"></div><div class="s">for one extra dollar earned</div></div>
+      </div>
+
+      <div class="chartbox"><div id="cliffChart"></div></div>
+
+      <p class="note-i" style="max-width:820px">The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper limit, which flattened this edge entirely. They expired on <b style="color:var(--ib);font-weight:400">31 December 2025</b>. Everything above comes from the poverty guidelines and the IRS applicable-percentage table &mdash; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">both are on the methodology page</a>.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ 05 IN LIVES ============ -->
+<section class="paper" id="lives">
+  <div class="wrap sec">
+    <div class="split" style="margin-bottom:48px">
+      <div class="stack" style="gap:20px">
+        <div class="eyebrow p">05 &middot; The other number</div>
+        <h2>Cost is not the only thing being measured.</h2>
+      </div>
+      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">Everything above this point is denominated in dollars, because dollars are what a calculator can show you. They are not the only currency in this argument.</p>
+    </div>
+
+    <div class="livesgrid">
+      <div class="stack" style="gap:22px">
+        <div class="bigstat">
+          <div class="n">114,174</div>
+          <div class="l">deaths a year that researchers at Yale project universal coverage would prevent</div>
+        </div>
+        <div class="stack" style="gap:14px">
+          <div class="row" style="gap:14px;align-items:baseline"><span class="num" style="font-size:23px;color:var(--amber-deep)">62,863</span><span class="body" style="font-size:15px">from extending coverage to those without it</span></div>
+          <div class="row" style="gap:14px;align-items:baseline"><span class="num" style="font-size:23px;color:var(--amber-deep)">51,311</span><span class="body" style="font-size:15px">from reversing the coverage policies enacted since 2025</span></div>
+        </div>
+      </div>
+
+      <div class="stack" style="gap:20px">
+        <p class="body">That second figure is the same policy change described at the top of this page. Five million people losing coverage is not only a budget line.</p>
+        <div class="card-p" style="border-left:2px solid var(--amber-deep)">
+          <div class="lbl p">The finding that matters most here</div>
+          <div class="quote" style="font-size:26px">Nearly half of the coverage-related deaths prevented &mdash; <span style="color:var(--amber-deep)">29,631</span> &mdash; would be among people who already have insurance.</div>
+          <p class="body">The underinsured: households with coverage on paper and deductibles they cannot clear. That is the argument this whole site makes, counted in a different unit. Having a plan is not the same as being able to use it.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclose">
+      <div class="lbl p">Read this one carefully</div>
+      <div class="grid2" style="gap:28px;margin-top:4px">
+        <p class="body" style="font-size:15px">This is a <b style="font-weight:500;color:var(--pk)">preprint</b> and has not been peer reviewed. Its senior author served as an unpaid adviser to Sen. Sanders&rsquo; office while the Medicare for All legislation was drafted, and has testified in support of it. We say that for the same reason we tell you the Mercatus study was Koch-funded: you should know who produced a number before you weigh it.</p>
+        <p class="body" style="font-size:15px">It also shares an assumption with the cost figures above &mdash; that provider payments fall to Medicare rates. Blahous called that assumption &ldquo;relatively generous&rdquo; and rejected the savings it produces; this study builds on it. The two are not independent confirmations of each other. They are the same bet, framed in opposite directions.</p>
+      </div>
+      <p class="fn" style="margin-top:4px">Pandey, Wells, Ye, Fitzpatrick &amp; Galvani, <i>Projected economic gains and lives saved under universal healthcare in the United States</i>, Yale School of Public Health, 2026. The same team&rsquo;s 2020 <i>Lancet</i> paper, which was peer reviewed, put the figure at roughly 68,000 lives and $450&nbsp;billion.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ 06 THE OBJECTIONS -->
+<section class="paper">
+  <div class="wrap sec">
+    <div class="split" style="margin-bottom:52px">
+      <div class="stack" style="gap:20px">
+        <div class="eyebrow p">06 &middot; The other side</div>
+        <h2>The objections, taken seriously.</h2>
+      </div>
+      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">These are the four arguments that actually land. We are not going to pretend they are stupid, and we are not going to skip the ones that hurt.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card-p">
+        <div class="lbl p">Objection 01</div>
+        <div class="quote">&ldquo;My taxes would go through the roof.&rdquo;</div>
+        <p class="body">Yes. Your taxes would rise, and every honest model says so &mdash; the ones above included. The question is whether the <em>total</em> shrinks, because the premium line goes to zero at the same time. For this household the tax increase runs <span style="color:var(--amber-deep)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span> depending on whose model you pick, against <span style="color:var(--amber-deep)" data-fig="emp.replaced">$30,200</span> in premiums, deductibles and copays it replaces.</p>
+        <p class="fn">Where it is genuinely close: households above roughly $250,000 pay more under most models. If that is you, the calculator will say so.</p>
+      </div>
+
+      <div class="card-p">
+        <div class="lbl p">Objection 02</div>
+        <div class="quote">&ldquo;I&rsquo;d be stuck waiting months for care.&rdquo;</div>
+        <p class="body">Wait times are real in some universal systems and not in others. Canada&rsquo;s elective queues are long; Germany&rsquo;s multi-payer sickness funds and France&rsquo;s statutory system cover everyone without them. How a system is designed and paid for matters more than whether it is single-payer &mdash; a distinction the debate usually flattens.</p>
+        <p class="fn">The honest counter-question: the US already rations by price. KFF&rsquo;s surveys have repeatedly found around four in ten adults saying they or a family member delayed or skipped care because of cost. That is a waiting list too &mdash; it is just invisible.</p>
+      </div>
+
+      <div class="card-p">
+        <div class="lbl p">Objection 03</div>
+        <div class="quote">&ldquo;I&rsquo;d lose the doctor I have now.&rdquo;</div>
+        <p class="body">Worth checking against what you have today. Narrow networks already decide this for most people: your plan drops a hospital system, your employer switches carriers, you change jobs. A single national network is the version where your doctor does not depend on your employer&rsquo;s procurement decisions.</p>
+        <p class="fn">Fair concession: transition is disruptive, and providers who do well under commercial rates would be paid less.</p>
+      </div>
+
+      <div class="card-p">
+        <div class="lbl p">Objection 04</div>
+        <div class="quote">&ldquo;The country simply cannot afford it.&rdquo;</div>
+        <p class="body">The headline figure is enormous &mdash; on the order of $30&ndash;40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.</p>
+        <p class="fn">The Mercatus study is the useful one here: funded by opponents and built to be damning, it still showed lower national spending than the status quo &mdash; but only under the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
+      </div>
+    </div>
+
+    <div class="rule" style="margin:48px 0 24px"></div>
+    <div class="row" style="justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <p class="note" style="font-size:14px">Every figure here traces to a published source, listed on the <a class="q" href="#/methodology">methodology page</a>. Disagree with an assumption? Change it and watch the numbers move.</p>
+      <a class="q" href="#/methodology" style="font-size:14px">Read the full methodology &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 WRITE YOUR REP ============ -->
+<section class="paper">
+  <div class="wrap sec">
+    <div class="split" style="margin-bottom:46px">
+      <div class="stack" style="gap:20px">
+        <div class="eyebrow p">07 &middot; Do something with it</div>
+        <h2>Send them your number.</h2>
+      </div>
+      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">Staffers count letters by position and topic. A specific figure from a constituent in the district reads differently than a form letter &mdash; so this one is built from your own numbers.</p>
+    </div>
+
+    <div class="actgrid">
+      <div class="stack" style="gap:20px">
+        <div class="card-p" style="padding:28px 30px;gap:20px">
+          <div class="lbl p">Your representative</div>
+          <div class="row" style="gap:16px;align-items:center">
+            <div style="width:62px;height:62px;border-radius:2px;background:var(--prule-soft);border:1px solid var(--prule);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <div class="stack" style="gap:4px">
+              <div style="font-family:var(--serif);font-size:23px;line-height:1.15">[Representative name]</div>
+              <div class="note" style="font-size:13.5px"><span id="repDistrict">Connecticut &mdash; [district]</span></div>
+            </div>
+          </div>
+          <div style="height:1px;background:var(--prule-soft)"></div>
+          <div class="stack" style="gap:11px">
+            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">House bill</span><span id="repBill"></span></div>
+            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Senate companion</span><span id="senBill"></span></div>
+            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Their position</span><span style="color:var(--pm)">[not yet wired]</span></div>
+          </div>
+        </div>
+
+        <div class="card-p" style="padding:28px 30px;gap:16px">
+          <div class="lbl p">What to emphasize</div>
+          <div class="stack" style="gap:9px">
+            <div class="chk on"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>My household&rsquo;s actual costs</div>
+            <div class="chk on"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Job-lock and losing coverage</div>
+            <div class="chk off"><span class="box off"></span>Small business burden</div>
+            <div class="chk off"><span class="box off"></span>A personal story</div>
+          </div>
+        </div>
+
+        <div class="stack" style="gap:9px">
+          <div class="lbl p">Tone</div>
+          <div class="seg" style="gap:6px">
+            <div style="flex-grow:1;height:42px;background:var(--paper-card);border:1px solid var(--prule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm)">Measured</div>
+            <div style="flex-grow:1;height:42px;background:var(--pk);border:1px solid var(--pk);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--paper);font-weight:500">Direct</div>
+            <div style="flex-grow:1;height:42px;background:var(--paper-card);border:1px solid var(--prule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm)">Personal</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="letter">
+        <div class="hd">
+          <div class="lbl p">Your letter</div>
+          <div class="note" style="font-size:13px">Editable &middot; 169 words</div>
+        </div>
+        <div class="bd">
+          <div>Dear Representative [name],</div>
+          <div>I am a constituent in <span id="letterPlace">Hartford</span>, and I am writing to ask you to support the Medicare for All Act, <span id="letterBill">H.R. 3069</span>.</div>
+          <div>I added up what my household actually spends on healthcare, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span id="letterHh">family of four</span>&rsquo;s healthcare costs <mark data-fig="emp.total">$31,578</mark> <span data-uw="a">a year</span>. Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before.</div>
+          <div>Under the financing models I looked at &mdash; including one produced by opponents of the policy &mdash; my household would pay between <mark data-fig="uni.rangeLo">$8,400</mark> and <mark data-fig="uni.rangeHi">$14,600</mark>. Every one of them is less than what we pay now.</div>
+          <div>I also want to be plain about the part that worries me most: if I lost my job tomorrow, keeping this coverage would cost <span data-fig="cobra.annual">$2,244</span> <span data-uw="a">a month</span>. My family&rsquo;s access to a doctor should not depend on my employer&rsquo;s procurement decisions.</div>
+          <div>Thank you for your time.</div>
+          <div style="color:var(--pm)">[Your name] &middot; [Your address]</div>
+          <div style="color:var(--pm);font-size:15px;border-top:1px solid var(--prule-soft);padding-top:15px">Figures calculated at thewholebill.org &mdash; the sources and assumptions are published there.</div>
+        </div>
+        <div class="ft">
+          <button class="btn-dark" style="height:50px;padding:0 30px;font-size:15px">Send to [name] &rarr;</button>
+          <button class="btn-ghost">Copy text</button>
+          <button class="btn-ghost">Download PDF</button>
+          <div class="grow"></div>
+          <p class="note" style="font-size:12.5px;max-width:190px;text-align:right">We never see your letter. It opens in your own mail client.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 METHODOLOGY ============ -->
+<div id="methBack" hidden style="background:var(--paper);border-bottom:1px solid var(--prule)">
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0">
+    <a class="brand" href="#" style="color:inherit">
+      <svg width="13" height="24" viewBox="0 0 13 24" aria-hidden="true">
+        <rect x="0" y="0" width="13" height="2.5" fill="#86603E"></rect>
+        <rect x="0" y="2.5" width="13" height="3.5" fill="#A87A43"></rect>
+        <rect x="0" y="6" width="13" height="12" fill="#D99A3F"></rect>
+        <rect x="0" y="18" width="13" height="6" fill="#F0C98D"></rect>
+      </svg>
+      <span class="wordmark">The Whole Bill</span>
+    </a>
+    <a class="q" href="#" style="font-size:14px">&larr; Back to the calculator</a>
+  </div>
+</div>
+
+<section class="paper view" id="methodology" hidden>
+  <div class="wrap sec meth">
+    <div class="split" style="margin-bottom:52px">
+      <div class="stack" style="gap:20px">
+        <div class="eyebrow p">08 &middot; Methodology</div>
+        <h2>Check our work.</h2>
+      </div>
+      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">This page exists because the argument on the rest of the site is only worth as much as the arithmetic behind it. Everything here is either a table you can look up or a sum you can redo.</p>
+    </div>
+
+    <div class="stack" style="gap:16px;margin-bottom:56px">
+      <h3>Three kinds of number</h3>
+      <p class="body" style="max-width:760px">Every figure the calculator produces is one of these three, and the interface says which. If a number is ours rather than someone else&rsquo;s, we would rather tell you than have you find out.</p>
+      <table style="margin-top:12px">
+        <tr>
+          <td style="width:130px"><span class="tag stat">Statutory</span></td>
+          <td>Fixed in law or in a published federal table. Exact, not an estimate. The poverty guidelines, the premium-credit schedule, the Medicare payroll rate, the COBRA 102% cap.</td>
+        </tr>
+        <tr>
+          <td><span class="tag surv">Survey</span></td>
+          <td>A real published measurement, but an average. Employer premiums come from KFF&rsquo;s annual employer survey &mdash; genuine data, though your employer is not the average employer.</td>
+        </tr>
+        <tr>
+          <td><span class="tag mod">Modeled</span></td>
+          <td>Our estimate. Benchmark plan premiums outside our five demo areas, out-of-pocket spending, and part of the universal figures. Labelled everywhere it appears.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="stack" style="gap:16px;margin-bottom:56px">
+      <h3>Poverty guidelines <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
+      <p class="body" style="max-width:760px">2026 coverage uses the guidelines in force when open enrollment began, which are the <b>2025</b> HHS figures. Add the increment once per person beyond the first.</p>
+      <table style="margin-top:12px">
+        <tr><th>Region</th><th>First person</th><th>Each additional</th><th>Household of four</th></tr>
+        <tr><td>48 states &amp; DC</td><td class="num">$15,650</td><td class="num">$5,500</td><td class="num">$32,150</td></tr>
+        <tr><td>Alaska</td><td class="num">$19,550</td><td class="num">$6,880</td><td class="num">$40,190</td></tr>
+        <tr><td>Hawaii</td><td class="num">$17,990</td><td class="num">$6,330</td><td class="num">$36,980</td></tr>
+      </table>
+    </div>
+
+    <div class="stack" style="gap:16px;margin-bottom:56px">
+      <h3>The premium tax credit <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
+      <p class="body" style="max-width:760px">The credit is the gap between the benchmark plan&rsquo;s premium and what the law says your household is expected to contribute. That expected share comes from IRS Rev. Proc. 2025-25, and it rises <i>linearly within each band</i> &mdash; not in steps.</p>
+      <table style="margin-top:12px">
+        <tr><th>Household income</th><th>Contribution rises from</th><th>to</th></tr>
+        <tr><td>Under 133% of the poverty line</td><td class="num">2.10%</td><td class="num">2.10%</td></tr>
+        <tr><td>133% &ndash; 150%</td><td class="num">3.14%</td><td class="num">4.19%</td></tr>
+        <tr><td>150% &ndash; 200%</td><td class="num">4.19%</td><td class="num">6.60%</td></tr>
+        <tr><td>200% &ndash; 250%</td><td class="num">6.60%</td><td class="num">8.44%</td></tr>
+        <tr><td>250% &ndash; 300%</td><td class="num">8.44%</td><td class="num">9.96%</td></tr>
+        <tr><td>300% &ndash; 400%</td><td class="num">9.96%</td><td class="num">9.96%</td></tr>
+        <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">400% and above</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit at all</td></tr>
+      </table>
+      <p class="fn" style="max-width:760px;border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
+    </div>
+
+    <div class="stack" style="gap:16px;margin-bottom:56px">
+      <h3>Employer coverage <span class="tag surv" style="vertical-align:middle;margin-left:8px">Survey</span></h3>
+      <p class="body" style="max-width:760px">From KFF&rsquo;s 2025 Employer Health Benefits Survey. The employer share is the part this whole site is about: it is compensation, spent on a product instead of paid to you.</p>
+      <table style="margin-top:12px">
+        <tr><th>Coverage</th><th>Total premium</th><th>Worker pays</th><th>Employer pays</th></tr>
+        <tr><td>Family</td><td class="num">$26,993</td><td class="num">$6,850</td><td class="num">$20,143</td></tr>
+        <tr><td>Single</td><td class="num">$9,325</td><td class="num">$1,440</td><td class="num">$7,885</td></tr>
+      </table>
+      <p class="fn" style="max-width:760px;border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Medicare payroll tax is 1.45% of wages, plus 0.9% above $200,000 (single) or $250,000 (joint). COBRA is capped by statute at 102% of the full premium.</p>
+    </div>
+
+    <div class="stack" style="gap:16px;margin-bottom:56px">
+      <h3>What universal coverage would cost you</h3>
+      <p class="body" style="max-width:760px">This is where we are most exposed, so here is the whole derivation. We show two figures. One uses the only household-level formula anyone has published. The other deliberately uses the least friendly published estimate in the debate.</p>
+
+      <div class="grid2" style="margin-top:20px">
+        <div class="card-p">
+          <div class="lbl p">Model one <span class="tag stat" style="margin-left:6px">Published formula</span></div>
+          <div class="quote" style="font-size:23px">Sanders &middot; Option 1</div>
+          <p class="body">From the financing options published by Sen. Sanders&rsquo; office in 2019 &mdash; the only household-level formula in this debate that anyone actually wrote down.</p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">4% &times; (income &minus; $29,200)<br>+ 7.5% &times; income<br><br>= 4% &times; $65,800 &nbsp;=&nbsp; $2,632<br>+ 7.5% &times; $95,000 &nbsp;=&nbsp; $7,125<br><b>= $9,757 a year</b></p>
+          <p class="fn">Our one liberty: the 2019 list presents the income premium and the payroll tax as <i>separate</i> options. We pair them. Say so out loud rather than let someone discover it.</p>
+        </div>
+
+        <div class="card-p">
+          <div class="lbl p">Model two <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
+          <div class="quote" style="font-size:23px">Blahous &middot; pessimistic</div>
+          <p class="body">Charles Blahous, Mercatus Center, 2018 &mdash; Koch-funded and written to show single-payer was unaffordable. He modelled two scenarios. His <i>main</i> one has national health spending <b>falling $2.05 trillion</b> over a decade against current law. His alternative, where provider payments do not fall to Medicare rates, has it <b>rising $3.25 trillion</b>.</p>
+          <p class="body">We use the alternative, so this site never rests on the friendly reading of an unfriendly study.</p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">$3.252T &divide; 10 years<br>&divide; 134,790,000 households<br>= <b>$2,413</b> per household per year<br><br>$9,757 + $2,413 = <b>$12,170</b></p>
+          <p class="fn">Blahous published no household figure, so that allocation is ours. Spreading it flat across all households is a simplification &mdash; real financing would be progressive, which would move this number down for most households and up for high earners.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack" style="gap:16px;margin-bottom:56px">
+      <h3>What we know is wrong <span class="tag mod" style="vertical-align:middle;margin-left:8px">Modeled</span></h3>
+      <p class="body" style="max-width:760px">Every model has soft spots. Ours are listed here rather than left for someone else to find.</p>
+      <table style="margin-top:12px">
+        <tr>
+          <td style="width:220px"><b style="font-weight:500;color:var(--pk)">Benchmark premiums</b></td>
+          <td>Five metro areas are wired up with modeled figures. Real premiums for every rating area come from the CMS public use files &mdash; Exchange PUFs for healthcare.gov states, State-based Exchange PUFs for the 21 states running their own. That is the next build step.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">ZIP codes</b></td>
+          <td>Rating areas are defined by county, not ZIP. Our five-area lookup matches on the first three digits, which is an approximation. The CMS Service Area file maps ZIP and county exactly and will replace it.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Out-of-pocket spending</b></td>
+          <td>Anchored to published average deductibles, not to measured spending. Real figures would come from the Medical Expenditure Panel Survey. Yours depends entirely on whether you got sick.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">The Medicare tax asymmetry</b></td>
+          <td>Today&rsquo;s total includes the 1.45% you already pay. The universal figures do not carry a continuing Medicare tax, which flatters them by roughly that amount. And if the employer&rsquo;s premium share is really your money, so is the employer&rsquo;s matching 1.45% &mdash; which we leave out, which cuts the other way.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Uninsured spending</b></td>
+          <td>Modeled, and low for a reason worth stating plainly: uninsured households spend less because they skip care, not because care is cheaper for them. It usually is not.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Wage incidence</b></td>
+          <td>The claim that the employer&rsquo;s premium share is really your compensation is well supported among economists but it is not a law of nature, and it plays out over years rather than on the day your premium changes.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="stack" style="gap:16px">
+      <h3 id="sources">Sources</h3>
+      <table style="margin-top:12px">
+        <tr><th>Figure</th><th>Source</th></tr>
+        <tr><td>Poverty guidelines</td><td>HHS, 2025 Poverty Guidelines</td></tr>
+        <tr><td>Premium credit schedule</td><td>IRS Rev. Proc. 2025-25, applicable percentage table for 2026</td></tr>
+        <tr><td>Employer premiums</td><td>KFF Employer Health Benefits Survey, 2025</td></tr>
+        <tr><td>2026 marketplace changes</td><td>KFF, 2026 Marketplace enrollment, premiums and deductibles</td></tr>
+        <tr><td>Single-payer financing</td><td>Office of Sen. Bernie Sanders, financing options, 2019</td></tr>
+        <tr><td>Single-payer national cost</td><td>Blahous, <i>The Costs of a National Single-Payer Healthcare System</i>, Mercatus Center, 2018</td></tr>
+        <tr><td>Household count</td><td>US Census Bureau, Total Households, 2025</td></tr>
+        <tr><td>Plan premiums (planned)</td><td>CMS Exchange and State-based Exchange Public Use Files</td></tr>
+      </table>
+      <p class="fn" style="max-width:760px;border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Found an error? That is the most useful thing you could send us. The calculation layer is a single file with no dependencies, and every constant on this page appears in it by name.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap stack" style="gap:26px">
+    <div class="row" style="justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-end">
+      <div class="stack" style="gap:12px">
+        <a class="brand" href="#" style="color:var(--ik)">
+          <svg width="13" height="24" viewBox="0 0 13 24" aria-hidden="true">
+            <rect x="0" y="0" width="13" height="2.5" fill="#86603E"></rect>
+            <rect x="0" y="2.5" width="13" height="3.5" fill="#A87A43"></rect>
+            <rect x="0" y="6" width="13" height="12" fill="#D99A3F"></rect>
+            <rect x="0" y="18" width="13" height="6" fill="#F0C98D"></rect>
+          </svg>
+          <span class="wordmark">The Whole Bill</span>
+        </a>
+        <span class="domain" style="color:var(--ifaint)">thewholebill.org</span>
+      </div>
+      <div class="row" style="gap:28px;font-size:13.5px;flex-wrap:wrap">
+        <a class="q" href="#/methodology" style="color:inherit;border:none">Methodology &amp; sources</a>
+      </div>
+    </div>
+    <div style="height:1px;background:var(--irule)"></div>
+    <div class="row" style="justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:12.5px;color:var(--ifaint)">
+      <span>A design preview. All figures are sample data for a family of four in Hartford, CT.</span>
+      <span>Bracketed items are real facts not yet wired up.</span>
+    </div>
+  </div>
+</footer>
+
+<script>/*__CALC__*/</script>
+<script>
+(function(){
+  var W = window.WholeBill;
+
+  // Bill numbers change every Congress. One place to update them.
+  var BILL = { house: "H.R. 3069", senate: "S. 1506", congress: "119th" };
+
+  var state = { area:"CT-1", size:4, income:95000, model:"sanders1", unit:"y", period:26, route:"employer" };
+  var S = null;
+
+  var WORDS = {
+    per:   { y:"per year",   m:"per month"   },
+    a:     { y:"a year",     m:"a month"     },
+    every: { y:"every year", m:"every month" },
+    slash: { y:"/ year",     m:"/ month"     }
+  };
+
+  function money(n){ return "$" + Math.round(n).toLocaleString("en-US"); }
+  function fmt(annual){ return money(state.unit === "y" ? annual : annual / 12); }
+
+  // Every figure on the page resolves through this map. Nothing is hardcoded, and
+  // every value is an ANNUAL number so the year/month view can never drift.
+  function figures(){
+    var e = S.employer, m = S.marketplace, u = S.universal, R = S.breakdown;
+    return {
+      "emp.worker": e.worker, "emp.employer": e.employer, "emp.oop": e.oop,
+      "emp.tax": e.medicareTax, "emp.total": e.total,
+      "emp.visible": e.visible, "emp.invisible": e.invisible,
+      "emp.cash": e.worker + e.oop, "emp.replaced": S.replacedByUniversal,
+      "mkt.total": m.total, "mkt.household": m.household, "mkt.subsidy": m.subsidy,
+      "mkt.benchmark": m.benchmark,
+      "uni.total": u.total, "uni.savings": S.savings, "uni.decade": S.decade,
+      "uni.rangeLo": S.universalRange.lo, "uni.rangeHi": S.universalRange.hi,
+      "cobra.annual": S.cobra.annual,
+      "route.whole": R.whole, "route.borne": R.borne,
+      "route.onPaystub": R.onPaystub, "route.offPaystub": R.offPaystub
+    };
+  }
+
+  function paint(){
+    var opts = { income: state.income, size: state.size,
+                 adults: Math.min(2, state.size), area: state.area,
+                 region: "contiguous", model: state.model };
+    S = W.summary(opts);
+    S.breakdown = W.routeBreakdown(state.route, opts);
+    S.routeMax = Math.max(
+      W.routeBreakdown("employer", opts).whole,
+      W.routeBreakdown("marketplace", opts).whole,
+      W.routeBreakdown("none", opts).whole);
+    var F = figures(), i, el;
+
+    var figs = document.querySelectorAll("[data-fig]");
+    for (i = 0; i < figs.length; i++){
+      el = figs[i];
+      var v = F[el.getAttribute("data-fig")];
+      if (v == null) continue;
+      // the decade total is a ten-year sum in either view, so it never divides
+      el.textContent = (el.getAttribute("data-pre") || "") +
+        (el.getAttribute("data-fig") === "uni.decade" ? money(v) : fmt(v));
+    }
+    var words = document.querySelectorAll("[data-uw]");
+    for (i = 0; i < words.length; i++){
+      var k = words[i].getAttribute("data-uw");
+      if (WORDS[k]) words[i].textContent = WORDS[k][state.unit];
+    }
+
+    renderWaterfall();
+    renderCards();
+
+    // comparison bars
+    var max = Math.max(S.employer.total, S.marketplace.total, S.universal.total);
+    setW("empFill", S.employer.total / max);
+    setW("mktFill", S.marketplace.household / max);
+    byId("mktGhost").style.width = (S.marketplace.subsidy / max * 100).toFixed(1) + "%";
+    byId("mktSub").innerHTML = S.marketplace.overCliff
+      ? '<span style="color:var(--c2)">No subsidy \u2014 over the 400% cliff</span>'
+      : "Plus " + fmt(S.marketplace.subsidy) + " paid by taxpayers";
+    setW("uFill",   S.universal.total / max);
+    var mkPos = (S.universal.total / max * 100).toFixed(1) + "%";
+    byId("mk").style.left = mkPos;
+    byId("rangeBand").style.left  = (S.universalRange.lo / max * 100).toFixed(1) + "%";
+    byId("rangeBand").style.width = ((S.universalRange.hi - S.universalRange.lo) / max * 100).toFixed(1) + "%";
+
+    // narrative bars
+    var vis = S.breakdown.onPaystub / S.breakdown.whole * 100;
+    byId("narrSmall").style.width = vis.toFixed(1) + "%";
+    byId("narrVis").style.width   = vis.toFixed(1) + "%";
+    byId("narrRest").style.width  = (100 - vis).toFixed(1) + "%";
+
+    // inputs + derived readouts
+    byId("sizeVal").textContent   = state.size;
+    byId("incomeVal").textContent = money(state.income);
+    byId("fplVal").textContent    = Math.round(S.fpl.ratio * 100) + "% of poverty line";
+    byId("areaNote").textContent  =
+      (S.marketplace.area.exchange === "state" ? "State-run exchange" : "Healthcare.gov") +
+      " \u00b7 Medicaid " + (S.marketplace.area.medicaidExpanded ? "expanded" : "not expanded");
+    byId("who").textContent  = S.universal.note;
+    var a = S.marketplace.area;
+    var tight = window.matchMedia("(max-width:760px)").matches;
+    byId("who-line").textContent = tight
+      ? state.size + " \u00b7 " + a.city + " \u00b7 $" + Math.round(state.income / 1000) + "k"
+      : "Household of " + state.size + " \u00b7 " + a.city + " \u00b7 " + money(state.income);
+    byId("letterPlace").textContent = a.city;
+    byId("repDistrict").textContent = a.st + " \u2014 [district]";
+    byId("repBill").textContent = BILL.house + " (" + BILL.congress + ")";
+    byId("senBill").textContent = BILL.senate;
+    byId("letterBill").textContent = BILL.house;
+    byId("letterHh").textContent = state.size === 1 ? "household" :
+      "family of " + ["one","two","three","four","five","six","seven","eight"][state.size - 1];
+    byId("basis").textContent = S.universal.basis;
+
+    renderElig();
+    renderPills();
+    renderScope();
+    renderCliff();
+    paintUnit();
+  }
+
+
+  var TONE = { 1:"var(--c1)", 2:"var(--c2)", 3:"var(--c3)", 4:"var(--c4)" };
+  var TONE_TEXT = { 1:"var(--c1)", 2:"var(--c2)", 3:"var(--c3)", 4:"var(--c4l)" };
+  var HATCH = "repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px)";
+
+  // The waterfall is generated from the route's parts, so a route with two components
+  // and a route with four both draw correctly without any hand-authored geometry.
+  function renderWaterfall(){
+    var R = S.breakdown, parts = R.parts, whole = R.whole, i, j, html = "", caps = "";
+    var scale = S.routeMax;   // shared across routes so the bars are comparable
+
+    // the loudest "you never see this" band gets the kicker
+    var kick = -1, best = 0;
+    for (i = 0; i < parts.length; i++){
+      if (parts[i].hidden && parts[i].value > best){ best = parts[i].value; kick = i; }
+    }
+
+    for (i = 0; i < parts.length; i++){
+      var p = parts[i];
+      html += '<div class="wcol">';
+      if (i === kick) html += '<div class="wkick">' +
+        (p.bears ? "The part you don\u2019t see" : "Not your money") + '</div>';
+      html += '<div class="wlab' + (i === kick ? ' big' : '') + '" style="color:' + TONE_TEXT[p.tone] + '">' +
+              (i === 0 ? "" : "+ ") + fmt(p.value) + '</div>';
+      for (j = i; j >= 0; j--){
+        var q = parts[j];
+        var cls = "band" + (j === i ? " top" : "") + (j === 0 ? " bot" : "");
+        var bg = q.ghost ? HATCH : TONE[q.tone];
+        html += '<div class="' + cls + '" style="height:' + (q.value / scale * 100).toFixed(3) +
+                '%;background:' + bg + '"></div>';
+      }
+      html += '</div>';
+
+      caps += '<div class="wcap"><span class="sw" style="background:' +
+              (p.ghost ? HATCH : TONE[p.tone]) + '"></span><span>' + p.caption + '</span></div>';
+    }
+
+    html += '<div class="wdiv"></div>';
+    html += '<div class="wcol" style="flex-grow:1.35"><div class="wlab total">' + fmt(whole) + '</div>' +
+            '<div class="band top bot" style="height:' + (whole / scale * 100).toFixed(3) +
+            '%;background:linear-gradient(to bottom,#E8AC53,#C9832F)"></div></div>';
+    caps += '<div style="width:2px;flex-shrink:0"></div>' +
+            '<div class="wcap" style="flex-grow:1.35"><span style="color:var(--ik);font-weight:500">' +
+            (R.uninsured ? "What you spend<br>and what you risk" : "What your household<br>actually costs") + '</span></div>';
+
+    byId("wf").innerHTML = html;
+    byId("wcaps").innerHTML = caps;
+    byId("wfNote").innerHTML = 'All figures <span data-uw="per">' +
+      WORDS.per[state.unit] + '</span>. ' + R.note;
+  }
+
+  function renderCards(){
+    var R = S.breakdown, html = "", i;
+    for (i = 0; i < R.parts.length; i++){
+      var p = R.parts[i], hi = (i === 1 && !p.onPaystub);
+      html += '<div class="card-i' + (hi ? ' hi' : '') + '">' +
+              '<div class="t"' + (hi ? ' style="color:var(--c2)"' : '') + '>' + p.label +
+              (p.bears ? '' : ' &middot; not yours') + '</div>' +
+              '<div class="v"' + (hi ? ' style="color:var(--c2)"' : '') + '>' + fmt(p.value) + '</div></div>';
+    }
+    byId("cards").innerHTML = html;
+
+    byId("bigSub").innerHTML = '<b style="color:var(--ik);font-weight:400">' + fmt(R.offPaystub) +
+      '</b> of that never appears on a paystub.' +
+      (R.borne < R.whole ? ' A further ' + fmt(R.whole - R.borne) + ' is carried by taxpayers, not by you.' : '');
+
+    byId("deductLbl").textContent = state.route === "employer" ? "Your premium deduction"
+      : state.route === "marketplace" ? "Your premium, after any credit" : "Premium";
+    byId("deduct").textContent = state.route === "none" ? "\u2014"
+      : "$" + ((state.route === "employer" ? S.employer.worker : S.marketplace.net) / state.period).toFixed(2);
+  }
+
+
+  // The cliff drawn from the same functions that drive the calculator, so the chart
+  // can never disagree with the numbers beside it.
+  function renderCliff(){
+    var opts = { size: state.size, adults: Math.min(2, state.size),
+                 area: state.area, region: "contiguous" };
+    var d = W.cliffDrop(opts), c = W.cliffCurve(opts, 200);
+    byId("cliffUnder").textContent = fmt(d.under);
+    byId("cliffOver").textContent  = fmt(d.over);
+    byId("cliffDrop").textContent  = fmt(d.drop);
+    byId("cliffUnderSub").textContent = "a credit of " + fmt(d.lostCredit) + ", intact";
+
+    var pts = c.points, i;
+    var lo = pts[0].income, hi = pts[pts.length - 1].income;
+    var top = 0;
+    for (i = 0; i < pts.length; i++) if (pts[i].household > top) top = pts[i].household;
+    var yMax = Math.ceil(top / 5000) * 5000;
+
+    // SVG text scales with the viewBox, so a desktop-sized viewBox squeezed into a
+    // phone renders labels at ~4px. Narrow screens get their own geometry instead.
+    var host = byId("cliffChart"), narrow = (host.clientWidth || 900) < 560;
+    var Wd = narrow ? 340 : 920, Ht = narrow ? 268 : 352;
+    var mL = narrow ? 42 : 74, mR = narrow ? 10 : 26, mT = narrow ? 36 : 18, mB = narrow ? 44 : 62;
+    var fA = narrow ? 11 : 11, fB = narrow ? 16 : 19, gridN = narrow ? 3 : 5;
+    var X = function(v){ return mL + (v - lo) / (hi - lo) * (Wd - mL - mR); };
+    var Y = function(v){ return Ht - mB - (v / yMax) * (Ht - mB - mT); };
+
+    var pre = [], post = [];
+    for (i = 0; i < pts.length; i++) (pts[i].overCliff ? post : pre).push(pts[i]);
+    var path = function(a){
+      var s2 = "", j;
+      for (j = 0; j < a.length; j++) s2 += (j ? "L" : "M") + X(a[j].income).toFixed(1) + "," + Y(a[j].household).toFixed(1) + " ";
+      return s2;
+    };
+
+    var g = "";
+    // horizontal gridlines + money labels
+    var step = yMax / gridN;
+    for (i = 0; i <= gridN; i++){
+      var v = step * i, y = Y(v);
+      g += '<line x1="' + mL + '" y1="' + y.toFixed(1) + '" x2="' + (Wd - mR) + '" y2="' + y.toFixed(1) +
+           '" stroke="#1F2330" stroke-width="1"/>';
+      g += '<text x="' + (mL - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" fill="#7C8395" ' +
+           'font-family="IBM Plex Mono, monospace" font-size="' + fA + '">' + (state.unit === "y"
+             ? "$" + Math.round(v / 1000) + "k" : "$" + Math.round(v / 12 / 100) * 100) + '</text>';
+    }
+    // % of poverty line along the bottom
+    for (i = 2; i <= 5; i++){
+      var inc = c.povertyLine * i;
+      if (inc < lo || inc > hi) continue;
+      g += '<text x="' + X(inc).toFixed(1) + '" y="' + (Ht - 34) + '" text-anchor="middle" fill="#7C8395" ' +
+           'font-family="IBM Plex Mono, monospace" font-size="' + fA + '">' + (i * 100) + '%</text>';
+    }
+    g += '<text x="' + ((mL + Wd - mR) / 2).toFixed(1) + '" y="' + (Ht - 10) + '" text-anchor="middle" fill="#5E6472" ' +
+         'font-family="IBM Plex Mono, monospace" font-size="' + (narrow ? 9.5 : 10.5) + '" letter-spacing="1.2">' +
+         (narrow ? "% OF THE POVERTY LINE" : "HOUSEHOLD INCOME, AS A SHARE OF THE POVERTY LINE") + '</text>';
+
+    var xc = X(c.cliffIncome), yUnder = Y(pre[pre.length - 1].household), yOver = Y(post[0].household);
+
+    // the drop itself
+    g += '<line x1="' + xc.toFixed(1) + '" y1="' + yUnder.toFixed(1) + '" x2="' + xc.toFixed(1) +
+         '" y2="' + yOver.toFixed(1) + '" stroke="#D99A3F" stroke-width="2.5" stroke-dasharray="5 4"/>';
+    g += '<path d="' + path(pre) + '" fill="none" stroke="#D99A3F" stroke-width="2.5" stroke-linejoin="round"/>';
+    g += '<path d="' + path(post) + '" fill="none" stroke="#D99A3F" stroke-width="2.5" stroke-linejoin="round"/>';
+    g += '<circle cx="' + xc.toFixed(1) + '" cy="' + yUnder.toFixed(1) + '" r="4" fill="#12141A" stroke="#D99A3F" stroke-width="2.5"/>';
+    g += '<circle cx="' + xc.toFixed(1) + '" cy="' + yOver.toFixed(1) + '" r="4.5" fill="#D99A3F"/>';
+
+    // annotation
+    var aX = narrow ? xc - 10 : xc + 14, aAnchor = narrow ? "end" : "start";
+    g += '<text x="' + aX.toFixed(1) + '" y="' + (yOver - (narrow ? 31 : 30)) + '" text-anchor="' + aAnchor +
+         '" fill="#D99A3F" font-family="IBM Plex Mono, monospace" font-size="' + fA +
+         '" letter-spacing="1.3">THE CREDIT STOPS</text>';
+    g += '<text x="' + aX.toFixed(1) + '" y="' + (yOver - (narrow ? 10 : 10)) + '" text-anchor="' + aAnchor +
+         '" fill="#E8E6E1" font-family="IBM Plex Mono, monospace" font-size="' + fB + '">+' + fmt(d.drop) + '</text>';
+
+    // where this household currently sits
+    var you = null;
+    for (i = 0; i < pts.length; i++) if (pts[i].income >= state.income){ you = pts[i]; break; }
+    if (you && state.income >= lo && state.income <= hi){
+      var xy = X(state.income), yy = Y(you.household);
+      g += '<line x1="' + xy.toFixed(1) + '" y1="' + mT + '" x2="' + xy.toFixed(1) + '" y2="' + (Ht - mB) +
+           '" stroke="#3FB5AE" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>';
+      g += '<circle cx="' + xy.toFixed(1) + '" cy="' + yy.toFixed(1) + '" r="5" fill="#3FB5AE" stroke="#12141A" stroke-width="2"/>';
+      // Label sits at the FOOT of the guide, not the top: the top is where the cliff
+      // annotation lives, and the two collide whenever this household is past the cliff.
+      var anchor = xy > Wd - 60 ? "end" : (xy < mL + 60 ? "start" : "middle");
+      g += '<text x="' + xy.toFixed(1) + '" y="' + (Ht - mB - 10) + '" text-anchor="' + anchor +
+           '" fill="#3FB5AE" font-family="IBM Plex Mono, monospace" font-size="' + fA + '">you</text>';
+    }
+
+    byId("cliffChart").innerHTML =
+      '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" role="img" aria-label="What a household bears on a benchmark marketplace plan across income, showing the 400% subsidy cliff">' +
+      g + '</svg>';
+  }
+
+  function renderElig(){
+    var m = S.marketplace, pct = Math.round(S.fpl.ratio * 100), html;
+    if (state.route === "none"){
+      html = '<div class="warn"><div class="lbl" style="color:var(--c2)">Nothing caps a bad year</div>' +
+        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">Every insured plan has a legal ' +
+        'out-of-pocket maximum. Without coverage there is no ceiling at all \u2014 one hospital ' +
+        'admission can cost more than a year of premiums. The figure above is what a household ' +
+        'this size typically spends in an <i>ordinary</i> year, and it is low mainly because ' +
+        'uninsured people skip care.</div></div>';
+      byId("elig").innerHTML = html;
+      return;
+    }
+    if (m.overCliff){
+      html = '<div class="warn"><div class="lbl" style="color:var(--c2)">You are over the subsidy cliff</div>' +
+        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
+        'poverty line this household is above 400% and gets <b>no premium tax credit at all</b> \u2014 not a ' +
+        'reduced one. The enhanced credits that smoothed this cliff expired on 31 December 2025. Earning ' +
+        'one dollar less could be worth thousands.</div></div>';
+    } else {
+      html = '<div class="callout-i"><div class="lbl" style="color:var(--teal)">What you qualify for today</div>' +
+        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
+        'poverty line, this household is expected to contribute <b>' +
+        (m.applicablePercentage * 100).toFixed(2) + '%</b> of income toward a benchmark silver plan \u2014 a ' +
+        'credit of ' + money(m.subsidy) + ' a year.' +
+        (m.chipLikely ? ' The children may also qualify for CHIP, which reaches further up the income scale.' : '') +
+        '</div></div>';
+    }
+    byId("elig").innerHTML = html;
+  }
+
+  var pills = byId("pills");
+  function renderPills(){
+    for (var i = 0; i < pills.children.length; i++){
+      pills.children[i].className = "pill" + (W.MODELS[i].id === state.model ? " on" : "");
+    }
+  }
+
+
+  /* ZIP -> rating area. Real rating areas are defined by COUNTY, not ZIP prefix, so this
+   * three-digit table is an approximation good enough for five demo metros and no more.
+   * Stage 2 replaces it with the CMS Service Area PUF, which maps ZIP and county exactly.
+   * Until then the site must never imply it knows an area it does not have. */
+  var ZIP_PREFIX = {
+    "060":"CT-1","061":"CT-1","062":"CT-1",
+    "100":"NY-4","101":"NY-4","102":"NY-4","103":"NY-4","104":"NY-4",
+    "111":"NY-4","112":"NY-4","113":"NY-4","114":"NY-4","116":"NY-4",
+    "190":"PA-9","191":"PA-9",
+    "750":"TX-26","751":"TX-26","752":"TX-26","753":"TX-26",
+    "330":"FL-27","331":"FL-27","332":"FL-27","333":"FL-27"
+  };
+  function lookupZip(z){
+    z = String(z || "").replace(/\D/g, "");
+    if (z.length < 5) return { ok:false, reason:"short", zip:z };
+    var hit = ZIP_PREFIX[z.slice(0,3)];
+    return hit ? { ok:true, area:hit, zip:z } : { ok:false, reason:"uncovered", zip:z };
+  }
+
+  function renderScope(msg){
+    var a = W.BENCHMARK[state.area];
+    byId("scope").innerHTML = msg || ('Showing the <b>' + a.city + '</b> area. This preview has ' +
+      'five metro areas wired up \u2014 the rest of the country needs the CMS plan files, ' +
+      'which is the next build step.');
+    var html = "", keys = Object.keys(W.BENCHMARK), i;
+    for (i = 0; i < keys.length; i++){
+      html += '<button type="button" data-a="' + keys[i] + '">' + W.BENCHMARK[keys[i]].city + '</button>';
+    }
+    byId("areapick").innerHTML = html;
+    [].forEach.call(byId("areapick").querySelectorAll("button"), function(b){
+      b.addEventListener("click", function(){
+        state.area = b.getAttribute("data-a");
+        byId("area").value = state.area;
+        byId("zip").value = "";
+        paint();
+        document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
+      });
+    });
+  }
+
+  function submitZip(){
+    var r = lookupZip(byId("zip").value);
+    if (r.ok){
+      state.area = r.area;
+      byId("area").value = r.area;
+      paint();
+      document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
+      return;
+    }
+    renderScope(r.reason === "short"
+      ? 'Enter all five digits.'
+      : '<b>' + r.zip + '</b> is not in this preview yet. Five metro areas are wired up so far &mdash; ' +
+        'pick one to see how the calculator works, and read <a href="#/methodology">why the rest need ' +
+        'the CMS plan files</a>.');
+  }
+
+
+  /* Two views in one file so the preview behaves like the shipped site: the main flow
+   * and the methodology page. At deploy these become separate documents and the only
+   * change is "#/methodology" -> "/methodology". */
+  function route(){
+    var meth = location.hash.indexOf("methodology") > -1;
+    var main = document.querySelectorAll("section:not(.view), .inkzone, footer");
+    for (var i = 0; i < main.length; i++) main[i].hidden = meth;
+    byId("methodology").hidden = !meth;
+    byId("methBack").hidden = !meth;
+    document.title = meth ? "Methodology \u2014 The Whole Bill" : "The Whole Bill";
+    if (meth) window.scrollTo(0, 0);
+  }
+  var stickyEl = document.querySelector(".sticky");
+  if (window.IntersectionObserver && stickyEl){
+    // A 1px sentinel in normal flow directly above the bar. Sign of its top tells us
+    // which side it left by, so scrolling from below does not falsely read as pinned.
+    var probe = document.createElement("div");
+    probe.style.cssText = "height:1px";
+    stickyEl.parentNode.insertBefore(probe, stickyEl);
+    new IntersectionObserver(function(e){
+      stickyEl.classList.toggle("pinned", e[0].boundingClientRect.top < 0);
+    }, { threshold: 0 }).observe(probe);
+  }
+
+  var rz;
+  window.addEventListener("resize", function(){
+    clearTimeout(rz);
+    rz = setTimeout(function(){ paint(); }, 140);
+  });
+
+  window.addEventListener("hashchange", function(){
+    route();
+    if (location.hash.indexOf("methodology") === -1) window.scrollTo(0, 0);
+  });
+
+  function byId(id){ return document.getElementById(id); }
+  function setW(id, frac){ byId(id).style.width = (frac * 100).toFixed(1) + "%"; }
+
+  W.MODELS.forEach(function(m){
+    var b = document.createElement("button");
+    b.className = "pill"; b.type = "button"; b.textContent = m.chip;
+    b.addEventListener("click", function(){ state.model = m.id; paint(); });
+    pills.appendChild(b);
+  });
+
+  var routeEl = byId("route");
+  [].forEach.call(routeEl.querySelectorAll("button"), function(b){
+    b.addEventListener("click", function(){
+      state.route = b.getAttribute("data-r");
+      [].forEach.call(routeEl.querySelectorAll("button"), function(x){ x.className = (x === b ? "on" : ""); });
+      paint();
+    });
+  });
+
+  byId("zipGo").addEventListener("click", submitZip);
+  byId("zip").addEventListener("keydown", function(e){ if (e.key === "Enter") submitZip(); });
+  byId("area").addEventListener("change", function(){ state.area = this.value; byId("zip").value = ""; paint(); });
+  byId("income").addEventListener("input", function(){ state.income = +this.value; paint(); });
+  byId("sizeUp").addEventListener("click", function(){ if (state.size < 8){ state.size++; paint(); } });
+  byId("sizeDown").addEventListener("click", function(){ if (state.size > 1){ state.size--; paint(); } });
+
+  var unitEl = byId("unit");
+  function paintUnit(){
+    var labels = unitEl.querySelectorAll(".unit-l"), i, active = null;
+    for (i = 0; i < labels.length; i++){
+      var on = labels[i].getAttribute("data-u") === state.unit;
+      labels[i].className = "unit-l" + (on ? " on" : "");
+      if (on) active = labels[i];
+    }
+    var thumb = unitEl.querySelector(".unit-thumb");
+    thumb.style.width = active.offsetWidth + "px";
+    thumb.style.transform = "translateX(" + (active.offsetLeft - 3) + "px)";
+    unitEl.setAttribute("aria-checked", state.unit === "m" ? "true" : "false");
+  }
+  unitEl.addEventListener("click", function(){
+    state.unit = state.unit === "y" ? "m" : "y";
+    paint();
+  });
+
+  paint();
+  route();
+})();
+</script>

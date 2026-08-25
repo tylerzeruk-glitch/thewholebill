@@ -1,0 +1,16 @@
+{
+  "name": "thewholebill",
+  "version": "0.1.0",
+  "private": true,
+  "description": "What your healthcare actually costs, and what it could cost instead.",
+  "type": "module",
+  "scripts": {
+    "build": "./build.sh",
+    "test": "./build.sh && node test/test.mjs",
+    "check": "node test/test.mjs",
+    "setup": "npm install && npx playwright install chromium"
+  },
+  "devDependencies": {
+    "playwright": "1.56.0"
+  }
+}
