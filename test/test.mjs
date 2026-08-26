@@ -26,6 +26,22 @@ const page = async (browser, w, h, mobile=false) => {
 };
 const setIncome = async (p, v) => { await p.locator('#income').fill(String(v)); await p.locator('#income').dispatchEvent('input'); await p.waitForTimeout(120); };
 
+test('calc: loads and computes in node, outside any browser', async () => {
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const W = require('../src/calc.js');
+  ok('calc.js loads in node', typeof W.summary === 'function', Object.keys(W).length + ' exports');
+  const s = W.summary({ income:95000, size:4, adults:2, area:'CT-1', model:'sanders1' });
+  ok('poverty line for a household of 4', Math.round(s.fpl.line) === 32150, `$${Math.round(s.fpl.line)}`);
+  ok('employer total is the sum of its parts',
+     Math.abs(s.employer.total - (s.employer.worker + s.employer.employer + s.employer.oop + s.employer.medicareTax)) < 0.01);
+  ok('the 400% cliff has no credit', W.applicablePercentage(4.0) === null);
+  ok('just under the cliff still has one', W.applicablePercentage(3.99) > 0);
+  const d = W.cliffDrop({ size:4, adults:2, area:'CT-1', region:'contiguous' });
+  ok('cliff drop equals the credit lost', Math.abs(d.drop - d.lostCredit) < 1,
+     `$${Math.round(d.drop)} at $${Math.round(d.income)}`);
+});
+
 test('layout: no horizontal overflow', async b => {
   for (const [w,h,m] of [[1440,900,false],[900,900,false],[430,932,true],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
