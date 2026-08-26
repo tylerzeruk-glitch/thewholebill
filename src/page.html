@@ -180,12 +180,17 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .wcol > *{flex-shrink:0}
 .band{flex-shrink:0;border-radius:0}
 .band.top{border-radius:1px 1px 0 0} .band.bot{border-radius:0 0 1px 1px}
-.wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;text-align:right}
+/* Left, not right. Right-aligning put each figure's end on its own bar's right
+   edge, which reads well on its own -- but the colour key below is a swatch then
+   text, so it can only start at the left. Two rows describing the same columns
+   disagreeing about which edge they hang from is worse than either choice. Left
+   is the edge both rows can share: figure, bar and swatch now all begin together. */
+.wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap}
 .wlab.big{font-size:clamp(18px,2.1vw,30px)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
 /* Its column is now the same width as the others, so this label wraps where it
    used to fit on one line. balance keeps it off a one-word last line. */
-.wkick{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--c2);margin-bottom:9px;text-wrap:balance;text-align:right}
+.wkick{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--c2);margin-bottom:9px;text-wrap:balance}
 .wdiv{width:2px;background:var(--irule-2);height:var(--chart-h);flex-shrink:0;align-self:flex-end}
 .wcaps{display:flex;gap:clamp(14px,3vw,44px);margin-top:20px}
 .wcap{flex-grow:1;flex-basis:0;display:flex;gap:9px;align-items:flex-start;min-width:0}
@@ -239,7 +244,31 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
 .bigstat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,84px);font-weight:300;line-height:1;letter-spacing:-.04em;color:var(--amber-deep)}
 .bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
-.disclose{margin-top:48px;border-top:1px solid var(--prule);padding-top:26px;display:flex;flex-direction:column;gap:16px}
+/* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
+   ARE that number, split in two. Set as a sum -- operator in its own column so the
+   digits stay aligned -- because a relationship the arithmetic already has is
+   cheaper to show than to explain, and this section had explained it in prose. */
+.tally{display:grid;grid-template-columns:14px auto minmax(0,1fr);gap:14px 13px;align-items:baseline;
+       border-top:1px solid var(--prule);padding-top:18px}
+.tally .op{font-family:var(--mono);font-size:19px;color:var(--pctrl)}
+.tally .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:23px;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
+.tally .d{font-size:15px;line-height:1.5;color:var(--pb);text-wrap:pretty}
+
+/* The source note collapses, but the DISCLOSURE does not: both facts a reader
+   needs in order to weigh this figure sit in the summary, in the open. Only the
+   elaboration is behind the toggle. Hiding the caveat itself would invert the
+   point of the section. */
+.src{border-top:1px solid var(--prule);margin-top:52px}
+.src > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+               gap:16px;align-items:center;padding:17px 0;min-height:44px}
+.src > summary::-webkit-details-marker{display:none}
+.src > summary:hover .src-s{color:var(--pk)}
+.src > summary:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
+.src-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--plabel);white-space:nowrap}
+.src-s{font-size:14px;line-height:1.5;color:var(--pb);min-width:0}
+.src-x{color:var(--pctrl);flex-shrink:0;transition:transform .22s ease}
+.src[open] .src-x{transform:rotate(180deg)}
+.src-bd{display:flex;flex-direction:column;gap:18px;padding-bottom:26px}
 
 /* ---------- critics / act ---------- */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
@@ -258,6 +287,10 @@ a.q{color:var(--amber-deep);text-decoration:none;border-bottom:1px solid rgba(14
 a.q:hover{border-bottom-color:var(--amber-deep)}
 .quote{font-family:var(--serif);font-size:clamp(23px,2.3vw,29px);font-style:italic;line-height:1.24}
 .fn{font-size:12.5px;line-height:1.55;color:var(--pm);border-top:1px solid var(--prule-soft);padding-top:14px}
+/* A footnote marker only means something if the thing it annotates carries one
+   too, so these come in pairs: .fnr in the body, .fnm on the note. */
+.fnm{color:var(--plabel);font-weight:500;margin-right:5px}
+.fnr{font-size:.7em;line-height:0;vertical-align:super;color:var(--plabel);font-weight:500;margin-left:1px}
 .actgrid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:36px;align-items:start}
 .letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;display:flex;flex-direction:column}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
@@ -340,6 +373,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .letter .hd,.letter .ft{padding-left:24px;padding-right:24px}
   .letter .ft p{text-align:left;max-width:none}
   .card-p{padding:26px 24px}
+  .src > summary{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k x" "s s";gap:8px 16px}
+  .src-k{grid-area:k} .src-s{grid-area:s} .src-x{grid-area:x}
+  .tally{grid-template-columns:14px auto;gap:4px 12px}
+  .tally .d{grid-column:1 / -1;padding-left:27px}
   .wf{gap:8px}
   .wcaps{gap:8px}
 
@@ -764,41 +801,52 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     </div>
 
     <div class="livesgrid">
-      <div class="stack" style="gap:22px">
+      <div class="stack" style="gap:24px">
         <div class="bigstat">
           <div class="n">114,174</div>
           <div class="l">deaths a year that researchers at Yale project universal coverage would prevent</div>
         </div>
-        <div class="stack" style="gap:14px">
-          <div class="row" style="gap:14px;align-items:baseline"><span class="num" style="font-size:23px;color:var(--amber-deep)">62,863</span><span class="body" style="font-size:15px">from extending coverage to those without it</span></div>
-          <div class="row" style="gap:14px;align-items:baseline"><span class="num" style="font-size:23px;color:var(--amber-deep)">51,311</span><span class="body" style="font-size:15px">from reversing the coverage policies enacted since 2025</span></div>
+        <div class="stack" style="gap:13px">
+          <div class="lbl p">Made up of</div>
+          <div class="tally">
+            <span class="op"></span>
+            <span class="v">62,863</span>
+            <span class="d">from extending coverage to people who have none</span>
+            <span class="op">+</span>
+            <span class="v">51,311</span>
+            <span class="d">from reversing the coverage policies enacted since 2025</span>
+          </div>
         </div>
+        <p class="note" style="max-width:430px">The second of those is the policy change at the top of this page. Five million people losing coverage is not only a budget line.</p>
       </div>
 
-      <div class="stack" style="gap:20px">
-        <p class="body">That second figure is the same policy change described at the top of this page. Five million people losing coverage is not only a budget line.</p>
-        <div class="card-p" style="border-left:2px solid var(--amber-deep)">
-          <div class="lbl p">The finding that matters most here</div>
-          <div class="quote" style="font-size:26px">Nearly half of the coverage-related deaths prevented &mdash; <span style="color:var(--amber-deep)">29,631</span> &mdash; would be among people who already have insurance.</div>
-          <p class="body">The underinsured: households with coverage on paper and deductibles they cannot clear. That is the argument this whole site makes, counted in a different unit. Having a plan is not the same as being able to use it.</p>
-        </div>
+      <div class="card-p" style="border-left:2px solid var(--amber-deep)">
+        <div class="lbl p">The finding that matters most here</div>
+        <div class="quote" style="font-size:26px">Nearly half of the coverage-related deaths prevented &mdash; <span style="color:var(--amber-deep)">29,631</span> &mdash; would be among people who already have insurance.</div>
+        <p class="body">The underinsured: households with coverage on paper and deductibles they cannot clear. That is the argument this whole site makes, counted in a different unit. Having a plan is not the same as being able to use it.</p>
       </div>
     </div>
 
-    <div class="disclose">
-      <div class="lbl p">Read this one carefully</div>
-      <div class="grid2" style="gap:28px;margin-top:4px">
-        <p class="body" style="font-size:15px">This is a <b style="font-weight:500;color:var(--pk)">preprint</b> and has not been peer reviewed. Its senior author served as an unpaid adviser to Sen. Sanders&rsquo; office while the Medicare for All legislation was drafted, and has testified in support of it. We say that for the same reason we tell you the Mercatus study was Koch-funded: you should know who produced a number before you weigh it.</p>
-        <p class="body" style="font-size:15px">It also shares an assumption with the cost figures above &mdash; that provider payments fall to Medicare rates. Blahous called that assumption &ldquo;relatively generous&rdquo; and rejected the savings it produces; this study builds on it. The two are not independent confirmations of each other. They are the same bet, framed in opposite directions.</p>
+    <details class="src">
+      <summary>
+        <span class="src-k">Who produced this number</span>
+        <span class="src-s">A preprint, not peer reviewed &mdash; and its senior author advised Sen. Sanders&rsquo; office.</span>
+        <svg class="src-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="src-bd">
+        <div class="grid2" style="gap:28px">
+          <p class="body" style="font-size:15px">The preprint has not been peer reviewed. Its senior author served as an unpaid adviser to Sen. Sanders&rsquo; office while the Medicare for All legislation was drafted, and has testified in support of it. We say that for the same reason we tell you the Mercatus study was Koch-funded: you should know who produced a number before you weigh it.</p>
+          <p class="body" style="font-size:15px">It also shares an assumption with the cost figures above &mdash; that provider payments fall to Medicare rates. Blahous called that assumption &ldquo;relatively generous&rdquo; and rejected the savings it produces; this study builds on it. The two are not independent confirmations of each other. They are the same bet, framed in opposite directions.</p>
+        </div>
+        <p class="fn">Pandey, Wells, Ye, Fitzpatrick &amp; Galvani, <i>Projected economic gains and lives saved under universal healthcare in the United States</i>, Yale School of Public Health, 2026. The same team&rsquo;s 2020 <i>Lancet</i> paper, which was peer reviewed, put the figure at roughly 68,000 lives and $450&nbsp;billion.</p>
       </div>
-      <p class="fn" style="margin-top:4px">Pandey, Wells, Ye, Fitzpatrick &amp; Galvani, <i>Projected economic gains and lives saved under universal healthcare in the United States</i>, Yale School of Public Health, 2026. The same team&rsquo;s 2020 <i>Lancet</i> paper, which was peer reviewed, put the figure at roughly 68,000 lives and $450&nbsp;billion.</p>
-    </div>
+    </details>
   </div>
 </section>
 
 
 <!-- ============ 06 THE OBJECTIONS -->
-<section class="paper">
+<section class="paper" id="objections">
   <div class="wrap sec">
     <div class="split" style="margin-bottom:52px">
       <div class="stack" style="gap:20px">
@@ -812,29 +860,29 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="card-p">
         <div class="lbl p">Objection 01</div>
         <div class="quote">&ldquo;My taxes would go through the roof.&rdquo;</div>
-        <p class="body">Yes. Your taxes would rise, and every honest model says so &mdash; the ones above included. The question is whether the <em>total</em> shrinks, because the premium line goes to zero at the same time. For this household the tax increase runs <span style="color:var(--amber-deep)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span> depending on whose model you pick, against <span style="color:var(--amber-deep)" data-fig="emp.replaced">$30,200</span> in premiums, deductibles and copays it replaces.</p>
-        <p class="fn">Where it is genuinely close: households above roughly $250,000 pay more under most models. If that is you, the calculator will say so.</p>
+        <p class="body">Yes. Your taxes would rise, and every honest model says so &mdash; the ones above included. The question is whether the <em>total</em> shrinks, because the premium line goes to zero at the same time. For this household the tax increase runs <span style="color:var(--amber-deep)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span> depending on whose model you pick, against <span style="color:var(--amber-deep)" data-fig="emp.replaced">$30,200</span> in premiums, deductibles and copays it replaces.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>Households above roughly $250,000 pay more under most models. If that is you, the calculator will say so.</p>
       </div>
 
       <div class="card-p">
         <div class="lbl p">Objection 02</div>
         <div class="quote">&ldquo;I&rsquo;d be stuck waiting months for care.&rdquo;</div>
-        <p class="body">Wait times are real in some universal systems and not in others. Canada&rsquo;s elective queues are long; Germany&rsquo;s multi-payer sickness funds and France&rsquo;s statutory system cover everyone without them. How a system is designed and paid for matters more than whether it is single-payer &mdash; a distinction the debate usually flattens.</p>
-        <p class="fn">The honest counter-question: the US already rations by price. KFF&rsquo;s surveys have repeatedly found around four in ten adults saying they or a family member delayed or skipped care because of cost. That is a waiting list too &mdash; it is just invisible.</p>
+        <p class="body">Wait times are real in some universal systems and not in others. Canada&rsquo;s elective queues are long; Germany&rsquo;s multi-payer sickness funds and France&rsquo;s statutory system cover everyone without them. How a system is designed and paid for matters more than whether it is single-payer &mdash; a distinction the debate usually flattens.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>The honest counter-question: the US already rations by price. KFF&rsquo;s surveys have repeatedly found around four in ten adults saying they or a family member delayed or skipped care because of cost. That is a waiting list too &mdash; it is just invisible.</p>
       </div>
 
       <div class="card-p">
         <div class="lbl p">Objection 03</div>
         <div class="quote">&ldquo;I&rsquo;d lose the doctor I have now.&rdquo;</div>
-        <p class="body">Worth checking against what you have today. Narrow networks already decide this for most people: your plan drops a hospital system, your employer switches carriers, you change jobs. A single national network is the version where your doctor does not depend on your employer&rsquo;s procurement decisions.</p>
-        <p class="fn">Fair concession: transition is disruptive, and providers who do well under commercial rates would be paid less.</p>
+        <p class="body">Worth checking against what you have today. Narrow networks already decide this for most people: your plan drops a hospital system, your employer switches carriers, you change jobs. A single national network is the version where your doctor does not depend on your employer&rsquo;s procurement decisions.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>Fair concession: transition is disruptive, and providers who do well under commercial rates would be paid less.</p>
       </div>
 
       <div class="card-p">
         <div class="lbl p">Objection 04</div>
         <div class="quote">&ldquo;The country simply cannot afford it.&rdquo;</div>
-        <p class="body">The headline figure is enormous &mdash; on the order of $30&ndash;40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.</p>
-        <p class="fn">The Mercatus study is the useful one here: funded by opponents and built to be damning, it still showed lower national spending than the status quo &mdash; but only under the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
+        <p class="body">The headline figure is enormous &mdash; on the order of $30&ndash;40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>The Mercatus study is the useful one here: funded by opponents and built to be damning, it still showed lower national spending than the status quo &mdash; but only under the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
       </div>
     </div>
 

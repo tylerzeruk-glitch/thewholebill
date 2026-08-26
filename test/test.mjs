@@ -231,6 +231,78 @@ test('waterfall: equal columns, keys aligned to them', async b => {
   }
 });
 
+/* The figure above a column and the colour key below it describe the same column,
+ * so they have to hang from the same edge. The key is a swatch then text, which can
+ * only start at the left -- so the figure does too. Right-aligning the figures read
+ * well alone and disagreed with the key row, which is worse than either choice.
+ * Only asserted above 500px: below that the key is a list, not a caption row. */
+test('waterfall: figure and colour key share their column edge', async b => {
+  for (const [w,h] of [[1440,900],[1200,900],[900,900],[520,900]]) {
+    const p = await page(b,w,h);
+    const r = await p.evaluate(()=>{
+      const cols=[...document.getElementById('wf').children].filter(c=>c.className.startsWith('wcol'));
+      const caps=[...document.getElementById('wcaps').children].filter(c=>(c.className||'').startsWith('wcap'));
+      let worst=0, where='';
+      cols.forEach((c,i)=>{
+        const lab=c.querySelector('.wlab'); if(!lab||!caps[i]) return;
+        const rg=document.createRange(); rg.selectNodeContents(lab);
+        const textLeft=rg.getBoundingClientRect().left;
+        const d=Math.abs(textLeft - caps[i].getBoundingClientRect().left);
+        if(d>worst){ worst=d; where=lab.textContent.trim(); }
+      });
+      return { worst, where };
+    });
+    ok(`${w}px: figures hang from the same edge as their key`, r.worst < 1,
+       `${r.worst.toFixed(1)}px at "${r.where}"`);
+    await p.close();
+  }
+});
+
+/* Collapsing a disclosure is only honest if the disclosure itself stays out in the
+ * open -- this section exists to say who produced the number. Both facts a reader
+ * needs to weigh it are in the summary; only the elaboration is behind the toggle. */
+test('lives: the source caveat is readable without expanding', async b => {
+  for (const [w,h,m] of [[1440,900,false],[390,844,true]]) {
+    const p = await page(b,w,h,m);
+    const r = await p.evaluate(()=>{
+      const d=document.querySelector('.src'), sum=d.querySelector('summary');
+      return { open:d.open, txt:sum.innerText.toLowerCase(),
+               h:sum.getBoundingClientRect().height,
+               shut:d.getBoundingClientRect().height };
+    });
+    // A closed <details> still reports a box for its subtree in Chrome, so the
+    // element's own height is what says whether the detail is on screen.
+    ok(`${w}px: starts collapsed`, r.open === false && r.shut < r.h + 8,
+       `${Math.round(r.shut)}px tall vs a ${Math.round(r.h)}px summary`);
+    ok(`${w}px: not-peer-reviewed stays visible`, /peer[\s-]?reviewed/.test(r.txt), r.txt.slice(0,70));
+    ok(`${w}px: the adviser role stays visible`, /sanders/.test(r.txt), r.txt.slice(0,70));
+    ok(`${w}px: summary is a 44px target`, r.h >= 44, `${Math.round(r.h)}px`);
+    const after = await p.evaluate(()=>{ const d=document.querySelector('.src'); d.open=true;
+      return d.getBoundingClientRect().height; });
+    ok(`${w}px: expanding reveals the detail`, after > r.shut + 100,
+       `${Math.round(r.shut)}px → ${Math.round(after)}px`);
+    await p.close();
+  }
+});
+
+/* A footnote marker that anchors to nothing is decoration. Each objection card
+ * carries the pair: * on the note, * on the claim it qualifies. */
+test('objections: every footnote marker has its anchor', async b => {
+  const p = await page(b,1440,900);
+  const bad = await p.evaluate(()=>{
+    const out=[];
+    document.querySelectorAll('#objections .grid2 > .card-p').forEach(c=>{
+      const fn=c.querySelector('.fn'), body=c.querySelector('p.body');
+      if(!fn) return;
+      if(!fn.querySelector('.fnm')) out.push('note without marker: '+fn.textContent.slice(0,30));
+      if(!body || !body.querySelector('.fnr')) out.push('claim without marker: '+(body?body.textContent.slice(0,30):'none'));
+    });
+    return out;
+  });
+  ok('every objection footnote is anchored', bad.length === 0, bad.slice(0,3).join(' | '));
+  await p.close();
+});
+
 test('cliff: statutory drop and no label collisions', async b => {
   const p = await page(b,1440,900);
   const d = await p.evaluate(()=>({ under:document.getElementById('cliffUnder').textContent,
