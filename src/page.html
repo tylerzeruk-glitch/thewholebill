@@ -144,17 +144,27 @@ button.step{border:none;cursor:pointer;font-family:var(--sans)}
 
 /* ---------- waterfall ---------- */
 .wf{display:flex;align-items:flex-end;gap:clamp(14px,3vw,44px);margin-top:clamp(48px,8vw,120px);height:var(--chart-h)}
-.wcol{flex-grow:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;height:var(--chart-h)}
+/* flex-basis:0 is the point. With the default `auto`, flex-grow only shares out
+   the LEFTOVER space, so each column started at the width of its own label and
+   the four data columns came out 123/224/148/148 at 1440px. Worse, .wcap did the
+   same from different content, so the colour keys drifted up to 58px from the
+   columns they label -- the exact thing docs/design-brief.md says putting keys in
+   the captions would prevent. With basis 0 both rows partition the same width by
+   the same ratios, so they line up by construction. Keep the two grow values in
+   step: the total column and its caption both carry 1.35 from the app script. */
+.wcol{flex-grow:1;flex-basis:0;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;height:var(--chart-h)}
 .wcol > *{flex-shrink:0}
 .band{flex-shrink:0;border-radius:0}
 .band.top{border-radius:1px 1px 0 0} .band.bot{border-radius:0 0 1px 1px}
 .wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap}
 .wlab.big{font-size:clamp(18px,2.1vw,30px)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
-.wkick{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--c2);margin-bottom:9px}
+/* Its column is now the same width as the others, so this label wraps where it
+   used to fit on one line. balance keeps it off a one-word last line. */
+.wkick{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--c2);margin-bottom:9px;text-wrap:balance}
 .wdiv{width:2px;background:var(--irule-2);height:var(--chart-h);flex-shrink:0;align-self:flex-end}
 .wcaps{display:flex;gap:clamp(14px,3vw,44px);margin-top:20px}
-.wcap{flex-grow:1;display:flex;gap:9px;align-items:flex-start;min-width:0}
+.wcap{flex-grow:1;flex-basis:0;display:flex;gap:9px;align-items:flex-start;min-width:0}
 .sw{width:11px;height:11px;border-radius:2px;flex-shrink:0;margin-top:4px}
 .wcap span{font-size:13.5px;line-height:1.5;color:var(--im)}
 
