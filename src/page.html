@@ -1248,13 +1248,34 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     g += '<circle cx="' + xc.toFixed(1) + '" cy="' + yUnder.toFixed(1) + '" r="4" fill="#12141A" stroke="#D99A3F" stroke-width="2.5"/>';
     g += '<circle cx="' + xc.toFixed(1) + '" cy="' + yOver.toFixed(1) + '" r="4.5" fill="#D99A3F"/>';
 
-    // annotation
+    // Annotation. It cannot sit ABOVE the cliff point. yMax rounds the post-cliff value
+    // up to the next $5k, so that value is always 83-100% of it and yOver lands within
+    // ~42 units of the top — while the two-line stack needs ~50. It clipped against the
+    // top edge AND overlapped itself at every income and household size.
+    // It hangs below the flat post-cliff line instead, which is the one region of the
+    // plot that is empty by construction: nothing is drawn right of the cliff except
+    // that line. It also now labels the flat run, which is what it was describing.
+    // The baseline gap is derived from the type sizes (number ascent + label descent
+    // + 5) instead of hand-set, so it cannot silently go tight if a size changes.
     var aX = narrow ? xc - 10 : xc + 14, aAnchor = narrow ? "end" : "start";
-    g += '<text x="' + aX.toFixed(1) + '" y="' + (yOver - (narrow ? 31 : 30)) + '" text-anchor="' + aAnchor +
-         '" fill="#D99A3F" font-family="IBM Plex Mono, monospace" font-size="' + fA +
-         '" letter-spacing="1.3">THE CREDIT STOPS</text>';
-    g += '<text x="' + aX.toFixed(1) + '" y="' + (yOver - (narrow ? 10 : 10)) + '" text-anchor="' + aAnchor +
-         '" fill="#E8E6E1" font-family="IBM Plex Mono, monospace" font-size="' + fB + '">+' + fmt(d.drop) + '</text>';
+    var aLabelY = yOver + fA + 10;
+    var aNumY   = aLabelY + fB * 1.03 + fA * 0.28 + 5;
+    var aLabelTxt = "THE CREDIT STOPS", aNumTxt = "+" + fmt(d.drop);
+    // IBM Plex Mono advances 0.6em per character; the label adds its letter-spacing.
+    var aW   = Math.max(aLabelTxt.length * (fA * 0.6 + 1.3), aNumTxt.length * fB * 0.6) + 12;
+    var aTop = aLabelY - fA * 1.03 - 6, aBot = aNumY + fB * 0.28 + 6;
+    // Built here but appended LAST, over an opaque backing in the chart's own surface
+    // colour. The "you" guide spans the full plot height, so it otherwise runs straight
+    // through this text for every income that puts the marker beside the cliff — about
+    // $131k-$150k for a family of four. The label is the more important mark, so it wins.
+    var annot =
+      '<rect x="' + (aAnchor === "end" ? aX - aW + 6 : aX - 6).toFixed(1) + '" y="' + aTop.toFixed(1) +
+      '" width="' + aW.toFixed(1) + '" height="' + (aBot - aTop).toFixed(1) + '" fill="#171A22"/>' +
+      '<text x="' + aX.toFixed(1) + '" y="' + aLabelY.toFixed(1) + '" text-anchor="' + aAnchor +
+      '" fill="#D99A3F" font-family="IBM Plex Mono, monospace" font-size="' + fA +
+      '" letter-spacing="1.3">' + aLabelTxt + '</text>' +
+      '<text x="' + aX.toFixed(1) + '" y="' + aNumY.toFixed(1) + '" text-anchor="' + aAnchor +
+      '" fill="#E8E6E1" font-family="IBM Plex Mono, monospace" font-size="' + fB + '">' + aNumTxt + '</text>';
 
     // where this household currently sits
     var you = null;
@@ -1264,12 +1285,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       g += '<line x1="' + xy.toFixed(1) + '" y1="' + mT + '" x2="' + xy.toFixed(1) + '" y2="' + (Ht - mB) +
            '" stroke="#3FB5AE" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>';
       g += '<circle cx="' + xy.toFixed(1) + '" cy="' + yy.toFixed(1) + '" r="5" fill="#3FB5AE" stroke="#12141A" stroke-width="2"/>';
-      // Label sits at the FOOT of the guide, not the top: the top is where the cliff
-      // annotation lives, and the two collide whenever this household is past the cliff.
+      // Label sits at the FOOT of the guide: the bottom of the plot is always free, and
+      // it sits next to the income axis the marker actually refers to.
       var anchor = xy > Wd - 60 ? "end" : (xy < mL + 60 ? "start" : "middle");
       g += '<text x="' + xy.toFixed(1) + '" y="' + (Ht - mB - 10) + '" text-anchor="' + anchor +
            '" fill="#3FB5AE" font-family="IBM Plex Mono, monospace" font-size="' + fA + '">you</text>';
     }
+
+    g += annot;
 
     byId("cliffChart").innerHTML =
       '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" role="img" aria-label="What a household bears on a benchmark marketplace plan across income, showing the 400% subsidy cliff">' +
