@@ -51,6 +51,34 @@ test('layout: no horizontal overflow', async b => {
   }
 });
 
+/* Overflow is not the same as a gutter. Content can sit flush against the viewport
+ * edge without ever exceeding it, so the check above passes while every section runs
+ * edge-to-edge -- which is exactly what a `padding` shorthand on .sec did, silently
+ * resetting .wrap's padding-left/right to 0 at every width below ~1250px. */
+test('layout: every section keeps its gutter', async b => {
+  const MIN = 20;   // --pad floors at 24px; allow a little for sub-pixel and borders
+  for (const [w,h,m] of [[1440,900,false],[1280,900,false],[1024,900,false],[768,1024,false],[430,932,true],[360,780,true]]) {
+    const p = await page(b,w,h,m);
+    const bad = await p.evaluate(min => {
+      const vw = innerWidth, out = [];
+      document.querySelectorAll('body *').forEach(e => {
+        if (e.closest('[hidden]')) return;
+        const cs = getComputedStyle(e);
+        if (cs.position === 'fixed' || cs.overflowX === 'auto' || cs.overflowX === 'scroll') return;
+        const hasText = [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
+        if (!hasText) return;
+        const r = e.getBoundingClientRect();
+        if (r.width <= 0 || r.height <= 0) return;
+        const gap = Math.min(r.left, vw - r.right);
+        if (gap < min) out.push(`${(typeof e.className==='string'&&e.className.trim())||e.tagName} @${gap.toFixed(0)}px "${(e.textContent||'').trim().slice(0,20)}"`);
+      });
+      return [...new Set(out)];
+    }, MIN);
+    ok(`${w}px: text clears the edge by ${MIN}px`, bad.length === 0, bad.slice(0,3).join(' | '));
+    await p.close();
+  }
+});
+
 test('sticky: pins across the ink zone', async b => {
   const p = await page(b,1440,900);
   const { top, height } = await p.evaluate(()=>{ const z=document.querySelector('.inkzone'); return {top:z.offsetTop, height:z.offsetHeight}; });
@@ -118,6 +146,30 @@ test('cliff: statutory drop and no label collisions', async b => {
       if (hit) hit = `$${inc}: ${hit}`;
     }
     ok(`household of ${size}: chart labels clear`, !hit, hit||'');
+  }
+  await p.close();
+});
+
+/* The chart's viewBox tracks its container width, so a stale viewBox silently
+ * rescales every label. Loading at a width is not the same as resizing to it:
+ * this asserts the chart follows its container after the fact, at the sizes the
+ * gutter change moved. */
+test('cliff: chart follows its container across resizes', async b => {
+  const p = await page(b,1440,900);
+  const read = () => p.evaluate(()=>{
+    const host=document.getElementById('cliffChart'), svg=host.querySelector('svg');
+    const vb=+svg.getAttribute('viewBox').split(' ')[2];
+    const scale=svg.getBoundingClientRect().width/vb;
+    return { hostW:host.clientWidth, vb, scale:+scale.toFixed(2),
+             minFs:+Math.min(...[...svg.querySelectorAll('text')].map(t=>+t.getAttribute('font-size')*scale)).toFixed(1) };
+  });
+  for (const [w,h] of [[390,844],[480,900],[768,1024],[1440,900],[360,780]]) {
+    await p.setViewportSize({width:w,height:h});
+    await p.waitForTimeout(450);
+    const r = await read();
+    ok(`${w}px: viewBox matches container`, Math.abs(r.hostW - r.vb) <= 2,
+       `host ${r.hostW} vs viewBox ${r.vb}`);
+    ok(`${w}px: chart text ≥ 9px after resize`, r.minFs >= 9, `${r.minFs}px at scale ${r.scale}`);
   }
   await p.close();
 });
