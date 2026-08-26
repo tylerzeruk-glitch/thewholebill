@@ -79,10 +79,6 @@ test('layout: every section keeps its gutter', async b => {
   }
 });
 
-/* The one-row bar has very little slack between its 900px breakpoint and ~1100px.
- * It fit on macOS and overflowed on Linux, where the same labels set a few pixels
- * wider -- so this asserts the row absorbs the squeeze at every width rather than
- * pushing the Year/Month switch out through overflow-x. */
 /* The narrative's two bars are a comparison, so their geometry has to carry the
  * true ratio in BOTH dimensions. They previously did neither: unequal figure
  * widths left the tracks 529px and 483px, so length read 3.56x against a true
@@ -106,6 +102,30 @@ test('narrative: the two bars encode their values truthfully', async b => {
     ok(`${w}px: both bars share one baseline`, r.trackDelta < 0.5, `Δ${r.trackDelta.toFixed(1)}px`);
     ok(`${w}px: bar length matches the value ratio`, Math.abs(r.lengthRatio - r.trueRatio) < 0.05,
        `drawn ${r.lengthRatio.toFixed(2)}x vs true ${r.trueRatio.toFixed(2)}x`);
+    await p.close();
+  }
+});
+
+/* The one-row bar has very little slack between its 900px breakpoint and ~1100px.
+ * It fit on macOS and overflowed on Linux, where the same labels set a few pixels
+ * wider -- so this asserts the row absorbs the squeeze at every width rather than
+ * pushing the Year/Month switch out through overflow-x. */
+/* Each figure is parked at the end of its own bar rather than in a right-hand
+ * column, so the short bar's number is not stranded across the page from the mark
+ * it labels. The number is positioned by percentage against the same box the fill
+ * uses, so this asserts the two edges actually coincide at every width. */
+test('narrative: each figure sits at the end of its own bar', async b => {
+  for (const [w,h,m] of [[1440,900,false],[900,900,false],[390,844,true]]) {
+    const p = await page(b,w,h,m);
+    const r = await p.evaluate(()=>[...document.querySelectorAll('.cmp .cmp-row')].map(row=>{
+      const fills=[...row.querySelector('.track').children];
+      const end=Math.max(...fills.map(f=>f.getBoundingClientRect().right));
+      const n=row.querySelector('.num').getBoundingClientRect();
+      return { gap:n.left-end, right:n.right };
+    }));
+    const [a,b2]=r;
+    ok(`${w}px: small figure follows its bar`, Math.abs(a.gap-16) < 1, `${a.gap.toFixed(1)}px from the bar end`);
+    ok(`${w}px: total figure follows its bar`, Math.abs(b2.gap-16) < 1, `${b2.gap.toFixed(1)}px from the bar end`);
     await p.close();
   }
 });
@@ -180,7 +200,7 @@ test('routes: each coverage route rebuilds the waterfall', async b => {
  * to 58px from the columns they name, which is precisely what design-brief.md
  * says keeping the keys in the captions would prevent. */
 test('waterfall: equal columns, keys aligned to them', async b => {
-  for (const [w,h,m] of [[1440,900,false],[1200,900,false],[900,900,false],[390,844,true]]) {
+  for (const [w,h,m] of [[1440,900,false],[1200,900,false],[900,900,false],[500,900,false],[390,844,true],[320,844,true]]) {
     const p = await page(b,w,h,m);
     for (const route of ['employer','marketplace','none']) {
       await p.locator(`#route button[data-r="${route}"]`).click();
@@ -191,13 +211,21 @@ test('waterfall: equal columns, keys aligned to them', async b => {
         const caps=[...document.getElementById('wcaps').children].filter(c=>(c.className||'').startsWith('wcap'));
         const data=cols.slice(0,-1).map(c=>c.getBoundingClientRect().width);
         const drift=cols.map((c,i)=>caps[i]?Math.abs(caps[i].getBoundingClientRect().left-c.getBoundingClientRect().left):0);
-        const over=cols.map(c=>{const l=c.querySelector('.wlab');
-          return l ? l.getBoundingClientRect().width - c.getBoundingClientRect().width : 0;});
-        return { spread:Math.max(...data)-Math.min(...data), maxDrift:Math.max(...drift), maxOver:Math.max(...over) };
+        // scrollWidth, not getBoundingClientRect: .wlab is a block, so its BOX is
+        // always the column width and the nowrap TEXT is what spills out of it.
+        // Measuring the box could never fail, and hid a 14px overflow at 390px.
+        const over=[...wf.querySelectorAll('.wlab'),...document.querySelectorAll('#wcaps .wcap')]
+          .map(e=>e.scrollWidth-e.clientWidth);
+        const stacked=getComputedStyle(document.getElementById('wcaps')).flexDirection==='column';
+        return { spread:Math.max(...data)-Math.min(...data), maxDrift:Math.max(...drift),
+                 maxOver:Math.max(...over), stacked };
       });
       ok(`${w}px ${route}: data columns equal`, r.spread < 0.5, `spread ${r.spread.toFixed(1)}px`);
-      ok(`${w}px ${route}: keys sit under their column`, r.maxDrift < 0.5, `drift ${r.maxDrift.toFixed(1)}px`);
-      ok(`${w}px ${route}: labels fit their column`, r.maxOver <= 0.5, `over ${r.maxOver.toFixed(1)}px`);
+      // Below 500px a column is under 76px and no caption fits in one, so the key
+      // becomes a list instead. Alignment is only worth asserting where it applies.
+      if (!r.stacked)
+        ok(`${w}px ${route}: keys sit under their column`, r.maxDrift < 0.5, `drift ${r.maxDrift.toFixed(1)}px`);
+      ok(`${w}px ${route}: nothing overflows its column`, r.maxOver <= 0.5, `over ${r.maxOver}px`);
     }
     await p.close();
   }
@@ -229,6 +257,33 @@ test('cliff: statutory drop and no label collisions', async b => {
  * rescales every label. Loading at a width is not the same as resizing to it:
  * this asserts the chart follows its container after the fact, at the sizes the
  * gutter change moved. */
+/* The "you" label is centred ON its guide, so a full-height dashed line ran
+ * straight through the middle of the word at every income -- the guide now stops
+ * above the cap height. Sampled every $2k rather than at a handful of incomes:
+ * the previous collision here was missed by a 6-point sample. */
+test('cliff: the "you" guide never crosses its own label', async b => {
+  const p = await page(b,1440,900);
+  const hits = [];
+  for (let inc = 14000; inc <= 258000; inc += 2000) {
+    await setIncome(p, inc);
+    const bad = await p.evaluate(()=>{
+      const svg = document.querySelector('#cliffChart svg');
+      const you = [...svg.querySelectorAll('text')].find(t=>t.textContent === 'you');
+      if (!you) return null;
+      const y = you.getBBox();
+      for (const el of svg.querySelectorAll('path,line,circle')) {
+        const b = el.getBBox();
+        if (!(b.x > y.x+y.width || b.x+b.width < y.x || b.y > y.y+y.height || b.y+b.height < y.y))
+          return el.tagName + ' ' + (el.getAttribute('stroke')||'');
+      }
+      return null;
+    });
+    if (bad) hits.push(`$${inc}: ${bad}`);
+  }
+  ok('label is clear of every plotted mark', hits.length === 0, hits.slice(0,3).join(' | '));
+  await p.close();
+});
+
 test('cliff: chart follows its container across resizes', async b => {
   const p = await page(b,1440,900);
   const read = () => p.evaluate(()=>{

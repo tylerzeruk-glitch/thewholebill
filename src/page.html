@@ -42,8 +42,8 @@ h1 em{font-style:italic;color:var(--amber-deep)}
 p{margin:0;text-wrap:pretty}
 .lede{font-size:clamp(17px,1.5vw,21px);line-height:1.56;color:var(--pb)}
 .body{font-size:16.5px;line-height:1.68;color:var(--pb)}
-.note{font-size:13px;line-height:1.55;color:var(--pm)}
-.note-i{font-size:12.5px;line-height:1.55;color:var(--ifaint)}
+.note{font-size:12.5px;line-height:1.55;color:var(--pm)}
+.note-i{font-size:12px;line-height:1.55;color:var(--ifaint)}
 
 .stack{display:flex;flex-direction:column}
 .row{display:flex}
@@ -87,7 +87,7 @@ p{margin:0;text-wrap:pretty}
 .cmp{display:flex;flex-direction:column;gap:34px;margin-top:56px}
 .cmp-row{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center}
 .cmp-lab{text-align:right;display:flex;flex-direction:column;gap:5px}
-.cmp-bars{display:flex;align-items:center;gap:16px;min-width:0}
+.cmp-bars{display:flex;align-items:center;min-width:0;padding-right:146px}
 /* These two bars are a comparison, so both dimensions have to be honest.
    ONE height for both: unequal thickness makes the taller bar read larger by
    area than its value, and thickness carries no meaning here -- length is the
@@ -96,7 +96,14 @@ p{margin:0;text-wrap:pretty}
    difference ate into each track by a different amount, so the two bars were
    measured against different baselines. Same fix .bar-v already uses below. */
 .cmp .track{height:60px}
-.cmp-bars .num{width:120px;flex-shrink:0;text-align:right}
+/* The figure is parked at the END of its own bar rather than in a right-hand
+   column, so the short bar's number is not stranded half a screen from the mark
+   it labels. It is absolutely positioned inside .cmp-plot -- which IS the track's
+   box -- so `left` is a percentage of the same width the fill uses, and the two
+   stay locked together at every viewport. .cmp-bars reserves the room the longest
+   figure needs on the right, which is what keeps both tracks identical. */
+.cmp-plot{position:relative;flex-grow:1;min-width:0}
+.cmp-bars .num{position:absolute;top:50%;transform:translateY(-50%);margin-left:16px;white-space:nowrap}
 .track{display:flex;border-radius:1px;overflow:hidden;flex-grow:1;min-width:0}
 .callout{margin-top:40px;border-left:2px solid var(--amber-deep);padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:4px}
 
@@ -128,7 +135,12 @@ p{margin:0;text-wrap:pretty}
 .field{display:flex;flex-direction:column;gap:9px}
 .ctrl{height:46px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;font-size:15px}
 .ctrl.mono{font-family:var(--mono);font-size:16px}
-.step{width:32px;height:34px;background:var(--ink-chip);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--im);font-size:16px}
+/* Divided cells, not floating chips. A filled chip inside an outlined control
+   reads as a box in a box, and the two glyphs had no shared edge to sit on. These
+   take their height from the control and are separated from it by the same hairline
+   the control is drawn with, so the whole thing is one object. */
+.step{width:40px;align-self:stretch;background:none;border:0;border-left:1px solid var(--ictrl);display:flex;align-items:center;justify-content:center;color:var(--im);font-size:17px;line-height:1;transition:background .15s,color .15s}
+.steps{display:flex;align-self:stretch}
 .seg{display:flex;gap:6px}
 .seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--irule-2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
 .seg > div.on,.seg > button.on{background:#2C3140;border-color:#3D4457;color:var(--ik);font-weight:500}
@@ -141,7 +153,10 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 input[type=range]::-moz-range-progress{height:4px;background:var(--teal);border-radius:2px}
 select.ctrl{appearance:none;-webkit-appearance:none;color:var(--ik);font-family:var(--sans);width:100%;background-image:none;cursor:pointer}
 select.ctrl option{background:var(--ink-raised);color:var(--ik)}
-button.step{border:none;cursor:pointer;font-family:var(--sans)}
+button.step{cursor:pointer;font-family:var(--sans)}
+.step:hover{background:var(--ink-chip);color:var(--ik)}
+.step:active{background:var(--ictrl);color:var(--ik)}
+.step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
 .warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:3px;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
 .bignum{font-family:var(--mono);font-size:clamp(48px,7vw,86px);font-weight:300;line-height:1;letter-spacing:-.035em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -165,17 +180,24 @@ button.step{border:none;cursor:pointer;font-family:var(--sans)}
 .wcol > *{flex-shrink:0}
 .band{flex-shrink:0;border-radius:0}
 .band.top{border-radius:1px 1px 0 0} .band.bot{border-radius:0 0 1px 1px}
-.wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap}
+.wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;text-align:right}
 .wlab.big{font-size:clamp(18px,2.1vw,30px)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
 /* Its column is now the same width as the others, so this label wraps where it
    used to fit on one line. balance keeps it off a one-word last line. */
-.wkick{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--c2);margin-bottom:9px;text-wrap:balance}
+.wkick{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--c2);margin-bottom:9px;text-wrap:balance;text-align:right}
 .wdiv{width:2px;background:var(--irule-2);height:var(--chart-h);flex-shrink:0;align-self:flex-end}
 .wcaps{display:flex;gap:clamp(14px,3vw,44px);margin-top:20px}
 .wcap{flex-grow:1;flex-basis:0;display:flex;gap:9px;align-items:flex-start;min-width:0}
 .sw{width:11px;height:11px;border-radius:2px;flex-shrink:0;margin-top:4px}
 .wcap span{font-size:13.5px;line-height:1.5;color:var(--im)}
+/* The total gets a wider share than the data columns -- its figure is set much
+   larger and an equal fifth cannot hold it. Declared here rather than inline so
+   the phone layout below can take it back. */
+.wcol-total,.wcap-total{flex-grow:1.35}
+.wf-gap{width:2px;flex-shrink:0}
+/* Declared after .wcol/.wcap so it wins on source order -- both are single-class
+   selectors, and this pair started life as inline styles. */
 
 /* ---------- comparison ---------- */
 .pills{display:flex;gap:8px;flex-wrap:wrap}
@@ -235,7 +257,7 @@ button.step{border:none;cursor:pointer;font-family:var(--sans)}
 a.q{color:var(--amber-deep);text-decoration:none;border-bottom:1px solid rgba(142,96,24,.35)}
 a.q:hover{border-bottom-color:var(--amber-deep)}
 .quote{font-family:var(--serif);font-size:clamp(23px,2.3vw,29px);font-style:italic;line-height:1.24}
-.fn{font-size:13px;line-height:1.55;color:var(--pm);border-top:1px solid var(--prule-soft);padding-top:14px}
+.fn{font-size:12.5px;line-height:1.55;color:var(--pm);border-top:1px solid var(--prule-soft);padding-top:14px}
 .actgrid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:36px;align-items:start}
 .letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;display:flex;flex-direction:column}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
@@ -276,12 +298,25 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    30px. So the two-row treatment starts here. The app script reads this same
    900px figure for the shortened context line -- keep the two in step. */
 @media (max-width:900px){
-  .sticky-in{display:grid;grid-template-columns:1fr auto;grid-template-areas:"who unit" "figs figs";
-             height:auto;padding-top:8px;padding-bottom:9px;gap:7px 12px;overflow:visible}
+  /* The switch spans BOTH rows on the right instead of sharing the top one with
+     the context line. That row was a 10px caption next to a 44px control, so its
+     height was the control's and the space between them was dead: the bar stood
+     102px tall on a phone, 12% of the viewport, permanently. Spanning it costs
+     nothing and the bar comes down to ~70px.
+     The figures are content-width and clustered left, not three equal 1fr columns.
+     Equal columns pad every figure out to the width of the longest label, which is
+     where the gaps between the dollar amounts came from. */
+  .sticky-in{display:grid;grid-template-columns:minmax(0,1fr) auto;
+             grid-template-areas:"who unit" "figs unit";align-items:center;
+             height:auto;padding-top:9px;padding-bottom:10px;gap:6px 14px;overflow:visible}
   .sticky .who{display:block;grid-area:who;align-self:center;font-size:10.5px;letter-spacing:.07em;
                min-width:0;overflow:hidden;text-overflow:ellipsis}
-  .unit{grid-area:unit;justify-self:end}
-  .figs{grid-area:figs;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px}
+  /* 44px is the touch floor, so state it rather than deriving it from label
+     padding -- the padding is then free to shrink for width on a phone. */
+  .unit{grid-area:unit;justify-self:end;align-self:center;min-height:44px}
+  .unit-l{padding:12px 14px}
+  .figs{grid-area:figs;display:grid;grid-template-columns:repeat(3,minmax(0,auto));
+        justify-content:start;gap:2px 16px}
   .fig{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"dot t" "n n";
        gap:1px 6px;align-items:center;white-space:normal}
   .fig .dot{grid-area:dot;width:6px;height:6px}
@@ -309,10 +344,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .wcaps{gap:8px}
 
   /* touch targets */
-  .step{width:44px;height:44px}
+  .step{width:44px}
   .ctrl{height:50px}
   select.ctrl{height:50px}
-  .unit-l{padding:12px 16px}
   input[type=range]{height:44px;margin:2px 0 0}
   input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-10px}
   input[type=range]::-moz-range-thumb{width:20px;height:20px}
@@ -330,7 +364,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      second look -- the discarded pair wanted .wlab 11.5px and .wcap span 11.5px. */
   .eyebrow{font-size:12px}
   .lbl,.lbl.p{font-size:11.5px}
-  .note,.note-i,.fn{font-size:13.5px}
+  .note,.note-i,.fn{font-size:13px}
   .domain{font-size:12.5px}
   .meth td,.meth th{font-size:13.5px}
   .meth th{font-size:10.5px}
@@ -340,6 +374,41 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .wcap span{font-size:11px}
   .wlab.big{font-size:13px}
   .wlab.total{font-size:17px}
+}
+
+/* Below this width a waterfall column is under 76px, and neither the figure above
+   it nor the caption below it can fit in that. Both overflowed into their
+   neighbours -- the captions by 18px at 390px and 31px at 320px, so the colour keys
+   ran into each other, which is the exact failure keeping the keys in the captions
+   was meant to prevent. The figures scale to their column; the key stops being a
+   caption row and becomes a list, because aligning to a 56px column is worth
+   nothing if the words do not fit inside it. */
+@media (max-width:500px){
+  .wlab{font-size:clamp(8px,2.5vw,10px);letter-spacing:-.02em;margin-bottom:8px}
+  .wlab.big{font-size:clamp(8px,2.5vw,10px)}
+  .wlab.total{font-size:clamp(13px,4.3vw,17px);letter-spacing:-.03em}
+  .wkick{font-size:9px;letter-spacing:.08em;margin-bottom:6px}
+  .wcaps{flex-direction:column;gap:8px;margin-top:18px}
+  .wcap,.wcap-total{flex-grow:0;flex-basis:auto;align-items:flex-start}
+  /* The total has no swatch, so it needs the swatch's indent to line up with
+     the four captions above it. 11px swatch + 9px gap. */
+  .wcap-total{padding-left:20px}
+  .wcap span{font-size:12.5px}
+  .wf-gap{display:none}
+}
+
+/* Phone widths. Three figures plus the switch have to share one row here, so the
+   figures give up a little type and the switch gives up horizontal padding only --
+   its 44px height is a touch-target floor, not a style choice. */
+@media (max-width:440px){
+  .sticky-in{gap:5px 10px}
+  .figs{gap:2px 10px}
+  /* Scaled, not stepped: "Marketplace" is one word, so a grid column holding it
+     cannot shrink below its own width. Below ~360px that word is what would push
+     the figures into the switch, and only the type can give. */
+  .sticky .fig .t{font-size:clamp(9.5px,2.75vw,10px)}
+  .sticky .fig .n{font-size:clamp(12px,3.45vw,13px)}
+  .unit-l{padding:12px 11px;font-size:11.5px}
 }
 </style>
 
@@ -413,8 +482,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="note">Premium deduction + Medicare tax</div>
         </div>
         <div class="cmp-bars">
-          <div class="track"><div id="narrSmall" style="width:26.2%;background:var(--c1)"></div></div>
-          <div class="num" style="font-size:22px;color:var(--pm)" data-fig="emp.visible">$8,278</div>
+          <div class="cmp-plot">
+            <div class="track"><div id="narrSmall" style="width:26.2%;background:var(--c1)"></div></div>
+            <div class="num" id="narrSmallNum" style="font-size:22px;color:var(--pm);left:26.2%" data-fig="emp.visible">$8,278</div>
+          </div>
         </div>
       </div>
       <div class="cmp-row">
@@ -423,11 +494,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="note">Everything, all in</div>
         </div>
         <div class="cmp-bars">
-          <div class="track">
-            <div id="narrVis" style="width:26.2%;background:var(--c1)"></div>
-            <div id="narrRest" style="width:73.8%;background:var(--c2)"></div>
+          <div class="cmp-plot">
+            <div class="track">
+              <div id="narrVis" style="width:26.2%;background:var(--c1)"></div>
+              <div id="narrRest" style="width:73.8%;background:var(--c2)"></div>
+            </div>
+            <div class="num" style="font-size:30px;left:100%" data-fig="emp.total">$31,578</div>
           </div>
-          <div class="num" style="font-size:30px" data-fig="emp.total">$31,578</div>
         </div>
       </div>
     </div>
@@ -487,7 +560,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="row" style="gap:14px">
             <div class="field grow">
               <div class="lbl">Household</div>
-              <div class="ctrl" style="padding-right:6px"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="row" style="gap:4px"><button type="button" class="step" id="sizeDown">&minus;</button><button type="button" class="step" id="sizeUp">+</button></span></div>
+              <div class="ctrl" style="padding-right:0;overflow:hidden"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="steps"><button type="button" class="step" id="sizeDown" aria-label="Fewer people">&minus;</button><button type="button" class="step" id="sizeUp" aria-label="More people">+</button></span></div>
             </div>
             <div class="field grow">
               <div class="lbl">Ages</div>
@@ -546,8 +619,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       </div>
 
       <div class="wf" id="wf"></div>
-      <p class="note-i" id="wfNote" style="margin-top:18px"></p>
       <div class="wcaps" id="wcaps"></div>
+      <p class="note-i" id="wfNote" style="margin-top:24px"></p>
     </div>
   </section>
 
@@ -1117,6 +1190,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // narrative bars
     var vis = S.breakdown.onPaystub / S.breakdown.whole * 100;
     byId("narrSmall").style.width = vis.toFixed(1) + "%";
+    byId("narrSmallNum").style.left = vis.toFixed(1) + "%";
     byId("narrVis").style.width   = vis.toFixed(1) + "%";
     byId("narrRest").style.width  = (100 - vis).toFixed(1) + "%";
 
@@ -1189,11 +1263,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     }
 
     html += '<div class="wdiv"></div>';
-    html += '<div class="wcol" style="flex-grow:1.35"><div class="wlab total">' + fmt(whole) + '</div>' +
+    html += '<div class="wcol wcol-total"><div class="wlab total">' + fmt(whole) + '</div>' +
             '<div class="band top bot" style="height:' + (whole / scale * 100).toFixed(3) +
             '%;background:linear-gradient(to bottom,#E8AC53,#C9832F)"></div></div>';
-    caps += '<div style="width:2px;flex-shrink:0"></div>' +
-            '<div class="wcap" style="flex-grow:1.35"><span style="color:var(--ik);font-weight:500">' +
+    caps += '<div class="wf-gap"></div>' +
+            '<div class="wcap wcap-total"><span style="color:var(--ik);font-weight:500">' +
             (R.uninsured ? "What you spend<br>and what you risk" : "What your household<br>actually costs") + '</span></div>';
 
     byId("wf").innerHTML = html;
@@ -1327,17 +1401,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       '" fill="#E8E6E1" font-family="IBM Plex Mono, monospace" font-size="' + fB + '">' + aNumTxt + '</text>';
 
     // where this household currently sits
-    var you = null;
+    var you = null, youY = Ht - mB - 10;
     for (i = 0; i < pts.length; i++) if (pts[i].income >= state.income){ you = pts[i]; break; }
     if (you && state.income >= lo && state.income <= hi){
       var xy = X(state.income), yy = Y(you.household);
-      g += '<line x1="' + xy.toFixed(1) + '" y1="' + mT + '" x2="' + xy.toFixed(1) + '" y2="' + (Ht - mB) +
+      // The label below is centred ON this guide, so a full-height line ran straight
+      // through the middle of the word at every income. It stops just above the cap
+      // height instead, which reads as the guide terminating in its own caption and
+      // cannot collide at any size. A knockout box was the alternative, but it would
+      // have to repaint the gridlines behind it, and the guide is the lesser mark.
+      var youStop = Math.max(mT + 6, youY - fA * 0.72 - 5);
+      g += '<line x1="' + xy.toFixed(1) + '" y1="' + mT + '" x2="' + xy.toFixed(1) + '" y2="' + youStop.toFixed(1) +
            '" stroke="#3FB5AE" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>';
       g += '<circle cx="' + xy.toFixed(1) + '" cy="' + yy.toFixed(1) + '" r="5" fill="#3FB5AE" stroke="#12141A" stroke-width="2"/>';
       // Label sits at the FOOT of the guide: the bottom of the plot is always free, and
       // it sits next to the income axis the marker actually refers to.
       var anchor = xy > Wd - 60 ? "end" : (xy < mL + 60 ? "start" : "middle");
-      g += '<text x="' + xy.toFixed(1) + '" y="' + (Ht - mB - 10) + '" text-anchor="' + anchor +
+      g += '<text x="' + xy.toFixed(1) + '" y="' + youY.toFixed(1) + '" text-anchor="' + anchor +
            '" fill="#3FB5AE" font-family="IBM Plex Mono, monospace" font-size="' + fA + '">you</text>';
     }
 
