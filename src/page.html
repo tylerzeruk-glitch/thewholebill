@@ -78,7 +78,11 @@ p{margin:0;text-wrap:pretty}
 .footline{display:flex;justify-content:space-between;gap:20px;padding-bottom:40px;font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;color:var(--pm);flex-wrap:wrap}
 
 /* ---------- narrative ---------- */
-.sec{padding:clamp(64px,9vw,104px) 0}
+/* Block longhands only. The `padding` SHORTHAND here silently reset .wrap's
+   padding-left/right to 0 -- same specificity, defined later, so it won.
+   Every .wrap.sec on the site ran flush to the viewport edge below ~1250px.
+   Anything that combines with .wrap must never use the padding shorthand. */
+.sec{padding-top:clamp(64px,9vw,104px);padding-bottom:clamp(64px,9vw,104px)}
 .split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,5vw,88px);align-items:start}
 .cmp{display:flex;flex-direction:column;gap:34px;margin-top:56px}
 .cmp-row{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center}
@@ -175,53 +179,6 @@ button.step{border:none;cursor:pointer;font-family:var(--sans)}
 .range .now{position:absolute;right:0;top:0;bottom:0;width:3px;background:var(--c2)}
 
 
-/* ---------- mobile pass ---------- */
-@media (max-width:760px){
-  /* the sticky bar goes two-row: context + switch, then the three figures */
-  .sticky-in{display:grid;grid-template-columns:1fr auto;grid-template-areas:"who unit" "figs figs";
-             height:auto;padding-top:8px;padding-bottom:9px;gap:7px 12px;overflow:visible}
-  .sticky .who{display:block;grid-area:who;align-self:center;font-size:10.5px;letter-spacing:.07em;
-               min-width:0;overflow:hidden;text-overflow:ellipsis}
-  .unit{grid-area:unit;justify-self:end}
-  .figs{grid-area:figs;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px}
-  .fig{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"dot t" "n n";
-       gap:1px 6px;align-items:center;white-space:normal}
-  .fig .dot{grid-area:dot;width:6px;height:6px}
-  .fig .t{grid-area:t;font-size:11px;line-height:1.2}
-  .fig .n{grid-area:n;font-size:14px}
-  .fig.sm-hide{display:grid}
-
-  /* touch targets */
-  .step{width:44px;height:44px}
-  .ctrl{height:50px}
-  select.ctrl{height:50px}
-  .unit-l{padding:12px 16px}
-  input[type=range]{height:44px;margin:2px 0 0}
-  input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-10px}
-  input[type=range]::-moz-range-thumb{width:20px;height:20px}
-  .areapick button{padding:12px 15px;min-height:44px}
-  .seg > div,.seg > button{height:48px}
-  .btn-dark{height:56px}
-  .btn-ghost{height:48px}
-  .zipfield .k,.zipfield .v{height:56px}
-  .zipfield .v{width:auto;flex:1;min-width:0}
-  .zipbar{flex-wrap:nowrap}
-
-  /* legibility */
-  .eyebrow{font-size:12px}
-  .lbl,.lbl.p{font-size:11.5px}
-  .note,.note-i,.fn{font-size:13.5px}
-  .domain{font-size:12.5px}
-  .meth td,.meth th{font-size:13.5px}
-  .meth th{font-size:10.5px}
-  .wcap span{font-size:11.5px}
-  .wlab{font-size:11.5px;letter-spacing:0}
-  .wlab.big{font-size:13px}
-  .wlab.total{font-size:17px}
-  .wkick{font-size:9px;letter-spacing:.1em}
-  .cstat{padding:18px 20px}
-  .letter .bd{font-size:16.5px}
-}
 
 /* ---------- the cliff ---------- */
 .cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:3px;background:var(--ink-surface);overflow:hidden}
@@ -268,6 +225,12 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
 .box.off{border:1px solid var(--pctrl)}
 footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-height:1.6}
 
+/* ---------- responsive ----------
+   ONE block per breakpoint, widest first, so source order and the cascade agree.
+   There used to be two max-width:760px blocks with the 1100px block sitting
+   between them. That is how .sticky-in's grid gap silently became 16px instead
+   of 7px 12px, and why several mobile type sizes looked like they were not
+   applying. Do not reintroduce a second block for an existing breakpoint. */
 @media (max-width:1100px){
   :root{--chart-h:380px}
   .instr{grid-template-columns:minmax(0,1fr)}
@@ -279,19 +242,39 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .livesgrid{grid-template-columns:minmax(0,1fr);gap:34px}
   .cliffstats{grid-template-columns:minmax(0,1fr)}
   .cstat{border-right:none;border-bottom:1px solid var(--irule)}
-  .sticky-in{gap:16px}
+  .sticky-in{gap:16px}          /* still the one-row bar down to 900px */
   .hero-inner{grid-template-columns:minmax(0,1fr);gap:36px}
   .meth .grid2{gap:20px}
 }
+
+/* The one-row sticky bar stops FITTING at ~900px, not at 760px. At 768px its
+   content ran 108px past the viewport and the bar scrolled sideways; at 860px,
+   30px. So the two-row treatment starts here. The app script reads this same
+   900px figure for the shortened context line -- keep the two in step. */
+@media (max-width:900px){
+  .sticky-in{display:grid;grid-template-columns:1fr auto;grid-template-areas:"who unit" "figs figs";
+             height:auto;padding-top:8px;padding-bottom:9px;gap:7px 12px;overflow:visible}
+  .sticky .who{display:block;grid-area:who;align-self:center;font-size:10.5px;letter-spacing:.07em;
+               min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .unit{grid-area:unit;justify-self:end}
+  .figs{grid-area:figs;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px}
+  .fig{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"dot t" "n n";
+       gap:1px 6px;align-items:center;white-space:normal}
+  .fig .dot{grid-area:dot;width:6px;height:6px}
+  .fig .t{grid-area:t;font-size:11px;line-height:1.2}
+  .fig .n{grid-area:n;font-size:14px}
+  .fig.sm-hide{display:grid}
+}
+
 @media (max-width:760px){
   :root{--chart-h:260px}
+
+  /* layout */
   .cmp-row{grid-template-columns:minmax(0,1fr);gap:10px}
   .cmp-lab{text-align:left}
   .bar-row{grid-template-columns:minmax(0,1fr);gap:8px}
   .bar-v{width:auto;text-align:left}
   .cards{grid-template-columns:minmax(0,1fr)}
-  .wlab,.wkick{font-size:10px;letter-spacing:0}
-  .wcap span{font-size:11px}
   .sw{width:9px;height:9px}
   .nav{display:none}
   .hero-inner{grid-template-columns:minmax(0,1fr)}
@@ -300,6 +283,39 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .card-p{padding:26px 24px}
   .wf{gap:8px}
   .wcaps{gap:8px}
+
+  /* touch targets */
+  .step{width:44px;height:44px}
+  .ctrl{height:50px}
+  select.ctrl{height:50px}
+  .unit-l{padding:12px 16px}
+  input[type=range]{height:44px;margin:2px 0 0}
+  input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-10px}
+  input[type=range]::-moz-range-thumb{width:20px;height:20px}
+  .areapick button{padding:12px 15px;min-height:44px}
+  .seg > div,.seg > button{height:48px}
+  .btn-dark{height:56px}
+  .btn-ghost{height:48px}
+  .zipfield .k,.zipfield .v{height:56px}
+  .zipfield .v{width:auto;flex:1;min-width:0}
+  .zipbar{flex-wrap:nowrap}
+
+  /* legibility. The three waterfall values below were each declared twice at this
+     breakpoint with different sizes; these are the ones that were actually winning,
+     kept as-is so this restructure changes no rendered size. Worth a deliberate
+     second look -- the discarded pair wanted .wlab 11.5px and .wcap span 11.5px. */
+  .eyebrow{font-size:12px}
+  .lbl,.lbl.p{font-size:11.5px}
+  .note,.note-i,.fn{font-size:13.5px}
+  .domain{font-size:12.5px}
+  .meth td,.meth th{font-size:13.5px}
+  .meth th{font-size:10.5px}
+  .cstat{padding:18px 20px}
+  .letter .bd{font-size:16.5px}
+  .wlab,.wkick{font-size:10px;letter-spacing:0}
+  .wcap span{font-size:11px}
+  .wlab.big{font-size:13px}
+  .wlab.total{font-size:17px}
 }
 </style>
 
@@ -809,7 +825,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
 <!-- ============ 08 METHODOLOGY ============ -->
 <div id="methBack" hidden style="background:var(--paper);border-bottom:1px solid var(--prule)">
-  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0">
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:22px;padding-bottom:22px">
     <a class="brand" href="#" style="color:inherit">
       <svg width="13" height="24" viewBox="0 0 13 24" aria-hidden="true">
         <rect x="0" y="0" width="13" height="2.5" fill="#86603E"></rect>
@@ -1089,7 +1105,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       " \u00b7 Medicaid " + (S.marketplace.area.medicaidExpanded ? "expanded" : "not expanded");
     byId("who").textContent  = S.universal.note;
     var a = S.marketplace.area;
-    var tight = window.matchMedia("(max-width:760px)").matches;
+    // Must match the sticky bar's two-row breakpoint in the stylesheet (900px).
+    // The long form plus the Year/Month switch does not fit on one row below it.
+    var tight = window.matchMedia("(max-width:900px)").matches;
     byId("who-line").textContent = tight
       ? state.size + " \u00b7 " + a.city + " \u00b7 $" + Math.round(state.income / 1000) + "k"
       : "Household of " + state.size + " \u00b7 " + a.city + " \u00b7 " + money(state.income);
@@ -1201,8 +1219,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     // SVG text scales with the viewBox, so a desktop-sized viewBox squeezed into a
     // phone renders labels at ~4px. Narrow screens get their own geometry instead.
-    var host = byId("cliffChart"), narrow = (host.clientWidth || 900) < 560;
-    var Wd = narrow ? 340 : 920, Ht = narrow ? 268 : 352;
+    var host = byId("cliffChart"), cw = host.clientWidth || 900, narrow = cw < 560;
+    // The viewBox width ALWAYS tracks the rendered width, at every size, so the
+    // scale factor stays at 1 and a declared 11px renders as 11px. `narrow` picks
+    // the layout -- margins, gridline count, type sizes, which side the annotation
+    // sits on -- but must never pick the width. Both fixed widths were wrong in the
+    // same way: 340 rendered the axis caption at 8.2px once these sections regained
+    // their gutter, and 920 rendered it at 7.3px in a 641px container at 768px wide.
+    // Do not hard-code this again; it is the defect docs/design-brief.md opens with.
+    var Wd = Math.max(260, Math.round(cw)), Ht = narrow ? 268 : 352;
     var mL = narrow ? 42 : 74, mR = narrow ? 10 : 26, mT = narrow ? 36 : 18, mB = narrow ? 44 : 62;
     var fA = narrow ? 11 : 11, fB = narrow ? 16 : 19, gridN = narrow ? 3 : 5;
     var X = function(v){ return mL + (v - lo) / (hi - lo) * (Wd - mL - mR); };
@@ -1423,6 +1448,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     clearTimeout(rz);
     rz = setTimeout(function(){ paint(); }, 140);
   });
+
+  /* The cliff chart's viewBox tracks its container width, so it has to re-render
+     when THAT changes -- not when the window does. A debounced window listener
+     samples the container mid-resize and leaves a stale viewBox behind: measured
+     at a 480px viewport the host was 382px wide while the viewBox still said 469,
+     rendering 11px type at 9px. Watching the element settles it in one pass.
+     Width-only guard, so re-rendering (which changes height) cannot loop. */
+  if (window.ResizeObserver){
+    var lastCw = 0;
+    new ResizeObserver(function(e){
+      var w = Math.round(e[0].contentRect.width);
+      if (w && w !== lastCw){ lastCw = w; if (S) renderCliff(); }
+    }).observe(byId("cliffChart"));
+  }
 
   window.addEventListener("hashchange", function(){
     route();
