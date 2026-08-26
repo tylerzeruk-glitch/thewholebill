@@ -1,0 +1,43 @@
+# The suite is this project's main defence: 16 of its 64 assertions measure
+# rendered geometry, and three separate defects reached main because nothing
+# ran it. See CLAUDE.md, "Verify rendered geometry, not source".
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Cache the browser binary, keyed on the resolved Playwright version so a
+      # dependency bump busts it rather than testing against a stale browser.
+      - id: pw
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/playwright'].version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      - if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      # System libraries are outside the cached browser directory, so they still
+      # have to be installed on a cache hit.
+      - if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - run: npm test
