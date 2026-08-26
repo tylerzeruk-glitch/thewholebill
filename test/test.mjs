@@ -79,6 +79,24 @@ test('layout: every section keeps its gutter', async b => {
   }
 });
 
+/* The one-row bar has very little slack between its 900px breakpoint and ~1100px.
+ * It fit on macOS and overflowed on Linux, where the same labels set a few pixels
+ * wider -- so this asserts the row absorbs the squeeze at every width rather than
+ * pushing the Year/Month switch out through overflow-x. */
+test('sticky: the bar never scrolls sideways', async b => {
+  for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
+    const p = await page(b,w,h,m);
+    const r = await p.evaluate(()=>{
+      const si=document.querySelector('.sticky-in');
+      const u=document.querySelector('.unit');
+      return { over:si.scrollWidth-si.clientWidth, unitRight:Math.round(innerWidth-u.getBoundingClientRect().right) };
+    });
+    ok(`${w}px: sticky bar does not overflow`, r.over === 0, `${r.over}px`);
+    ok(`${w}px: switch stays inside the gutter`, r.unitRight >= 20, `${r.unitRight}px from edge`);
+    await p.close();
+  }
+});
+
 test('sticky: pins across the ink zone', async b => {
   const p = await page(b,1440,900);
   const { top, height } = await p.evaluate(()=>{ const z=document.querySelector('.inkzone'); return {top:z.offsetTop, height:z.offsetHeight}; });
