@@ -83,6 +83,33 @@ test('layout: every section keeps its gutter', async b => {
  * It fit on macOS and overflowed on Linux, where the same labels set a few pixels
  * wider -- so this asserts the row absorbs the squeeze at every width rather than
  * pushing the Year/Month switch out through overflow-x. */
+/* The narrative's two bars are a comparison, so their geometry has to carry the
+ * true ratio in BOTH dimensions. They previously did neither: unequal figure
+ * widths left the tracks 529px and 483px, so length read 3.56x against a true
+ * 3.91x, while heights of 52px and 64px made area read 4.38x. Understated one
+ * way, overstated the other. */
+test('narrative: the two bars encode their values truthfully', async b => {
+  for (const [w,h,m] of [[1440,900,false],[900,900,false],[390,844,true]]) {
+    const p = await page(b,w,h,m);
+    const r = await p.evaluate(()=>{
+      const rows=[...document.querySelectorAll('.cmp .cmp-row')].map(row=>{
+        const t=row.querySelector('.track'), f=[...t.children], tb=t.getBoundingClientRect();
+        return { trackW:tb.width, h:Math.max(...f.map(x=>x.getBoundingClientRect().height)),
+                 filled:f.reduce((a,x)=>a+x.getBoundingClientRect().width,0),
+                 value:+row.querySelector('.num').textContent.replace(/[^0-9]/g,'') };
+      });
+      const [a,b2]=rows;
+      return { trackDelta:Math.abs(a.trackW-b2.trackW), heightDelta:Math.abs(a.h-b2.h),
+               trueRatio:b2.value/a.value, lengthRatio:b2.filled/a.filled };
+    });
+    ok(`${w}px: both bars share one height`, r.heightDelta < 0.5, `Δ${r.heightDelta.toFixed(1)}px`);
+    ok(`${w}px: both bars share one baseline`, r.trackDelta < 0.5, `Δ${r.trackDelta.toFixed(1)}px`);
+    ok(`${w}px: bar length matches the value ratio`, Math.abs(r.lengthRatio - r.trueRatio) < 0.05,
+       `drawn ${r.lengthRatio.toFixed(2)}x vs true ${r.trueRatio.toFixed(2)}x`);
+    await p.close();
+  }
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);

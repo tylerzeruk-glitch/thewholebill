@@ -88,6 +88,15 @@ p{margin:0;text-wrap:pretty}
 .cmp-row{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center}
 .cmp-lab{text-align:right;display:flex;flex-direction:column;gap:5px}
 .cmp-bars{display:flex;align-items:center;gap:16px;min-width:0}
+/* These two bars are a comparison, so both dimensions have to be honest.
+   ONE height for both: unequal thickness makes the taller bar read larger by
+   area than its value, and thickness carries no meaning here -- length is the
+   data. ONE width for the figure column: the two figures are set at different
+   sizes for typographic hierarchy, and while they sat in the flow that
+   difference ate into each track by a different amount, so the two bars were
+   measured against different baselines. Same fix .bar-v already uses below. */
+.cmp .track{height:60px}
+.cmp-bars .num{width:120px;flex-shrink:0;text-align:right}
 .track{display:flex;border-radius:1px;overflow:hidden;flex-grow:1;min-width:0}
 .callout{margin-top:40px;border-left:2px solid var(--amber-deep);padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:4px}
 
@@ -394,7 +403,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="note">Premium deduction + Medicare tax</div>
         </div>
         <div class="cmp-bars">
-          <div class="track" style="flex-grow:1;min-width:0"><div id="narrSmall" style="width:26.2%;height:52px;background:var(--c1)"></div></div>
+          <div class="track"><div id="narrSmall" style="width:26.2%;background:var(--c1)"></div></div>
           <div class="num" style="font-size:22px;color:var(--pm)" data-fig="emp.visible">$8,278</div>
         </div>
       </div>
@@ -404,7 +413,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="note">Everything, all in</div>
         </div>
         <div class="cmp-bars">
-          <div class="track" style="height:64px">
+          <div class="track">
             <div id="narrVis" style="width:26.2%;background:var(--c1)"></div>
             <div id="narrRest" style="width:73.8%;background:var(--c2)"></div>
           </div>
