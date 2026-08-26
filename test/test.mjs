@@ -200,7 +200,7 @@ test('routes: each coverage route rebuilds the waterfall', async b => {
  * to 58px from the columns they name, which is precisely what design-brief.md
  * says keeping the keys in the captions would prevent. */
 test('waterfall: equal columns, keys aligned to them', async b => {
-  for (const [w,h,m] of [[1440,900,false],[1200,900,false],[900,900,false],[500,900,false],[390,844,true],[320,844,true]]) {
+  for (const [w,h,m] of [[1440,900,false],[1200,900,false],[900,900,false],[520,900,false],[500,900,false],[390,844,true],[320,844,true]]) {
     const p = await page(b,w,h,m);
     for (const route of ['employer','marketplace','none']) {
       await p.locator(`#route button[data-r="${route}"]`).click();

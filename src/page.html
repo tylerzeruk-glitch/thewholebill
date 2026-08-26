@@ -384,7 +384,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    caption row and becomes a list, because aligning to a 56px column is worth
    nothing if the words do not fit inside it. */
 @media (max-width:500px){
-  .wlab{font-size:clamp(8px,2.5vw,10px);letter-spacing:-.02em;margin-bottom:8px}
+  /* The column, not the type, is where the headroom comes from: at 320px five
+     columns share 272px, so every pixel of gap is worth a fifth of a pixel to each
+     of them. CI caught a 1px overflow here that macOS did not -- Linux sets the
+     same mono a shade wider -- so this leaves several px of slack, not none. */
+  .wf{gap:5px}
+  .wlab{font-size:clamp(8px,2.5vw,10px);letter-spacing:-.035em;margin-bottom:8px}
   .wlab.big{font-size:clamp(8px,2.5vw,10px)}
   .wlab.total{font-size:clamp(13px,4.3vw,17px);letter-spacing:-.03em}
   .wkick{font-size:9px;letter-spacing:.08em;margin-bottom:6px}
