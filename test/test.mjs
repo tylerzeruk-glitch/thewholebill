@@ -173,6 +173,36 @@ test('routes: each coverage route rebuilds the waterfall', async b => {
   await p.close();
 });
 
+/* Column width carries no meaning in a waterfall -- height is the data -- so the
+ * data columns must not vary. They did: flex-grow with the default basis:auto
+ * sized each column from its own label, giving 123/224/148/148 at 1440px. The
+ * caption row did the same from different content, so the colour keys drifted up
+ * to 58px from the columns they name, which is precisely what design-brief.md
+ * says keeping the keys in the captions would prevent. */
+test('waterfall: equal columns, keys aligned to them', async b => {
+  for (const [w,h,m] of [[1440,900,false],[1200,900,false],[900,900,false],[390,844,true]]) {
+    const p = await page(b,w,h,m);
+    for (const route of ['employer','marketplace','none']) {
+      await p.locator(`#route button[data-r="${route}"]`).click();
+      await p.waitForTimeout(250);
+      const r = await p.evaluate(()=>{
+        const wf=document.getElementById('wf');
+        const cols=[...wf.children].filter(c=>c.className.startsWith('wcol'));
+        const caps=[...document.getElementById('wcaps').children].filter(c=>(c.className||'').startsWith('wcap'));
+        const data=cols.slice(0,-1).map(c=>c.getBoundingClientRect().width);
+        const drift=cols.map((c,i)=>caps[i]?Math.abs(caps[i].getBoundingClientRect().left-c.getBoundingClientRect().left):0);
+        const over=cols.map(c=>{const l=c.querySelector('.wlab');
+          return l ? l.getBoundingClientRect().width - c.getBoundingClientRect().width : 0;});
+        return { spread:Math.max(...data)-Math.min(...data), maxDrift:Math.max(...drift), maxOver:Math.max(...over) };
+      });
+      ok(`${w}px ${route}: data columns equal`, r.spread < 0.5, `spread ${r.spread.toFixed(1)}px`);
+      ok(`${w}px ${route}: keys sit under their column`, r.maxDrift < 0.5, `drift ${r.maxDrift.toFixed(1)}px`);
+      ok(`${w}px ${route}: labels fit their column`, r.maxOver <= 0.5, `over ${r.maxOver.toFixed(1)}px`);
+    }
+    await p.close();
+  }
+});
+
 test('cliff: statutory drop and no label collisions', async b => {
   const p = await page(b,1440,900);
   const d = await p.evaluate(()=>({ under:document.getElementById('cliffUnder').textContent,
