@@ -95,7 +95,12 @@ p{margin:0;text-wrap:pretty}
 .sticky{position:sticky;top:0;z-index:20;background:rgba(26,29,38,.92);backdrop-filter:saturate(1.2) blur(8px);-webkit-backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--irule-2)}
 .sticky.pinned{box-shadow:0 8px 22px -12px rgba(0,0,0,.85);border-bottom-color:#2F3542}
 .sticky-in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:58px;flex-wrap:nowrap;overflow-x:auto}
-.sticky .who{font-family:var(--mono);font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:var(--im);white-space:nowrap}
+/* min-width:0 is load-bearing. A nowrap flex item's min-content width is the full
+   string, so without it nothing in this row can shrink and the surplus goes to
+   overflow-x, pushing the Year/Month switch off the right edge. The row has very
+   little slack between 900px and ~1100px: it fit on macOS and overflowed on Linux,
+   where the same labels set a few px wider. The context line gives way instead. */
+.sticky .who{font-family:var(--mono);font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:var(--im);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .figs{display:flex;gap:clamp(16px,2.6vw,38px);align-items:center}
 .fig{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
