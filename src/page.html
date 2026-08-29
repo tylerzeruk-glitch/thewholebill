@@ -12,7 +12,7 @@
   --ik:#E8E6E1; --ib:#B9BCC4; --im:#8A8F9C; --ilabel:#8B92A4; --ifaint:#7C8395;
 
   --c1:#F0C98D; --c2:#D99A3F; --c3:#A87A43; --c4:#86603E; --c4l:#C39258;
-  --amber-deep:#8E6018; --teal:#3FB5AE;
+  --amber-deep:#8E6018; --teal:#3FB5AE; --teal-l:#A8E3DE; --teal-d:#2A8F88;
 
   --chart-h:500px;
   --pad:clamp(24px,5vw,96px);
@@ -231,9 +231,19 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .bar-row{display:grid;grid-template-columns:210px minmax(0,1fr);gap:24px;align-items:center}
 .bar-t{display:flex;flex-direction:column;gap:3px}
 .bar-t .a{font-size:14.5px;font-weight:500} .bar-t .b{font-size:12.5px;color:var(--ifaint)}
+/* The two bands need a key, and the caption already names them in bar order, so
+   the swatch goes on the caption rather than adding a separate legend. */
+.usw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;vertical-align:baseline}
 .bar-w{display:flex;align-items:center;gap:16px;min-width:0}
-.bar-bg{flex-grow:1;height:44px;background:var(--ink-raised);border-radius:1px;min-width:0;display:flex;overflow:hidden}
-.bar-ghost{height:100%;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
+.bar-bg{flex-grow:1;height:44px;background:var(--ink-raised);border-radius:1px;min-width:0;display:flex;align-items:stretch;overflow:hidden}
+/* Half height, centred. At full height this read as a continuation of the bar,
+   so the marketplace row drew 632px -- $27,402 at this chart's scale -- while the
+   figure beside it said $14,532. Two of the three bars encoded the number shown
+   and one encoded the number plus the subsidy, which is the one comparison a
+   reader makes by length. Width and position are untouched, so the hatch still
+   measures the subsidy exactly and still ends at the true cost of the care; only
+   its weight says it is not the household's money. */
+.bar-ghost{height:52%;align-self:center;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
 .bar-fill{height:100%;flex-shrink:0;border-radius:1px;transition:width .35s cubic-bezier(.4,0,.2,1)}
 .bar-v{width:112px;flex-shrink:0;font-family:var(--mono);font-size:clamp(18px,2vw,24px);letter-spacing:-.02em;text-align:right}
 .summary{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px}
@@ -745,15 +755,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           </div>
         </div>
         <div class="bar-row">
-          <div class="bar-t"><div class="a" style="color:var(--teal)">Under universal coverage</div><div class="b">No bill at the point of care</div></div>
+          <div class="bar-t"><div class="a" style="color:var(--teal)">Under universal coverage</div><div class="b">No bill at the point of care</div><div class="b" id="uniSub" style="margin-top:4px"></div></div>
           <div class="bar-w">
-            <div class="bar-bg"><div class="bar-fill" id="uFill" style="width:31%;background:var(--teal)"></div></div>
+            <div class="bar-bg" id="uBar"></div>
             <div class="bar-v num" id="uVal" data-fig="uni.total" style="color:var(--teal)">$9,800</div>
           </div>
         </div>
       </div>
 
-      <p class="note-i" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b>. Your employer&rsquo;s premium share counts, because it is your compensation routed around your paycheck. A marketplace subsidy does not &mdash; that is paid by taxpayers, and is shown hatched.</p>
+      <p class="note-i" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b>. Employer money counts on both sides: the premium share you pay through today, and the <b style="color:var(--ib);font-weight:400">7.5% payroll tax</b> that replaces it under universal coverage. Both are your compensation, routed around your paycheck. A marketplace subsidy is not &mdash; that is other taxpayers&rsquo; money, drawn hatched and at half height because the household never bears it.</p>
 
       <div class="summary">
         <div class="save">
@@ -1268,7 +1278,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("mktSub").innerHTML = S.marketplace.overCliff
       ? '<span style="color:var(--c2)">No subsidy \u2014 over the 400% cliff</span>'
       : "Plus " + fmt(S.marketplace.subsidy) + " paid by taxpayers";
-    setW("uFill",   S.universal.total / max);
+    renderUniversalBar(max);
     var mkPos = (S.universal.total / max * 100).toFixed(1) + "%";
     byId("mk").style.left = mkPos;
     byId("rangeBand").style.left  = (S.universalRange.lo / max * 100).toFixed(1) + "%";
@@ -1312,6 +1322,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     paintUnit();
   }
 
+
+  /* The universal figure is not one number. 73% of it is the employer payroll tax
+   * -- employer-side money, counted as the household's for exactly the reason the
+   * employer's premium share is counted on the other side of the comparison. The
+   * bar had shown it as a single block, so the one thing this whole site exists to
+   * reveal was visible on the status-quo side and invisible on the alternative.
+   * Same light-to-dark reading as the waterfall: the lighter the band, the more
+   * likely you would ever see the money. Two steps only -- a third would fall
+   * below 3:1 on this ground, which is what docs/design-brief.md warns about. */
+  var UNI_PARTS = {
+    premium:    { tone:"var(--teal-l)", who:"from you" },
+    payroll:    { tone:"var(--teal)",   who:"from your employer" },
+    blahousGap: { tone:"var(--teal-d)", who:"our allocation" }   // ours, not Blahous's -- he published no household figure
+  };
 
   var TONE = { 1:"var(--c1)", 2:"var(--c2)", 3:"var(--c3)", 4:"var(--c4)" };
   var TONE_TEXT = { 1:"var(--c1)", 2:"var(--c2)", 3:"var(--c3)", 4:"var(--c4l)" };
@@ -1361,6 +1385,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("wcaps").innerHTML = caps;
     byId("wfNote").innerHTML = 'All figures <span data-uw="per">' +
       WORDS.per[state.unit] + '</span>. ' + R.note;
+  }
+
+  function renderUniversalBar(max){
+    var parts = S.universal.parts, html = "", sub = [], k, p, v;
+    for (k in parts){
+      if (!Object.prototype.hasOwnProperty.call(parts, k)) continue;
+      p = UNI_PARTS[k]; v = parts[k];
+      if (!p || !(v > 0)) continue;
+      html += '<div class="bar-fill" style="width:' + (v / max * 100).toFixed(2) +
+              '%;background:' + p.tone + '"></div>';
+      sub.push('<span class="usw" style="background:' + p.tone + '"></span>' + fmt(v) + " " + p.who);
+    }
+    byId("uBar").innerHTML = html;
+    byId("uniSub").innerHTML = sub.join("<br>");
   }
 
   function renderCards(){
