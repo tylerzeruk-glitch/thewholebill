@@ -130,6 +130,59 @@ test('narrative: each figure sits at the end of its own bar', async b => {
   }
 });
 
+/* Supporting text inherits the width of whatever chart it sits under, so these
+ * blocks ran 108-147 characters per line against a readable 45-75 -- the worst
+ * of them WHILE carrying max-width:820px, because a pixel cap cannot know the
+ * type was made smaller. The cap is in `ch` now; this asserts the result rather
+ * than the rule, so shrinking a font or widening a container fails here. */
+test('readability: supporting text keeps a readable measure', async b => {
+  for (const [w,h] of [[1440,900],[1100,900]]) {
+    const p = await page(b,w,h);
+    for (const view of ['main','methodology']) {
+      if (view === 'methodology') { await p.evaluate(()=>{location.hash='#/methodology';}); await p.waitForTimeout(300); }
+      const bad = await p.evaluate(()=>[...document.querySelectorAll('p.note,p.note-i,p.fn')]
+        .filter(e=>e.offsetHeight>0)
+        .map(e=>{ const r=document.createRange(); r.selectNodeContents(e);
+          const lines=new Set([...r.getClientRects()].filter(x=>x.height>1).map(x=>Math.round(x.top)));
+          const t=e.textContent.trim().replace(/\s+/g,' ');
+          return { cpl: lines.size ? Math.round(t.length/lines.size) : 0, t:t.slice(0,44) }; })
+        .filter(x=>x.cpl>75));
+      ok(`${w}px ${view}: every note under 75 characters per line`, bad.length === 0,
+         bad.slice(0,2).map(x=>`${x.cpl}cpl "${x.t}…"`).join(' | '));
+    }
+    await p.close();
+  }
+});
+
+/* A heading and its one supporting line are meant to sit on the same bottom line.
+ * align-self:end aligned their BOXES, which is not the same thing: a 56px heading
+ * at line-height 1.05 carries much less space below its last baseline than a 15px
+ * note at 1.65, so the boxes matched to 0.0px while the text sat 9px apart. This
+ * measures the baselines, using a zero-height inline-block whose bottom edge sits
+ * on the baseline -- getBoundingClientRect gives the line box, which is the very
+ * thing that was misleading here. */
+test('splits: heading and supporting line share a baseline', async b => {
+  for (const w of [1101,1250,1440,1920]) {
+    const p = await page(b,w,900);
+    const bad = await p.evaluate(()=>{
+      const baseline = el => { const s=document.createElement('span');
+        s.style.cssText='display:inline-block;width:0;height:0;overflow:hidden';
+        el.appendChild(s); const y=s.getBoundingClientRect().bottom; s.remove(); return y; };
+      return [...document.querySelectorAll('.split.tie')].map(sp=>{
+        // only meaningful while the split is actually two columns
+        if (getComputedStyle(sp).gridTemplateColumns.split(' ').length < 2) return null;
+        const k=[...sp.children], h=k[0].querySelector('h1,h2');
+        if (!h || k.length < 2) return null;
+        const eb=(sp.closest('section')?.querySelector('.eyebrow')||{}).textContent||'';
+        return { sec:eb.trim().slice(0,22), d:+(baseline(k[1])-baseline(h)).toFixed(1) };
+      }).filter(x=>x && Math.abs(x.d) > 1);
+    });
+    ok(`${w}px: every heading sits on its note's baseline`, bad.length === 0,
+       bad.map(x=>`${x.sec} Δ${x.d}px`).join(', '));
+    await p.close();
+  }
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
