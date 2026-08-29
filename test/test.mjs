@@ -202,6 +202,72 @@ test('hero: the dateline ends on the same line as the controls', async b => {
   }
 });
 
+/* Three bars compared by length, so each one's SOLID length has to carry the
+ * figure printed beside it. The marketplace bar did not: its hatched subsidy ran
+ * at full height on the end of it, drawing 632px -- $27,402 at that chart's scale
+ * -- against a printed $14,532. The hatch keeps its exact width and position (it
+ * still measures the subsidy, and still ends at the true cost of the care); only
+ * its weight changed. This asserts the part a reader compares. */
+test('comparison: every bar draws the figure printed beside it', async b => {
+  for (const [w,h] of [[1440,900],[1200,900]]) {
+    const p = await page(b,w,h);
+    for (const model of [0,1]) {
+      await p.locator('#pills button').nth(model).click();
+      await p.waitForTimeout(250);
+      const r = await p.evaluate(()=>{
+        const n=e=>+document.querySelector(e).textContent.replace(/[^0-9]/g,'');
+        const wid=e=>document.querySelector(e).getBoundingClientRect().width;
+        // dollars per pixel, from the bar that is drawn at full track width
+        const scale = n('[data-fig="emp.total"]') / wid('#empFill');
+        const uni=[...document.querySelectorAll('#uBar .bar-fill')]
+          .reduce((a,e)=>a+e.getBoundingClientRect().width,0);
+        return [
+          { k:'employer',    drawn: wid('#empFill')*scale, said:n('[data-fig="emp.total"]') },
+          { k:'marketplace', drawn: wid('#mktFill')*scale, said:n('[data-fig="mkt.household"]') },
+          { k:'universal',   drawn: uni*scale,             said:n('#uVal') },
+        ].map(x=>({...x, err: Math.abs(x.drawn-x.said)/x.said}));
+      });
+      for (const x of r)
+        ok(`${w}px m${model}: ${x.k} bar length = its figure`, x.err < 0.005,
+           `drawn $${Math.round(x.drawn).toLocaleString()} vs $${x.said.toLocaleString()}`);
+    }
+    await p.close();
+  }
+});
+
+/* 73% of the universal figure is the employer payroll tax -- employer-side money,
+ * counted as the household's for the same reason the employer's premium share is
+ * counted on the other side. It used to be drawn as one undifferentiated block, so
+ * the argument the site is built on was visible for the status quo and invisible
+ * for the alternative. The bands must account for the whole figure, or the split
+ * is worse than not splitting. */
+test('comparison: the universal bar accounts for its whole figure', async b => {
+  const p = await page(b,1440,900);
+  for (const [model,bands] of [[0,2],[1,3]]) {
+    await p.locator('#pills button').nth(model).click();
+    await p.waitForTimeout(250);
+    for (const unit of ['y','m']) {
+      const r = await p.evaluate(()=>{
+        const n=e=>+document.querySelector(e).textContent.replace(/[^0-9]/g,'');
+        const scale = n('[data-fig="emp.total"]')/document.querySelector('#empFill').getBoundingClientRect().width;
+        const segs=[...document.querySelectorAll('#uBar .bar-fill')];
+        const caption=document.querySelector('#uniSub').innerText.trim().split('\n').filter(Boolean);
+        return { n:segs.length, said:n('#uVal'), captionLines:caption.length,
+                 drawn: segs.reduce((a,e)=>a+e.getBoundingClientRect().width,0)*scale };
+      });
+      ok(`model ${model} (${unit}): ${bands} bands drawn`, r.n === bands, `${r.n}`);
+      ok(`model ${model} (${unit}): bands sum to the figure`,
+         Math.abs(r.drawn-r.said)/r.said < 0.005,
+         `$${Math.round(r.drawn).toLocaleString()} vs $${r.said.toLocaleString()}`);
+      ok(`model ${model} (${unit}): every band is named`, r.captionLines === bands,
+         `${r.captionLines} caption lines for ${r.n} bands`);
+      if (unit === 'y') { await p.locator('#unit').click(); await p.waitForTimeout(250); }
+    }
+    await p.locator('#unit').click(); await p.waitForTimeout(250);
+  }
+  await p.close();
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
