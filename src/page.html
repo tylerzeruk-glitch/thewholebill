@@ -84,6 +84,16 @@ p{margin:0;text-wrap:pretty}
    Anything that combines with .wrap must never use the padding shorthand. */
 .sec{padding-top:clamp(64px,9vw,104px);padding-bottom:clamp(64px,9vw,104px)}
 .split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,5vw,88px);align-items:start}
+/* Where a heading is paired with one supporting line, the two are meant to sit on
+   the same line at the bottom. Aligning the boxes is not the same thing: a 56px
+   heading at line-height 1.05 carries far less space below its last baseline than
+   a 15px note at 1.65 does, so the boxes matched to 0.0px while the text sat 9px
+   apart -- which is the gap you can see. Baseline alignment aligns what the eye
+   actually reads. `end` is the fallback for engines that drop the keyword: they
+   get the previous behaviour rather than a broken row.
+   Opt-in, because section 01 pairs its heading with a two-paragraph stack. That is
+   a different relationship and is meant to hang from the top. */
+.split.tie{align-items:end;align-items:last baseline}
 .cmp{display:flex;flex-direction:column;gap:34px;margin-top:56px}
 .cmp-row{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center}
 .cmp-lab{text-align:right;display:flex;flex-direction:column;gap:5px}
@@ -668,12 +678,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   <!-- ---- 04 THE REVEAL ---- -->
   <section class="ink">
     <div class="wrap sec">
-      <div class="split">
+      <div class="split tie">
         <div class="stack" style="gap:16px">
           <div class="eyebrow i">02 &middot; The reveal</div>
           <h2>Here is <em style="font-style:italic;color:var(--c2)">the whole bill</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Four things add up to what your household&rsquo;s healthcare costs. You only ever see the first one &mdash; the rest is spent on your behalf.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. You only ever see the first one &mdash; the rest is spent on your behalf.</p>
       </div>
 
       <div class="wf" id="wf"></div>
@@ -685,12 +695,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   <!-- ---- 05 THE COMPARISON ---- -->
   <section class="ink">
     <div class="wrap sec" style="display:flex;flex-direction:column;gap:30px">
-      <div class="split">
+      <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">03 &middot; The comparison</div>
           <h2>Three ways to pay for the same care.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Nobody agrees on what single-payer would cost. So pick whose estimate you trust &mdash; including the ones written to make it look bad.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust &mdash; including the ones written to make it look bad.</p>
       </div>
 
       <div class="stack" style="gap:14px">
@@ -783,12 +793,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   <!-- ---- 04 THE CLIFF ---- -->
   <section class="ink" id="cliff">
     <div class="wrap sec" style="display:flex;flex-direction:column;gap:32px">
-      <div class="split">
+      <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">04 &middot; The cliff</div>
           <h2>One dollar, <em style="font-style:italic;color:var(--c2)">nine thousand dollars</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
       </div>
 
       <div class="cliffstats">
@@ -808,12 +818,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 <!-- ============ 05 IN LIVES ============ -->
 <section class="paper" id="lives">
   <div class="wrap sec">
-    <div class="split" style="margin-bottom:48px">
+    <div class="split tie" style="margin-bottom:48px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">05 &middot; The other number</div>
         <h2>Cost is not the only thing being measured.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">Everything above this point is denominated in dollars, because dollars are what a calculator can show you. They are not the only currency in this argument.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">Everything above this point is denominated in dollars, because dollars are what a calculator can show you. They are not the only currency in this argument.</p>
     </div>
 
     <div class="livesgrid">
@@ -864,12 +874,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 <!-- ============ 06 THE OBJECTIONS -->
 <section class="paper" id="objections">
   <div class="wrap sec">
-    <div class="split" style="margin-bottom:52px">
+    <div class="split tie" style="margin-bottom:52px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">06 &middot; The other side</div>
         <h2>The objections, taken seriously.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">These are the four arguments that actually land. We are not going to pretend they are stupid, and we are not going to skip the ones that hurt.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">These are the four arguments that actually land. We are not going to pretend they are stupid, and we are not going to skip the ones that hurt.</p>
     </div>
 
     <div class="grid2">
@@ -913,12 +923,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 <!-- ============ 07 WRITE YOUR REP ============ -->
 <section class="paper">
   <div class="wrap sec">
-    <div class="split" style="margin-bottom:46px">
+    <div class="split tie" style="margin-bottom:46px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">07 &middot; Do something with it</div>
         <h2>Send them your number.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">Staffers count letters by position and topic. A specific figure from a constituent in the district reads differently than a form letter &mdash; so this one is built from your own numbers.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">Staffers count letters by position and topic. A specific figure from a constituent in the district reads differently than a form letter &mdash; so this one is built from your own numbers.</p>
     </div>
 
     <div class="actgrid">
@@ -1007,12 +1017,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
 <section class="paper view" id="methodology" hidden>
   <div class="wrap sec meth">
-    <div class="split" style="margin-bottom:52px">
+    <div class="split tie" style="margin-bottom:52px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">08 &middot; Methodology</div>
         <h2>Check our work.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">This page exists because the argument on the rest of the site is only worth as much as the arithmetic behind it. Everything here is either a table you can look up or a sum you can redo.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">This page exists because the argument on the rest of the site is only worth as much as the arithmetic behind it. Everything here is either a table you can look up or a sum you can redo.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
