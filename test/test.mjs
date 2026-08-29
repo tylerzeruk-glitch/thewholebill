@@ -79,10 +79,6 @@ test('layout: every section keeps its gutter', async b => {
   }
 });
 
-/* The one-row bar has very little slack between its 900px breakpoint and ~1100px.
- * It fit on macOS and overflowed on Linux, where the same labels set a few pixels
- * wider -- so this asserts the row absorbs the squeeze at every width rather than
- * pushing the Year/Month switch out through overflow-x. */
 /* The narrative's two bars are a comparison, so their geometry has to carry the
  * true ratio in BOTH dimensions. They previously did neither: unequal figure
  * widths left the tracks 529px and 483px, so length read 3.56x against a true
@@ -106,6 +102,83 @@ test('narrative: the two bars encode their values truthfully', async b => {
     ok(`${w}px: both bars share one baseline`, r.trackDelta < 0.5, `Δ${r.trackDelta.toFixed(1)}px`);
     ok(`${w}px: bar length matches the value ratio`, Math.abs(r.lengthRatio - r.trueRatio) < 0.05,
        `drawn ${r.lengthRatio.toFixed(2)}x vs true ${r.trueRatio.toFixed(2)}x`);
+    await p.close();
+  }
+});
+
+/* The one-row bar has very little slack between its 900px breakpoint and ~1100px.
+ * It fit on macOS and overflowed on Linux, where the same labels set a few pixels
+ * wider -- so this asserts the row absorbs the squeeze at every width rather than
+ * pushing the Year/Month switch out through overflow-x. */
+/* Each figure is parked at the end of its own bar rather than in a right-hand
+ * column, so the short bar's number is not stranded across the page from the mark
+ * it labels. The number is positioned by percentage against the same box the fill
+ * uses, so this asserts the two edges actually coincide at every width. */
+test('narrative: each figure sits at the end of its own bar', async b => {
+  for (const [w,h,m] of [[1440,900,false],[900,900,false],[390,844,true]]) {
+    const p = await page(b,w,h,m);
+    const r = await p.evaluate(()=>[...document.querySelectorAll('.cmp .cmp-row')].map(row=>{
+      const fills=[...row.querySelector('.track').children];
+      const end=Math.max(...fills.map(f=>f.getBoundingClientRect().right));
+      const n=row.querySelector('.num').getBoundingClientRect();
+      return { gap:n.left-end, right:n.right };
+    }));
+    const [a,b2]=r;
+    ok(`${w}px: small figure follows its bar`, Math.abs(a.gap-16) < 1, `${a.gap.toFixed(1)}px from the bar end`);
+    ok(`${w}px: total figure follows its bar`, Math.abs(b2.gap-16) < 1, `${b2.gap.toFixed(1)}px from the bar end`);
+    await p.close();
+  }
+});
+
+/* Supporting text inherits the width of whatever chart it sits under, so these
+ * blocks ran 108-147 characters per line against a readable 45-75 -- the worst
+ * of them WHILE carrying max-width:820px, because a pixel cap cannot know the
+ * type was made smaller. The cap is in `ch` now; this asserts the result rather
+ * than the rule, so shrinking a font or widening a container fails here. */
+test('readability: supporting text keeps a readable measure', async b => {
+  for (const [w,h] of [[1440,900],[1100,900]]) {
+    const p = await page(b,w,h);
+    for (const view of ['main','methodology']) {
+      if (view === 'methodology') { await p.evaluate(()=>{location.hash='#/methodology';}); await p.waitForTimeout(300); }
+      const bad = await p.evaluate(()=>[...document.querySelectorAll('p.note,p.note-i,p.fn')]
+        .filter(e=>e.offsetHeight>0)
+        .map(e=>{ const r=document.createRange(); r.selectNodeContents(e);
+          const lines=new Set([...r.getClientRects()].filter(x=>x.height>1).map(x=>Math.round(x.top)));
+          const t=e.textContent.trim().replace(/\s+/g,' ');
+          return { cpl: lines.size ? Math.round(t.length/lines.size) : 0, t:t.slice(0,44) }; })
+        .filter(x=>x.cpl>75));
+      ok(`${w}px ${view}: every note under 75 characters per line`, bad.length === 0,
+         bad.slice(0,2).map(x=>`${x.cpl}cpl "${x.t}…"`).join(' | '));
+    }
+    await p.close();
+  }
+});
+
+/* A heading and its one supporting line are meant to sit on the same bottom line.
+ * align-self:end aligned their BOXES, which is not the same thing: a 56px heading
+ * at line-height 1.05 carries much less space below its last baseline than a 15px
+ * note at 1.65, so the boxes matched to 0.0px while the text sat 9px apart. This
+ * measures the baselines, using a zero-height inline-block whose bottom edge sits
+ * on the baseline -- getBoundingClientRect gives the line box, which is the very
+ * thing that was misleading here. */
+test('splits: heading and supporting line share a baseline', async b => {
+  for (const w of [1101,1250,1440,1920]) {
+    const p = await page(b,w,900);
+    const bad = await p.evaluate(()=>{
+      const baseline = el => { const s=document.createElement('span');
+        s.style.cssText='display:inline-block;width:0;height:0;overflow:hidden';
+        el.appendChild(s); const y=s.getBoundingClientRect().bottom; s.remove(); return y; };
+      return [...document.querySelectorAll('.split.tie')].map(sp=>{
+        // only meaningful while the split is actually two columns
+        if (getComputedStyle(sp).gridTemplateColumns.split(' ').length < 2) return null;
+        const k=[...sp.children], h=k[0].querySelector('h1,h2');
+        if (!h || k.length < 2) return null;
+        const eb=(sp.closest('section')?.querySelector('.eyebrow')||{}).textContent||'';
+        return { sec:eb.trim().slice(0,22), d:+(baseline(k[1])-baseline(h)).toFixed(1) };
+      }).filter(x=>x && Math.abs(x.d) > 1);
+    });
+    ok(`${w}px: every heading sits on its note's baseline`, bad.length === 0,
+       bad.map(x=>`${x.sec} Δ${x.d}px`).join(', '));
     await p.close();
   }
 });
@@ -180,7 +253,7 @@ test('routes: each coverage route rebuilds the waterfall', async b => {
  * to 58px from the columns they name, which is precisely what design-brief.md
  * says keeping the keys in the captions would prevent. */
 test('waterfall: equal columns, keys aligned to them', async b => {
-  for (const [w,h,m] of [[1440,900,false],[1200,900,false],[900,900,false],[390,844,true]]) {
+  for (const [w,h,m] of [[1440,900,false],[1200,900,false],[900,900,false],[520,900,false],[500,900,false],[390,844,true],[320,844,true]]) {
     const p = await page(b,w,h,m);
     for (const route of ['employer','marketplace','none']) {
       await p.locator(`#route button[data-r="${route}"]`).click();
@@ -191,16 +264,96 @@ test('waterfall: equal columns, keys aligned to them', async b => {
         const caps=[...document.getElementById('wcaps').children].filter(c=>(c.className||'').startsWith('wcap'));
         const data=cols.slice(0,-1).map(c=>c.getBoundingClientRect().width);
         const drift=cols.map((c,i)=>caps[i]?Math.abs(caps[i].getBoundingClientRect().left-c.getBoundingClientRect().left):0);
-        const over=cols.map(c=>{const l=c.querySelector('.wlab');
-          return l ? l.getBoundingClientRect().width - c.getBoundingClientRect().width : 0;});
-        return { spread:Math.max(...data)-Math.min(...data), maxDrift:Math.max(...drift), maxOver:Math.max(...over) };
+        // scrollWidth, not getBoundingClientRect: .wlab is a block, so its BOX is
+        // always the column width and the nowrap TEXT is what spills out of it.
+        // Measuring the box could never fail, and hid a 14px overflow at 390px.
+        const over=[...wf.querySelectorAll('.wlab'),...document.querySelectorAll('#wcaps .wcap')]
+          .map(e=>e.scrollWidth-e.clientWidth);
+        const stacked=getComputedStyle(document.getElementById('wcaps')).flexDirection==='column';
+        return { spread:Math.max(...data)-Math.min(...data), maxDrift:Math.max(...drift),
+                 maxOver:Math.max(...over), stacked };
       });
       ok(`${w}px ${route}: data columns equal`, r.spread < 0.5, `spread ${r.spread.toFixed(1)}px`);
-      ok(`${w}px ${route}: keys sit under their column`, r.maxDrift < 0.5, `drift ${r.maxDrift.toFixed(1)}px`);
-      ok(`${w}px ${route}: labels fit their column`, r.maxOver <= 0.5, `over ${r.maxOver.toFixed(1)}px`);
+      // Below 500px a column is under 76px and no caption fits in one, so the key
+      // becomes a list instead. Alignment is only worth asserting where it applies.
+      if (!r.stacked)
+        ok(`${w}px ${route}: keys sit under their column`, r.maxDrift < 0.5, `drift ${r.maxDrift.toFixed(1)}px`);
+      ok(`${w}px ${route}: nothing overflows its column`, r.maxOver <= 0.5, `over ${r.maxOver}px`);
     }
     await p.close();
   }
+});
+
+/* The figure above a column and the colour key below it describe the same column,
+ * so they have to hang from the same edge. The key is a swatch then text, which can
+ * only start at the left -- so the figure does too. Right-aligning the figures read
+ * well alone and disagreed with the key row, which is worse than either choice.
+ * Only asserted above 500px: below that the key is a list, not a caption row. */
+test('waterfall: figure and colour key share their column edge', async b => {
+  for (const [w,h] of [[1440,900],[1200,900],[900,900],[520,900]]) {
+    const p = await page(b,w,h);
+    const r = await p.evaluate(()=>{
+      const cols=[...document.getElementById('wf').children].filter(c=>c.className.startsWith('wcol'));
+      const caps=[...document.getElementById('wcaps').children].filter(c=>(c.className||'').startsWith('wcap'));
+      let worst=0, where='';
+      cols.forEach((c,i)=>{
+        const lab=c.querySelector('.wlab'); if(!lab||!caps[i]) return;
+        const rg=document.createRange(); rg.selectNodeContents(lab);
+        const textLeft=rg.getBoundingClientRect().left;
+        const d=Math.abs(textLeft - caps[i].getBoundingClientRect().left);
+        if(d>worst){ worst=d; where=lab.textContent.trim(); }
+      });
+      return { worst, where };
+    });
+    ok(`${w}px: figures hang from the same edge as their key`, r.worst < 1,
+       `${r.worst.toFixed(1)}px at "${r.where}"`);
+    await p.close();
+  }
+});
+
+/* Collapsing a disclosure is only honest if the disclosure itself stays out in the
+ * open -- this section exists to say who produced the number. Both facts a reader
+ * needs to weigh it are in the summary; only the elaboration is behind the toggle. */
+test('lives: the source caveat is readable without expanding', async b => {
+  for (const [w,h,m] of [[1440,900,false],[390,844,true]]) {
+    const p = await page(b,w,h,m);
+    const r = await p.evaluate(()=>{
+      const d=document.querySelector('.src'), sum=d.querySelector('summary');
+      return { open:d.open, txt:sum.innerText.toLowerCase(),
+               h:sum.getBoundingClientRect().height,
+               shut:d.getBoundingClientRect().height };
+    });
+    // A closed <details> still reports a box for its subtree in Chrome, so the
+    // element's own height is what says whether the detail is on screen.
+    ok(`${w}px: starts collapsed`, r.open === false && r.shut < r.h + 8,
+       `${Math.round(r.shut)}px tall vs a ${Math.round(r.h)}px summary`);
+    ok(`${w}px: not-peer-reviewed stays visible`, /peer[\s-]?reviewed/.test(r.txt), r.txt.slice(0,70));
+    ok(`${w}px: the adviser role stays visible`, /sanders/.test(r.txt), r.txt.slice(0,70));
+    ok(`${w}px: summary is a 44px target`, r.h >= 44, `${Math.round(r.h)}px`);
+    const after = await p.evaluate(()=>{ const d=document.querySelector('.src'); d.open=true;
+      return d.getBoundingClientRect().height; });
+    ok(`${w}px: expanding reveals the detail`, after > r.shut + 100,
+       `${Math.round(r.shut)}px → ${Math.round(after)}px`);
+    await p.close();
+  }
+});
+
+/* A footnote marker that anchors to nothing is decoration. Each objection card
+ * carries the pair: * on the note, * on the claim it qualifies. */
+test('objections: every footnote marker has its anchor', async b => {
+  const p = await page(b,1440,900);
+  const bad = await p.evaluate(()=>{
+    const out=[];
+    document.querySelectorAll('#objections .grid2 > .card-p').forEach(c=>{
+      const fn=c.querySelector('.fn'), body=c.querySelector('p.body');
+      if(!fn) return;
+      if(!fn.querySelector('.fnm')) out.push('note without marker: '+fn.textContent.slice(0,30));
+      if(!body || !body.querySelector('.fnr')) out.push('claim without marker: '+(body?body.textContent.slice(0,30):'none'));
+    });
+    return out;
+  });
+  ok('every objection footnote is anchored', bad.length === 0, bad.slice(0,3).join(' | '));
+  await p.close();
 });
 
 test('cliff: statutory drop and no label collisions', async b => {
@@ -229,6 +382,33 @@ test('cliff: statutory drop and no label collisions', async b => {
  * rescales every label. Loading at a width is not the same as resizing to it:
  * this asserts the chart follows its container after the fact, at the sizes the
  * gutter change moved. */
+/* The "you" label is centred ON its guide, so a full-height dashed line ran
+ * straight through the middle of the word at every income -- the guide now stops
+ * above the cap height. Sampled every $2k rather than at a handful of incomes:
+ * the previous collision here was missed by a 6-point sample. */
+test('cliff: the "you" guide never crosses its own label', async b => {
+  const p = await page(b,1440,900);
+  const hits = [];
+  for (let inc = 14000; inc <= 258000; inc += 2000) {
+    await setIncome(p, inc);
+    const bad = await p.evaluate(()=>{
+      const svg = document.querySelector('#cliffChart svg');
+      const you = [...svg.querySelectorAll('text')].find(t=>t.textContent === 'you');
+      if (!you) return null;
+      const y = you.getBBox();
+      for (const el of svg.querySelectorAll('path,line,circle')) {
+        const b = el.getBBox();
+        if (!(b.x > y.x+y.width || b.x+b.width < y.x || b.y > y.y+y.height || b.y+b.height < y.y))
+          return el.tagName + ' ' + (el.getAttribute('stroke')||'');
+      }
+      return null;
+    });
+    if (bad) hits.push(`$${inc}: ${bad}`);
+  }
+  ok('label is clear of every plotted mark', hits.length === 0, hits.slice(0,3).join(' | '));
+  await p.close();
+});
+
 test('cliff: chart follows its container across resizes', async b => {
   const p = await page(b,1440,900);
   const read = () => p.evaluate(()=>{

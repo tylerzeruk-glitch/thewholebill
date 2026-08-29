@@ -42,8 +42,8 @@ h1 em{font-style:italic;color:var(--amber-deep)}
 p{margin:0;text-wrap:pretty}
 .lede{font-size:clamp(17px,1.5vw,21px);line-height:1.56;color:var(--pb)}
 .body{font-size:16.5px;line-height:1.68;color:var(--pb)}
-.note{font-size:13px;line-height:1.55;color:var(--pm)}
-.note-i{font-size:12.5px;line-height:1.55;color:var(--ifaint)}
+.note{font-size:12.5px;line-height:1.55;color:var(--pm)}
+.note-i{font-size:12px;line-height:1.55;color:var(--ifaint)}
 
 .stack{display:flex;flex-direction:column}
 .row{display:flex}
@@ -84,10 +84,20 @@ p{margin:0;text-wrap:pretty}
    Anything that combines with .wrap must never use the padding shorthand. */
 .sec{padding-top:clamp(64px,9vw,104px);padding-bottom:clamp(64px,9vw,104px)}
 .split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,5vw,88px);align-items:start}
+/* Where a heading is paired with one supporting line, the two are meant to sit on
+   the same line at the bottom. Aligning the boxes is not the same thing: a 56px
+   heading at line-height 1.05 carries far less space below its last baseline than
+   a 15px note at 1.65 does, so the boxes matched to 0.0px while the text sat 9px
+   apart -- which is the gap you can see. Baseline alignment aligns what the eye
+   actually reads. `end` is the fallback for engines that drop the keyword: they
+   get the previous behaviour rather than a broken row.
+   Opt-in, because section 01 pairs its heading with a two-paragraph stack. That is
+   a different relationship and is meant to hang from the top. */
+.split.tie{align-items:end;align-items:last baseline}
 .cmp{display:flex;flex-direction:column;gap:34px;margin-top:56px}
 .cmp-row{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center}
 .cmp-lab{text-align:right;display:flex;flex-direction:column;gap:5px}
-.cmp-bars{display:flex;align-items:center;gap:16px;min-width:0}
+.cmp-bars{display:flex;align-items:center;min-width:0;padding-right:146px}
 /* These two bars are a comparison, so both dimensions have to be honest.
    ONE height for both: unequal thickness makes the taller bar read larger by
    area than its value, and thickness carries no meaning here -- length is the
@@ -96,7 +106,14 @@ p{margin:0;text-wrap:pretty}
    difference ate into each track by a different amount, so the two bars were
    measured against different baselines. Same fix .bar-v already uses below. */
 .cmp .track{height:60px}
-.cmp-bars .num{width:120px;flex-shrink:0;text-align:right}
+/* The figure is parked at the END of its own bar rather than in a right-hand
+   column, so the short bar's number is not stranded half a screen from the mark
+   it labels. It is absolutely positioned inside .cmp-plot -- which IS the track's
+   box -- so `left` is a percentage of the same width the fill uses, and the two
+   stay locked together at every viewport. .cmp-bars reserves the room the longest
+   figure needs on the right, which is what keeps both tracks identical. */
+.cmp-plot{position:relative;flex-grow:1;min-width:0}
+.cmp-bars .num{position:absolute;top:50%;transform:translateY(-50%);margin-left:16px;white-space:nowrap}
 .track{display:flex;border-radius:1px;overflow:hidden;flex-grow:1;min-width:0}
 .callout{margin-top:40px;border-left:2px solid var(--amber-deep);padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:4px}
 
@@ -128,7 +145,12 @@ p{margin:0;text-wrap:pretty}
 .field{display:flex;flex-direction:column;gap:9px}
 .ctrl{height:46px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;font-size:15px}
 .ctrl.mono{font-family:var(--mono);font-size:16px}
-.step{width:32px;height:34px;background:var(--ink-chip);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--im);font-size:16px}
+/* Divided cells, not floating chips. A filled chip inside an outlined control
+   reads as a box in a box, and the two glyphs had no shared edge to sit on. These
+   take their height from the control and are separated from it by the same hairline
+   the control is drawn with, so the whole thing is one object. */
+.step{width:40px;align-self:stretch;background:none;border:0;border-left:1px solid var(--ictrl);display:flex;align-items:center;justify-content:center;color:var(--im);font-size:17px;line-height:1;transition:background .15s,color .15s}
+.steps{display:flex;align-self:stretch}
 .seg{display:flex;gap:6px}
 .seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--irule-2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
 .seg > div.on,.seg > button.on{background:#2C3140;border-color:#3D4457;color:var(--ik);font-weight:500}
@@ -141,7 +163,10 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 input[type=range]::-moz-range-progress{height:4px;background:var(--teal);border-radius:2px}
 select.ctrl{appearance:none;-webkit-appearance:none;color:var(--ik);font-family:var(--sans);width:100%;background-image:none;cursor:pointer}
 select.ctrl option{background:var(--ink-raised);color:var(--ik)}
-button.step{border:none;cursor:pointer;font-family:var(--sans)}
+button.step{cursor:pointer;font-family:var(--sans)}
+.step:hover{background:var(--ink-chip);color:var(--ik)}
+.step:active{background:var(--ictrl);color:var(--ik)}
+.step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
 .warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:3px;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
 .bignum{font-family:var(--mono);font-size:clamp(48px,7vw,86px);font-weight:300;line-height:1;letter-spacing:-.035em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -165,6 +190,11 @@ button.step{border:none;cursor:pointer;font-family:var(--sans)}
 .wcol > *{flex-shrink:0}
 .band{flex-shrink:0;border-radius:0}
 .band.top{border-radius:1px 1px 0 0} .band.bot{border-radius:0 0 1px 1px}
+/* Left, not right. Right-aligning put each figure's end on its own bar's right
+   edge, which reads well on its own -- but the colour key below is a swatch then
+   text, so it can only start at the left. Two rows describing the same columns
+   disagreeing about which edge they hang from is worse than either choice. Left
+   is the edge both rows can share: figure, bar and swatch now all begin together. */
 .wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap}
 .wlab.big{font-size:clamp(18px,2.1vw,30px)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
@@ -176,6 +206,13 @@ button.step{border:none;cursor:pointer;font-family:var(--sans)}
 .wcap{flex-grow:1;flex-basis:0;display:flex;gap:9px;align-items:flex-start;min-width:0}
 .sw{width:11px;height:11px;border-radius:2px;flex-shrink:0;margin-top:4px}
 .wcap span{font-size:13.5px;line-height:1.5;color:var(--im)}
+/* The total gets a wider share than the data columns -- its figure is set much
+   larger and an equal fifth cannot hold it. Declared here rather than inline so
+   the phone layout below can take it back. */
+.wcol-total,.wcap-total{flex-grow:1.35}
+.wf-gap{width:2px;flex-shrink:0}
+/* Declared after .wcol/.wcap so it wins on source order -- both are single-class
+   selectors, and this pair started life as inline styles. */
 
 /* ---------- comparison ---------- */
 .pills{display:flex;gap:8px;flex-wrap:wrap}
@@ -217,11 +254,42 @@ button.step{border:none;cursor:pointer;font-family:var(--sans)}
 .livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
 .bigstat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,84px);font-weight:300;line-height:1;letter-spacing:-.04em;color:var(--amber-deep)}
 .bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
-.disclose{margin-top:48px;border-top:1px solid var(--prule);padding-top:26px;display:flex;flex-direction:column;gap:16px}
+/* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
+   ARE that number, split in two. Set as a sum -- operator in its own column so the
+   digits stay aligned -- because a relationship the arithmetic already has is
+   cheaper to show than to explain, and this section had explained it in prose. */
+.tally{display:grid;grid-template-columns:14px auto minmax(0,1fr);gap:14px 13px;align-items:baseline;
+       border-top:1px solid var(--prule);padding-top:18px}
+.tally .op{font-family:var(--mono);font-size:19px;color:var(--pctrl)}
+.tally .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:23px;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
+.tally .d{font-size:15px;line-height:1.5;color:var(--pb);text-wrap:pretty}
+
+/* The source note collapses, but the DISCLOSURE does not: both facts a reader
+   needs in order to weigh this figure sit in the summary, in the open. Only the
+   elaboration is behind the toggle. Hiding the caveat itself would invert the
+   point of the section. */
+.src{border-top:1px solid var(--prule);margin-top:52px}
+.src > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+               gap:16px;align-items:center;padding:17px 0;min-height:44px}
+.src > summary::-webkit-details-marker{display:none}
+.src > summary:hover .src-s{color:var(--pk)}
+.src > summary:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
+.src-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--plabel);white-space:nowrap}
+.src-s{font-size:14px;line-height:1.5;color:var(--pb);min-width:0}
+.src-x{color:var(--pctrl);flex-shrink:0;transition:transform .22s ease}
+.src[open] .src-x{transform:rotate(180deg)}
+.src-bd{display:flex;flex-direction:column;gap:18px;padding-bottom:26px}
 
 /* ---------- critics / act ---------- */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
 .card-p{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;padding:34px 36px;display:flex;flex-direction:column;gap:16px}
+/* Inside a card the note is an aside, not a second paragraph. Four cards each
+   drawing a full-width rule put four horizontal lines through one grid; a short
+   left rule subordinates the note without cutting across the card. The notes
+   themselves stay on the page: three of the four are concessions or funding
+   disclosures, and folding those away would hide the parts this section exists
+   to show. See docs/design-brief.md on provenance. */
+.card-p .fn{border-top:none;padding-top:0;margin-top:2px;padding-left:14px;border-left:1px solid var(--prule)}
 .meth table{width:100%;border-collapse:collapse;font-size:14.5px}
 .meth th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--plabel);font-weight:400;padding:0 16px 10px 0;border-bottom:1px solid var(--prule)}
 .meth td{padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;color:var(--pb);line-height:1.6}
@@ -235,7 +303,20 @@ button.step{border:none;cursor:pointer;font-family:var(--sans)}
 a.q{color:var(--amber-deep);text-decoration:none;border-bottom:1px solid rgba(142,96,24,.35)}
 a.q:hover{border-bottom-color:var(--amber-deep)}
 .quote{font-family:var(--serif);font-size:clamp(23px,2.3vw,29px);font-style:italic;line-height:1.24}
-.fn{font-size:13px;line-height:1.55;color:var(--pm);border-top:1px solid var(--prule-soft);padding-top:14px}
+.fn{font-size:12.5px;line-height:1.55;color:var(--pm);border-top:1px solid var(--prule-soft);padding-top:14px}
+/* Measure, not width. These blocks inherited the full column width of whatever
+   chart they sit under and ran 108-147 characters per line, against a readable
+   45-75. Capped in `ch` so the cap tracks the font size: the cliff note already
+   carried max-width:820px and STILL set 147 characters, because a pixel cap does
+   not know the type has been made smaller. Measured, not guessed: 60ch sets 78
+   characters here and 56ch sets 73, because `ch` is the width of a zero and real
+   prose averages narrower. test.mjs asserts the rendered result, not this number,
+   so a font-size change fails there rather than silently widening the line. */
+.note,.note-i,.fn{max-width:56ch}
+/* A footnote marker only means something if the thing it annotates carries one
+   too, so these come in pairs: .fnr in the body, .fnm on the note. */
+.fnm{color:var(--plabel);font-weight:500;margin-right:5px}
+.fnr{font-size:.7em;line-height:0;vertical-align:super;color:var(--plabel);font-weight:500;margin-left:1px}
 .actgrid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:36px;align-items:start}
 .letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;display:flex;flex-direction:column}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
@@ -276,12 +357,25 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    30px. So the two-row treatment starts here. The app script reads this same
    900px figure for the shortened context line -- keep the two in step. */
 @media (max-width:900px){
-  .sticky-in{display:grid;grid-template-columns:1fr auto;grid-template-areas:"who unit" "figs figs";
-             height:auto;padding-top:8px;padding-bottom:9px;gap:7px 12px;overflow:visible}
+  /* The switch spans BOTH rows on the right instead of sharing the top one with
+     the context line. That row was a 10px caption next to a 44px control, so its
+     height was the control's and the space between them was dead: the bar stood
+     102px tall on a phone, 12% of the viewport, permanently. Spanning it costs
+     nothing and the bar comes down to ~70px.
+     The figures are content-width and clustered left, not three equal 1fr columns.
+     Equal columns pad every figure out to the width of the longest label, which is
+     where the gaps between the dollar amounts came from. */
+  .sticky-in{display:grid;grid-template-columns:minmax(0,1fr) auto;
+             grid-template-areas:"who unit" "figs unit";align-items:center;
+             height:auto;padding-top:9px;padding-bottom:10px;gap:6px 14px;overflow:visible}
   .sticky .who{display:block;grid-area:who;align-self:center;font-size:10.5px;letter-spacing:.07em;
                min-width:0;overflow:hidden;text-overflow:ellipsis}
-  .unit{grid-area:unit;justify-self:end}
-  .figs{grid-area:figs;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px}
+  /* 44px is the touch floor, so state it rather than deriving it from label
+     padding -- the padding is then free to shrink for width on a phone. */
+  .unit{grid-area:unit;justify-self:end;align-self:center;min-height:44px}
+  .unit-l{padding:12px 14px}
+  .figs{grid-area:figs;display:grid;grid-template-columns:repeat(3,minmax(0,auto));
+        justify-content:start;gap:2px 16px}
   .fig{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"dot t" "n n";
        gap:1px 6px;align-items:center;white-space:normal}
   .fig .dot{grid-area:dot;width:6px;height:6px}
@@ -305,14 +399,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .letter .hd,.letter .ft{padding-left:24px;padding-right:24px}
   .letter .ft p{text-align:left;max-width:none}
   .card-p{padding:26px 24px}
+  .src > summary{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k x" "s s";gap:8px 16px}
+  .src-k{grid-area:k} .src-s{grid-area:s} .src-x{grid-area:x}
+  .tally{grid-template-columns:14px auto;gap:4px 12px}
+  .tally .d{grid-column:1 / -1;padding-left:27px}
   .wf{gap:8px}
   .wcaps{gap:8px}
 
   /* touch targets */
-  .step{width:44px;height:44px}
+  .step{width:44px}
   .ctrl{height:50px}
   select.ctrl{height:50px}
-  .unit-l{padding:12px 16px}
   input[type=range]{height:44px;margin:2px 0 0}
   input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-10px}
   input[type=range]::-moz-range-thumb{width:20px;height:20px}
@@ -330,7 +427,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      second look -- the discarded pair wanted .wlab 11.5px and .wcap span 11.5px. */
   .eyebrow{font-size:12px}
   .lbl,.lbl.p{font-size:11.5px}
-  .note,.note-i,.fn{font-size:13.5px}
+  .note,.note-i,.fn{font-size:13px}
   .domain{font-size:12.5px}
   .meth td,.meth th{font-size:13.5px}
   .meth th{font-size:10.5px}
@@ -340,6 +437,46 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .wcap span{font-size:11px}
   .wlab.big{font-size:13px}
   .wlab.total{font-size:17px}
+}
+
+/* Below this width a waterfall column is under 76px, and neither the figure above
+   it nor the caption below it can fit in that. Both overflowed into their
+   neighbours -- the captions by 18px at 390px and 31px at 320px, so the colour keys
+   ran into each other, which is the exact failure keeping the keys in the captions
+   was meant to prevent. The figures scale to their column; the key stops being a
+   caption row and becomes a list, because aligning to a 56px column is worth
+   nothing if the words do not fit inside it. */
+@media (max-width:500px){
+  /* The column, not the type, is where the headroom comes from: at 320px five
+     columns share 272px, so every pixel of gap is worth a fifth of a pixel to each
+     of them. CI caught a 1px overflow here that macOS did not -- Linux sets the
+     same mono a shade wider -- so this leaves several px of slack, not none. */
+  .wf{gap:5px}
+  .wlab{font-size:clamp(8px,2.5vw,10px);letter-spacing:-.035em;margin-bottom:8px}
+  .wlab.big{font-size:clamp(8px,2.5vw,10px)}
+  .wlab.total{font-size:clamp(13px,4.3vw,17px);letter-spacing:-.03em}
+  .wkick{font-size:9px;letter-spacing:.08em;margin-bottom:6px}
+  .wcaps{flex-direction:column;gap:8px;margin-top:18px}
+  .wcap,.wcap-total{flex-grow:0;flex-basis:auto;align-items:flex-start}
+  /* The total has no swatch, so it needs the swatch's indent to line up with
+     the four captions above it. 11px swatch + 9px gap. */
+  .wcap-total{padding-left:20px}
+  .wcap span{font-size:12.5px}
+  .wf-gap{display:none}
+}
+
+/* Phone widths. Three figures plus the switch have to share one row here, so the
+   figures give up a little type and the switch gives up horizontal padding only --
+   its 44px height is a touch-target floor, not a style choice. */
+@media (max-width:440px){
+  .sticky-in{gap:5px 10px}
+  .figs{gap:2px 10px}
+  /* Scaled, not stepped: "Marketplace" is one word, so a grid column holding it
+     cannot shrink below its own width. Below ~360px that word is what would push
+     the figures into the switch, and only the type can give. */
+  .sticky .fig .t{font-size:clamp(9.5px,2.75vw,10px)}
+  .sticky .fig .n{font-size:clamp(12px,3.45vw,13px)}
+  .unit-l{padding:12px 11px;font-size:11.5px}
 }
 </style>
 
@@ -413,8 +550,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="note">Premium deduction + Medicare tax</div>
         </div>
         <div class="cmp-bars">
-          <div class="track"><div id="narrSmall" style="width:26.2%;background:var(--c1)"></div></div>
-          <div class="num" style="font-size:22px;color:var(--pm)" data-fig="emp.visible">$8,278</div>
+          <div class="cmp-plot">
+            <div class="track"><div id="narrSmall" style="width:26.2%;background:var(--c1)"></div></div>
+            <div class="num" id="narrSmallNum" style="font-size:22px;color:var(--pm);left:26.2%" data-fig="emp.visible">$8,278</div>
+          </div>
         </div>
       </div>
       <div class="cmp-row">
@@ -423,11 +562,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="note">Everything, all in</div>
         </div>
         <div class="cmp-bars">
-          <div class="track">
-            <div id="narrVis" style="width:26.2%;background:var(--c1)"></div>
-            <div id="narrRest" style="width:73.8%;background:var(--c2)"></div>
+          <div class="cmp-plot">
+            <div class="track">
+              <div id="narrVis" style="width:26.2%;background:var(--c1)"></div>
+              <div id="narrRest" style="width:73.8%;background:var(--c2)"></div>
+            </div>
+            <div class="num" style="font-size:30px;left:100%" data-fig="emp.total">$31,578</div>
           </div>
-          <div class="num" style="font-size:30px" data-fig="emp.total">$31,578</div>
         </div>
       </div>
     </div>
@@ -439,7 +580,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="rule" style="margin:56px 0 24px"></div>
     <div class="row" style="gap:56px;flex-wrap:wrap">
-      <p class="note" style="max-width:520px">All figures are <span data-uw="per">per year</span> unless labelled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark plan premiums are modeled.</p>
+      <p class="note">All figures are <span data-uw="per">per year</span> unless labelled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark plan premiums are modeled.</p>
       <p class="note" style="max-width:360px">Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
     </div>
   </div>
@@ -487,7 +628,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="row" style="gap:14px">
             <div class="field grow">
               <div class="lbl">Household</div>
-              <div class="ctrl" style="padding-right:6px"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="row" style="gap:4px"><button type="button" class="step" id="sizeDown">&minus;</button><button type="button" class="step" id="sizeUp">+</button></span></div>
+              <div class="ctrl" style="padding-right:0;overflow:hidden"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="steps"><button type="button" class="step" id="sizeDown" aria-label="Fewer people">&minus;</button><button type="button" class="step" id="sizeUp" aria-label="More people">+</button></span></div>
             </div>
             <div class="field grow">
               <div class="lbl">Ages</div>
@@ -537,29 +678,29 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   <!-- ---- 04 THE REVEAL ---- -->
   <section class="ink">
     <div class="wrap sec">
-      <div class="split">
+      <div class="split tie">
         <div class="stack" style="gap:16px">
           <div class="eyebrow i">02 &middot; The reveal</div>
           <h2>Here is <em style="font-style:italic;color:var(--c2)">the whole bill</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Four things add up to what your household&rsquo;s healthcare costs. You only ever see the first one &mdash; the rest is spent on your behalf.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. You only ever see the first one &mdash; the rest is spent on your behalf.</p>
       </div>
 
       <div class="wf" id="wf"></div>
-      <p class="note-i" id="wfNote" style="margin-top:18px"></p>
       <div class="wcaps" id="wcaps"></div>
+      <p class="note-i" id="wfNote" style="margin-top:24px"></p>
     </div>
   </section>
 
   <!-- ---- 05 THE COMPARISON ---- -->
   <section class="ink">
     <div class="wrap sec" style="display:flex;flex-direction:column;gap:30px">
-      <div class="split">
+      <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">03 &middot; The comparison</div>
           <h2>Three ways to pay for the same care.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Nobody agrees on what single-payer would cost. So pick whose estimate you trust &mdash; including the ones written to make it look bad.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust &mdash; including the ones written to make it look bad.</p>
       </div>
 
       <div class="stack" style="gap:14px">
@@ -652,12 +793,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   <!-- ---- 04 THE CLIFF ---- -->
   <section class="ink" id="cliff">
     <div class="wrap sec" style="display:flex;flex-direction:column;gap:32px">
-      <div class="split">
+      <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">04 &middot; The cliff</div>
           <h2>One dollar, <em style="font-style:italic;color:var(--c2)">nine thousand dollars</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im);align-self:end">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
       </div>
 
       <div class="cliffstats">
@@ -668,7 +809,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
       <div class="chartbox"><div id="cliffChart"></div></div>
 
-      <p class="note-i" style="max-width:820px">The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper limit, which flattened this edge entirely. They expired on <b style="color:var(--ib);font-weight:400">31 December 2025</b>. Everything above comes from the poverty guidelines and the IRS applicable-percentage table &mdash; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">both are on the methodology page</a>.</p>
+      <p class="note-i">The enhanced credits enacted in 2021 capped contributions at 8.5% of income and flattened this edge entirely. They expired on <b style="color:var(--ib);font-weight:400">31 December 2025</b>. The poverty guidelines and IRS applicable-percentage table behind these figures are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>.</p>
     </div>
   </section>
 
@@ -677,86 +818,97 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 <!-- ============ 05 IN LIVES ============ -->
 <section class="paper" id="lives">
   <div class="wrap sec">
-    <div class="split" style="margin-bottom:48px">
+    <div class="split tie" style="margin-bottom:48px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">05 &middot; The other number</div>
         <h2>Cost is not the only thing being measured.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">Everything above this point is denominated in dollars, because dollars are what a calculator can show you. They are not the only currency in this argument.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">Everything above this point is denominated in dollars, because dollars are what a calculator can show you. They are not the only currency in this argument.</p>
     </div>
 
     <div class="livesgrid">
-      <div class="stack" style="gap:22px">
+      <div class="stack" style="gap:24px">
         <div class="bigstat">
           <div class="n">114,174</div>
           <div class="l">deaths a year that researchers at Yale project universal coverage would prevent</div>
         </div>
-        <div class="stack" style="gap:14px">
-          <div class="row" style="gap:14px;align-items:baseline"><span class="num" style="font-size:23px;color:var(--amber-deep)">62,863</span><span class="body" style="font-size:15px">from extending coverage to those without it</span></div>
-          <div class="row" style="gap:14px;align-items:baseline"><span class="num" style="font-size:23px;color:var(--amber-deep)">51,311</span><span class="body" style="font-size:15px">from reversing the coverage policies enacted since 2025</span></div>
+        <div class="stack" style="gap:13px">
+          <div class="lbl p">Made up of</div>
+          <div class="tally">
+            <span class="op"></span>
+            <span class="v">62,863</span>
+            <span class="d">from extending coverage to people who have none</span>
+            <span class="op">+</span>
+            <span class="v">51,311</span>
+            <span class="d">from reversing the coverage policies enacted since 2025</span>
+          </div>
         </div>
+        <p class="note" style="max-width:430px">The second of those is the policy change at the top of this page. Five million people losing coverage is not only a budget line.</p>
       </div>
 
-      <div class="stack" style="gap:20px">
-        <p class="body">That second figure is the same policy change described at the top of this page. Five million people losing coverage is not only a budget line.</p>
-        <div class="card-p" style="border-left:2px solid var(--amber-deep)">
-          <div class="lbl p">The finding that matters most here</div>
-          <div class="quote" style="font-size:26px">Nearly half of the coverage-related deaths prevented &mdash; <span style="color:var(--amber-deep)">29,631</span> &mdash; would be among people who already have insurance.</div>
-          <p class="body">The underinsured: households with coverage on paper and deductibles they cannot clear. That is the argument this whole site makes, counted in a different unit. Having a plan is not the same as being able to use it.</p>
-        </div>
+      <div class="card-p" style="border-left:2px solid var(--amber-deep)">
+        <div class="lbl p">The finding that matters most here</div>
+        <div class="quote" style="font-size:26px">Nearly half of the coverage-related deaths prevented &mdash; <span style="color:var(--amber-deep)">29,631</span> &mdash; would be among people who already have insurance.</div>
+        <p class="body">The underinsured: households with coverage on paper and deductibles they cannot clear. That is the argument this whole site makes, counted in a different unit. Having a plan is not the same as being able to use it.</p>
       </div>
     </div>
 
-    <div class="disclose">
-      <div class="lbl p">Read this one carefully</div>
-      <div class="grid2" style="gap:28px;margin-top:4px">
-        <p class="body" style="font-size:15px">This is a <b style="font-weight:500;color:var(--pk)">preprint</b> and has not been peer reviewed. Its senior author served as an unpaid adviser to Sen. Sanders&rsquo; office while the Medicare for All legislation was drafted, and has testified in support of it. We say that for the same reason we tell you the Mercatus study was Koch-funded: you should know who produced a number before you weigh it.</p>
-        <p class="body" style="font-size:15px">It also shares an assumption with the cost figures above &mdash; that provider payments fall to Medicare rates. Blahous called that assumption &ldquo;relatively generous&rdquo; and rejected the savings it produces; this study builds on it. The two are not independent confirmations of each other. They are the same bet, framed in opposite directions.</p>
+    <details class="src">
+      <summary>
+        <span class="src-k">Who produced this number</span>
+        <span class="src-s">A preprint, not peer reviewed &mdash; and its senior author advised Sen. Sanders&rsquo; office.</span>
+        <svg class="src-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="src-bd">
+        <div class="grid2" style="gap:28px">
+          <p class="body" style="font-size:15px">The preprint has not been peer reviewed. Its senior author served as an unpaid adviser to Sen. Sanders&rsquo; office while the Medicare for All legislation was drafted, and has testified in support of it. We say that for the same reason we tell you the Mercatus study was Koch-funded: you should know who produced a number before you weigh it.</p>
+          <p class="body" style="font-size:15px">It also shares an assumption with the cost figures above &mdash; that provider payments fall to Medicare rates. Blahous called that assumption &ldquo;relatively generous&rdquo; and rejected the savings it produces; this study builds on it. The two are not independent confirmations of each other. They are the same bet, framed in opposite directions.</p>
+        </div>
+        <p class="fn">Pandey, Wells, Ye, Fitzpatrick &amp; Galvani, <i>Projected economic gains and lives saved under universal healthcare in the United States</i>, Yale School of Public Health, 2026. The same team&rsquo;s 2020 <i>Lancet</i> paper, which was peer reviewed, put the figure at roughly 68,000 lives and $450&nbsp;billion.</p>
       </div>
-      <p class="fn" style="margin-top:4px">Pandey, Wells, Ye, Fitzpatrick &amp; Galvani, <i>Projected economic gains and lives saved under universal healthcare in the United States</i>, Yale School of Public Health, 2026. The same team&rsquo;s 2020 <i>Lancet</i> paper, which was peer reviewed, put the figure at roughly 68,000 lives and $450&nbsp;billion.</p>
-    </div>
+    </details>
   </div>
 </section>
 
 
 <!-- ============ 06 THE OBJECTIONS -->
-<section class="paper">
+<section class="paper" id="objections">
   <div class="wrap sec">
-    <div class="split" style="margin-bottom:52px">
+    <div class="split tie" style="margin-bottom:52px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">06 &middot; The other side</div>
         <h2>The objections, taken seriously.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">These are the four arguments that actually land. We are not going to pretend they are stupid, and we are not going to skip the ones that hurt.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">These are the four arguments that actually land. We are not going to pretend they are stupid, and we are not going to skip the ones that hurt.</p>
     </div>
 
     <div class="grid2">
       <div class="card-p">
         <div class="lbl p">Objection 01</div>
         <div class="quote">&ldquo;My taxes would go through the roof.&rdquo;</div>
-        <p class="body">Yes. Your taxes would rise, and every honest model says so &mdash; the ones above included. The question is whether the <em>total</em> shrinks, because the premium line goes to zero at the same time. For this household the tax increase runs <span style="color:var(--amber-deep)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span> depending on whose model you pick, against <span style="color:var(--amber-deep)" data-fig="emp.replaced">$30,200</span> in premiums, deductibles and copays it replaces.</p>
-        <p class="fn">Where it is genuinely close: households above roughly $250,000 pay more under most models. If that is you, the calculator will say so.</p>
+        <p class="body">Yes. Your taxes would rise, and every honest model says so &mdash; the ones above included. The question is whether the <em>total</em> shrinks, because the premium line goes to zero at the same time. For this household the tax increase runs <span style="color:var(--amber-deep)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span> depending on whose model you pick, against <span style="color:var(--amber-deep)" data-fig="emp.replaced">$30,200</span> in premiums, deductibles and copays it replaces.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>Households above roughly $250,000 pay more under most models. If that is you, the calculator will say so.</p>
       </div>
 
       <div class="card-p">
         <div class="lbl p">Objection 02</div>
         <div class="quote">&ldquo;I&rsquo;d be stuck waiting months for care.&rdquo;</div>
-        <p class="body">Wait times are real in some universal systems and not in others. Canada&rsquo;s elective queues are long; Germany&rsquo;s multi-payer sickness funds and France&rsquo;s statutory system cover everyone without them. How a system is designed and paid for matters more than whether it is single-payer &mdash; a distinction the debate usually flattens.</p>
-        <p class="fn">The honest counter-question: the US already rations by price. KFF&rsquo;s surveys have repeatedly found around four in ten adults saying they or a family member delayed or skipped care because of cost. That is a waiting list too &mdash; it is just invisible.</p>
+        <p class="body">Wait times are real in some universal systems and not in others. Canada&rsquo;s elective queues are long; Germany&rsquo;s multi-payer sickness funds and France&rsquo;s statutory system cover everyone without them. How a system is designed and paid for matters more than whether it is single-payer &mdash; a distinction the debate usually flattens.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>The US already rations by price. KFF&rsquo;s surveys have repeatedly found around four in ten adults saying they or a family member delayed or skipped care because of cost. That is a waiting list too &mdash; it is just invisible.</p>
       </div>
 
       <div class="card-p">
         <div class="lbl p">Objection 03</div>
         <div class="quote">&ldquo;I&rsquo;d lose the doctor I have now.&rdquo;</div>
-        <p class="body">Worth checking against what you have today. Narrow networks already decide this for most people: your plan drops a hospital system, your employer switches carriers, you change jobs. A single national network is the version where your doctor does not depend on your employer&rsquo;s procurement decisions.</p>
-        <p class="fn">Fair concession: transition is disruptive, and providers who do well under commercial rates would be paid less.</p>
+        <p class="body">Worth checking against what you have today. Narrow networks already decide this for most people: your plan drops a hospital system, your employer switches carriers, you change jobs. A single national network is the version where your doctor does not depend on your employer&rsquo;s procurement decisions.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>Transition is disruptive, and providers who do well under commercial rates would be paid less.</p>
       </div>
 
       <div class="card-p">
         <div class="lbl p">Objection 04</div>
         <div class="quote">&ldquo;The country simply cannot afford it.&rdquo;</div>
-        <p class="body">The headline figure is enormous &mdash; on the order of $30&ndash;40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.</p>
-        <p class="fn">The Mercatus study is the useful one here: funded by opponents and built to be damning, it still showed lower national spending than the status quo &mdash; but only under the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
+        <p class="body">The headline figure is enormous &mdash; on the order of $30&ndash;40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>The Mercatus study is the useful one here. Funded by opponents and built to be damning, it still showed lower national spending than the status quo. But that result depends on the bill&rsquo;s own assumption that providers are paid Medicare rates &mdash; a reading Blahous himself rejects. Both halves of that are true.</p>
       </div>
     </div>
 
@@ -771,12 +923,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 <!-- ============ 07 WRITE YOUR REP ============ -->
 <section class="paper">
   <div class="wrap sec">
-    <div class="split" style="margin-bottom:46px">
+    <div class="split tie" style="margin-bottom:46px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">07 &middot; Do something with it</div>
         <h2>Send them your number.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">Staffers count letters by position and topic. A specific figure from a constituent in the district reads differently than a form letter &mdash; so this one is built from your own numbers.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">Staffers count letters by position and topic. A specific figure from a constituent in the district reads differently than a form letter &mdash; so this one is built from your own numbers.</p>
     </div>
 
     <div class="actgrid">
@@ -865,12 +1017,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
 <section class="paper view" id="methodology" hidden>
   <div class="wrap sec meth">
-    <div class="split" style="margin-bottom:52px">
+    <div class="split tie" style="margin-bottom:52px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">08 &middot; Methodology</div>
         <h2>Check our work.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65;align-self:end">This page exists because the argument on the rest of the site is only worth as much as the arithmetic behind it. Everything here is either a table you can look up or a sum you can redo.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">This page exists because the argument on the rest of the site is only worth as much as the arithmetic behind it. Everything here is either a table you can look up or a sum you can redo.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
@@ -916,7 +1068,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>300% &ndash; 400%</td><td class="num">9.96%</td><td class="num">9.96%</td></tr>
         <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">400% and above</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit at all</td></tr>
       </table>
-      <p class="fn" style="max-width:760px;border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
+      <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
@@ -927,7 +1079,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Family</td><td class="num">$26,993</td><td class="num">$6,850</td><td class="num">$20,143</td></tr>
         <tr><td>Single</td><td class="num">$9,325</td><td class="num">$1,440</td><td class="num">$7,885</td></tr>
       </table>
-      <p class="fn" style="max-width:760px;border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Medicare payroll tax is 1.45% of wages, plus 0.9% above $200,000 (single) or $250,000 (joint). COBRA is capped by statute at 102% of the full premium.</p>
+      <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Medicare payroll tax is 1.45% of wages, plus 0.9% above $200,000 (single) or $250,000 (joint). COBRA is capped by statute at 102% of the full premium.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
@@ -998,7 +1150,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Household count</td><td>US Census Bureau, Total Households, 2025</td></tr>
         <tr><td>Plan premiums (planned)</td><td>CMS Exchange and State-based Exchange Public Use Files</td></tr>
       </table>
-      <p class="fn" style="max-width:760px;border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Found an error? That is the most useful thing you could send us. The calculation layer is a single file with no dependencies, and every constant on this page appears in it by name.</p>
+      <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Found an error? That is the most useful thing you could send us. The calculation layer is a single file with no dependencies, and every constant on this page appears in it by name.</p>
     </div>
   </div>
 </section>
@@ -1117,6 +1269,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // narrative bars
     var vis = S.breakdown.onPaystub / S.breakdown.whole * 100;
     byId("narrSmall").style.width = vis.toFixed(1) + "%";
+    byId("narrSmallNum").style.left = vis.toFixed(1) + "%";
     byId("narrVis").style.width   = vis.toFixed(1) + "%";
     byId("narrRest").style.width  = (100 - vis).toFixed(1) + "%";
 
@@ -1189,11 +1342,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     }
 
     html += '<div class="wdiv"></div>';
-    html += '<div class="wcol" style="flex-grow:1.35"><div class="wlab total">' + fmt(whole) + '</div>' +
+    html += '<div class="wcol wcol-total"><div class="wlab total">' + fmt(whole) + '</div>' +
             '<div class="band top bot" style="height:' + (whole / scale * 100).toFixed(3) +
             '%;background:linear-gradient(to bottom,#E8AC53,#C9832F)"></div></div>';
-    caps += '<div style="width:2px;flex-shrink:0"></div>' +
-            '<div class="wcap" style="flex-grow:1.35"><span style="color:var(--ik);font-weight:500">' +
+    caps += '<div class="wf-gap"></div>' +
+            '<div class="wcap wcap-total"><span style="color:var(--ik);font-weight:500">' +
             (R.uninsured ? "What you spend<br>and what you risk" : "What your household<br>actually costs") + '</span></div>';
 
     byId("wf").innerHTML = html;
@@ -1327,17 +1480,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       '" fill="#E8E6E1" font-family="IBM Plex Mono, monospace" font-size="' + fB + '">' + aNumTxt + '</text>';
 
     // where this household currently sits
-    var you = null;
+    var you = null, youY = Ht - mB - 10;
     for (i = 0; i < pts.length; i++) if (pts[i].income >= state.income){ you = pts[i]; break; }
     if (you && state.income >= lo && state.income <= hi){
       var xy = X(state.income), yy = Y(you.household);
-      g += '<line x1="' + xy.toFixed(1) + '" y1="' + mT + '" x2="' + xy.toFixed(1) + '" y2="' + (Ht - mB) +
+      // The label below is centred ON this guide, so a full-height line ran straight
+      // through the middle of the word at every income. It stops just above the cap
+      // height instead, which reads as the guide terminating in its own caption and
+      // cannot collide at any size. A knockout box was the alternative, but it would
+      // have to repaint the gridlines behind it, and the guide is the lesser mark.
+      var youStop = Math.max(mT + 6, youY - fA * 0.72 - 5);
+      g += '<line x1="' + xy.toFixed(1) + '" y1="' + mT + '" x2="' + xy.toFixed(1) + '" y2="' + youStop.toFixed(1) +
            '" stroke="#3FB5AE" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>';
       g += '<circle cx="' + xy.toFixed(1) + '" cy="' + yy.toFixed(1) + '" r="5" fill="#3FB5AE" stroke="#12141A" stroke-width="2"/>';
       // Label sits at the FOOT of the guide: the bottom of the plot is always free, and
       // it sits next to the income axis the marker actually refers to.
       var anchor = xy > Wd - 60 ? "end" : (xy < mL + 60 ? "start" : "middle");
-      g += '<text x="' + xy.toFixed(1) + '" y="' + (Ht - mB - 10) + '" text-anchor="' + anchor +
+      g += '<text x="' + xy.toFixed(1) + '" y="' + youY.toFixed(1) + '" text-anchor="' + anchor +
            '" fill="#3FB5AE" font-family="IBM Plex Mono, monospace" font-size="' + fA + '">you</text>';
     }
 
