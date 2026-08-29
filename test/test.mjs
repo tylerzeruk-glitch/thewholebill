@@ -216,15 +216,18 @@ test('comparison: every bar draws the figure printed beside it', async b => {
       await p.waitForTimeout(250);
       const r = await p.evaluate(()=>{
         const n=e=>+document.querySelector(e).textContent.replace(/[^0-9]/g,'');
-        const wid=e=>document.querySelector(e).getBoundingClientRect().width;
-        // dollars per pixel, from the bar that is drawn at full track width
-        const scale = n('[data-fig="emp.total"]') / wid('#empFill');
-        const uni=[...document.querySelectorAll('#uBar .bar-fill')]
+        // solid segments only: a hatched one is money the household does not bear
+        const solid=id=>[...document.querySelectorAll('#'+id+' > div')]
+          .filter(e=>!e.classList.contains('bar-ghost'))
           .reduce((a,e)=>a+e.getBoundingClientRect().width,0);
+        const all=id=>[...document.querySelectorAll('#'+id+' > div')]
+          .reduce((a,e)=>a+e.getBoundingClientRect().width,0);
+        // the employer bar is drawn from its own total, so it sets the scale
+        const scale = n('[data-fig="emp.total"]') / all('empBar');
         return [
-          { k:'employer',    drawn: wid('#empFill')*scale, said:n('[data-fig="emp.total"]') },
-          { k:'marketplace', drawn: wid('#mktFill')*scale, said:n('[data-fig="mkt.household"]') },
-          { k:'universal',   drawn: uni*scale,             said:n('#uVal') },
+          { k:'employer',    drawn: solid('empBar')*scale, said:n('[data-fig="emp.total"]') },
+          { k:'marketplace', drawn: solid('mktBar')*scale, said:n('[data-fig="mkt.household"]') },
+          { k:'universal',   drawn: solid('uBar')*scale,   said:n('#uVal') },
         ].map(x=>({...x, err: Math.abs(x.drawn-x.said)/x.said}));
       });
       for (const x of r)
@@ -233,6 +236,29 @@ test('comparison: every bar draws the figure printed beside it', async b => {
     }
     await p.close();
   }
+});
+
+/* Every bar is now built from the same parts the waterfall uses, so a segment that
+ * exists in one section has to exist in the other. This is the guard against the
+ * two drifting apart again -- they already had, by the Medicare payroll tax. */
+test('comparison: bars are built from the route breakdown', async b => {
+  const p = await page(b,1440,900);
+  const shape = await p.evaluate(()=>{
+    const keys=id=>[...document.querySelectorAll('#'+id+' > div')].map(e=>e.dataset.k);
+    const lines=id=>document.querySelector('#'+id).innerText.trim().split('\n').filter(Boolean).length;
+    return { emp:keys('empBar'), mkt:keys('mktBar'), uni:keys('uBar'),
+             empK:lines('empSub'), mktK:lines('mktSub'), uniK:lines('uniSub') };
+  });
+  ok('employer bar has its four components',
+     shape.emp.join() === 'worker,employer,oop,tax', shape.emp.join());
+  ok('marketplace bar puts the subsidy last, after what you bear',
+     shape.mkt.join() === 'netPremium,oop,tax,subsidy', shape.mkt.join());
+  ok('universal bar carries its financing components',
+     shape.uni.join() === 'premium,payroll', shape.uni.join());
+  ok('every segment is named in its key',
+     shape.empK === shape.emp.length && shape.mktK === shape.mkt.length && shape.uniK === shape.uni.length,
+     `${shape.empK}/${shape.emp.length}, ${shape.mktK}/${shape.mkt.length}, ${shape.uniK}/${shape.uni.length}`);
+  await p.close();
 });
 
 /* 73% of the universal figure is the employer payroll tax -- employer-side money,
@@ -249,7 +275,8 @@ test('comparison: the universal bar accounts for its whole figure', async b => {
     for (const unit of ['y','m']) {
       const r = await p.evaluate(()=>{
         const n=e=>+document.querySelector(e).textContent.replace(/[^0-9]/g,'');
-        const scale = n('[data-fig="emp.total"]')/document.querySelector('#empFill').getBoundingClientRect().width;
+        const empW=[...document.querySelectorAll('#empBar > div')].reduce((a,e)=>a+e.getBoundingClientRect().width,0);
+        const scale = n('[data-fig="emp.total"]')/empW;
         const segs=[...document.querySelectorAll('#uBar .bar-fill')];
         const caption=document.querySelector('#uniSub').innerText.trim().split('\n').filter(Boolean);
         return { n:segs.length, said:n('#uVal'), captionLines:caption.length,
@@ -266,6 +293,91 @@ test('comparison: the universal bar accounts for its whole figure', async b => {
     await p.locator('#unit').click(); await p.waitForTimeout(250);
   }
   await p.close();
+});
+
+/* The savings panel was pinned to the employer route no matter what the household
+ * selected. An uninsured household was told it would keep $22,414 a year on the
+ * same screen that said it spends $6,878 -- it would in fact pay $2,879 MORE. The
+ * uninsured case is the one that matters: the comparison has to be able to come
+ * out negative, and say so, or the whole section is advocacy rather than a
+ * calculator. */
+test('savings: the panel answers for the route you picked', async b => {
+  const p = await page(b,1440,900);
+  const n = s => +s.replace(/[^0-9]/g,'');
+  for (const route of ['employer','marketplace','none']) {
+    await p.locator(`#route button[data-r="${route}"]`).click();
+    await p.waitForTimeout(300);
+    const r = await p.evaluate(()=>{
+      const t=e=>document.querySelector(e).textContent.trim();
+      return { live:t('[data-fig="route.whole"]'), borne:t('[data-fig="route.borne"]'),
+               uni:t('#uVal'), save:t('#save'), decade:t('#decade'), label:t('#saveLbl'),
+               neg:document.querySelector('.save').classList.contains('neg') };
+    });
+    const expected = Math.abs(n(r.borne) - n(r.uni));
+    ok(`${route}: saving is |what you bear − universal|`, Math.abs(n(r.save)-expected) <= 1,
+       `${r.save} vs $${expected.toLocaleString()}`);
+    ok(`${route}: decade is ten times it`, Math.abs(n(r.decade)-n(r.save)*10) <= 10,
+       `${r.decade}`);
+    const shouldBeNeg = n(r.borne) < n(r.uni);
+    ok(`${route}: label matches the direction`, r.neg === shouldBeNeg &&
+       /would (keep|pay)/.test(r.label) && (shouldBeNeg ? /pay/ : /keep/).test(r.label),
+       `"${r.label}" neg=${r.neg}`);
+  }
+  await p.close();
+});
+
+/* One household, one route, one number. marketplaceCost.household left the
+ * Medicare payroll tax out while routeBreakdown put it in, so the same household's
+ * marketplace cost read $14,532 in the comparison bars and $15,909 in the
+ * waterfall -- and the gap ran in the direction that flattered this site. */
+test('figures: the two sections agree on what a route costs', async b => {
+  const p = await page(b,1440,900);
+  const n = s => +s.replace(/[^0-9]/g,'');
+  for (const route of ['employer','marketplace','none']) {
+    await p.locator(`#route button[data-r="${route}"]`).click();
+    await p.waitForTimeout(300);
+    const r = await p.evaluate(()=>{
+      const t=e=>document.querySelector(e).textContent.trim();
+      const bands=[...document.querySelectorAll('#wf .wcol:not(.wcol-total) .wlab')].map(e=>e.textContent);
+      return { whole:t('#wf .wcol-total .wlab'), borne:t('[data-fig="route.borne"]'),
+               mkt:t('[data-fig="mkt.household"]'), bands };
+    });
+    // the waterfall's total column is the whole bill for this route
+    ok(`${route}: waterfall total is the route's whole bill`, n(r.whole) > 0, r.whole);
+    if (route === 'marketplace')
+      ok('marketplace bar matches what the waterfall says the household bears',
+         Math.abs(n(r.mkt) - n(r.borne)) <= 1, `bar ${r.mkt} vs borne $${n(r.borne).toLocaleString()}`);
+  }
+  await p.close();
+});
+
+/* The strip's labels name marks at particular points, so above 900px they sit on
+ * those points. "today" moved with the route once the panel stopped being pinned
+ * to the employer figure, and a label that stays at the right edge while its mark
+ * slides to 21% is worse than no label. Below 900px they cannot all fit on their
+ * marks -- 13px of overlap at 761px, 57px at 390px -- so they become a legend. */
+test('range strip: labels sit clear of each other and of the strip', async b => {
+  for (const w of [1920,1440,1100,901,900,760,390,320]) {
+    const p = await page(b, w, 900, w < 500);
+    for (const route of ['employer','marketplace','none']) {
+      await p.locator(`#route button[data-r="${route}"]`).click();
+      await p.waitForTimeout(250);
+      const r = await p.evaluate(()=>{
+        const vis=[...document.querySelectorAll('.rlabels > span')].filter(e=>e.offsetParent!==null);
+        const box=document.querySelector('.rlabels').getBoundingClientRect();
+        const rs=vis.map(e=>{const b=e.getBoundingClientRect();return [b.left,b.right];});
+        let ov=0;
+        for(let i=0;i<rs.length;i++) for(let j=i+1;j<rs.length;j++)
+          ov=Math.max(ov, Math.min(rs[i][1],rs[j][1])-Math.max(rs[i][0],rs[j][0]));
+        return { ov:Math.max(0,ov),
+                 out:Math.max(0, box.left-Math.min(...rs.map(x=>x[0])),
+                                 Math.max(...rs.map(x=>x[1]))-box.right) };
+      });
+      ok(`${w}px ${route}: labels do not collide`, r.ov < 0.5, `${r.ov.toFixed(1)}px`);
+      ok(`${w}px ${route}: labels stay on the strip`, r.out < 0.5, `${r.out.toFixed(1)}px`);
+    }
+    await p.close();
+  }
 });
 
 test('sticky: the bar never scrolls sideways', async b => {

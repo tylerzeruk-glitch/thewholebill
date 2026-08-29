@@ -167,17 +167,24 @@
     var oop = o.oop != null ? o.oop
             : Math.max(OOP.marketplaceFamilyFloor, OOP.marketplacePerPerson * o.size);
     if (o.size === 1) oop = o.oop != null ? o.oop : OOP.marketplaceSingle;
+    // The Medicare payroll tax belongs here for the same reason it belongs in
+    // employerCost: the household pays it on this route too. Leaving it out made
+    // the SAME household's marketplace cost $14,532 in the comparison bars and
+    // $15,909 in the waterfall, which builds its own total from routeBreakdown.
+    // One page, one household, two numbers -- and the gap ran in the direction
+    // that flattered this site's conclusion.
+    var tax = medicareTax(o.income, o.size > 1 ? 'joint' : 'single');
 
     return {
       benchmark: benchmark, applicablePercentage: pct, expectedContribution: expected,
-      subsidy: subsidy, net: net, oop: oop,
-      household: net + oop,          // what the household pays
-      total: benchmark + oop,        // total cost of the care, however routed
+      subsidy: subsidy, net: net, oop: oop, medicareTax: tax,
+      household: net + oop + tax,          // what the household bears
+      total: benchmark + oop + tax,        // the whole bill, however routed
       fplRatio: ratio,
       overCliff: pct === null,
       chipLikely: kids > 0 && ratio <= area.chipUpTo,
       area: area,
-      basis: { benchmark: 'modeled', applicablePercentage: 'statutory', oop: 'modeled' }
+      basis: { benchmark: 'modeled', applicablePercentage: 'statutory', oop: 'modeled', medicareTax: 'statutory' }
     };
   }
 
@@ -378,6 +385,16 @@
 
   /* ------------------------------------------------------------- the bundle */
 
+  // The route the household is actually ON decides what universal coverage would
+  // save it. Pinning this to the employer route told an uninsured household it
+  // would keep $22,414 a year when the same page had just said it spends $6,878 --
+  // it would in fact pay $2,879 MORE. Pass `route` to get the honest figure.
+  function savingsFor(route, o) {
+    var uni = universalCost(o.model || 'sanders1', o.income, o.size);
+    var borne = routeBreakdown(route || 'employer', o).borne;
+    return { borne: borne, universal: uni.total, delta: borne - uni.total };
+  }
+
   function summary(o) {
     var opts = {
       income: o.income, size: o.size, adults: o.adults,
@@ -394,7 +411,7 @@
       marketplace: mkt,
       universal: uni,
       universalRange: { lo: Math.min.apply(null, all), hi: Math.max.apply(null, all) },
-      savings: emp.total - uni.total,
+      savings: emp.total - uni.total,          // employer route; see savingsFor()
       decade: (emp.total - uni.total) * 10,
       cobra: cobra(opts),
       fpl: { line: povertyLine(o.size, opts.region), ratio: fplRatio(o.income, o.size, opts.region) },
@@ -411,6 +428,6 @@
     routeBreakdown: routeBreakdown, UNINSURED: UNINSURED,
     cliffCurve: cliffCurve, cliffDrop: cliffDrop,
     BLAHOUS: BLAHOUS, BLAHOUS_ADDER: BLAHOUS_ADDER,
-    universalCost: universalCost, cobra: cobra, summary: summary
+    universalCost: universalCost, cobra: cobra, summary: summary, savingsFor: savingsFor
   };
 }));
