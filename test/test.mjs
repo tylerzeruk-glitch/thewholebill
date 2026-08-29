@@ -183,6 +183,25 @@ test('splits: heading and supporting line share a baseline', async b => {
   }
 });
 
+/* The dateline's amber rule and the area-picker buttons opposite it are both real
+ * edges, so they align edge to edge. A 6px margin used to hold them apart, which
+ * read as a mistake rather than a decision. Only meaningful while the hero is two
+ * columns -- below 1101px the dateline stacks underneath. */
+test('hero: the dateline ends on the same line as the controls', async b => {
+  for (const w of [1101,1250,1440,1920]) {
+    const p = await page(b,w,1000);
+    const d = await p.evaluate(()=>{
+      const hero=document.querySelector('.hero-inner');
+      if (getComputedStyle(hero).gridTemplateColumns.split(' ').length < 2) return null;
+      const bot=e=>document.querySelector(e).getBoundingClientRect().bottom;
+      return +(bot('.dateline') - bot('#areapick')).toFixed(1);
+    });
+    if (d === null) continue;
+    ok(`${w}px: dateline bottom meets the controls`, Math.abs(d) < 0.5, `Δ${d}px`);
+    await p.close();
+  }
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
