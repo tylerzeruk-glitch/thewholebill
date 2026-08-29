@@ -203,11 +203,11 @@ test('hero: the dateline ends on the same line as the controls', async b => {
 });
 
 /* Three bars compared by length, so each one's SOLID length has to carry the
- * figure printed beside it. The marketplace bar did not: its hatched subsidy ran
- * at full height on the end of it, drawing 632px -- $27,402 at that chart's scale
- * -- against a printed $14,532. The hatch keeps its exact width and position (it
- * still measures the subsidy, and still ends at the true cost of the care); only
- * its weight changed. This asserts the part a reader compares. */
+ * figure printed beside it. This asserts the solid part only.
+ * The marketplace row also carries a hatched subsidy on the end of it, drawn at
+ * full height by deliberate choice -- its texture and its own caption line carry
+ * the distinction -- so that row's OVERALL length is longer than its figure.
+ * Do not extend this to total width; the hatch is not part of the number. */
 test('comparison: every bar draws the figure printed beside it', async b => {
   for (const [w,h] of [[1440,900],[1200,900]]) {
     const p = await page(b,w,h);
