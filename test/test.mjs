@@ -216,15 +216,18 @@ test('comparison: every bar draws the figure printed beside it', async b => {
       await p.waitForTimeout(250);
       const r = await p.evaluate(()=>{
         const n=e=>+document.querySelector(e).textContent.replace(/[^0-9]/g,'');
-        const wid=e=>document.querySelector(e).getBoundingClientRect().width;
-        // dollars per pixel, from the bar that is drawn at full track width
-        const scale = n('[data-fig="emp.total"]') / wid('#empFill');
-        const uni=[...document.querySelectorAll('#uBar .bar-fill')]
+        // solid segments only: a hatched one is money the household does not bear
+        const solid=id=>[...document.querySelectorAll('#'+id+' > div')]
+          .filter(e=>!e.classList.contains('bar-ghost'))
           .reduce((a,e)=>a+e.getBoundingClientRect().width,0);
+        const all=id=>[...document.querySelectorAll('#'+id+' > div')]
+          .reduce((a,e)=>a+e.getBoundingClientRect().width,0);
+        // the employer bar is drawn from its own total, so it sets the scale
+        const scale = n('[data-fig="emp.total"]') / all('empBar');
         return [
-          { k:'employer',    drawn: wid('#empFill')*scale, said:n('[data-fig="emp.total"]') },
-          { k:'marketplace', drawn: wid('#mktFill')*scale, said:n('[data-fig="mkt.household"]') },
-          { k:'universal',   drawn: uni*scale,             said:n('#uVal') },
+          { k:'employer',    drawn: solid('empBar')*scale, said:n('[data-fig="emp.total"]') },
+          { k:'marketplace', drawn: solid('mktBar')*scale, said:n('[data-fig="mkt.household"]') },
+          { k:'universal',   drawn: solid('uBar')*scale,   said:n('#uVal') },
         ].map(x=>({...x, err: Math.abs(x.drawn-x.said)/x.said}));
       });
       for (const x of r)
@@ -233,6 +236,29 @@ test('comparison: every bar draws the figure printed beside it', async b => {
     }
     await p.close();
   }
+});
+
+/* Every bar is now built from the same parts the waterfall uses, so a segment that
+ * exists in one section has to exist in the other. This is the guard against the
+ * two drifting apart again -- they already had, by the Medicare payroll tax. */
+test('comparison: bars are built from the route breakdown', async b => {
+  const p = await page(b,1440,900);
+  const shape = await p.evaluate(()=>{
+    const keys=id=>[...document.querySelectorAll('#'+id+' > div')].map(e=>e.dataset.k);
+    const lines=id=>document.querySelector('#'+id).innerText.trim().split('\n').filter(Boolean).length;
+    return { emp:keys('empBar'), mkt:keys('mktBar'), uni:keys('uBar'),
+             empK:lines('empSub'), mktK:lines('mktSub'), uniK:lines('uniSub') };
+  });
+  ok('employer bar has its four components',
+     shape.emp.join() === 'worker,employer,oop,tax', shape.emp.join());
+  ok('marketplace bar puts the subsidy last, after what you bear',
+     shape.mkt.join() === 'netPremium,oop,tax,subsidy', shape.mkt.join());
+  ok('universal bar carries its financing components',
+     shape.uni.join() === 'premium,payroll', shape.uni.join());
+  ok('every segment is named in its key',
+     shape.empK === shape.emp.length && shape.mktK === shape.mkt.length && shape.uniK === shape.uni.length,
+     `${shape.empK}/${shape.emp.length}, ${shape.mktK}/${shape.mkt.length}, ${shape.uniK}/${shape.uni.length}`);
+  await p.close();
 });
 
 /* 73% of the universal figure is the employer payroll tax -- employer-side money,
@@ -249,7 +275,8 @@ test('comparison: the universal bar accounts for its whole figure', async b => {
     for (const unit of ['y','m']) {
       const r = await p.evaluate(()=>{
         const n=e=>+document.querySelector(e).textContent.replace(/[^0-9]/g,'');
-        const scale = n('[data-fig="emp.total"]')/document.querySelector('#empFill').getBoundingClientRect().width;
+        const empW=[...document.querySelectorAll('#empBar > div')].reduce((a,e)=>a+e.getBoundingClientRect().width,0);
+        const scale = n('[data-fig="emp.total"]')/empW;
         const segs=[...document.querySelectorAll('#uBar .bar-fill')];
         const caption=document.querySelector('#uniSub').innerText.trim().split('\n').filter(Boolean);
         return { n:segs.length, said:n('#uVal'), captionLines:caption.length,
