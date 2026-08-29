@@ -236,14 +236,12 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .usw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;vertical-align:baseline}
 .bar-w{display:flex;align-items:center;gap:16px;min-width:0}
 .bar-bg{flex-grow:1;height:44px;background:var(--ink-raised);border-radius:1px;min-width:0;display:flex;align-items:stretch;overflow:hidden}
-/* Half height, centred. At full height this read as a continuation of the bar,
-   so the marketplace row drew 632px -- $27,402 at this chart's scale -- while the
-   figure beside it said $14,532. Two of the three bars encoded the number shown
-   and one encoded the number plus the subsidy, which is the one comparison a
-   reader makes by length. Width and position are untouched, so the hatch still
-   measures the subsidy exactly and still ends at the true cost of the care; only
-   its weight says it is not the household's money. */
-.bar-ghost{height:52%;align-self:center;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
+/* Full height, and the caption carries the distinction instead. The hatch does
+   extend this row past the figure printed beside it -- 632px against a printed
+   $14,532 -- but the texture already says it is a different object, and half
+   height read as a broken bar. The caption names the hatch and its amount so the
+   two segments cannot be read as one length. */
+.bar-ghost{height:100%;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
 .bar-fill{height:100%;flex-shrink:0;border-radius:1px;transition:width .35s cubic-bezier(.4,0,.2,1)}
 .bar-v{width:112px;flex-shrink:0;font-family:var(--mono);font-size:clamp(18px,2vw,24px);letter-spacing:-.02em;text-align:right}
 .summary{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px}
@@ -737,8 +735,6 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
       </div>
 
-      <p class="note-i" style="margin-top:-16px">None of these studies published a per-household figure. The numbers below are our allocation of each national estimate onto this household &mdash; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">the methodology page shows exactly how</a>, and you can change the assumptions.</p>
-
       <div class="bars">
         <div class="bar-row">
           <div class="bar-t"><div class="a">Through your employer</div><div class="b">What you pay today</div></div>
@@ -763,7 +759,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
       </div>
 
-      <p class="note-i" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b>. Employer money counts on both sides: the premium share you pay through today, and the <b style="color:var(--ib);font-weight:400">7.5% payroll tax</b> that replaces it under universal coverage. Both are your compensation, routed around your paycheck. A marketplace subsidy is not &mdash; that is other taxpayers&rsquo; money, drawn hatched and at half height because the household never bears it.</p>
+      <p class="note-i" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b> &mdash; employer money counts on both sides, a taxpayer subsidy on neither. No study published a per-household figure, so the universal numbers are our allocation; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">the methodology page shows the arithmetic</a>.</p>
 
       <div class="summary">
         <div class="save">
@@ -1277,7 +1273,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("mktGhost").style.width = (S.marketplace.subsidy / max * 100).toFixed(1) + "%";
     byId("mktSub").innerHTML = S.marketplace.overCliff
       ? '<span style="color:var(--c2)">No subsidy \u2014 over the 400% cliff</span>'
-      : "Plus " + fmt(S.marketplace.subsidy) + " paid by taxpayers";
+      : "Hatched: " + fmt(S.marketplace.subsidy) + " paid by taxpayers, not by you";
     renderUniversalBar(max);
     var mkPos = (S.universal.total / max * 100).toFixed(1) + "%";
     byId("mk").style.left = mkPos;
