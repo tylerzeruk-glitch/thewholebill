@@ -268,6 +268,91 @@ test('comparison: the universal bar accounts for its whole figure', async b => {
   await p.close();
 });
 
+/* The savings panel was pinned to the employer route no matter what the household
+ * selected. An uninsured household was told it would keep $22,414 a year on the
+ * same screen that said it spends $6,878 -- it would in fact pay $2,879 MORE. The
+ * uninsured case is the one that matters: the comparison has to be able to come
+ * out negative, and say so, or the whole section is advocacy rather than a
+ * calculator. */
+test('savings: the panel answers for the route you picked', async b => {
+  const p = await page(b,1440,900);
+  const n = s => +s.replace(/[^0-9]/g,'');
+  for (const route of ['employer','marketplace','none']) {
+    await p.locator(`#route button[data-r="${route}"]`).click();
+    await p.waitForTimeout(300);
+    const r = await p.evaluate(()=>{
+      const t=e=>document.querySelector(e).textContent.trim();
+      return { live:t('[data-fig="route.whole"]'), borne:t('[data-fig="route.borne"]'),
+               uni:t('#uVal'), save:t('#save'), decade:t('#decade'), label:t('#saveLbl'),
+               neg:document.querySelector('.save').classList.contains('neg') };
+    });
+    const expected = Math.abs(n(r.borne) - n(r.uni));
+    ok(`${route}: saving is |what you bear − universal|`, Math.abs(n(r.save)-expected) <= 1,
+       `${r.save} vs $${expected.toLocaleString()}`);
+    ok(`${route}: decade is ten times it`, Math.abs(n(r.decade)-n(r.save)*10) <= 10,
+       `${r.decade}`);
+    const shouldBeNeg = n(r.borne) < n(r.uni);
+    ok(`${route}: label matches the direction`, r.neg === shouldBeNeg &&
+       /would (keep|pay)/.test(r.label) && (shouldBeNeg ? /pay/ : /keep/).test(r.label),
+       `"${r.label}" neg=${r.neg}`);
+  }
+  await p.close();
+});
+
+/* One household, one route, one number. marketplaceCost.household left the
+ * Medicare payroll tax out while routeBreakdown put it in, so the same household's
+ * marketplace cost read $14,532 in the comparison bars and $15,909 in the
+ * waterfall -- and the gap ran in the direction that flattered this site. */
+test('figures: the two sections agree on what a route costs', async b => {
+  const p = await page(b,1440,900);
+  const n = s => +s.replace(/[^0-9]/g,'');
+  for (const route of ['employer','marketplace','none']) {
+    await p.locator(`#route button[data-r="${route}"]`).click();
+    await p.waitForTimeout(300);
+    const r = await p.evaluate(()=>{
+      const t=e=>document.querySelector(e).textContent.trim();
+      const bands=[...document.querySelectorAll('#wf .wcol:not(.wcol-total) .wlab')].map(e=>e.textContent);
+      return { whole:t('#wf .wcol-total .wlab'), borne:t('[data-fig="route.borne"]'),
+               mkt:t('[data-fig="mkt.household"]'), bands };
+    });
+    // the waterfall's total column is the whole bill for this route
+    ok(`${route}: waterfall total is the route's whole bill`, n(r.whole) > 0, r.whole);
+    if (route === 'marketplace')
+      ok('marketplace bar matches what the waterfall says the household bears',
+         Math.abs(n(r.mkt) - n(r.borne)) <= 1, `bar ${r.mkt} vs borne $${n(r.borne).toLocaleString()}`);
+  }
+  await p.close();
+});
+
+/* The strip's labels name marks at particular points, so above 900px they sit on
+ * those points. "today" moved with the route once the panel stopped being pinned
+ * to the employer figure, and a label that stays at the right edge while its mark
+ * slides to 21% is worse than no label. Below 900px they cannot all fit on their
+ * marks -- 13px of overlap at 761px, 57px at 390px -- so they become a legend. */
+test('range strip: labels sit clear of each other and of the strip', async b => {
+  for (const w of [1920,1440,1100,901,900,760,390,320]) {
+    const p = await page(b, w, 900, w < 500);
+    for (const route of ['employer','marketplace','none']) {
+      await p.locator(`#route button[data-r="${route}"]`).click();
+      await p.waitForTimeout(250);
+      const r = await p.evaluate(()=>{
+        const vis=[...document.querySelectorAll('.rlabels > span')].filter(e=>e.offsetParent!==null);
+        const box=document.querySelector('.rlabels').getBoundingClientRect();
+        const rs=vis.map(e=>{const b=e.getBoundingClientRect();return [b.left,b.right];});
+        let ov=0;
+        for(let i=0;i<rs.length;i++) for(let j=i+1;j<rs.length;j++)
+          ov=Math.max(ov, Math.min(rs[i][1],rs[j][1])-Math.max(rs[i][0],rs[j][0]));
+        return { ov:Math.max(0,ov),
+                 out:Math.max(0, box.left-Math.min(...rs.map(x=>x[0])),
+                                 Math.max(...rs.map(x=>x[1]))-box.right) };
+      });
+      ok(`${w}px ${route}: labels do not collide`, r.ov < 0.5, `${r.ov.toFixed(1)}px`);
+      ok(`${w}px ${route}: labels stay on the strip`, r.out < 0.5, `${r.out.toFixed(1)}px`);
+    }
+    await p.close();
+  }
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
