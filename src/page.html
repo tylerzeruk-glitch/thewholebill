@@ -175,10 +175,10 @@ button.step{cursor:pointer;font-family:var(--sans)}
 /* The hit area is the button; the drawn circle is the span inside it, so the
    target can grow to 44px on touch screens without the glyph inflating with it. */
 .qmark{background:none;border:0;padding:0;min-width:24px;min-height:24px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-.qmark-c{width:19px;height:19px;border-radius:50%;border:1px solid var(--ictrl);color:var(--im);font-family:var(--mono);font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s}
-.qmark:hover .qmark-c{color:var(--ik);border-color:var(--im)}
+.qmark-c{width:16px;height:16px;border-radius:50%;border:1px solid var(--c2);color:var(--c2);font-family:var(--mono);font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s,background .15s}
+.qmark:hover .qmark-c{color:var(--ink);background:var(--c2)}
 .qmark:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
-.qmark[aria-expanded="true"] .qmark-c{color:var(--ink);background:var(--im);border-color:var(--im)}
+.qmark[aria-expanded="true"] .qmark-c{color:var(--ink);background:var(--c2)}
 .qpop{position:absolute;top:30px;left:0;right:0;z-index:6;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:3px;padding:16px 18px;font-size:12.5px;line-height:1.6;color:var(--ib);box-shadow:0 14px 34px -14px rgba(0,0,0,.8)}
 .step:hover{background:var(--ink-chip);color:var(--ik)}
 .step:active{background:var(--ictrl);color:var(--ik)}
@@ -1658,6 +1658,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   function renderElig(){
     var m = S.marketplace, pct = Math.round(S.fpl.ratio * 100), html;
+    // Subsidies are a marketplace mechanism, so on the employer route this box
+    // described a credit for a plan the household is not on. hidden rather than
+    // emptied: .out lays its children out with a flex gap, and an empty div in
+    // the flow would still collect a gap on each side.
+    byId("elig").hidden = state.route === "employer";
+    if (state.route === "employer") return;
     if (state.route === "none"){
       html = '<div class="warn"><div class="lbl" style="color:var(--c2)">Nothing caps a bad year</div>' +
         '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">Every insured plan has a legal ' +
@@ -1830,10 +1836,27 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     qPop.hidden = !open;
     qBtn.setAttribute("aria-expanded", open ? "true" : "false");
   }
-  qBtn.addEventListener("click", function(){ qSet(qPop.hidden); });
-  document.addEventListener("click", function(e){
-    if (!qPop.hidden && !qPop.contains(e.target) && !qBtn.contains(e.target)) qSet(false);
-  });
+  /* Hover where hover exists; tap where it does not. The two cannot share a click
+     handler: on a mouse, the click that follows hover-open would toggle it shut
+     again. The close is delayed a beat so the pointer can cross the 8px gap from
+     the button to the panel without the panel vanishing under it; keyboard users
+     get the same panel from focus. */
+  if (window.matchMedia("(hover: hover)").matches){
+    var qTimer;
+    var qOpen  = function(){ clearTimeout(qTimer); qSet(true); };
+    var qClose = function(){ clearTimeout(qTimer); qTimer = setTimeout(function(){ qSet(false); }, 140); };
+    [qBtn, qPop].forEach(function(el){
+      el.addEventListener("mouseenter", qOpen);
+      el.addEventListener("mouseleave", qClose);
+    });
+    qBtn.addEventListener("focus", qOpen);
+    qBtn.addEventListener("blur", qClose);
+  } else {
+    qBtn.addEventListener("click", function(){ qSet(qPop.hidden); });
+    document.addEventListener("click", function(e){
+      if (!qPop.hidden && !qPop.contains(e.target) && !qBtn.contains(e.target)) qSet(false);
+    });
+  }
   document.addEventListener("keydown", function(e){
     if (e.key === "Escape" && !qPop.hidden){ qSet(false); qBtn.focus(); }
   });

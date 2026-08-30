@@ -409,6 +409,39 @@ test('income tooltip: opens, fits, and closes', async b => {
   }
 });
 
+/* On a mouse the panel opens on hover, and the 8px gap between button and panel
+ * must be crossable: the close is on a short delay, so moving the pointer down
+ * into the panel keeps it open rather than yanking it away mid-read. */
+test('income tooltip: hover opens and the pointer can reach the panel', async b => {
+  const p = await page(b,1440,900);
+  await p.locator('#incomeQ').hover();
+  await p.waitForTimeout(120);
+  ok('hover opens it', await p.evaluate(()=>!document.getElementById('incomeQPop').hidden));
+  await p.locator('#incomeQPop').hover();
+  await p.waitForTimeout(250);
+  ok('pointer inside the panel keeps it open', await p.evaluate(()=>!document.getElementById('incomeQPop').hidden));
+  await p.locator('h1, .panel .lbl').first().hover();
+  await p.waitForTimeout(300);
+  ok('leaving closes it', await p.evaluate(()=>document.getElementById('incomeQPop').hidden));
+  await p.close();
+});
+
+/* Subsidies are a marketplace mechanism. On the employer route the eligibility box
+ * described a premium tax credit for a plan the household is not on. */
+test('eligibility box: only where subsidies apply', async b => {
+  const p = await page(b,1440,900);
+  for (const [route, shown] of [['employer',false],['marketplace',true],['none',true]]) {
+    await p.locator(`#route button[data-r="${route}"]`).click();
+    await p.waitForTimeout(250);
+    const vis = await p.evaluate(()=>{
+      const e=document.getElementById('elig');
+      return !e.hidden && e.offsetHeight > 0;
+    });
+    ok(`${route}: box ${shown?'shown':'hidden'}`, vis === shown);
+  }
+  await p.close();
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
