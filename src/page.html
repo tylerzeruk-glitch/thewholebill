@@ -172,6 +172,14 @@ input[type=range]::-moz-range-progress{height:4px;background:var(--teal);border-
 select.ctrl{appearance:none;-webkit-appearance:none;color:var(--ik);font-family:var(--sans);width:100%;background-image:none;cursor:pointer}
 select.ctrl option{background:var(--ink-raised);color:var(--ik)}
 button.step{cursor:pointer;font-family:var(--sans)}
+/* The hit area is the button; the drawn circle is the span inside it, so the
+   target can grow to 44px on touch screens without the glyph inflating with it. */
+.qmark{background:none;border:0;padding:0;min-width:24px;min-height:24px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.qmark-c{width:19px;height:19px;border-radius:50%;border:1px solid var(--ictrl);color:var(--im);font-family:var(--mono);font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s}
+.qmark:hover .qmark-c{color:var(--ik);border-color:var(--im)}
+.qmark:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
+.qmark[aria-expanded="true"] .qmark-c{color:var(--ink);background:var(--im);border-color:var(--im)}
+.qpop{position:absolute;top:30px;left:0;right:0;z-index:6;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:3px;padding:16px 18px;font-size:12.5px;line-height:1.6;color:var(--ib);box-shadow:0 14px 34px -14px rgba(0,0,0,.8)}
 .step:hover{background:var(--ink-chip);color:var(--ik)}
 .step:active{background:var(--ictrl);color:var(--ik)}
 .step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
@@ -446,6 +454,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   /* touch targets */
   .step{width:44px}
+  .qmark{min-width:44px;min-height:44px}
   .ctrl{height:50px}
   select.ctrl{height:50px}
   input[type=range]{height:44px;margin:2px 0 0}
@@ -673,10 +682,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
               <div class="ctrl mono" style="letter-spacing:.04em">41, 39, 12, 9</div>
             </div>
           </div>
-          <div class="field">
+          <div class="field" style="position:relative">
             <div class="row" style="justify-content:space-between;align-items:baseline">
-              <div class="lbl">Household income</div>
+              <div class="row" style="gap:8px;align-items:center">
+                <div class="lbl">Household income</div>
+                <button type="button" class="qmark" id="incomeQ" aria-expanded="false" aria-controls="incomeQPop" aria-label="What counts as household income"><span class="qmark-c" aria-hidden="true">?</span></button>
+              </div>
               <div class="num" style="font-size:19px" id="incomeVal">$95,000</div>
+            </div>
+            <div class="qpop" id="incomeQPop" hidden>
+              <div class="lbl" style="margin-bottom:8px">What to enter</div>
+              Your household&rsquo;s expected income for the year, before taxes &mdash; roughly the <b style="font-weight:500;color:var(--ik)">adjusted gross income</b> on a tax return, plus any tax-exempt interest and non-taxable Social Security. That is the number the subsidy rules run on (they call it MAGI). A best guess is fine &mdash; drag the slider to see how much it matters.
             </div>
             <input type="range" id="income" min="12000" max="260000" step="1000" value="95000" aria-label="Household income">
             <div class="row num" style="justify-content:space-between;font-size:11px;color:var(--ifaint);margin-top:5px"><span>$12k</span><span id="fplVal"></span><span>$260k</span></div>
@@ -1165,6 +1181,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">What the universal figure is</b></td>
           <td>A contribution, not a cost of care. The other two bars show what covering this household costs in full; this one shows the share of it the household would pay. Their care would still cost roughly what it costs now &mdash; <b>$30,600 to $34,600</b> a year on the models above &mdash; and the household would pay about <b>28&ndash;32%</b> of that, the rest coming from progressive financing and the federal health spending that already exists. Read as a like-for-like total, it flatters universal coverage. Putting a number on that remainder would mean allocating national spending per household, a second modeled figure stacked on the one we already publish, so for now we say this instead.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">One income number</b></td>
+          <td>The statutes want three different ones: the subsidy runs on MAGI, the Medicare payroll tax on wages, and the Sanders premium on income above an exemption. We run all three from the single figure you enter. Close for a household whose income is mostly wages; retirement deferrals drive them apart, since Medicare wages include a 401(k) deferral and MAGI does not. We also treat any household larger than one as filing jointly.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">Uninsured spending</b></td>
@@ -1803,6 +1823,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       [].forEach.call(routeEl.querySelectorAll("button"), function(x){ x.className = (x === b ? "on" : ""); });
       paint();
     });
+  });
+
+  var qBtn = byId("incomeQ"), qPop = byId("incomeQPop");
+  function qSet(open){
+    qPop.hidden = !open;
+    qBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  qBtn.addEventListener("click", function(){ qSet(qPop.hidden); });
+  document.addEventListener("click", function(e){
+    if (!qPop.hidden && !qPop.contains(e.target) && !qBtn.contains(e.target)) qSet(false);
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !qPop.hidden){ qSet(false); qBtn.focus(); }
   });
 
   byId("zipGo").addEventListener("click", submitZip);
