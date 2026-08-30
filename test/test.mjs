@@ -509,6 +509,8 @@ test('deduction: the override reaches every figure, and resets away', async b =>
              empShare:[...document.querySelectorAll('#cards .card-i .v')][1].textContent,
              note:t('#deductNote') };
   });
+  await p.locator('#adv summary').click();       // the fields live in the drawer now
+  await p.waitForTimeout(150);
   const base = await read();
   ok('marked optional', await p.evaluate(()=>/optional/i.test(document.getElementById('deductLbl').textContent))
      && /Optional/.test(base.note));
@@ -527,7 +529,7 @@ test('deduction: the override reaches every figure, and resets away', async b =>
   await p.waitForTimeout(250);
   ok('cadence reinterprets the typed amount', n((await read()).whole) === n(base.whole) - (6850-6000));
 
-  await p.click('#deductReset');
+  await p.click('#advReset');
   await p.waitForTimeout(250);
   const r = await read();
   ok('reset returns to the survey average', r.whole === base.whole && /Optional/.test(r.note));
@@ -538,7 +540,58 @@ test('deduction: the override reaches every figure, and resets away', async b =>
 
   await p.locator('#route button[data-r="marketplace"]').click();
   await p.waitForTimeout(250);
-  ok('read-only off the employer route', await p.evaluate(()=>document.getElementById('deduct').readOnly));
+  ok('the drawer only exists on the employer route',
+     await p.evaluate(()=>document.getElementById('adv').hidden));
+  await p.close();
+});
+
+/* The drawer holds the plan-number overrides, and its summary line carries the
+ * state -- a fold only earns its keep when the disclosure stays outside it. The
+ * total premium is the field that matters most: with it, the employer share stops
+ * being pinned at the survey average and becomes derived, exact, the user's own.
+ * And an employer-plan OOP override must never leak into the marketplace figures,
+ * which read the same opts object. */
+test('drawer: overrides compose, disclose, and stay in their lane', async b => {
+  const p = await page(b,1440,900);
+  const n = s => +s.replace(/[^0-9]/g,'');
+  const sum = () => p.evaluate(()=>document.getElementById('advSum').textContent.trim());
+  const cards = () => p.evaluate(()=>[...document.querySelectorAll('#cards .card-i .v')].map(e=>e.textContent));
+
+  ok('closed, it says averages are in force', /survey averages/.test(await sum()));
+  await p.locator('#adv summary').click();
+  await p.waitForTimeout(150);
+
+  await p.fill('#totPrem','30000');
+  await p.waitForTimeout(250);
+  ok('total premium alone recomputes the share', n((await cards())[1]) === 30000-6850,
+     (await cards())[1]);
+  ok('summary names what is yours', /your total premium/.test(await sum()), await sum());
+
+  await p.fill('#deduct','500');
+  await p.fill('#oopIn','6000');
+  await p.waitForTimeout(250);
+  ok('with both premium fields the share is exact', n((await cards())[1]) === 30000-13000);
+  ok('the OOP override lands', n((await cards())[2]) === 6000);
+  ok('all three reads as your numbers', /Using your numbers/.test(await sum()));
+
+  const mktOop = await p.evaluate(()=>{
+    const line=[...document.getElementById('mktSub').innerText.split('\n')].find(l=>/out-of-pocket/.test(l));
+    return +line.replace(/[^0-9]/g,'');
+  });
+  ok('the marketplace out-of-pocket is untouched', mktOop === 5200, `$${mktOop}`);
+
+  await p.fill('#totPrem','9000');
+  await p.waitForTimeout(250);
+  ok('an impossible pair is called out', /less than the deduction/.test(await sum()));
+
+  ok('reset-all is offered while anything is overridden',
+     await p.evaluate(()=>!document.getElementById('advReset').hidden));
+  await p.click('#advReset');
+  await p.waitForTimeout(250);
+  ok('reset-all returns every figure to the averages',
+     /survey averages/.test(await sum()) && n((await cards())[1]) === 20143);
+  ok('and then withdraws itself',
+     await p.evaluate(()=>document.getElementById('advReset').hidden));
   await p.close();
 });
 
