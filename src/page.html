@@ -171,6 +171,19 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 input[type=range]::-moz-range-progress{height:4px;background:var(--teal);border-radius:2px}
 select.ctrl{appearance:none;-webkit-appearance:none;color:var(--ik);font-family:var(--sans);width:100%;background-image:none;cursor:pointer}
 input.ctrl{color:var(--ik);width:100%;outline:none}
+/* The section-05 fold, in the ink palette. The summary line carries the state --
+   survey averages or the user's own numbers -- because a fold only earns its keep
+   when the disclosure stays outside it. */
+.adv{border-top:1px solid var(--irule);border-bottom:1px solid var(--irule)}
+.adv > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:15px 0;min-height:44px}
+.adv > summary::-webkit-details-marker{display:none}
+.adv-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ilabel);white-space:nowrap}
+.adv-s{font-size:13px;line-height:1.5;color:var(--im);min-width:0}
+.adv > summary:hover .adv-s{color:var(--ib)}
+.adv > summary:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
+.adv-x{color:var(--ictrl);flex-shrink:0;transition:transform .22s ease}
+.adv[open] .adv-x{transform:rotate(180deg)}
+.adv-bd{display:flex;flex-direction:column;gap:22px;padding:4px 0 22px}
 input.ctrl:focus-visible{border-color:var(--c2)}
 select.ctrl option{background:var(--ink-raised);color:var(--ik)}
 button.step{cursor:pointer;font-family:var(--sans)}
@@ -704,19 +717,38 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <div class="lbl">How you&rsquo;re covered now</div>
             <div class="seg" id="route"><button type="button" data-r="employer" class="on">Employer</button><button type="button" data-r="marketplace">Marketplace</button><button type="button" data-r="none">Uninsured</button></div>
           </div>
-          <div class="field">
-            <div class="lbl" id="deductLbl">Your premium deduction</div>
-            <div class="row" style="gap:6px;flex-wrap:wrap">
-              <input class="ctrl mono" id="deduct" value="$263.46" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-labelledby="deductLbl">
-              <select class="ctrl" id="period" style="width:auto;color:var(--im);font-size:14px" aria-label="How often it comes out of your pay">
-                <option value="52">every week</option>
-                <option value="26" selected>every 2 weeks</option>
-                <option value="24">twice a month</option>
-                <option value="12">every month</option>
-              </select>
+          <details class="adv" id="adv">
+            <summary>
+              <span class="adv-k">Your plan&rsquo;s numbers</span>
+              <span class="adv-s" id="advSum">Using survey averages &mdash; open to enter your own.</span>
+              <svg class="adv-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div class="adv-bd">
+              <div class="field">
+                <div class="lbl" id="deductLbl">Your premium deduction <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span></div>
+                <div class="row" style="gap:6px;flex-wrap:wrap">
+                  <input class="ctrl mono" id="deduct" value="$263.46" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-labelledby="deductLbl">
+                  <select class="ctrl" id="period" style="width:auto;color:var(--im);font-size:14px" aria-label="How often it comes out of your pay">
+                    <option value="52">every week</option>
+                    <option value="26" selected>every 2 weeks</option>
+                    <option value="24">twice a month</option>
+                    <option value="12">every month</option>
+                  </select>
+                </div>
+                <div class="note-i" id="deductNote"></div>
+              </div>
+              <div class="field">
+                <div class="lbl">Total plan premium, per year <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span></div>
+                <input class="ctrl mono" id="totPrem" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Total plan premium per year, yours plus your employer's">
+                <div class="note-i" id="totPremNote">The whole premium &mdash; your share plus your employer&rsquo;s. It is on a W-2 in <b style="color:var(--ib);font-weight:400">Box 12, code DD</b>. With this, the employer share stops being a survey average and becomes your real one.</div>
+              </div>
+              <div class="field">
+                <div class="lbl">Deductible &amp; out-of-pocket, per year <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span></div>
+                <input class="ctrl mono" id="oopIn" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Deductible and out-of-pocket spending per year">
+                <div class="note-i">What your household actually spends in a year on deductibles and copays. Ours is a modeled average; yours is a fact.</div>
+              </div>
             </div>
-            <div class="note-i" id="deductNote"></div>
-          </div>
+          </details>
         </div>
 
         <div class="out">
@@ -1270,7 +1302,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      the un-overridden average is an ANNUAL survey figure, so there the cadence
      only changes how it is displayed. An empty field is the road back: clearing
      it returns to the average, which is what makes the override optional. */
-  var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null };
+  var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null };
   function adultsOf(ages){
     var n = 0, i;
     for (i = 0; i < ages.length; i++) if (ages[i] >= 21) n++;
@@ -1311,18 +1343,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var opts = { income: state.income, size: state.size,
                  adults: adultsOf(state.ages), area: state.area,
                  region: "contiguous", model: state.model };
-    if (state.deductPer != null){
-      // The user told us ONE number: their own deduction. The employer share is
-      // the part they cannot see -- that is the site's thesis -- so it stays at
-      // the survey average and the total premium moves with the override. Holding
-      // the TOTAL at the average instead would silently resize the employer share,
-      // the figure this site exists to get right, from a number that says nothing
-      // about it. Passed as totalPremium because calc.js derives employer as
-      // premium minus worker.
-      var eTier = W.EMPLOYER[state.size > 1 ? "family" : "single"];
-      opts.workerPremium = state.deductPer * state.period;
-      opts.totalPremium  = opts.workerPremium + (eTier.premium - eTier.worker);
+    var eTier = W.EMPLOYER[state.size > 1 ? "family" : "single"];
+    if (state.deductPer != null) opts.workerPremium = state.deductPer * state.period;
+    if (state.totPrem != null){
+      // Both numbers given: the employer share becomes derived, exact, theirs.
+      opts.totalPremium = state.totPrem;
+    } else if (state.deductPer != null){
+      // Only the deduction given. The employer share is the part they cannot see
+      // -- that is the site's thesis -- so it stays at the survey average and the
+      // total moves. Holding the TOTAL at the average instead would silently
+      // resize the employer share, the figure this site exists to get right, from
+      // a number that says nothing about it.
+      opts.totalPremium = opts.workerPremium + (eTier.premium - eTier.worker);
     }
+    if (state.oopOwn != null) opts.employerOop = state.oopOwn;
     S = W.summary(opts);
     S.breakdown = W.routeBreakdown(state.route, opts);
     S.routeMax = Math.max(
@@ -1557,27 +1591,43 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       '</b> of that never appears on a paystub.' +
       (R.borne < R.whole ? ' A further ' + fmt(R.whole - R.borne) + ' is carried by taxpayers, not by you.' : '');
 
-    byId("deductLbl").innerHTML = state.route === "employer"
-        ? 'Your premium deduction <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span>'
-      : state.route === "marketplace" ? "Your premium, after any credit" : "Premium";
-    var dEl = byId("deduct");
-    dEl.readOnly = state.route !== "employer";
-    dEl.style.color = state.route === "employer" ? "" : "var(--im)";
-    // A focused field is the user's, mid-keystroke -- repainting it would eat the
-    // caret. Every other repaint keeps it in step with the route and cadence.
-    if (document.activeElement !== dEl){
-      dEl.value = state.route === "none" ? "\u2014"
-        : "$" + ((state.route === "employer"
-            ? (state.deductPer != null ? state.deductPer : S.employer.worker / state.period)
-            : S.marketplace.net / state.period)).toFixed(2);
+    // The drawer describes the user's employer plan, so it exists only where that
+    // plan is the route under discussion.
+    byId("adv").hidden = state.route !== "employer";
+    if (state.route === "employer"){
+      // A focused field is the user's, mid-keystroke -- repainting it would eat
+      // the caret. Every other repaint keeps the trio in step.
+      var setF = function(id, own, avg){
+        var el = byId(id);
+        if (document.activeElement !== el)
+          el.value = "$" + (own != null ? own : avg).toFixed(2);
+      };
+      var eT = W.EMPLOYER[state.size > 1 ? "family" : "single"];
+      setF("deduct", state.deductPer, S.employer.worker / state.period);
+      setF("totPrem", state.totPrem, eT.premium);
+      // S.employer.oop already reflects the override when one is set, and is the
+      // modeled average when none is -- so it serves both arms.
+      setF("oopIn", state.oopOwn, S.employer.oop);
+      byId("deductNote").innerHTML = state.deductPer != null
+        ? "Your number, in place of the survey average. <a class=\"q\" id=\"deductReset\" href=\"#\" style=\"color:var(--teal);border-bottom-color:rgba(63,181,174,.4)\">Go back to the average</a>."
+        : "Optional. Pre-filled with the KFF 2025 survey average &mdash; type the number from your own paystub and everything recalculates.";
+
+      // The summary is the disclosure: it must say what is driving the figures
+      // even -- especially -- while the drawer is shut.
+      var own = [];
+      if (state.deductPer != null) own.push("deduction");
+      if (state.totPrem != null) own.push("total premium");
+      if (state.oopOwn != null) own.push("out-of-pocket");
+      var sum = own.length === 0
+        ? "Using survey averages &mdash; open to enter your own."
+        : own.length === 3
+          ? "Using your numbers."
+          : "Using your " + own.join(" and ") + " &mdash; survey averages for the rest.";
+      if (state.totPrem != null && state.deductPer != null &&
+          state.totPrem < state.deductPer * state.period)
+        sum += ' <span style="color:var(--c2)">Total premium is less than the deduction &mdash; check the two.</span>';
+      byId("advSum").innerHTML = sum;
     }
-    byId("deductNote").innerHTML = state.route === "employer"
-        ? (state.deductPer != null
-            ? "Your number, in place of the survey average. <a class=\"q\" id=\"deductReset\" href=\"#\" style=\"color:var(--teal);border-bottom-color:rgba(63,181,174,.4)\">Go back to the average</a>."
-            : "Optional. Pre-filled with the KFF 2025 survey average &mdash; type the number from your own paystub and everything recalculates.")
-      : state.route === "marketplace"
-        ? "Computed from the benchmark premium and your credit &mdash; not editable."
-        : "No premium: this is what makes the uninsured route look cheap.";
   }
 
 
@@ -1956,6 +2006,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     paint();
   });
   byId("deduct").addEventListener("change", function(){ paint(); });
+  function wireOverride(id, key, max){
+    byId(id).addEventListener("input", function(){
+      if (state.route !== "employer") return;
+      var v = parseFloat(this.value.replace(/[^0-9.]/g, ""));
+      state[key] = (isFinite(v) && v > 0 && v < max) ? v : null;
+      paint();
+    });
+    byId(id).addEventListener("change", function(){ paint(); });
+  }
+  wireOverride("totPrem", "totPrem", 1000000);
+  wireOverride("oopIn", "oopOwn", 1000000);
   byId("period").addEventListener("change", function(){
     state.period = +this.value;
     paint();

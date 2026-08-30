@@ -138,7 +138,12 @@
     var premium = o.totalPremium != null ? o.totalPremium : t.premium;
     var worker  = o.workerPremium != null ? o.workerPremium : t.worker;
     var employer = Math.max(0, premium - worker);
-    var oop = o.oop != null ? o.oop
+    // employerOop is the route-scoped override: o.oop applies to every route (and
+    // summary() computes employer AND marketplace from one opts object), so a
+    // number describing the user's employer plan must ride its own field or it
+    // would silently rewrite the marketplace comparison too.
+    var oop = o.employerOop != null ? o.employerOop
+            : o.oop != null ? o.oop
             : (tier === 'single' ? OOP.employerSingle
                : Math.max(OOP.employerFamilyFloor, OOP.employerPerPerson * o.size));
     var tax = medicareTax(o.income, o.size > 1 ? 'joint' : 'single');
@@ -404,7 +409,7 @@
       // caller's own opts and feeds the waterfall. Dropping these here made the
       // two halves of the page disagree the moment a user typed their own
       // deduction -- the waterfall moved and everything else silently did not.
-      workerPremium: o.workerPremium, totalPremium: o.totalPremium
+      workerPremium: o.workerPremium, totalPremium: o.totalPremium, employerOop: o.employerOop
     };
     var emp = employerCost(opts);
     var mkt = marketplaceCost(opts);
