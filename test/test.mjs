@@ -396,7 +396,11 @@ test('income tooltip: opens, fits, and closes', async b => {
                expanded: document.getElementById('incomeQ').getAttribute('aria-expanded') };
     });
     ok(`${w}px: tooltip opens`, !r.hidden && r.expanded === 'true');
-    ok(`${w}px: tooltip names the number to enter`, /adjusted gross income/.test(r.txt) && /MAGI/.test(r.txt));
+    // Deliberately plain language: "before taxes" is the one load-bearing fact,
+    // and the guess-is-fine line is what lowers the stakes of the question. The
+    // MAGI detail lives in the methodology, not here.
+    ok(`${w}px: tooltip says before taxes and that a guess is fine`,
+       /before taxes/.test(r.txt) && /guess is fine/.test(r.txt));
     ok(`${w}px: tooltip stays inside the viewport`, r.inX);
     await p.keyboard.press('Escape');
     await p.waitForTimeout(100);
