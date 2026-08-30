@@ -442,6 +442,56 @@ test('eligibility box: only where subsidies apply', async b => {
   await p.close();
 });
 
+/* The Ages field is wired, coarsely: under 21 is a child (the ACA child-rate
+ * boundary), 21+ an adult, 65+ flagged but still priced as an adult. Ages are the
+ * source of truth and household size is their count, so the two controls cannot
+ * disagree. Age-RATING is deliberately absent until the Stage 2 CMS files. */
+test('ages: the field drives the split, and size follows it', async b => {
+  const p = await page(b,1440,900);
+  const read = () => p.evaluate(()=>({
+    size:document.getElementById('sizeVal').textContent,
+    ages:document.getElementById('ages').value,
+    whole:+document.querySelector('[data-fig="route.whole"]').textContent.replace(/[^0-9]/g,''),
+    note:!document.getElementById('agesNote').hidden }));
+  await p.locator('#route button[data-r="marketplace"]').click();
+  await p.waitForTimeout(250);
+
+  const two = await read();
+  await p.fill('#ages', '41, 39, 30, 9');       // third person becomes an adult
+  await p.waitForTimeout(250);
+  const three = await read();
+  ok('an extra adult changes the marketplace bill', three.whole > two.whole,
+     `$${two.whole.toLocaleString()} -> $${three.whole.toLocaleString()}`);
+
+  await p.fill('#ages', '41, 39');
+  await p.waitForTimeout(250);
+  ok('the count of ages is the household size', (await read()).size === '2');
+
+  await p.locator('#sizeUp').click();
+  await p.waitForTimeout(200);
+  const stepped = await read();
+  ok('stepping size grows the ages list', stepped.ages === '41, 39, 10' && stepped.size === '3', stepped.ages);
+
+  await p.fill('#ages', '70, 39');
+  await p.waitForTimeout(250);
+  ok('65+ raises the Medicare note', (await read()).note);
+  await p.fill('#ages', '41, 39');
+  await p.waitForTimeout(250);
+  ok('and it clears again', !(await read()).note);
+
+  // Junk mid-keystroke must never blank the model or the figures.
+  await p.fill('#ages', 'x,,');
+  await p.waitForTimeout(200);
+  const junk = await read();
+  ok('junk input leaves the last good state in force', +junk.size >= 1 && junk.whole > 0,
+     `size ${junk.size}, whole ${junk.whole}`);
+  await p.fill('#ages', '8 22 45');
+  await p.locator('#ages').blur();
+  await p.waitForTimeout(200);
+  ok('blur normalises the separators', (await read()).ages === '8, 22, 45', (await read()).ages);
+  await p.close();
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);

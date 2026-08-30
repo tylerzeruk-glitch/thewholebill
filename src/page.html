@@ -170,6 +170,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--ik);border:3px solid var(--ink)}
 input[type=range]::-moz-range-progress{height:4px;background:var(--teal);border-radius:2px}
 select.ctrl{appearance:none;-webkit-appearance:none;color:var(--ik);font-family:var(--sans);width:100%;background-image:none;cursor:pointer}
+input.ctrl{color:var(--ik);width:100%;outline:none}
+input.ctrl:focus-visible{border-color:var(--c2)}
 select.ctrl option{background:var(--ink-raised);color:var(--ik)}
 button.step{cursor:pointer;font-family:var(--sans)}
 /* The hit area is the button; the drawn circle is the span inside it, so the
@@ -678,8 +680,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
               <div class="ctrl" style="padding-right:0;overflow:hidden"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="steps"><button type="button" class="step" id="sizeDown" aria-label="Fewer people">&minus;</button><button type="button" class="step" id="sizeUp" aria-label="More people">+</button></span></div>
             </div>
             <div class="field grow">
-              <div class="lbl">Ages</div>
-              <div class="ctrl mono" style="letter-spacing:.04em">41, 39, 12, 9</div>
+              <div class="lbl" for="ages">Ages</div>
+              <input class="ctrl mono" id="ages" value="41, 39, 12, 9" inputmode="numeric" autocomplete="off" spellcheck="false" aria-label="Ages of everyone in the household, separated by commas" style="letter-spacing:.04em">
             </div>
           </div>
           <div class="field" style="position:relative">
@@ -697,6 +699,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <input type="range" id="income" min="12000" max="260000" step="1000" value="95000" aria-label="Household income">
             <div class="row num" style="justify-content:space-between;font-size:11px;color:var(--ifaint);margin-top:5px"><span>$12k</span><span id="fplVal"></span><span>$260k</span></div>
           </div>
+          <div class="note-i" id="agesNote" hidden style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this preview does not price &mdash; they are counted as adults here.</div>
           <div class="field">
             <div class="lbl">How you&rsquo;re covered now</div>
             <div class="seg" id="route"><button type="button" data-r="employer" class="on">Employer</button><button type="button" data-r="marketplace">Marketplace</button><button type="button" data-r="none">Uninsured</button></div>
@@ -1164,7 +1167,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <table style="margin-top:12px">
         <tr>
           <td style="width:220px"><b style="font-weight:500;color:var(--pk)">Benchmark premiums</b></td>
-          <td>Five metro areas are wired up with modeled figures. Real premiums for every rating area come from the CMS public use files &mdash; Exchange PUFs for healthcare.gov states, State-based Exchange PUFs for the 21 states running their own. That is the next build step.</td>
+          <td>Five metro areas are wired up with modeled figures, and they are not age-rated: everyone 21 and over prices as one flat adult rate, when the real ACA curve charges a 64-year-old about three times a 21-year-old. Real, age-rated premiums for every rating area come from the CMS public use files &mdash; Exchange PUFs for healthcare.gov states, State-based Exchange PUFs for the 21 states running their own. That is the next build step. Anyone 65+ is usually on Medicare, which we do not price at all.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">ZIP codes</b></td>
@@ -1250,7 +1253,18 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   // Bill numbers change every Congress. One place to update them.
   var BILL = { house: "H.R. 3069", senate: "S. 1506", congress: "119th" };
 
-  var state = { area:"CT-1", size:4, income:95000, model:"sanders1", unit:"y", period:26, route:"employer" };
+  /* ages is the source of truth and size is derived from it -- two controls
+     describing the same people must not be able to disagree. The split is coarse
+     on purpose: under 21 is a child (the ACA child-rate boundary), 21+ an adult,
+     65+ flagged as Medicare territory but still priced as an adult. Real age-rated
+     premiums (the 3:1 curve) need the Stage 2 CMS files; until then a 26-year-old
+     and a 62-year-old price the same, and the methodology page says so. */
+  var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer" };
+  function adultsOf(ages){
+    var n = 0, i;
+    for (i = 0; i < ages.length; i++) if (ages[i] >= 21) n++;
+    return n;
+  }
   var S = null;
 
   var WORDS = {
@@ -1284,7 +1298,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   function paint(){
     var opts = { income: state.income, size: state.size,
-                 adults: Math.min(2, state.size), area: state.area,
+                 adults: adultsOf(state.ages), area: state.area,
                  region: "contiguous", model: state.model };
     S = W.summary(opts);
     S.breakdown = W.routeBreakdown(state.route, opts);
@@ -1354,6 +1368,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     // inputs + derived readouts
     byId("sizeVal").textContent   = state.size;
+    byId("agesNote").hidden = !state.ages.some(function(a){ return a >= 65; });
     byId("incomeVal").textContent = money(state.income);
     byId("fplVal").textContent    = Math.round(S.fpl.ratio * 100) + "% of poverty line";
     byId("areaNote").textContent  =
@@ -1529,7 +1544,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   // The cliff drawn from the same functions that drive the calculator, so the chart
   // can never disagree with the numbers beside it.
   function renderCliff(){
-    var opts = { size: state.size, adults: Math.min(2, state.size),
+    var opts = { size: state.size, adults: adultsOf(state.ages),
                  area: state.area, region: "contiguous" };
     var d = W.cliffDrop(opts), c = W.cliffCurve(opts, 200);
     byId("cliffUnder").textContent = fmt(d.under);
@@ -1865,8 +1880,34 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   byId("zip").addEventListener("keydown", function(e){ if (e.key === "Enter") submitZip(); });
   byId("area").addEventListener("change", function(){ state.area = this.value; byId("zip").value = ""; paint(); });
   byId("income").addEventListener("input", function(){ state.income = +this.value; paint(); });
-  byId("sizeUp").addEventListener("click", function(){ if (state.size < 8){ state.size++; paint(); } });
-  byId("sizeDown").addEventListener("click", function(){ if (state.size > 1){ state.size--; paint(); } });
+  function agesToField(){ byId("ages").value = state.ages.join(", "); }
+  // Stepping up appends an adult until there are two, then children -- the shape
+  // of the default household, and of most real ones. Stepping down drops the last.
+  byId("sizeUp").addEventListener("click", function(){
+    if (state.size >= 8) return;
+    state.ages.push(adultsOf(state.ages) < 2 ? 40 : 10);
+    state.size = state.ages.length;
+    agesToField(); paint();
+  });
+  byId("sizeDown").addEventListener("click", function(){
+    if (state.size <= 1) return;
+    state.ages.pop();
+    state.size = state.ages.length;
+    agesToField(); paint();
+  });
+  // Live while typing, so the promise at the top of the panel holds -- but the
+  // field is only rewritten on blur, never mid-keystroke: reformatting under the
+  // caret is how inputs eat their own text. A half-typed entry (trailing comma,
+  // stray letter) leaves the last good list in force.
+  byId("ages").addEventListener("input", function(){
+    var tokens = this.value.split(/[^0-9]+/).filter(Boolean).map(Number)
+      .filter(function(n){ return n >= 0 && n <= 120; });
+    if (tokens.length < 1 || tokens.length > 8) return;
+    state.ages = tokens;
+    state.size = tokens.length;
+    paint();
+  });
+  byId("ages").addEventListener("change", agesToField);
 
   var unitEl = byId("unit");
   function paintUnit(){
