@@ -184,6 +184,9 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
 .adv-x{color:var(--ictrl);flex-shrink:0;transition:transform .22s ease}
 .adv[open] .adv-x{transform:rotate(180deg)}
 .adv-bd{display:flex;flex-direction:column;gap:22px;padding:4px 0 22px}
+.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--ictrl);border-radius:2px;color:var(--im);font-family:var(--sans);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s}
+.adv-reset:hover{color:var(--ik);border-color:var(--im)}
+.adv-reset:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
 input.ctrl:focus-visible{border-color:var(--c2)}
 select.ctrl option{background:var(--ink-raised);color:var(--ik)}
 button.step{cursor:pointer;font-family:var(--sans)}
@@ -747,6 +750,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                 <input class="ctrl mono" id="oopIn" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Deductible and out-of-pocket spending per year">
                 <div class="note-i">What your household actually spends in a year on deductibles and copays. Ours is a modeled average; yours is a fact.</div>
               </div>
+              <button type="button" class="adv-reset" id="advReset" hidden>Reset all to the averages</button>
             </div>
           </details>
         </div>
@@ -1609,7 +1613,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       // modeled average when none is -- so it serves both arms.
       setF("oopIn", state.oopOwn, S.employer.oop);
       byId("deductNote").innerHTML = state.deductPer != null
-        ? "Your number, in place of the survey average. <a class=\"q\" id=\"deductReset\" href=\"#\" style=\"color:var(--teal);border-bottom-color:rgba(63,181,174,.4)\">Go back to the average</a>."
+        ? "Your number, in place of the survey average. Clear the field to go back."
         : "Optional. Pre-filled with the KFF 2025 survey average &mdash; type the number from your own paystub and everything recalculates.";
 
       // The summary is the disclosure: it must say what is driving the figures
@@ -1627,6 +1631,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           state.totPrem < state.deductPer * state.period)
         sum += ' <span style="color:var(--c2)">Total premium is less than the deduction &mdash; check the two.</span>';
       byId("advSum").innerHTML = sum;
+      byId("advReset").hidden = own.length === 0;
     }
   }
 
@@ -2021,23 +2026,16 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     state.period = +this.value;
     paint();
   });
-  // The reset link is re-rendered by paint(), so the listener lives on the note.
-  // It fires on pointerdown, not click: pressing the link blurs the input, the
-  // blur's change event repaints, and the repaint replaces the link node before
-  // the click can land on it -- pointerdown runs ahead of the blur. The click
-  // handler stays for keyboard activation, where no blur race exists.
-  function deductReset(e){
-    if (e.target.id !== "deductReset") return;
-    e.preventDefault();
-    state.deductPer = null;
-    // preventDefault keeps focus where it was, and paint() will not rewrite a
-    // focused field -- so if the user came straight from the input, blur it first
-    // or the field keeps showing the number the figures just stopped using.
-    byId("deduct").blur();
+  // One reset for the drawer. A static button, so there is no repaint race: the
+  // per-field link this replaces was re-rendered by paint(), and the blur that
+  // preceded the click could swap the node out from under the pointer. Blur any
+  // field the user came straight from, or paint() will politely refuse to rewrite
+  // it and it would keep showing the number the figures just stopped using.
+  byId("advReset").addEventListener("click", function(){
+    state.deductPer = state.totPrem = state.oopOwn = null;
+    ["deduct","totPrem","oopIn"].forEach(function(id){ byId(id).blur(); });
     paint();
-  }
-  byId("deductNote").addEventListener("pointerdown", deductReset);
-  byId("deductNote").addEventListener("click", deductReset);
+  });
 
   var unitEl = byId("unit");
   function paintUnit(){

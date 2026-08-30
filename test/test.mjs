@@ -529,7 +529,7 @@ test('deduction: the override reaches every figure, and resets away', async b =>
   await p.waitForTimeout(250);
   ok('cadence reinterprets the typed amount', n((await read()).whole) === n(base.whole) - (6850-6000));
 
-  await p.click('#deductReset');
+  await p.click('#advReset');
   await p.waitForTimeout(250);
   const r = await read();
   ok('reset returns to the survey average', r.whole === base.whole && /Optional/.test(r.note));
@@ -584,10 +584,14 @@ test('drawer: overrides compose, disclose, and stay in their lane', async b => {
   await p.waitForTimeout(250);
   ok('an impossible pair is called out', /less than the deduction/.test(await sum()));
 
-  for (const id of ['totPrem','deduct','oopIn']) await p.fill('#'+id,'');
+  ok('reset-all is offered while anything is overridden',
+     await p.evaluate(()=>!document.getElementById('advReset').hidden));
+  await p.click('#advReset');
   await p.waitForTimeout(250);
-  ok('clearing all three returns to the averages',
+  ok('reset-all returns every figure to the averages',
      /survey averages/.test(await sum()) && n((await cards())[1]) === 20143);
+  ok('and then withdraws itself',
+     await p.evaluate(()=>document.getElementById('advReset').hidden));
   await p.close();
 });
 
