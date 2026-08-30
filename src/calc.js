@@ -398,7 +398,13 @@
   function summary(o) {
     var opts = {
       income: o.income, size: o.size, adults: o.adults,
-      area: o.area, region: o.region || 'contiguous'
+      area: o.area, region: o.region || 'contiguous',
+      // The premium overrides must ride along: summary() feeds the sticky bar,
+      // the comparison bars and COBRA, while routeBreakdown() is called with the
+      // caller's own opts and feeds the waterfall. Dropping these here made the
+      // two halves of the page disagree the moment a user typed their own
+      // deduction -- the waterfall moved and everything else silently did not.
+      workerPremium: o.workerPremium, totalPremium: o.totalPremium
     };
     var emp = employerCost(opts);
     var mkt = marketplaceCost(opts);

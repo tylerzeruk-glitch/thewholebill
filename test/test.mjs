@@ -442,6 +442,106 @@ test('eligibility box: only where subsidies apply', async b => {
   await p.close();
 });
 
+/* The Ages field is wired, coarsely: under 21 is a child (the ACA child-rate
+ * boundary), 21+ an adult, 65+ flagged but still priced as an adult. Ages are the
+ * source of truth and household size is their count, so the two controls cannot
+ * disagree. Age-RATING is deliberately absent until the Stage 2 CMS files. */
+test('ages: the field drives the split, and size follows it', async b => {
+  const p = await page(b,1440,900);
+  const read = () => p.evaluate(()=>({
+    size:document.getElementById('sizeVal').textContent,
+    ages:document.getElementById('ages').value,
+    whole:+document.querySelector('[data-fig="route.whole"]').textContent.replace(/[^0-9]/g,''),
+    note:!document.getElementById('agesNote').hidden }));
+  await p.locator('#route button[data-r="marketplace"]').click();
+  await p.waitForTimeout(250);
+
+  const two = await read();
+  await p.fill('#ages', '41, 39, 30, 9');       // third person becomes an adult
+  await p.waitForTimeout(250);
+  const three = await read();
+  ok('an extra adult changes the marketplace bill', three.whole > two.whole,
+     `$${two.whole.toLocaleString()} -> $${three.whole.toLocaleString()}`);
+
+  await p.fill('#ages', '41, 39');
+  await p.waitForTimeout(250);
+  ok('the count of ages is the household size', (await read()).size === '2');
+
+  await p.locator('#sizeUp').click();
+  await p.waitForTimeout(200);
+  const stepped = await read();
+  ok('stepping size grows the ages list', stepped.ages === '41, 39, 10' && stepped.size === '3', stepped.ages);
+
+  await p.fill('#ages', '70, 39');
+  await p.waitForTimeout(250);
+  ok('65+ raises the Medicare note', (await read()).note);
+  await p.fill('#ages', '41, 39');
+  await p.waitForTimeout(250);
+  ok('and it clears again', !(await read()).note);
+
+  // Junk mid-keystroke must never blank the model or the figures.
+  await p.fill('#ages', 'x,,');
+  await p.waitForTimeout(200);
+  const junk = await read();
+  ok('junk input leaves the last good state in force', +junk.size >= 1 && junk.whole > 0,
+     `size ${junk.size}, whole ${junk.whole}`);
+  await p.fill('#ages', '8 22 45');
+  await p.locator('#ages').blur();
+  await p.waitForTimeout(200);
+  ok('blur normalises the separators', (await read()).ages === '8, 22, 45', (await read()).ages);
+  await p.close();
+});
+
+/* The deduction box is an override, and an OPTIONAL one: empty means the KFF
+ * survey average. The user states one number -- their own paycheck deduction --
+ * so the employer share stays at the survey average and the total moves; resizing
+ * the invisible share from a number that says nothing about it would corrupt the
+ * one figure this site exists to get right. The override must reach EVERY
+ * employer figure: summary() once dropped it on the floor, so the waterfall moved
+ * while the sticky bar, comparison bars and COBRA silently did not. */
+test('deduction: the override reaches every figure, and resets away', async b => {
+  const p = await page(b,1440,900);
+  const n = s => +s.replace(/[^0-9]/g,'');
+  const read = () => p.evaluate(()=>{
+    const t=e=>document.querySelector(e).textContent.trim();
+    return { whole:t('[data-fig="route.whole"]'), sticky:t('.sticky [data-fig="emp.total"]'),
+             cobra:t('[data-fig="cobra.annual"]'),
+             empShare:[...document.querySelectorAll('#cards .card-i .v')][1].textContent,
+             note:t('#deductNote') };
+  });
+  const base = await read();
+  ok('marked optional', await p.evaluate(()=>/optional/i.test(document.getElementById('deductLbl').textContent))
+     && /Optional/.test(base.note));
+
+  await p.fill('#deduct','500');            // $500 every 2 weeks = $13,000/yr
+  await p.waitForTimeout(250);
+  const o = await read();
+  ok('override moves the waterfall', n(o.whole) === n(base.whole) + (13000-6850),
+     `${base.whole} -> ${o.whole}`);
+  ok('sticky bar agrees with the waterfall', o.sticky === o.whole, `${o.sticky} vs ${o.whole}`);
+  ok('COBRA follows the real premium', n(o.cobra) === Math.round((13000+20143)*1.02),
+     o.cobra);
+  ok('the employer share does not move', o.empShare === base.empShare, o.empShare);
+
+  await p.selectOption('#period','12');     // same $500, monthly = $6,000/yr
+  await p.waitForTimeout(250);
+  ok('cadence reinterprets the typed amount', n((await read()).whole) === n(base.whole) - (6850-6000));
+
+  await p.click('#deductReset');
+  await p.waitForTimeout(250);
+  const r = await read();
+  ok('reset returns to the survey average', r.whole === base.whole && /Optional/.test(r.note));
+
+  await p.fill('#deduct','999'); await p.waitForTimeout(200);
+  await p.fill('#deduct','');  await p.waitForTimeout(200);
+  ok('clearing the field is also the way back', (await read()).whole === base.whole);
+
+  await p.locator('#route button[data-r="marketplace"]').click();
+  await p.waitForTimeout(250);
+  ok('read-only off the employer route', await p.evaluate(()=>document.getElementById('deduct').readOnly));
+  await p.close();
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
