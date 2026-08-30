@@ -586,12 +586,22 @@ test('drawer: overrides compose, disclose, and stay in their lane', async b => {
 
   ok('reset-all is offered while anything is overridden',
      await p.evaluate(()=>!document.getElementById('advReset').hidden));
+  ok('reset-all wears the amber', await p.evaluate(()=>
+     getComputedStyle(document.getElementById('advReset')).color === 'rgb(217, 154, 63)'));
+  ok('each overridden field is checked, untouched ones are not', await p.evaluate(()=>{
+    const on = id => document.getElementById(id).classList.contains('on');
+    return on('deductOvk') && on('totPremOvk') && on('oopInOvk');
+  }));
   await p.click('#advReset');
   await p.waitForTimeout(250);
   ok('reset-all returns every figure to the averages',
      /survey averages/.test(await sum()) && n((await cards())[1]) === 20143);
   ok('and then withdraws itself',
      await p.evaluate(()=>document.getElementById('advReset').hidden));
+  ok('and the checks go dark with it', await p.evaluate(()=>{
+    const on = id => document.getElementById(id).classList.contains('on');
+    return !on('deductOvk') && !on('totPremOvk') && !on('oopInOvk');
+  }));
   await p.close();
 });
 
