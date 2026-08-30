@@ -380,6 +380,35 @@ test('range strip: labels sit clear of each other and of the strip', async b => 
   }
 });
 
+/* The income field asks for one number that three statutes define differently, so
+ * it carries a tooltip saying which one to enter (MAGI-ish, before taxes). The
+ * panel is an overlay inside the field: it must actually open, stay inside the
+ * viewport, and close from the keyboard. */
+test('income tooltip: opens, fits, and closes', async b => {
+  for (const [w,h,m] of [[1440,900,false],[390,844,true]]) {
+    const p = await page(b,w,h,m);
+    await p.locator('#incomeQ').click();
+    await p.waitForTimeout(150);
+    const r = await p.evaluate(()=>{
+      const pop=document.getElementById('incomeQPop'), b=pop.getBoundingClientRect();
+      return { hidden:pop.hidden, txt:pop.textContent,
+               inX: b.left >= 0 && b.right <= innerWidth,
+               expanded: document.getElementById('incomeQ').getAttribute('aria-expanded') };
+    });
+    ok(`${w}px: tooltip opens`, !r.hidden && r.expanded === 'true');
+    // Deliberately plain language: "before taxes" is the one load-bearing fact,
+    // and the guess-is-fine line is what lowers the stakes of the question. The
+    // MAGI detail lives in the methodology, not here.
+    ok(`${w}px: tooltip says before taxes and that a guess is fine`,
+       /before taxes/.test(r.txt) && /guess is fine/.test(r.txt));
+    ok(`${w}px: tooltip stays inside the viewport`, r.inX);
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(100);
+    ok(`${w}px: Escape closes it`, await p.evaluate(()=>document.getElementById('incomeQPop').hidden));
+    await p.close();
+  }
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
