@@ -106,4 +106,7 @@ lightness there.
    send people to the wrong office, which for this site is a serious failure.
 3. **Real routing.** `#/methodology` becomes `/methodology`; the section is already self-contained
    and the router is about twelve lines.
-4. **Deploy** static to thewholebill.org.
+4. ~~Deploy~~ **Done 2026-08-30**: live at thewholebill.org via Cloudflare Pages,
+   auto-deployed from `main`, gated by Cloudflare Access (allowlisted emails only).
+   Settings, gate management and the go-public checklist: `docs/DEPLOY.md`.
+   Going public is a deliberate step, not a default.
