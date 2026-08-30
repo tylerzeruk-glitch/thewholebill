@@ -707,10 +707,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="field">
             <div class="lbl" id="deductLbl">Your premium deduction</div>
             <div class="row" style="gap:6px;flex-wrap:wrap">
-              <div class="ctrl mono" style="width:150px;justify-content:flex-start" id="deduct">$263.46</div>
-              <div class="ctrl" style="gap:14px;color:var(--im);font-size:14px"><span>every 2 weeks</span><span style="font-size:11px;color:var(--ifaint)">&#9662;</span></div>
+              <input class="ctrl mono" id="deduct" value="$263.46" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-labelledby="deductLbl">
+              <select class="ctrl" id="period" style="width:auto;color:var(--im);font-size:14px" aria-label="How often it comes out of your pay">
+                <option value="52">every week</option>
+                <option value="26" selected>every 2 weeks</option>
+                <option value="24">twice a month</option>
+                <option value="12">every month</option>
+              </select>
             </div>
-            <div class="note-i">Pre-filled from the KFF 2025 employer survey average. Override it with your own.</div>
+            <div class="note-i" id="deductNote"></div>
           </div>
         </div>
 
@@ -1259,7 +1264,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      65+ flagged as Medicare territory but still priced as an adult. Real age-rated
      premiums (the 3:1 curve) need the Stage 2 CMS files; until then a 26-year-old
      and a 62-year-old price the same, and the methodology page says so. */
-  var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer" };
+  /* deductPer is the user's own per-paycheck deduction, or null for the KFF
+     average. The pair (deductPer, period) is what the user actually stated, so
+     changing the cadence keeps the typed amount and recomputes the year -- while
+     the un-overridden average is an ANNUAL survey figure, so there the cadence
+     only changes how it is displayed. An empty field is the road back: clearing
+     it returns to the average, which is what makes the override optional. */
+  var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null };
   function adultsOf(ages){
     var n = 0, i;
     for (i = 0; i < ages.length; i++) if (ages[i] >= 21) n++;
@@ -1300,6 +1311,18 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var opts = { income: state.income, size: state.size,
                  adults: adultsOf(state.ages), area: state.area,
                  region: "contiguous", model: state.model };
+    if (state.deductPer != null){
+      // The user told us ONE number: their own deduction. The employer share is
+      // the part they cannot see -- that is the site's thesis -- so it stays at
+      // the survey average and the total premium moves with the override. Holding
+      // the TOTAL at the average instead would silently resize the employer share,
+      // the figure this site exists to get right, from a number that says nothing
+      // about it. Passed as totalPremium because calc.js derives employer as
+      // premium minus worker.
+      var eTier = W.EMPLOYER[state.size > 1 ? "family" : "single"];
+      opts.workerPremium = state.deductPer * state.period;
+      opts.totalPremium  = opts.workerPremium + (eTier.premium - eTier.worker);
+    }
     S = W.summary(opts);
     S.breakdown = W.routeBreakdown(state.route, opts);
     S.routeMax = Math.max(
@@ -1534,10 +1557,27 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       '</b> of that never appears on a paystub.' +
       (R.borne < R.whole ? ' A further ' + fmt(R.whole - R.borne) + ' is carried by taxpayers, not by you.' : '');
 
-    byId("deductLbl").textContent = state.route === "employer" ? "Your premium deduction"
+    byId("deductLbl").innerHTML = state.route === "employer"
+        ? 'Your premium deduction <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span>'
       : state.route === "marketplace" ? "Your premium, after any credit" : "Premium";
-    byId("deduct").textContent = state.route === "none" ? "\u2014"
-      : "$" + ((state.route === "employer" ? S.employer.worker : S.marketplace.net) / state.period).toFixed(2);
+    var dEl = byId("deduct");
+    dEl.readOnly = state.route !== "employer";
+    dEl.style.color = state.route === "employer" ? "" : "var(--im)";
+    // A focused field is the user's, mid-keystroke -- repainting it would eat the
+    // caret. Every other repaint keeps it in step with the route and cadence.
+    if (document.activeElement !== dEl){
+      dEl.value = state.route === "none" ? "\u2014"
+        : "$" + ((state.route === "employer"
+            ? (state.deductPer != null ? state.deductPer : S.employer.worker / state.period)
+            : S.marketplace.net / state.period)).toFixed(2);
+    }
+    byId("deductNote").innerHTML = state.route === "employer"
+        ? (state.deductPer != null
+            ? "Your number, in place of the survey average. <a class=\"q\" id=\"deductReset\" href=\"#\" style=\"color:var(--teal);border-bottom-color:rgba(63,181,174,.4)\">Go back to the average</a>."
+            : "Optional. Pre-filled with the KFF 2025 survey average &mdash; type the number from your own paystub and everything recalculates.")
+      : state.route === "marketplace"
+        ? "Computed from the benchmark premium and your credit &mdash; not editable."
+        : "No premium: this is what makes the uninsured route look cheap.";
   }
 
 
@@ -1908,6 +1948,35 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     paint();
   });
   byId("ages").addEventListener("change", agesToField);
+
+  byId("deduct").addEventListener("input", function(){
+    if (state.route !== "employer") return;
+    var v = parseFloat(this.value.replace(/[^0-9.]/g, ""));
+    state.deductPer = (isFinite(v) && v > 0 && v < 100000) ? v : null;
+    paint();
+  });
+  byId("deduct").addEventListener("change", function(){ paint(); });
+  byId("period").addEventListener("change", function(){
+    state.period = +this.value;
+    paint();
+  });
+  // The reset link is re-rendered by paint(), so the listener lives on the note.
+  // It fires on pointerdown, not click: pressing the link blurs the input, the
+  // blur's change event repaints, and the repaint replaces the link node before
+  // the click can land on it -- pointerdown runs ahead of the blur. The click
+  // handler stays for keyboard activation, where no blur race exists.
+  function deductReset(e){
+    if (e.target.id !== "deductReset") return;
+    e.preventDefault();
+    state.deductPer = null;
+    // preventDefault keeps focus where it was, and paint() will not rewrite a
+    // focused field -- so if the user came straight from the input, blur it first
+    // or the field keeps showing the number the figures just stopped using.
+    byId("deduct").blur();
+    paint();
+  }
+  byId("deductNote").addEventListener("pointerdown", deductReset);
+  byId("deductNote").addEventListener("click", deductReset);
 
   var unitEl = byId("unit");
   function paintUnit(){
