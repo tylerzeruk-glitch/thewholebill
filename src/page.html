@@ -189,8 +189,15 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
 .adv-x{color:var(--ictrl);flex-shrink:0;transition:transform .22s ease}
 .adv[open] .adv-x{transform:rotate(180deg)}
 .adv-bd{display:flex;flex-direction:column;gap:22px;padding:4px 0 22px}
-.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--ictrl);border-radius:2px;color:var(--im);font-family:var(--sans);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s}
-.adv-reset:hover{color:var(--ik);border-color:var(--im)}
+/* Lit while THIS field's number is driving the figures, dark otherwise -- the
+   per-field version of the summary line. Amber because amber is what marks the
+   user's own data throughout (the overridden field's focus ring, the reset).
+   Decorative: the summary line and each note already carry the state in words,
+   so the check is aria-hidden. */
+.ovk{display:none;align-items:center;color:var(--c2)}
+.ovk.on{display:flex}
+.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--c2);border-radius:2px;color:var(--c2);font-family:var(--sans);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.adv-reset:hover{color:var(--ink);background:var(--c2)}
 .adv-reset:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
 input.ctrl:focus-visible{border-color:var(--c2)}
 select.ctrl option{background:var(--ink-raised);color:var(--ik)}
@@ -736,6 +743,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                 <div class="lbl" id="deductLbl">Your premium deduction <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span></div>
                 <div class="row" style="gap:6px;flex-wrap:wrap">
                   <input class="ctrl mono" id="deduct" value="$263.46" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-labelledby="deductLbl">
+                  <span class="ovk" id="deductOvk" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
                   <select class="ctrl" id="period" style="width:auto;color:var(--im);font-size:14px" aria-label="How often it comes out of your pay">
                     <option value="52">every week</option>
                     <option value="26" selected>every 2 weeks</option>
@@ -747,13 +755,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
               </div>
               <div class="field">
                 <div class="lbl">Total plan premium, per year <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span></div>
-                <input class="ctrl mono" id="totPrem" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Total plan premium per year, yours plus your employer's">
-                <div class="note-i" id="totPremNote">The whole premium &mdash; your share plus your employer&rsquo;s. It is on a W-2 in <b style="color:var(--ib);font-weight:400">Box 12, code DD</b>. With this, the employer share stops being a survey average and becomes your real one.</div>
+                <div class="row" style="gap:10px;align-items:center">
+                  <input class="ctrl mono" id="totPrem" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Total plan premium per year, yours plus your employer's">
+                  <span class="ovk" id="totPremOvk" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+                </div>
+                <div class="note-i" id="totPremNote">The whole premium &mdash; your share plus your employer&rsquo;s. It is on a W-2 in <b style="color:var(--ib);font-weight:400">Box 12, code DD</b>. With this, the employer share stops being a survey average and becomes exactly this minus your yearly deduction &mdash; the two fields work together, and they are meant to be different numbers.</div>
               </div>
               <div class="field">
-                <div class="lbl">Deductible &amp; out-of-pocket, per year <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span></div>
-                <input class="ctrl mono" id="oopIn" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Deductible and out-of-pocket spending per year">
-                <div class="note-i">What your household actually spends in a year on deductibles and copays. Ours is a modeled average; yours is a fact.</div>
+                <div class="lbl">Deductible, per year <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span></div>
+                <div class="row" style="gap:10px;align-items:center">
+                  <input class="ctrl mono" id="oopIn" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Deductible and similar spending per year">
+                  <span class="ovk" id="oopInOvk" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+                </div>
+                <div class="note-i">Roughly what care costs your household in a year before the plan pays &mdash; deductible plus copays if you know them. <b style="color:var(--ib);font-weight:400">Not the out-of-pocket maximum.</b> Ours is a modeled average; yours is a fact.</div>
               </div>
               <button type="button" class="adv-reset" id="advReset" hidden>Reset all to the averages</button>
             </div>
@@ -1626,7 +1640,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       var own = [];
       if (state.deductPer != null) own.push("deduction");
       if (state.totPrem != null) own.push("total premium");
-      if (state.oopOwn != null) own.push("out-of-pocket");
+      if (state.oopOwn != null) own.push("deductible");
       var sum = own.length === 0
         ? "Using survey averages &mdash; open to enter your own."
         : own.length === 3
@@ -1637,6 +1651,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         sum += ' <span style="color:var(--c2)">Total premium is less than the deduction &mdash; check the two.</span>';
       byId("advSum").innerHTML = sum;
       byId("advReset").hidden = own.length === 0;
+      byId("deductOvk").classList.toggle("on", state.deductPer != null);
+      byId("totPremOvk").classList.toggle("on", state.totPrem != null);
+      byId("oopInOvk").classList.toggle("on", state.oopOwn != null);
     }
   }
 
