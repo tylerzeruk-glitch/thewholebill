@@ -635,7 +635,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="zipbar">
         <div class="zipfield">
           <div class="k">Zip</div>
-          <input class="v" id="zip" inputmode="numeric" maxlength="5" placeholder="06106" value="06106" aria-label="ZIP code">
+          <input class="v" id="zip" inputmode="numeric" maxlength="5" placeholder="75201" value="75201" aria-label="ZIP code">
         </div>
         <button class="btn-dark" id="zipGo">Show me &rarr;</button>
       </div>
@@ -653,7 +653,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="footline">
       <span>&darr; Scroll</span>
       <span class="domain">thewholebill.org</span>
-      <span>Modeled from KFF, CMS &amp; Census data &middot; sample figures</span>
+      <span>KFF, CMS &amp; Census data &middot; a live preview</span>
     </div>
   </div>
 </section>
@@ -1516,8 +1516,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     </div>
     <div style="height:1px;background:var(--irule)"></div>
     <div class="row" style="justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:12.5px;color:var(--ifaint)">
-      <span>A design preview. All figures are sample data for a family of four in Hartford, CT.</span>
-      <span>Bracketed items are real facts not yet wired up.</span>
+      <span>A live preview, still being built. The starting household is an example; every figure follows the one you set.</span>
+      <span>Spotted something wrong? <a class="q" href="mailto:contact@thewholebill.org" style="color:inherit;border-bottom-color:var(--irule-2)">contact@thewholebill.org</a></span>
     </div>
   </div>
 </footer>
@@ -1549,9 +1549,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      where a 3-digit ZIP decides the rating area). bChoices holds the counties
      of a ZIP that spans rating areas until the reader picks one -- ask, never
      guess, same rule as the rep card. */
-  var state = { bkey:"09003", bChoices:null, size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
+  var state = { bkey:"48113", bChoices:null, size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
                 tone:"direct", emph:{ emp:true, mkt:false, loss:true, nation:false, story:false },
-                zip5:"06106", district:"CT-1" };
+                zip5:"75201", district:"TX-30" };
   function adultsOf(ages){
     var n = 0, i;
     for (i = 0; i < ages.length; i++) if (ages[i] >= 21) n++;
