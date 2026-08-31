@@ -318,6 +318,29 @@ test('comparison: the universal bar accounts for its whole figure', async b => {
   await p.close();
 });
 
+/* The ink zone escalates before it turns: the whole bill (02), then the cliff
+ * (03, the statute as closing indictment), then the comparison (04, the
+ * alternative). The turn is marked in the headline itself: "Another way" wears
+ * universal's teal, the same colour that means universal everywhere else. */
+test('narrative: the cliff precedes the turn, and the turn wears teal', async b => {
+  const p = await page(b,1440,900);
+  const r = await p.evaluate(()=>{
+    const eyebrows=[...document.querySelectorAll('.eyebrow')]
+      .map(e=>e.textContent.trim()).filter(t=>/^\d\d/.test(t));
+    const cliffY=document.getElementById('cliff').offsetTop;
+    const cmpY=document.getElementById('pills').closest('section').offsetTop;
+    const em=[...document.querySelectorAll('h2 em')].find(e=>/Another way/.test(e.textContent));
+    return { seq: eyebrows.map(t=>t.slice(0,2)).join(','),
+             cliffFirst: cliffY < cmpY,
+             teal: em ? getComputedStyle(em).color : 'missing' };
+  });
+  ok('sections number 01-08 in page order (08 is the methodology view)',
+     r.seq === '01,02,03,04,05,06,07,08', r.seq);
+  ok('the cliff sits before the comparison', r.cliffFirst);
+  ok('"Another way" wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
+  await p.close();
+});
+
 /* Six models, friendliest formula to most expensive allocation. The argument is
  * cemented by SURVIVING the hostile numbers, not by curating friendly ones -- so
  * the spectrum itself is asserted: the low end is the Sanders formula, the high
