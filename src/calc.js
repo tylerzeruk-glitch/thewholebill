@@ -205,26 +205,22 @@
    * so, and the UI must repeat it. See numbers-and-copy-traps.md #7 and #8.
    * ---------------------------------------------------------------------- */
 
-  /* Two models only, and each one is traceable.
+  /* Six models, each one traceable, spanning peer-reviewed-friendly to the most
+   * expensive estimate anyone has published. The argument is cemented by
+   * SURVIVING the hostile numbers, not by curating friendly ones.
    *
-   * 1. Sanders Option 1 is the ONLY published household-level formula in this debate.
-   *    We apply it literally.
+   * Two are published household-level formulas (Sanders Option 1; Galvani/Lancet
+   * 2020). The other four are OUR allocation of a published national estimate
+   * onto one household — the Blahous convention, stated where it applies:
    *
-   * 2. The second is deliberately the least friendly published estimate. Blahous
-   *    (Mercatus, 2018) modelled two scenarios: his MAIN one has national health
-   *    spending FALLING $2.054T over a decade against current law, and his
-   *    ALTERNATIVE — where provider payments do not fall to Medicare rates — has it
-   *    RISING $3.252T. We use the alternative, so the site never rests on the
-   *    friendly reading of an unfriendly study.
+   *      annual national-spending delta vs current law / 134.79M households
    *
-   *    Blahous published no household figure, so we derive one and show the whole
-   *    sum: the gap between his two scenarios, spread evenly over ten years and all
-   *    US households, added to the Sanders result.
-   *
-   *      $3.252T / 10 years / 134.79M households = ~$2,413 per household per year
-   *
-   *    Flat-per-household is a simplification — real financing would spread it
-   *    progressively. Stated on the methodology page, not buried.
+   * (Blahous's own delta is a ten-year figure, so his divides by 10 first.)
+   * Flat-per-household is a simplification — real financing would spread it
+   * progressively. The deltas also come from different base years and baselines
+   * (Blahous 2020s decade, Urban 2020, RAND 2019, CBO 2030): we spread each
+   * source's own dollars over one household count rather than false-precision
+   * adjust them — stated on the methodology page, not buried.
    */
   var BLAHOUS = {
     altDelta: 3.252e12,   // Blahous alternative scenario, 10-yr increase vs current law
@@ -234,6 +230,25 @@
   };
   var BLAHOUS_ADDER = BLAHOUS.altDelta / BLAHOUS.years / BLAHOUS.households;
 
+  /* RAND RR-3106 (Liu & Eibner, 2019): NHE +$68.8B (+1.8%) in 2019 with the plan
+   * fully in place — $3,823.1B -> $3,891.9B, Table 1. Models the bill WITH
+   * long-term care, payment rates ~109% of Medicare, supply constraints
+   * absorbing half of new demand (+9.8% without that constraint). */
+  var RAND_ADDER = 68.8e9 / BLAHOUS.households;
+
+  /* CBO Working Paper 2020-08 (Dec 2020), Exhibit 1-1: five illustrative
+   * options for 2030. We use Option 5 — the one shaped most like the bill
+   * (LTSS covered, no cost sharing) — which RAISES NHE $290B, the least
+   * friendly of the five. CBO's four options WITHOUT long-term care all LOWER
+   * national spending (-$42B to -$743B). CBO never scored the bill itself. */
+  var CBO_ADDER = 290e9 / BLAHOUS.households;
+
+  /* Urban Institute, "From Incremental to Comprehensive" (Oct 2019), Table 13:
+   * "Single-Payer Enhanced" raises national health spending $719.7B (+20.6%)
+   * in 2020 — the most expensive estimate anyone has published. LTSS, dental,
+   * zero cost sharing, all residents covered. */
+  var URBAN_ADDER = 719.7e9 / BLAHOUS.households;
+
   function sandersOne(income, size) {
     var exempt = size > 1 ? 29200 : 14600;
     var premium = 0.04 * Math.max(0, income - exempt);
@@ -241,17 +256,80 @@
     return { total: premium + payroll, parts: { premium: premium, payroll: payroll } };
   }
 
+  /* Galvani, Parpia, Foster, Singer & Fitzpatrick, The Lancet 395:524-533
+   * (Feb 2020) — the only PEER-REVIEWED estimate in this set, and the second
+   * published household-level formula: a 5% household income tax above a
+   * $29,000 exemption (the paper's stated threshold, "as stipulated by Sanders
+   * and colleagues") plus a 10% employer payroll tax replacing employer
+   * premiums (12.29% is the paper's break-even upper bound). The paper leaves
+   * ~$507 average out-of-pocket, which — like every model here — we exclude
+   * for comparability; the methodology page says so. The single-filer
+   * exemption is halved by us, mirroring sandersOne; the paper states only
+   * the $29,000 figure. */
+  function galvani(income, size) {
+    var exempt = size > 1 ? 29000 : 14500;
+    var premium = 0.05 * Math.max(0, income - exempt);
+    var payroll = 0.10 * income;
+    return { total: premium + payroll, parts: { premium: premium, payroll: payroll } };
+  }
+
+  function sandersPlus(adderKey, adder) {
+    return function (income, size) {
+      var s = sandersOne(income, size);
+      var parts = { premium: s.parts.premium, payroll: s.parts.payroll };
+      parts[adderKey] = adder;
+      return { total: s.total + adder, parts: parts };
+    };
+  }
+
+  /* Ordered friendliest formula to most hostile allocation, so the pill row
+   * reads as a spectrum. Chips name the source; notes carry the provenance,
+   * friendly and hostile labelled to the same standard. */
   var MODELS = [
     {
       id: 'sanders1',
       chip: 'Sanders \u00b7 Option 1',
       basis: 'published formula',
       note: 'Sen. Bernie Sanders\u2019 office, 2019, from its published list of financing options \u2014 ' +
-            'the only household-level formula anyone in this debate has actually published. A 4% ' +
+            'the first of two household-level formulas anyone in this debate has published. A 4% ' +
             'income-based premium above a standard-deduction exemption, plus a 7.5% employer payroll ' +
             'tax replacing what your employer pays now. The list presents these as separate options; ' +
             'pairing them is our doing.',
       compute: sandersOne
+    },
+    {
+      id: 'galvani',
+      chip: 'Lancet \u00b7 peer-reviewed',
+      basis: 'published formula',
+      note: 'Galvani and colleagues, The Lancet, 2020 \u2014 the only peer-reviewed estimate here, ' +
+            'and the second published household formula: a 5% income tax above a $29,000 exemption ' +
+            'plus a 10% employer payroll tax replacing premiums. The senior author was an unpaid ' +
+            'adviser to Sen. Sanders\u2019 office \u2014 we say that for the same reason we label Mercatus ' +
+            'Koch-funded. The same team\u2019s 2026 preprint (not peer reviewed) re-ran the model on ' +
+            '2024 data and found national spending falling 19.7%.',
+      compute: galvani
+    },
+    {
+      id: 'rand',
+      chip: 'RAND \u00b7 2019',
+      basis: 'published estimate + our allocation',
+      note: 'RAND Corporation, 2019 \u2014 nonpartisan, modelling the bill WITH long-term care. It ' +
+            'found national health spending rising 1.8%, about $69 billion a year; we spread that ' +
+            'across 134.79 million households and add it to the Sanders formula, the same ' +
+            'allocation we apply to Blahous. RAND assumed supply constraints absorb half of new ' +
+            'demand \u2014 without that assumption its increase is 9.8%.',
+      compute: sandersPlus('randGap', RAND_ADDER)
+    },
+    {
+      id: 'cbo5',
+      chip: 'CBO \u00b7 bill-like option',
+      basis: 'published estimate + our allocation',
+      note: 'Congressional Budget Office, 2020 \u2014 five illustrative options; CBO never scored the ' +
+            'bill itself. We use the option shaped most like the bill (long-term care covered, no ' +
+            'cost sharing), which RAISES national spending $290 billion in 2030 \u2014 the least ' +
+            'friendly of the five. CBO\u2019s four options without long-term care all LOWER national ' +
+            'spending. The per-household allocation is ours, like Blahous.',
+      compute: sandersPlus('cboGap', CBO_ADDER)
     },
     {
       id: 'blahous',
@@ -264,11 +342,19 @@
             'He published no household figure: we spread that $3.25 trillion evenly across ten ' +
             'years and 134.79 million households (about $2,413 a year) and add it to the Sanders ' +
             'formula. Flat-per-household is a simplification; real financing would be progressive.',
-      compute: function (income, size) {
-        var s = sandersOne(income, size);
-        return { total: s.total + BLAHOUS_ADDER,
-                 parts: { premium: s.parts.premium, payroll: s.parts.payroll, blahousGap: BLAHOUS_ADDER } };
-      }
+      compute: sandersPlus('blahousGap', BLAHOUS_ADDER)
+    },
+    {
+      id: 'urban',
+      chip: 'Urban \u00b7 most expensive',
+      basis: 'published estimate + our allocation',
+      note: 'Urban Institute, 2019 \u2014 a left-leaning institute\u2019s \u201cSingle-Payer Enhanced\u201d, and ' +
+            'the most expensive estimate anyone has published: national spending rising $720 ' +
+            'billion a year, covering long-term care, dental, zero cost sharing and every ' +
+            'resident. We include it so the range\u2019s top end is the hardest number on offer \u2014 if ' +
+            'the argument survives this one, it survives. The per-household allocation is ours, ' +
+            'like Blahous.',
+      compute: sandersPlus('urbanGap', URBAN_ADDER)
     }
   ];
 
@@ -439,6 +525,7 @@
     routeBreakdown: routeBreakdown, UNINSURED: UNINSURED,
     cliffCurve: cliffCurve, cliffDrop: cliffDrop,
     BLAHOUS: BLAHOUS, BLAHOUS_ADDER: BLAHOUS_ADDER,
+    RAND_ADDER: RAND_ADDER, CBO_ADDER: CBO_ADDER, URBAN_ADDER: URBAN_ADDER,
     universalCost: universalCost, cobra: cobra, summary: summary, savingsFor: savingsFor
   };
 }));
