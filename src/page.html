@@ -147,7 +147,11 @@ p{margin:0;text-wrap:pretty}
 .unit-l.on{color:#1E1509;font-weight:500}
 
 /* ---------- instrument ---------- */
-.instr{display:grid;grid-template-columns:452px minmax(0,1fr);gap:0}
+/* scroll-margin clears the sticky results bar: without it, the ZIP submit's
+   scrollIntoView parks the section top underneath the bar and beheads the
+   "Tell it about you" heading. The 900px block widens it for the taller
+   two-row bar. */
+.instr{display:grid;grid-template-columns:452px minmax(0,1fr);gap:0;scroll-margin-top:74px}
 .panel{border-right:1px solid var(--irule);padding:44px clamp(24px,3vw,40px) 52px 0;display:flex;flex-direction:column;gap:30px}
 .out{padding:44px 0 52px clamp(24px,3.4vw,48px);display:flex;flex-direction:column;gap:26px;min-width:0}
 .field{display:flex;flex-direction:column;gap:9px}
@@ -468,6 +472,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    30px. So the two-row treatment starts here. The app script reads this same
    900px figure for the shortened context line -- keep the two in step. */
 @media (max-width:900px){
+  .instr{scroll-margin-top:92px}   /* the two-row sticky bar is taller here */
   /* The switch spans BOTH rows on the right instead of sharing the top one with
      the context line. That row was a 10px caption next to a 44px control, so its
      height was the control's and the space between them was dead: the bar stood
@@ -2030,9 +2035,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     }
     byId("cards").innerHTML = html;
 
-    byId("bigSub").innerHTML = '<b style="color:var(--ik);font-weight:400">' + fmt(R.offPaystub) +
-      '</b> of that never appears on a paystub.' +
-      (R.borne < R.whole ? ' A further ' + fmt(R.whole - R.borne) + ' is carried by taxpayers, not by you.' : '');
+    // The paystub sentence is the employer-route thesis. On the marketplace the
+    // buyer writes every cheque themselves, so saying it there reads wrong; the
+    // fact worth surfacing is the taxpayer share, or its absence past the cliff.
+    byId("bigSub").innerHTML = state.route === "marketplace"
+      ? (R.borne < R.whole
+          ? 'Nothing here hides on a paystub. <b style="color:var(--ik);font-weight:400">' +
+            fmt(R.whole - R.borne) + '</b> of it is carried by taxpayers, not by you.'
+          : 'Nothing here hides on a paystub, and past the 400% cliff nobody shares it: every dollar is yours.')
+      : '<b style="color:var(--ik);font-weight:400">' + fmt(R.offPaystub) +
+        '</b> of that never appears on a paystub.' +
+        (R.borne < R.whole ? ' A further ' + fmt(R.whole - R.borne) + ' is carried by taxpayers, not by you.' : '');
 
     // The drawer describes the user's employer plan, so it exists only where that
     // plan is the route under discussion.
@@ -2263,7 +2276,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    * the CMS plan files (see tools/build-benchmarks.mjs). About one ZIP in eight
    * spans more than one rating area; those ask the reader which county is
    * theirs, the same rule the rep card follows. */
-  var SAMPLES = [["Hartford","06106"],["New York City","10002"],["Dallas","75201"],["Miami","33130"],["Philadelphia","19103"]];
+  /* The four biggest metros plus the country's biggest marketplace county
+     (Miami-Dade). Between them they cover both exchange types, New York's
+     family tiers and Los Angeles's ZIP-split rating area. */
+  var SAMPLES = [["New York City","10002"],["Los Angeles","90012"],["Chicago","60601"],["Dallas","75201"],["Miami","33130"]];
 
   function countyLabel(a){
     var n = a.county || a;
