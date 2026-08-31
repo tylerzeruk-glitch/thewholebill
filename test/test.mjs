@@ -1310,6 +1310,58 @@ test('content: no dead links or stale placeholders', async b => {
   await p.close();
 });
 
+/* The site's public copy carries no em or en dashes: the owner's standing
+ * style rule (CLAUDE.md, Language). Code comments are exempt. This scans what
+ * a reader can see, across every state that swaps copy in: routes, models,
+ * tones, emphases, subsidy states, ZIP states and the methodology view. The
+ * hidden parts of the DOM are included, so both slot-03 variants and the
+ * methodology section are always in scope no matter which state is showing. */
+test('language: no em or en dashes anywhere a reader can see', async b => {
+  const p = await page(b, 1280, 900);
+  const scan = async label => {
+    const hits = await p.evaluate(() => {
+      const c = document.body.cloneNode(true);
+      c.querySelectorAll('script,style').forEach(n => n.remove());
+      const t = c.textContent + ' ' + document.title;
+      return { m: (t.match(/[^\n]{0,25}[–—][^\n]{0,25}/g) || []).slice(0, 3), len: t.length };
+    });
+    ok(`no dashes: ${label}`, hits.m.length === 0, hits.m.join(' | '));
+    return hits.len;
+  };
+  // guard against a silently empty scan: the page holds tens of thousands of
+  // characters of copy, and a scan that sees almost none of it proves nothing
+  const len = await scan('on load');
+  ok('the scan is reading real copy', len > 10000, `${len} chars`);
+  for (const r of ['marketplace', 'none', 'employer']) {
+    await p.locator(`#route button[data-r="${r}"]`).click(); await p.waitForTimeout(250);
+    await scan(`route ${r}`);
+  }
+  for (let i = 0; i < 6; i++) {
+    await p.locator('.pills .pill').nth(i).click(); await p.waitForTimeout(250);
+    await scan(`model ${i + 1} of 6`);
+  }
+  for (const t of ['measured', 'personal', 'direct']) {
+    await p.locator(`.tbtn[data-tone="${t}"]`).click(); await p.waitForTimeout(250);
+    await scan(`tone ${t}`);
+  }
+  for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
+  await scan('every employer-side letter block');
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+  for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
+  await scan('every marketplace letter block');
+  await setIncome(p, 40000);  await scan('subsidy qualifying, with CHIP');
+  await setIncome(p, 240000); await scan('over the cliff');
+  await setIncome(p, 95000);
+  for (const z of ['10001', '44113', '06106']) {
+    await p.locator('#zip').fill(z); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+    await scan(`zip ${z}`);
+  }
+  await p.evaluate(() => { location.hash = '#/methodology'; });
+  await p.waitForTimeout(400);
+  await scan('methodology view');
+  await p.close();
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;

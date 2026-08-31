@@ -84,6 +84,13 @@ and displayed monthly.
 The household does not *spend* the employer's premium share — that is the entire argument. Copy
 says what healthcare **costs** a household, and reserves "spends" for money that leaves its hands.
 
+**No em or en dashes anywhere a reader can see.** Owner's rule: readers take them as a tell of
+AI-written text, and this site cannot afford the suspicion. Rewrite instead of substituting:
+a comma, colon, period or parentheses for prose; "to" for ranges; "·" for label pairs (select
+options, the page title, name-role pairs); a plain hyphen for empty-state placeholders and
+citation page ranges. Code comments are exempt. The suite enforces this by scanning rendered
+text in every copy-bearing state — new dynamic copy paths should be added to that test's loop.
+
 ## Volatile constants
 
 Bill numbers change every Congress: one `BILL` constant in the app script (currently H.R. 3069 /

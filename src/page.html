@@ -626,7 +626,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div>
       <div class="eyebrow p" style="margin-bottom:32px">A healthcare cost calculator</div>
       <h1>What does your healthcare <em>actually</em> cost?</h1>
-      <p class="lede" style="margin-top:36px;max-width:560px">Not the number on your paystub. The whole number &mdash; including the share your employer pays on your behalf, which is your money too.</p>
+      <p class="lede" style="margin-top:36px;max-width:560px">Not the number on your paystub. The whole number, including the share your employer pays on your behalf, which is your money too.</p>
       <div class="zipbar">
         <div class="zipfield">
           <div class="k">Zip</div>
@@ -641,7 +641,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <aside class="dateline">
         <div class="k">What changed this year</div>
         <p>The enhanced premium tax credits expired on 31 December 2025. The 400% subsidy cliff is back.</p>
-        <p>Marketplace enrollees are paying <b>58% more</b> in premiums, average deductibles hit a record <b>$3,786</b>, and KFF projects roughly <b>five million fewer enrollees</b> in 2026 &mdash; early federal data already count nearly three million gone.</p>
+        <p>Marketplace enrollees are paying <b>58% more</b> in premiums, average deductibles hit a record <b>$3,786</b>, and KFF projects roughly <b>five million fewer enrollees</b> in 2026. Early federal data already count nearly three million gone.</p>
         <p style="color:var(--pm);font-size:13px">KFF analysis of 2026 Marketplace enrollment.</p>
       </aside>
     </div>
@@ -663,7 +663,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       </div>
       <div class="stack" style="gap:20px">
         <p class="body">When your employer &ldquo;covers&rdquo; your health insurance, they are not giving you a gift. They are spending part of your compensation on a product, and handing you the product instead of the money.</p>
-        <p class="body">Economists broadly agree this cost lands on wages. It is yours. It just never appears on a paystub, so almost nobody counts it &mdash; which is exactly why healthcare costs feel survivable in the abstract and ruinous in practice.</p>
+        <p class="body">Economists broadly agree this cost lands on wages. It is yours. It just never appears on a paystub, so almost nobody counts it, which is exactly why healthcare costs feel survivable in the abstract and ruinous in practice.</p>
       </div>
     </div>
 
@@ -743,11 +743,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="field">
             <div class="lbl">State</div>
             <select class="ctrl" id="area">
-              <option value="CT-1">Connecticut &mdash; Hartford area</option>
-              <option value="NY-4">New York &mdash; NYC area</option>
-              <option value="PA-9">Pennsylvania &mdash; Philadelphia</option>
-              <option value="TX-26">Texas &mdash; Dallas area</option>
-              <option value="FL-27">Florida &mdash; Miami area</option>
+              <option value="CT-1">Connecticut · Hartford area</option>
+              <option value="NY-4">New York · NYC area</option>
+              <option value="PA-9">Pennsylvania · Philadelphia</option>
+              <option value="TX-26">Texas · Dallas area</option>
+              <option value="FL-27">Florida · Miami area</option>
             </select>
             <div class="note-i" id="areaNote"></div>
           </div>
@@ -771,12 +771,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             </div>
             <div class="qpop" id="incomeQPop" hidden>
               <div class="lbl" style="margin-bottom:8px">What to enter</div>
-              All the money your household expects to make this year, <b style="font-weight:500;color:var(--ik)">before taxes</b>. A close guess is fine &mdash; drag the slider to see how much it matters.
+              All the money your household expects to make this year, <b style="font-weight:500;color:var(--ik)">before taxes</b>. A close guess is fine. Drag the slider to see how much it matters.
             </div>
             <input type="range" id="income" min="12000" max="260000" step="1000" value="95000" aria-label="Household income">
             <div class="row num" style="justify-content:space-between;font-size:11px;color:var(--ifaint);margin-top:5px"><span>$12k</span><span id="fplVal"></span><span>$260k</span></div>
           </div>
-          <div class="note-i" id="agesNote" hidden style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this preview does not price &mdash; they are counted as adults here.</div>
+          <div class="note-i" id="agesNote" hidden style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this preview does not price, so they are counted as adults here.</div>
           <div class="field">
             <div class="lbl">How you&rsquo;re covered now</div>
             <div class="seg" id="route"><button type="button" data-r="employer" class="on">Employer</button><button type="button" data-r="marketplace">Marketplace</button><button type="button" data-r="none">Uninsured</button></div>
@@ -808,7 +808,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                   <input class="ctrl mono" id="totPrem" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Total plan premium per year, yours plus your employer's">
                   <span class="ovk" id="totPremOvk" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
                 </div>
-                <div class="note-i" id="totPremNote">The whole premium &mdash; your share plus your employer&rsquo;s. It is on a W-2 in <b style="color:var(--ib);font-weight:400">Box 12, code DD</b>. With this, the employer share stops being a survey average and becomes exactly this minus your yearly deduction &mdash; the two fields work together, and they are meant to be different numbers.</div>
+                <div class="note-i" id="totPremNote">The whole premium: your share plus your employer&rsquo;s. It is on a W-2 in <b style="color:var(--ib);font-weight:400">Box 12, code DD</b>. With this, the employer share stops being a survey average and becomes exactly this minus your yearly deduction. The two fields work together, and they are meant to be different numbers.</div>
               </div>
               <div class="field">
                 <div class="lbl">Deductible, per year <span style="color:var(--ifaint);letter-spacing:.08em">&middot; optional</span></div>
@@ -816,7 +816,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                   <input class="ctrl mono" id="oopIn" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:150px" aria-label="Deductible and similar spending per year">
                   <span class="ovk" id="oopInOvk" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
                 </div>
-                <div class="note-i">Roughly what care costs your household in a year before the plan pays &mdash; deductible plus copays if you know them. <b style="color:var(--ib);font-weight:400">Not the out-of-pocket maximum.</b> Ours is a modeled average; yours is a fact.</div>
+                <div class="note-i">Roughly what care costs your household in a year before the plan pays: deductible plus copays if you know them. <b style="color:var(--ib);font-weight:400">Not the out-of-pocket maximum.</b> Ours is a modeled average; yours is a fact.</div>
               </div>
               <button type="button" class="adv-reset" id="advReset" hidden>Reset all to the averages</button>
             </div>
@@ -849,7 +849,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">02 &middot; The reveal</div>
           <h2>Here is <em style="font-style:italic;color:var(--c2)">the whole bill</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. You only ever see the first one &mdash; the rest is spent on your behalf.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. You only ever see the first one. The rest is spent on your behalf.</p>
       </div>
 
       <div class="wf" id="wf"></div>
@@ -873,7 +873,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">03 &middot; The cliff</div>
           <h2>One dollar, <em style="font-style:italic;color:var(--c2)">nine thousand dollars</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)" id="cliffIntro">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)" id="cliffIntro">Nothing on this page is modeled. The premium tax credit does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.</p>
       </div>
 
       <div class="cliffstats">
@@ -893,11 +893,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">03 &middot; The bad year</div>
           <h2>Nothing caps <em style="font-style:italic;color:var(--c2)">a bad year</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">The out-of-pocket maximum is the law&rsquo;s ceiling on a bad year &mdash; for people with coverage. Going without insurance means going without the ceiling: no statute anywhere limits what a hospital can bill you.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">The out-of-pocket maximum is the law&rsquo;s ceiling on a bad year, for people with coverage. Going without insurance means going without the ceiling: no statute anywhere limits what a hospital can bill you.</p>
       </div>
 
       <div class="cliffstats">
-        <div class="cstat"><div class="t">One average hospital stay, billed at list price</div><div class="v" style="color:var(--c2)">&asymp;$57,000</div><div class="s">$16,700 average cost &times; the published 3.4&times; average markup &mdash; modeled</div></div>
+        <div class="cstat"><div class="t">One average hospital stay, billed at list price</div><div class="v" style="color:var(--c2)">&asymp;$57,000</div><div class="s">$16,700 average cost &times; the published 3.4&times; average markup, modeled</div></div>
         <div class="cstat"><div class="t">The most an insured person can owe in a year</div><div class="v">$10,600</div><div class="s">the 2026 statutory out-of-pocket maximum, per person</div></div>
         <div class="cstat" style="border:none"><div class="t">The most an uninsured person can owe</div><div class="v" style="color:var(--c2)">No limit</div><div class="s">no ceiling exists in law</div></div>
       </div>
@@ -905,17 +905,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="grid2" style="gap:14px">
         <div class="card-i" style="gap:9px">
           <div class="t">After one hospitalization</div>
-          <div class="v" style="font-size:22px">&asymp;$6,000 <span style="font-size:13px;color:var(--im)">in unpaid bills, uninsured &mdash; against &asymp;$300 insured</span></div>
-          <div class="t" style="font-size:12px">A study of a million admissions matched to credit records &mdash; a finding both sides of the medical-bankruptcy debate accept.</div>
+          <div class="v" style="font-size:22px">&asymp;$6,000 <span style="font-size:13px;color:var(--im)">in unpaid bills, uninsured, against &asymp;$300 insured</span></div>
+          <div class="t" style="font-size:12px">A study of a million admissions matched to credit records, a finding both sides of the medical-bankruptcy debate accept.</div>
         </div>
         <div class="card-i" style="gap:9px">
           <div class="t">Before the bad year even arrives</div>
           <div class="v" style="font-size:22px">62% <span style="font-size:13px;color:var(--im)">of uninsured adults already carry health-care debt</span></div>
-          <div class="t" style="font-size:12px">KFF survey, 2022 &mdash; against 44% of insured adults.</div>
+          <div class="t" style="font-size:12px">KFF survey, 2022, against 44% of insured adults.</div>
         </div>
       </div>
 
-      <p class="note-i">How often does cost stop care? Asked by KFF in 2025, <b style="color:var(--ib);font-weight:400">three in four</b> uninsured adults said they skipped or postponed care over cost; the federal NHIS survey, asking more narrowly, puts it at <b style="color:var(--ib);font-weight:400">38.6%</b> &mdash; more than double the privately insured. Both figures, and the list-price arithmetic above (our derivation from HCUP&rsquo;s published aggregates and published markup research, one of whose sources is union-funded and labelled so), are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a> &mdash; along with the medical-bankruptcy literature, where the famous numbers disagree and we print both sides or neither.</p>
+      <p class="note-i">How often does cost stop care? Asked by KFF in 2025, <b style="color:var(--ib);font-weight:400">three in four</b> uninsured adults said they skipped or postponed care over cost; the federal NHIS survey, asking more narrowly, puts it at <b style="color:var(--ib);font-weight:400">38.6%</b>, more than double the privately insured. Both figures, and the list-price arithmetic above (our derivation from HCUP&rsquo;s published aggregates and published markup research, one of whose sources is union-funded and labelled so), are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>, along with the medical-bankruptcy literature, where the famous numbers disagree and we print both sides or neither.</p>
     </div>
   </section>
   <!-- ---- 05 THE COMPARISON (the turn: after the cliff, the alternative) ---- -->
@@ -926,7 +926,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">04 &middot; The comparison</div>
           <h2><em style="font-style:italic;color:var(--teal)">Another way</em> to pay for the same care.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust &mdash; including the ones written to make it look bad.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust, including the ones written to make it look bad.</p>
       </div>
 
       <div class="stack" style="gap:14px">
@@ -942,7 +942,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
         <div class="stack" style="gap:7px">
           <div class="lbl">How solid is this figure</div>
-          <div style="font-size:14.5px;line-height:1.6;color:var(--im)"><span id="basis" style="color:var(--c2)"></span> &mdash; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">see the arithmetic</a>.</div>
+          <div style="font-size:14.5px;line-height:1.6;color:var(--im)"><span id="basis" style="color:var(--c2)"></span>. <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">See the arithmetic</a>.</div>
         </div>
       </div>
 
@@ -970,7 +970,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
       </div>
 
-      <p class="note-i" id="cmpNote" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b> &mdash; employer money counts on both sides, a taxpayer subsidy on neither. No study published a per-household figure, so the universal numbers are our allocation; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">the methodology page shows the arithmetic</a>.</p>
+      <p class="note-i" id="cmpNote" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b>: employer money counts on both sides, a taxpayer subsidy on neither. No study published a per-household figure, so the universal numbers are our allocation; <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">the methodology page shows the arithmetic</a>.</p>
 
       <div class="summary">
         <div class="save">
@@ -1008,7 +1008,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
         <div class="rlabels num">
           <span style="left:0">$0</span>
-          <span id="rangeLbl" style="color:var(--teal)"><span data-fig="uni.rangeLo">$8,400</span> &mdash; <span data-fig="uni.rangeHi">$14,600</span></span>
+          <span id="rangeLbl" style="color:var(--teal)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span>
           <span id="nowLbl" style="color:var(--c2)"><span data-fig="route.borne">$31,578</span> &nbsp;today</span>
         </div>
       </div>
@@ -1053,7 +1053,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
       <div class="card-p" style="border-left:2px solid var(--amber-deep)">
         <div class="lbl p">The finding that matters most here</div>
-        <div class="quote" style="font-size:26px">Nearly half of the coverage-related deaths prevented &mdash; <span style="color:var(--amber-deep)">29,631</span> &mdash; would be among people who already have insurance.</div>
+        <div class="quote" style="font-size:26px">Nearly half of the coverage-related deaths prevented, <span style="color:var(--amber-deep)">29,631</span> of them, would be among people who already have insurance.</div>
         <p class="body">The underinsured: households with coverage on paper and deductibles they cannot clear. That is the argument this whole site makes, counted in a different unit. Having a plan is not the same as being able to use it.</p>
       </div>
     </div>
@@ -1061,13 +1061,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <details class="src">
       <summary>
         <span class="src-k">Who produced this number</span>
-        <span class="src-s">A preprint from July 2026, not peer reviewed &mdash; and its senior author advised Sen. Sanders&rsquo; office.</span>
+        <span class="src-s">A preprint from July 2026, not peer reviewed, and its senior author advised Sen. Sanders&rsquo; office.</span>
         <svg class="src-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </summary>
       <div class="src-bd">
         <div class="grid2" style="gap:28px">
           <p class="body" style="font-size:15px">The preprint has not been peer reviewed. Its senior author served as an unpaid adviser to Sen. Sanders&rsquo; office while the Medicare for All legislation was drafted, and has testified in support of it. We say that for the same reason we tell you the Mercatus study was Koch-funded: you should know who produced a number before you weigh it.</p>
-          <p class="body" style="font-size:15px">It also shares an assumption with the cost figures above &mdash; that provider payments fall to Medicare rates. Blahous called that assumption &ldquo;relatively generous&rdquo; and rejected the savings it produces; this study builds on it. The two are not independent confirmations of each other. They are the same bet, framed in opposite directions.</p>
+          <p class="body" style="font-size:15px">It also shares an assumption with the cost figures above: that provider payments fall to Medicare rates. Blahous called that assumption &ldquo;relatively generous&rdquo; and rejected the savings it produces; this study builds on it. The two are not independent confirmations of each other. They are the same bet, framed in opposite directions.</p>
         </div>
         <p class="fn">Pandey, Wells, Ye, Fitzpatrick &amp; Galvani, <i>Projected economic gains and lives saved under universal healthcare in the United States</i>, Yale School of Public Health, 2026. The same team&rsquo;s 2020 <i>Lancet</i> paper, which was peer reviewed, put the figure at roughly 68,000 lives and $450&nbsp;billion.</p>
       </div>
@@ -1090,15 +1090,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="card-p">
         <div class="lbl p">Objection 01</div>
         <div class="quote">&ldquo;My taxes would go through the roof.&rdquo;</div>
-        <p class="body">Yes. Your taxes would rise, and every honest model says so &mdash; the ones above included. The question is whether the <em>total</em> shrinks, because the premium line goes to zero at the same time. For this household the tax increase runs <span style="color:var(--amber-deep)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span> depending on whose model you pick, against <span style="color:var(--amber-deep)" data-fig="emp.replaced">$30,200</span> in premiums, deductibles and copays it replaces.<sup class="fnr">*</sup></p>
+        <p class="body">Yes. Your taxes would rise, and every honest model says so, the ones above included. The question is whether the <em>total</em> shrinks, because the premium line goes to zero at the same time. For this household the tax increase runs <span style="color:var(--amber-deep)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span> depending on whose model you pick, against <span style="color:var(--amber-deep)" data-fig="emp.replaced">$30,200</span> in premiums, deductibles and copays it replaces.<sup class="fnr">*</sup></p>
         <p class="fn"><span class="fnm">*</span>Households above roughly $250,000 pay more under most models. If that is you, the calculator will say so.</p>
       </div>
 
       <div class="card-p">
         <div class="lbl p">Objection 02</div>
         <div class="quote">&ldquo;I&rsquo;d be stuck waiting months for care.&rdquo;</div>
-        <p class="body">Wait times are real in some universal systems and not in others. Canada&rsquo;s elective queues are long; Germany&rsquo;s multi-payer sickness funds and France&rsquo;s statutory system cover everyone without them. How a system is designed and paid for matters more than whether it is single-payer &mdash; a distinction the debate usually flattens.<sup class="fnr">*</sup></p>
-        <p class="fn"><span class="fnm">*</span>The US already rations by price. KFF&rsquo;s surveys have repeatedly found around four in ten adults saying they or a family member delayed or skipped care because of cost. That is a waiting list too &mdash; it is just invisible.</p>
+        <p class="body">Wait times are real in some universal systems and not in others. Canada&rsquo;s elective queues are long; Germany&rsquo;s multi-payer sickness funds and France&rsquo;s statutory system cover everyone without them. How a system is designed and paid for matters more than whether it is single-payer, a distinction the debate usually flattens.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>The US already rations by price. KFF&rsquo;s surveys have repeatedly found around four in ten adults saying they or a family member delayed or skipped care because of cost. That is a waiting list too. It is just invisible.</p>
       </div>
 
       <div class="card-p">
@@ -1111,8 +1111,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="card-p">
         <div class="lbl p">Objection 04</div>
         <div class="quote">&ldquo;The country simply cannot afford it.&rdquo;</div>
-        <p class="body">The headline figure is enormous &mdash; on the order of $30&ndash;40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.<sup class="fnr">*</sup></p>
-        <p class="fn"><span class="fnm">*</span>The Mercatus study is the useful one here. Funded by opponents and built to be damning, it still showed lower national spending than the status quo. But that result depends on the bill&rsquo;s own assumption that providers are paid Medicare rates &mdash; a reading Blahous himself rejects. Both halves of that are true.</p>
+        <p class="body">The headline figure is enormous: on the order of $30 to $40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>The Mercatus study is the useful one here. Funded by opponents and built to be damning, it still showed lower national spending than the status quo. But that result depends on the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
       </div>
     </div>
 
@@ -1132,7 +1132,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="eyebrow p">07 &middot; Do something with it</div>
         <h2>Send them your number.</h2>
       </div>
-      <p class="note" style="font-size:15px;line-height:1.65">Staffers count letters by position and topic. A specific figure from a constituent in the district reads differently than a form letter &mdash; so this one is built from your own numbers.</p>
+      <p class="note" style="font-size:15px;line-height:1.65">Staffers count letters by position and topic. A specific figure from a constituent in the district reads differently than a form letter, so this one is built from your own numbers.</p>
     </div>
 
     <div class="actgrid">
@@ -1144,7 +1144,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             </div>
             <div class="stack" style="gap:4px">
-              <div style="font-family:var(--serif);font-size:23px;line-height:1.15" id="repName">&mdash;</div>
+              <div style="font-family:var(--serif);font-size:23px;line-height:1.15" id="repName">-</div>
               <div class="note" style="font-size:13.5px"><span id="repDistrict">Enter your five-digit ZIP above.</span></div>
             </div>
           </div>
@@ -1160,9 +1160,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="stack" style="gap:11px">
             <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">House bill</span><span id="repBill"></span></div>
             <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Senate companion</span><span id="senBill"></span></div>
-            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Their position</span><span id="repPos" style="color:var(--pm)">&mdash;</span></div>
+            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Their position</span><span id="repPos" style="color:var(--pm)">-</span></div>
           </div>
-          <p class="note" style="font-size:12px" id="repHedge" hidden>District from your ZIP &mdash; if you live near a district line, double-check on your representative&rsquo;s site.</p>
+          <p class="note" style="font-size:12px" id="repHedge" hidden>District from your ZIP. If you live near a district line, double-check on your representative&rsquo;s site.</p>
         </div>
 
         <div class="card-p" style="padding:28px 30px;gap:16px">
@@ -1247,7 +1247,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <td><span class="tag surv">Survey</span></td>
-          <td>A real published measurement, but an average. Employer premiums come from KFF&rsquo;s annual employer survey &mdash; genuine data, though your employer is not the average employer.</td>
+          <td>A real published measurement, but an average. Employer premiums come from KFF&rsquo;s annual employer survey: genuine data, though your employer is not the average employer.</td>
         </tr>
         <tr>
           <td><span class="tag mod">Modeled</span></td>
@@ -1269,15 +1269,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>The premium tax credit <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
-      <p class="body" style="max-width:760px">The credit is the gap between the benchmark plan&rsquo;s premium and what the law says your household is expected to contribute. That expected share comes from IRS Rev. Proc. 2025-25, and it rises <i>linearly within each band</i> &mdash; not in steps.</p>
+      <p class="body" style="max-width:760px">The credit is the gap between the benchmark plan&rsquo;s premium and what the law says your household is expected to contribute. That expected share comes from IRS Rev. Proc. 2025-25, and it rises <i>linearly within each band</i>, not in steps.</p>
       <table style="margin-top:12px">
         <tr><th>Household income</th><th>Contribution rises from</th><th>to</th></tr>
         <tr><td>Under 133% of the poverty line</td><td class="num">2.10%</td><td class="num">2.10%</td></tr>
-        <tr><td>133% &ndash; 150%</td><td class="num">3.14%</td><td class="num">4.19%</td></tr>
-        <tr><td>150% &ndash; 200%</td><td class="num">4.19%</td><td class="num">6.60%</td></tr>
-        <tr><td>200% &ndash; 250%</td><td class="num">6.60%</td><td class="num">8.44%</td></tr>
-        <tr><td>250% &ndash; 300%</td><td class="num">8.44%</td><td class="num">9.96%</td></tr>
-        <tr><td>300% &ndash; 400%</td><td class="num">9.96%</td><td class="num">9.96%</td></tr>
+        <tr><td>133% to 150%</td><td class="num">3.14%</td><td class="num">4.19%</td></tr>
+        <tr><td>150% to 200%</td><td class="num">4.19%</td><td class="num">6.60%</td></tr>
+        <tr><td>200% to 250%</td><td class="num">6.60%</td><td class="num">8.44%</td></tr>
+        <tr><td>250% to 300%</td><td class="num">8.44%</td><td class="num">9.96%</td></tr>
+        <tr><td>300% to 400%</td><td class="num">9.96%</td><td class="num">9.96%</td></tr>
         <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">400% and above</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit at all</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
@@ -1296,13 +1296,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>What universal coverage would cost you</h3>
-      <p class="body" style="max-width:760px">This is where we are most exposed, so here is the whole derivation, for all six models. Two are published household-level formulas &mdash; the only two anyone has written down. The other four are our allocation of a published national estimate: the source&rsquo;s own annual spending change against current law, spread evenly across 134.79 million households (Census, 2025) and added to the Sanders formula. The range deliberately runs from the only peer-reviewed estimate to the most expensive one anyone has published &mdash; the argument has to survive the hostile end, or it is not an argument.</p>
+      <p class="body" style="max-width:760px">This is where we are most exposed, so here is the whole derivation, for all six models. Two are published household-level formulas, the only two anyone has written down. The other four are our allocation of a published national estimate: the source&rsquo;s own annual spending change against current law, spread evenly across 134.79 million households (Census, 2025) and added to the Sanders formula. The range deliberately runs from the only peer-reviewed estimate to the most expensive one anyone has published. The argument has to survive the hostile end, or it is not an argument.</p>
 
       <div class="grid2" style="margin-top:20px">
         <div class="card-p">
           <div class="lbl p">Model one <span class="tag stat" style="margin-left:6px">Published formula</span></div>
           <div class="quote" style="font-size:23px">Sanders &middot; bill&rsquo;s authors</div>
-          <p class="body">From the financing options published by Sen. Sanders&rsquo; office in 2019 (its &ldquo;Option 1&rdquo;) &mdash; the first of the two household-level formulas in this debate that anyone actually wrote down.</p>
+          <p class="body">From the financing options published by Sen. Sanders&rsquo; office in 2019 (its &ldquo;Option 1&rdquo;), the first of the two household-level formulas in this debate that anyone actually wrote down.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">4% &times; (income &minus; $29,200)<br>+ 7.5% &times; income<br><br>= 4% &times; $65,800 &nbsp;=&nbsp; $2,632<br>+ 7.5% &times; $95,000 &nbsp;=&nbsp; $7,125<br><b>= $9,757 a year</b></p>
           <p class="fn">Our one liberty: the 2019 list presents the income premium and the payroll tax as <i>separate</i> options. We pair them. Say so out loud rather than let someone discover it.</p>
         </div>
@@ -1310,43 +1310,43 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="card-p">
           <div class="lbl p">Model two <span class="tag stat" style="margin-left:6px">Published formula</span></div>
           <div class="quote" style="font-size:23px">Lancet &middot; peer-reviewed</div>
-          <p class="body">Galvani, Parpia, Foster, Singer &amp; Fitzpatrick, <i>The Lancet</i>, February 2020 &mdash; the only peer-reviewed estimate in this set, and the second published household formula: a 5% income tax above the paper&rsquo;s stated $29,000 exemption, plus a 10% payroll tax replacing employer premiums (12.29% is the paper&rsquo;s break-even upper bound).</p>
+          <p class="body">Galvani, Parpia, Foster, Singer &amp; Fitzpatrick, <i>The Lancet</i>, February 2020: the only peer-reviewed estimate in this set, and the second published household formula: a 5% income tax above the paper&rsquo;s stated $29,000 exemption, plus a 10% payroll tax replacing employer premiums (12.29% is the paper&rsquo;s break-even upper bound).</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">5% &times; (income &minus; $29,000)<br>+ 10% &times; income<br><br>= 5% &times; $66,000 &nbsp;=&nbsp; $3,300<br>+ 10% &times; $95,000 &nbsp;=&nbsp; $9,500<br><b>= $12,800 a year</b></p>
-          <p class="fn">The senior author was an unpaid adviser to Sen. Sanders&rsquo; office &mdash; disclosed for the same reason Mercatus is labelled Koch-funded. The paper leaves about $507 average out-of-pocket, which every model here excludes for comparability. The paper states one $29,000 threshold; halving it for single filers mirrors our Sanders treatment and is our convention, not the paper&rsquo;s. The same team&rsquo;s 2026 preprint (not peer reviewed, produced for a Rep. Khanna inquiry) re-ran the model on 2024 data: national spending falling $1,041 billion, 19.7%.</p>
+          <p class="fn">The senior author was an unpaid adviser to Sen. Sanders&rsquo; office, disclosed for the same reason Mercatus is labelled Koch-funded. The paper leaves about $507 average out-of-pocket, which every model here excludes for comparability. The paper states one $29,000 threshold; halving it for single filers mirrors our Sanders treatment and is our convention, not the paper&rsquo;s. The same team&rsquo;s 2026 preprint (not peer reviewed, produced for a Rep. Khanna inquiry) re-ran the model on 2024 data: national spending falling $1,041 billion, 19.7%.</p>
         </div>
 
         <div class="card-p">
           <div class="lbl p">Model three <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">RAND &middot; nonpartisan</div>
-          <p class="body">Liu &amp; Eibner, RAND Corporation, 2019 &mdash; nonpartisan, modelling the bill <i>with</i> long-term care at payment rates around 109% of Medicare. National health spending rises 1.8% &mdash; $3,823 billion to $3,892 billion.</p>
+          <p class="body">Liu &amp; Eibner, RAND Corporation, 2019: nonpartisan, modelling the bill <i>with</i> long-term care at payment rates around 109% of Medicare. National health spending rises 1.8%, from $3,823 billion to $3,892 billion.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$68.8B &divide; 134,790,000 households<br>= <b>$510</b> per household per year<br><br>$9,757 + $510 = <b>$10,267</b></p>
-          <p class="fn">RAND assumed supply constraints absorb half of new demand; without that assumption its increase is 9.8%. RAND published no household figure &mdash; the allocation is ours, same convention as Blahous.</p>
+          <p class="fn">RAND assumed supply constraints absorb half of new demand; without that assumption its increase is 9.8%. RAND published no household figure. The allocation is ours, same convention as Blahous.</p>
         </div>
 
         <div class="card-p">
           <div class="lbl p">Model four <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">CBO &middot; the scorekeeper</div>
-          <p class="body">Congressional Budget Office, December 2020 &mdash; five illustrative options for 2030; CBO has never scored the bill itself. We use Option 5, the one shaped most like the bill (long-term care covered, no cost sharing), which <b>raises</b> national spending $290 billion &mdash; the least friendly of the five. CBO&rsquo;s four options <i>without</i> long-term care all <b>lower</b> national spending, by $42 to $743 billion.</p>
+          <p class="body">Congressional Budget Office, December 2020: five illustrative options for 2030; CBO has never scored the bill itself. We use Option 5, the one shaped most like the bill (long-term care covered, no cost sharing), which <b>raises</b> national spending $290 billion, the least friendly of the five. CBO&rsquo;s four options <i>without</i> long-term care all <b>lower</b> national spending, by $42 to $743 billion.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$290B &divide; 134,790,000 households<br>= <b>$2,151</b> per household per year<br><br>$9,757 + $2,151 = <b>$11,908</b></p>
-          <p class="fn">CBO published no household figure &mdash; the allocation is ours, same convention as Blahous. Its $290 billion is a 2030 projection against CBO&rsquo;s own $6,631 billion baseline; we spread the source&rsquo;s dollars as published rather than false-precision adjust them to a common year.</p>
+          <p class="fn">CBO published no household figure. The allocation is ours, same convention as Blahous. Its $290 billion is a 2030 projection against CBO&rsquo;s own $6,631 billion baseline; we spread the source&rsquo;s dollars as published rather than false-precision adjust them to a common year.</p>
         </div>
 
         <div class="card-p">
           <div class="lbl p">Model five <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">Mercatus &middot; the opposition</div>
-          <p class="body">Charles Blahous, Mercatus Center, 2018 &mdash; Koch-funded and written to show single-payer was unaffordable. He modelled two scenarios. His <i>main</i> one has national health spending <b>falling $2.05 trillion</b> over a decade against current law. His alternative, where provider payments do not fall to Medicare rates, has it <b>rising $3.25 trillion</b>.</p>
+          <p class="body">Charles Blahous, Mercatus Center, 2018: Koch-funded and written to show single-payer was unaffordable. He modelled two scenarios. His <i>main</i> one has national health spending <b>falling $2.05 trillion</b> over a decade against current law. His alternative, where provider payments do not fall to Medicare rates, has it <b>rising $3.25 trillion</b>.</p>
           <p class="body">We use the alternative, so this site never rests on the friendly reading of an unfriendly study.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">$3.252T &divide; 10 years<br>&divide; 134,790,000 households<br>= <b>$2,413</b> per household per year<br><br>$9,757 + $2,413 = <b>$12,170</b></p>
-          <p class="fn">Blahous published no household figure, so that allocation is ours. Spreading it flat across all households is a simplification &mdash; real financing would be progressive, which would move this number down for most households and up for high earners.</p>
+          <p class="fn">Blahous published no household figure, so that allocation is ours. Spreading it flat across all households is a simplification: real financing would be progressive, which would move this number down for most households and up for high earners.</p>
         </div>
 
         <div class="card-p">
           <div class="lbl p">Model six <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">Urban &middot; the priciest</div>
-          <p class="body">Blumberg, Holahan and colleagues, Urban Institute, October 2019 &mdash; a left-leaning institute&rsquo;s &ldquo;Single-Payer Enhanced&rdquo;, and the most expensive estimate anyone has published: national spending rising <b>$719.7 billion a year (+20.6%)</b>, covering long-term care, dental, zero cost sharing and every US resident.</p>
-          <p class="body">We include it so the top of the range is the hardest number on offer &mdash; if the argument survives this one, it survives.</p>
+          <p class="body">Blumberg, Holahan and colleagues, Urban Institute, October 2019: a left-leaning institute&rsquo;s &ldquo;Single-Payer Enhanced&rdquo;, and the most expensive estimate anyone has published: national spending rising <b>$719.7 billion a year (+20.6%)</b>, covering long-term care, dental, zero cost sharing and every US resident.</p>
+          <p class="body">We include it so the top of the range is the hardest number on offer. If the argument survives this one, it survives.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$719.7B &divide; 134,790,000 households<br>= <b>$5,340</b> per household per year<br><br>$9,757 + $5,340 = <b>$15,097</b></p>
-          <p class="fn">Urban published no household figure &mdash; the allocation is ours, same convention as Blahous. Its &ldquo;Single-Payer Lite&rdquo; option, without long-term care and with income-scaled cost sharing, <i>cuts</i> national spending 6.0% &mdash; we use the expensive one.</p>
+          <p class="fn">Urban published no household figure. The allocation is ours, same convention as Blahous. Its &ldquo;Single-Payer Lite&rdquo; option, without long-term care and with income-scaled cost sharing, <i>cuts</i> national spending 6.0%. We use the expensive one.</p>
         </div>
       </div>
     </div>
@@ -1357,30 +1357,30 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <table style="margin-top:12px">
         <tr>
           <td style="width:220px"><b style="font-weight:500;color:var(--pk)">One admission, at cost</b></td>
-          <td>About <span class="num">$16,700</span> &mdash; derived by us from HCUP&rsquo;s published 2022 aggregates: $548.5 billion in hospital costs across 32.9 million stays (HCUP Statistical Brief #316). Excludes physician fees, so the real bill runs higher.</td>
+          <td>About <span class="num">$16,700</span>, derived by us from HCUP&rsquo;s published 2022 aggregates: $548.5 billion in hospital costs across 32.9 million stays (HCUP Statistical Brief #316). Excludes physician fees, so the real bill runs higher.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">The markup to list price</b></td>
-          <td>Charges average <span class="num">3.4&times;</span> cost nationally (Bai &amp; Anderson, <i>Health Affairs</i> 2015, on 2012 data; the most common ratio was 2.4). A 2020 study by National Nurses United &mdash; a union that advocates single-payer; labelled, like every source here &mdash; measures 4.2&times; by 2018. We use the older, smaller number.</td>
+          <td>Charges average <span class="num">3.4&times;</span> cost nationally (Bai &amp; Anderson, <i>Health Affairs</i> 2015, on 2012 data; the most common ratio was 2.4). A 2020 study by National Nurses United (a union that advocates single-payer; labelled, like every source here) measures 4.2&times; by 2018. We use the older, smaller number.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">One admission, as billed</b></td>
-          <td>&asymp;<span class="num">$57,000</span> &mdash; $16,700 &times; 3.4, our multiplication, labelled modeled where it appears. Uninsured patients are billed from list prices. Protections exist but are conditional &mdash; nonprofit hospitals&rsquo; assistance policies under IRS 501(r), good-faith estimates for scheduled care under the No Surprises Act &mdash; and none of them caps the price itself.</td>
+          <td>&asymp;<span class="num">$57,000</span>: $16,700 &times; 3.4, our multiplication, labelled modeled where it appears. Uninsured patients are billed from list prices. Protections exist but are conditional (nonprofit hospitals&rsquo; assistance policies under IRS 501(r), good-faith estimates for scheduled care under the No Surprises Act), and none of them caps the price itself.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">The insured ceiling</b></td>
-          <td><span class="num">$10,600</span> self-only / <span class="num">$21,200</span> family &mdash; the 2026 out-of-pocket maximum, statutory, from CMS&rsquo;s 2025 Marketplace final rule. It applies only to people with coverage. No equivalent exists in law for the uninsured.</td>
+          <td><span class="num">$10,600</span> self-only / <span class="num">$21,200</span> family: the 2026 out-of-pocket maximum, statutory, from CMS&rsquo;s 2025 Marketplace final rule. It applies only to people with coverage. No equivalent exists in law for the uninsured.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">After one hospitalization</b></td>
-          <td>&asymp;<span class="num">$6,000</span> in unpaid bills for an uninsured adult four years on, against &asymp;<span class="num">$300</span> insured &mdash; Dobkin, Finkelstein, Kluender &amp; Notowidigdo&rsquo;s event study of about a million California admissions matched to credit records (<i>American Economic Review</i>, 2018). A finding both camps of the bankruptcy debate below accept.</td>
+          <td>&asymp;<span class="num">$6,000</span> in unpaid bills for an uninsured adult four years on, against &asymp;<span class="num">$300</span> insured: Dobkin, Finkelstein, Kluender &amp; Notowidigdo&rsquo;s event study of about a million California admissions matched to credit records (<i>American Economic Review</i>, 2018). A finding both camps of the bankruptcy debate below accept.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">Debt, and care skipped</b></td>
-          <td><span class="num">62%</span> of uninsured adults carry health-care debt, against 44% of the insured (KFF survey, 2022). Cost stopped or delayed care for <span class="num">three in four</span> uninsured adults in KFF&rsquo;s 2025 poll &mdash; or <span class="num">38.6%</span>, more than double the privately insured, by the narrower federal NHIS measure (2024). Two surveys asking two different questions; we print both.</td>
+          <td><span class="num">62%</span> of uninsured adults carry health-care debt, against 44% of the insured (KFF survey, 2022). Cost stopped or delayed care for <span class="num">three in four</span> uninsured adults in KFF&rsquo;s 2025 poll, or <span class="num">38.6%</span>, more than double the privately insured, by the narrower federal NHIS measure (2024). Two surveys asking two different questions; we print both.</td>
         </tr>
       </table>
-      <p class="fn">The medical-bankruptcy numbers are deliberately absent from section 03, because the famous ones disagree about what they measure. A 2019 AJPH editorial &mdash; a survey of bankruptcy filers with a 29.4% response rate, whose lead authors co-founded Physicians for a National Health Program, which advocates single-payer &mdash; found 66.5% of filers said medical bills or illness-related work loss <i>contributed</i>. A 2018 NEJM analysis by academic economists, linking hospitalizations to credit records, estimates admissions <i>cause</i> about 4% of non-elderly bankruptcies, 6% among the uninsured. Self-reported contribution and measured causation are different questions; neither number refutes the other, and we will not print one without the other.</p>
+      <p class="fn">The medical-bankruptcy numbers are deliberately absent from section 03, because the famous ones disagree about what they measure. A 2019 AJPH editorial (a survey of bankruptcy filers with a 29.4% response rate, whose lead authors co-founded Physicians for a National Health Program, which advocates single-payer) found 66.5% of filers said medical bills or illness-related work loss <i>contributed</i>. A 2018 NEJM analysis by academic economists, linking hospitalizations to credit records, estimates admissions <i>cause</i> about 4% of non-elderly bankruptcies, 6% among the uninsured. Self-reported contribution and measured causation are different questions; neither number refutes the other, and we will not print one without the other.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
@@ -1389,7 +1389,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <table style="margin-top:12px">
         <tr>
           <td style="width:220px"><b style="font-weight:500;color:var(--pk)">Benchmark premiums</b></td>
-          <td>Five metro areas are wired up with modeled figures, and they are not age-rated: everyone 21 and over prices as one flat adult rate, when the real ACA curve charges a 64-year-old about three times a 21-year-old. Real, age-rated premiums for every rating area come from the CMS public use files &mdash; Exchange PUFs for healthcare.gov states, State-based Exchange PUFs for the 21 states running their own. That is the next build step. Anyone 65+ is usually on Medicare, which we do not price at all.</td>
+          <td>Five metro areas are wired up with modeled figures, and they are not age-rated: everyone 21 and over prices as one flat adult rate, when the real ACA curve charges a 64-year-old about three times a 21-year-old. Real, age-rated premiums for every rating area come from the CMS public use files: Exchange PUFs for healthcare.gov states, State-based Exchange PUFs for the 21 states running their own. That is the next build step. Anyone 65+ is usually on Medicare, which we do not price at all.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">ZIP codes</b></td>
@@ -1401,15 +1401,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">The Medicare tax asymmetry</b></td>
-          <td>Today&rsquo;s total includes the 1.45% you already pay. The universal figures do not carry a continuing Medicare tax, which flatters them by roughly that amount. And if the employer&rsquo;s premium share is really your money, so is the employer&rsquo;s matching 1.45% &mdash; which we leave out, which cuts the other way.</td>
+          <td>Today&rsquo;s total includes the 1.45% you already pay. The universal figures do not carry a continuing Medicare tax, which flatters them by roughly that amount. And if the employer&rsquo;s premium share is really your money, so is the employer&rsquo;s matching 1.45%, which we leave out, which cuts the other way.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">What the universal figure is</b></td>
-          <td>A contribution, not a cost of care. The other two bars show what covering this household costs in full; this one shows the share of it the household would pay. Their care would still cost roughly what it costs now &mdash; <b>$30,600 to $34,600</b> a year on the models above &mdash; and the household would pay about <b>28&ndash;32%</b> of that, the rest coming from progressive financing and the federal health spending that already exists. Read as a like-for-like total, it flatters universal coverage. Putting a number on that remainder would mean allocating national spending per household, a second modeled figure stacked on the one we already publish, so for now we say this instead.</td>
+          <td>A contribution, not a cost of care. The other two bars show what covering this household costs in full; this one shows the share of it the household would pay. Their care would still cost roughly what it costs now (<b>$30,600 to $34,600</b> a year on the models above), and the household would pay about <b>28 to 32%</b> of that, the rest coming from progressive financing and the federal health spending that already exists. Read as a like-for-like total, it flatters universal coverage. Putting a number on that remainder would mean allocating national spending per household, a second modeled figure stacked on the one we already publish, so for now we say this instead.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">Mixed vintages in the allocations</b></td>
-          <td>The four allocated models spread each source&rsquo;s own dollars &mdash; Blahous&rsquo;s 2020s decade, Urban&rsquo;s 2020, RAND&rsquo;s 2019, CBO&rsquo;s 2030 projection &mdash; over one 2025 household count. Inflating them all to one year would add false precision to numbers whose real uncertainty is the model, not the deflator; leaving them as published understates the older sources slightly. We chose the disclosure over the adjustment.</td>
+          <td>The four allocated models spread each source&rsquo;s own dollars (Blahous&rsquo;s 2020s decade, Urban&rsquo;s 2020, RAND&rsquo;s 2019, CBO&rsquo;s 2030 projection) over one 2025 household count. Inflating them all to one year would add false precision to numbers whose real uncertainty is the model, not the deflator; leaving them as published understates the older sources slightly. We chose the disclosure over the adjustment.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">One income number</b></td>
@@ -1417,7 +1417,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">Uninsured spending</b></td>
-          <td>Modeled, and low for a reason worth stating plainly: uninsured households spend less because they skip care, not because care is cheaper for them. It usually is not. Our figure is the cost of the care an uninsured household <i>uses</i> in a year &mdash; cash out of pocket runs lower still (roughly $500&ndash;750 in the last published MEPS breakdowns), because providers collect little of what they bill. Either way it describes a quiet year; the bad-year arithmetic has its own section above.</td>
+          <td>Modeled, and low for a reason worth stating plainly: uninsured households spend less because they skip care, not because care is cheaper for them. It usually is not. Our figure is the cost of the care an uninsured household <i>uses</i> in a year. Cash out of pocket runs lower still (roughly $500 to $750 in the last published MEPS breakdowns), because providers collect little of what they bill. Either way it describes a quiet year; the bad-year arithmetic has its own section above.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">Wage incidence</b></td>
@@ -1435,7 +1435,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Employer premiums</td><td>KFF Employer Health Benefits Survey, 2025</td></tr>
         <tr><td>2026 marketplace changes</td><td>KFF, 2026 Marketplace enrollment, premiums and deductibles</td></tr>
         <tr><td>Single-payer financing</td><td>Office of Sen. Bernie Sanders, financing options, 2019</td></tr>
-        <tr><td>Single-payer, peer-reviewed</td><td>Galvani et al., <i>Improving the prognosis of health care in the USA</i>, The Lancet 395:524&ndash;533, 2020</td></tr>
+        <tr><td>Single-payer, peer-reviewed</td><td>Galvani et al., <i>Improving the prognosis of health care in the USA</i>, The Lancet 395:524-533, 2020</td></tr>
         <tr><td>Single-payer national cost</td><td>Blahous, <i>The Costs of a National Single-Payer Healthcare System</i>, Mercatus Center, 2018</td></tr>
         <tr><td>Single-payer, nonpartisan</td><td>Liu &amp; Eibner, <i>National Health Spending Estimates Under Medicare for All</i>, RAND RR-3106, 2019</td></tr>
         <tr><td>Single-payer, five options</td><td>CBO, <i>How CBO Analyzes the Costs of Proposals for Single-Payer Health Care Systems</i>, Working Paper 2020-08, December 2020</td></tr>
@@ -1566,23 +1566,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("repPick").hidden = !(r.st === "split" || r.st === "picked");
     byId("repHedge").hidden = r.st !== "one";
     if (r.st === "none"){
-      name.innerHTML = "&mdash;";
+      name.innerHTML = "-";
       dist.textContent = "Enter your five-digit ZIP above.";
-      pos.innerHTML = "&mdash;";
+      pos.innerHTML = "-";
     } else if (r.st === "unknown"){
-      name.innerHTML = "&mdash;";
+      name.innerHTML = "-";
       dist.textContent = "We don’t have a district for ZIP " + state.zip5 + ".";
-      pos.innerHTML = "&mdash;";
+      pos.innerHTML = "-";
     } else if (r.st === "split"){
       name.textContent = (r.ds.length === 2 ? "Two" : r.ds.length) + " districts share your ZIP";
       dist.textContent = "Pick yours below.";
-      pos.innerHTML = "&mdash;";
+      pos.innerHTML = "-";
     } else {
       var m = REPS.house[r.d], parts = r.d.split("-"), stn = STATE_NAMES[parts[0]] || parts[0];
       if (!m){
         name.textContent = "This seat is vacant";
         dist.textContent = stn + "’s " + ordinal(parts[1]) + " district has no current member.";
-        pos.innerHTML = "&mdash;";
+        pos.innerHTML = "-";
       } else {
         name.textContent = m.n + " (" + m.p + ")";
         dist.textContent = stn + "’s " + ordinal(parts[1]) + " district · " +
@@ -1593,7 +1593,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       }
     }
     if (!byId("repPick").hidden){
-      byId("repPickWhy").textContent = "ZIP " + state.zip5 + " spans " + r.ds.length + " districts — you know which town you live in; we don’t:";
+      byId("repPickWhy").textContent = "ZIP " + state.zip5 + " spans " + r.ds.length + " districts. You know which town you live in; we don’t:";
       var html = "", i, k, mm;
       for (i = 0; i < r.ds.length; i++){
         k = r.ds[i]; mm = REPS.house[k];
@@ -1629,27 +1629,27 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       P.push('I added up what my household actually spends on healthcare, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span class="letterHh"></span>&rsquo;s healthcare costs more than <mark data-fig="emp.total" data-round="down"></mark> <span data-uw="a"></span>. Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before.');
     if (e.mkt)
       P.push(m.overCliff
-        ? 'I buy my own coverage through the marketplace &mdash; I am my own employer, so nothing about this cost is hidden from me &mdash; and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this district carries this cost in a way their larger competitors do not.'
-        : 'I buy my own coverage through the marketplace &mdash; I am my own employer, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span> &mdash; and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this district carries this cost in a way their larger competitors do not.');
-    P.push('Under the financing models I looked at &mdash; including one produced by opponents of the policy &mdash; my household would pay between roughly <mark data-fig="uni.rangeLo" data-round="down"></mark> and <mark data-fig="uni.rangeHi" data-round="up"></mark>. <span id="letterCmp"></span>');
+        ? 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this district carries this cost in a way their larger competitors do not.'
+        : 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this district carries this cost in a way their larger competitors do not.');
+    P.push('Under the financing models I looked at, including one produced by opponents of the policy, my household would pay between roughly <mark data-fig="uni.rangeLo" data-round="down"></mark> and <mark data-fig="uni.rangeHi" data-round="up"></mark>. <span id="letterCmp"></span>');
     if (e.loss){
       if (r === "none")
-        P.push('My household is uninsured today &mdash; the coverage that came with a job went with it. Even now, between care paid in cash and the Medicare payroll tax we still pay, a quiet year costs us roughly <mark data-fig="route.borne" data-round="near"></mark> <span data-uw="a"></span> &mdash; and one hospital stay could undo years of saving.');
+        P.push('My household is uninsured today. The coverage that came with a job went with it. Even now, between care paid in cash and the Medicare payroll tax we still pay, a quiet year costs us roughly <mark data-fig="route.borne" data-round="near"></mark> <span data-uw="a"></span>, and one hospital stay could undo years of saving.');
       else if (r === "marketplace")
-        P.push('Part of why we buy our own coverage is that the employer kind can vanish with a job &mdash; keeping a lost plan through COBRA runs more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. Access to a doctor should not depend on anyone&rsquo;s payroll status.');
+        P.push('Part of why we buy our own coverage is that the employer kind can vanish with a job. Keeping a lost plan through COBRA runs more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. Access to a doctor should not depend on anyone&rsquo;s payroll status.');
       else
         P.push('I also want to be plain about the part that worries me most: if I lost my job tomorrow, keeping this coverage through COBRA would cost more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. My family&rsquo;s access to a doctor should not depend on my employer&rsquo;s procurement decisions.');
     }
     if (e.nation)
-      P.push('This is not only my household&rsquo;s arithmetic. The least friendly published estimate &mdash; from a Koch-funded center, written to argue the policy is unaffordable &mdash; still found national health spending about $2 trillion lower over a decade in its main scenario, and a peer-reviewed study in <i>The Lancet</i> put the saving at roughly $450 billion a year. I am not asking you to take the friendliest number; even the hostile one, on its own main assumptions, comes out ahead.');
+      P.push('This is not only my household&rsquo;s arithmetic. The least friendly published estimate, from a Koch-funded center written to argue the policy is unaffordable, still found national health spending about $2 trillion lower over a decade in its main scenario, and a peer-reviewed study in <i>The Lancet</i> put the saving at roughly $450 billion a year. I am not asking you to take the friendliest number; even the hostile one, on its own main assumptions, comes out ahead.');
     if (e.story)
-      P.push('<span class="hint">[Your story goes here &mdash; who is covered, what it has cost, what you have put off. One or two sentences in your own words are the part a staffer remembers.]</span>');
+      P.push('<span class="hint">[Your story goes here: who is covered, what it has cost, what you have put off. One or two sentences in your own words are the part a staffer remembers.]</span>');
     P.push(t === "measured" ? "Thank you for your time and consideration."
          : t === "personal" ? "Thank you for reading this far."
          : "Thank you for your time.");
     var out = P.map(function(p){ return "<div>" + p + "</div>"; }).join("");
     out += '<div style="color:var(--pm)">[Your name] &middot; [Your address]</div>';
-    out += '<div style="color:var(--pm);font-size:15px;border-top:1px solid var(--prule-soft);padding-top:15px">Figures calculated at thewholebill.org &mdash; the sources and assumptions are published there.</div>';
+    out += '<div style="color:var(--pm);font-size:15px;border-top:1px solid var(--prule-soft);padding-top:15px">Figures calculated at thewholebill.org. The sources and assumptions are published there.</div>';
     return out;
   }
   function renderLetter(){
@@ -1716,7 +1716,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       ? "Every one of them is less than what healthcare costs us now."
       : S.universalRange.lo > S.breakdown.borne
         ? "All of them are more than my household bears today; I am writing in support even so."
-        : "For my household it is close either way — some models come in under what we bear now, some over.";
+        : "For my household it is close either way: some models come in under what we bear now, some over.";
 
     var F = figures(), i, el;
 
@@ -1755,7 +1755,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     drawSegments("empBar", "empSub", W.routeBreakdown("employer", opts).parts, max);
     drawSegments("mktBar", "mktSub", W.routeBreakdown("marketplace", opts).parts, max);
     byId("mktNote").innerHTML = S.marketplace.overCliff
-      ? '<span style="color:var(--c2)">No subsidy \u2014 over the 400% cliff</span>'
+      ? '<span style="color:var(--c2)">No subsidy · over the 400% cliff</span>'
       : "What you pay, after the credit";
     renderUniversalBar(max);
     var mkPos = (S.universal.total / max * 100).toFixed(1) + "%";
@@ -1838,8 +1838,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("cliffView").hidden = state.route === "none";
     byId("badYear").hidden = state.route !== "none";
     byId("cliffIntro").textContent = state.route === "employer"
-      ? "Not your market today — but it is the market waiting if the employer plan ever goes away. Nothing on this page is modeled: the premium tax credit does not taper at the top, it stops, and this is what it does to a household that earns one dollar too much."
-      : "Nothing on this page is modeled. The premium tax credit does not taper at the top — it stops. This is what the statute does to a household that earns one dollar too much.";
+      ? "Not your market today, but it is the market waiting if the employer plan ever goes away. Nothing on this page is modeled: the premium tax credit does not taper at the top, it stops, and this is what it does to a household that earns one dollar too much."
+      : "Nothing on this page is modeled. The premium tax credit does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.";
 
     renderElig();
     renderPills();
@@ -2010,7 +2010,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       setF("oopIn", state.oopOwn, S.employer.oop);
       byId("deductNote").innerHTML = state.deductPer != null
         ? "Your number, in place of the survey average. Clear the field to go back."
-        : "Optional. Pre-filled with the KFF 2025 survey average &mdash; type the number from your own paystub and everything recalculates.";
+        : "Optional. Pre-filled with the KFF 2025 survey average. Type the number from your own paystub and everything recalculates.";
 
       // The summary is the disclosure: it must say what is driving the figures
       // even -- especially -- while the drawer is shut.
@@ -2026,10 +2026,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         ? "Currently using survey averages. Expand to enter your numbers."
         : own.length === 3
           ? "Currently using your plan&rsquo;s numbers. Reset to use the survey averages."
-          : "Currently using your " + own.join(" and ") + " &mdash; survey averages for the rest.";
+          : "Currently using your " + own.join(" and ") + ", with survey averages for the rest.";
       if (state.totPrem != null && state.deductPer != null &&
           state.totPrem < state.deductPer * state.period)
-        sum += ' <span style="color:var(--c2)">Total premium is less than the deduction &mdash; check the two.</span>';
+        sum += ' <span style="color:var(--c2)">Total premium is less than the deduction. Check the two.</span>';
       byId("advSum").innerHTML = sum;
       byId("advReset").hidden = own.length === 0;
       byId("deductOvk").classList.toggle("on", state.deductPer != null);
@@ -2180,7 +2180,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (state.route === "none"){
       html = '<div class="warn"><div class="lbl" style="color:var(--c2)">Nothing caps a bad year</div>' +
         '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">Every insured plan has a legal ' +
-        'out-of-pocket maximum. Without coverage there is no ceiling at all \u2014 one hospital ' +
+        'out-of-pocket maximum. Without coverage there is no ceiling at all. One hospital ' +
         'admission can cost more than a year of premiums. The figure above is what a household ' +
         'this size typically spends in an <i>ordinary</i> year, and it is low mainly because ' +
         'uninsured people skip care.</div></div>';
@@ -2190,14 +2190,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (m.overCliff){
       html = '<div class="warn"><div class="lbl" style="color:var(--c2)">You are over the subsidy cliff</div>' +
         '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
-        'poverty line this household is above 400% and gets <b>no premium tax credit at all</b> \u2014 not a ' +
+        'poverty line this household is above 400% and gets <b>no premium tax credit at all</b>, not a ' +
         'reduced one. The enhanced credits that smoothed this cliff expired on 31 December 2025. Earning ' +
         'one dollar less could be worth thousands.</div></div>';
     } else {
       html = '<div class="callout-i"><div class="lbl" style="color:var(--teal)">What you qualify for today</div>' +
         '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
         'poverty line, this household is expected to contribute <b>' +
-        (m.applicablePercentage * 100).toFixed(2) + '%</b> of income toward a benchmark silver plan \u2014 a ' +
+        (m.applicablePercentage * 100).toFixed(2) + '%</b> of income toward a benchmark silver plan: a ' +
         'credit of ' + money(m.subsidy) + ' a year.' +
         (m.chipLikely ? ' The children may also qualify for CHIP, which reaches further up the income scale.' : '') +
         '</div></div>';
@@ -2236,7 +2236,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   function renderScope(msg){
     var a = W.BENCHMARK[state.area];
     byId("scope").innerHTML = msg || ('Showing the <b>' + a.city + '</b> area. This preview has ' +
-      'five metro areas wired up \u2014 the rest of the country needs the CMS plan files, ' +
+      'five metro areas wired up. The rest of the country needs the CMS plan files, ' +
       'which is the next build step.');
     var html = "", keys = Object.keys(W.BENCHMARK), i;
     for (i = 0; i < keys.length; i++){
@@ -2274,8 +2274,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     }
     renderScope(r.reason === "short"
       ? 'Enter all five digits.'
-      : '<b>' + r.zip + '</b> is not in this preview yet. Five metro areas are wired up so far &mdash; ' +
-        'pick one to see how the calculator works, and read <a href="#/methodology">why the rest need ' +
+      : '<b>' + r.zip + '</b> is not in this preview yet. Five metro areas are wired up so far. ' +
+        'Pick one to see how the calculator works, and read <a href="#/methodology">why the rest need ' +
         'the CMS plan files</a>.');
   }
 
@@ -2289,7 +2289,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     for (var i = 0; i < main.length; i++) main[i].hidden = meth;
     byId("methodology").hidden = !meth;
     byId("methBack").hidden = !meth;
-    document.title = meth ? "Methodology \u2014 The Whole Bill" : "The Whole Bill";
+    document.title = meth ? "Methodology · The Whole Bill" : "The Whole Bill";
     if (meth) window.scrollTo(0, 0);
   }
   var stickyEl = document.querySelector(".sticky");
@@ -2354,7 +2354,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     var o = document.createElement("option");
     o.value = m.id;
-    o.textContent = role ? name + " — " + role : name;
+    o.textContent = role ? name + " · " + role : name;
     byId("modelPick").appendChild(o);
   });
   byId("modelPick").addEventListener("change", function(){

@@ -290,7 +290,7 @@
       id: 'sanders1',
       chip: 'Sanders \u00b7 bill\u2019s authors',
       basis: 'published formula',
-      note: 'Sen. Bernie Sanders\u2019 office, 2019, from its published list of financing options \u2014 ' +
+      note: 'Sen. Bernie Sanders\u2019 office, 2019, from its published list of financing options, ' +
             'the first of two household-level formulas anyone in this debate has published. A 4% ' +
             'income-based premium above a standard-deduction exemption, plus a 7.5% employer payroll ' +
             'tax replacing what your employer pays now. The list presents these as separate options; ' +
@@ -301,10 +301,10 @@
       id: 'galvani',
       chip: 'Lancet \u00b7 peer-reviewed',
       basis: 'published formula',
-      note: 'Galvani and colleagues, The Lancet, 2020 \u2014 the only peer-reviewed estimate here, ' +
+      note: 'Galvani and colleagues, The Lancet, 2020: the only peer-reviewed estimate here, ' +
             'and the second published household formula: a 5% income tax above a $29,000 exemption ' +
             'plus a 10% employer payroll tax replacing premiums. The senior author was an unpaid ' +
-            'adviser to Sen. Sanders\u2019 office \u2014 we say that for the same reason we label Mercatus ' +
+            'adviser to Sen. Sanders\u2019 office. We say that for the same reason we label Mercatus ' +
             'Koch-funded. The same team\u2019s 2026 preprint (not peer reviewed) re-ran the model on ' +
             '2024 data and found national spending falling 19.7%.',
       compute: galvani
@@ -313,20 +313,20 @@
       id: 'rand',
       chip: 'RAND \u00b7 nonpartisan',
       basis: 'published estimate + our allocation',
-      note: 'RAND Corporation, 2019 \u2014 nonpartisan, modelling the bill WITH long-term care. It ' +
+      note: 'RAND Corporation, 2019: nonpartisan, modelling the bill WITH long-term care. It ' +
             'found national health spending rising 1.8%, about $69 billion a year; we spread that ' +
             'across 134.79 million households and add it to the Sanders formula, the same ' +
             'allocation we apply to Blahous. RAND assumed supply constraints absorb half of new ' +
-            'demand \u2014 without that assumption its increase is 9.8%.',
+            'demand; without that assumption its increase is 9.8%.',
       compute: sandersPlus('randGap', RAND_ADDER)
     },
     {
       id: 'cbo5',
       chip: 'CBO \u00b7 the scorekeeper',
       basis: 'published estimate + our allocation',
-      note: 'Congressional Budget Office, 2020 \u2014 five illustrative options; CBO never scored the ' +
+      note: 'Congressional Budget Office, 2020: five illustrative options; CBO never scored the ' +
             'bill itself. We use the option shaped most like the bill (long-term care covered, no ' +
-            'cost sharing), which RAISES national spending $290 billion in 2030 \u2014 the least ' +
+            'cost sharing), which RAISES national spending $290 billion in 2030, the least ' +
             'friendly of the five. CBO\u2019s four options without long-term care all LOWER national ' +
             'spending. The per-household allocation is ours, like Blahous.',
       compute: sandersPlus('cboGap', CBO_ADDER)
@@ -335,7 +335,7 @@
       id: 'blahous',
       chip: 'Mercatus \u00b7 the opposition',
       basis: 'published formula + our allocation',
-      note: 'Mercatus Center, 2018 \u2014 Koch-funded and written to show single-payer was ' +
+      note: 'Mercatus Center, 2018: Koch-funded and written to show single-payer was ' +
             'unaffordable. Blahous modelled two scenarios; his main one has national spending ' +
             'FALLING $2.05 trillion over a decade. We use his other one, where it rises $3.25 ' +
             'trillion, so this site never leans on the friendly reading of an unfriendly study. ' +
@@ -348,10 +348,10 @@
       id: 'urban',
       chip: 'Urban \u00b7 the priciest',
       basis: 'published estimate + our allocation',
-      note: 'Urban Institute, 2019 \u2014 a left-leaning institute\u2019s \u201cSingle-Payer Enhanced\u201d, and ' +
+      note: 'Urban Institute, 2019: a left-leaning institute\u2019s \u201cSingle-Payer Enhanced\u201d, and ' +
             'the most expensive estimate anyone has published: national spending rising $720 ' +
             'billion a year, covering long-term care, dental, zero cost sharing and every ' +
-            'resident. We include it so the range\u2019s top end is the hardest number on offer \u2014 if ' +
+            'resident. We include it so the range\u2019s top end is the hardest number on offer. If ' +
             'the argument survives this one, it survives. The per-household allocation is ours, ' +
             'like Blahous.',
       compute: sandersPlus('urbanGap', URBAN_ADDER)
