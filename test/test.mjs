@@ -1116,20 +1116,26 @@ test('reps: the snapshot is coherent', async () => {
      && Object.values(REPS.senate).flat().length === 10);
 });
 
-/* The privacy note in the letter's footer wraps to its own row when the button
- * row is tight, instead of being crushed beside it -- it once wore a 190px cap
- * and ran three cramped lines. */
-test('letter: the privacy note gets room to breathe', async b => {
+/* The privacy note in the letter's footer takes a full row of its own, left-
+ * aligned under the buttons -- it once wore a 190px cap and ran three cramped
+ * right-aligned lines, and a flexible-width version still right-aligned it
+ * mid-air when it wrapped. */
+test('letter: the privacy note sits left-aligned under the buttons', async b => {
   for (const w of [1440, 900, 390]) {
     const p = await page(b,w,900);
     const r = await p.evaluate(()=>{
       const el = document.querySelector('.letter .ft p');
+      const btn = document.getElementById('sendBtn');
       const range = document.createRange(); range.selectNodeContents(el);
       const lines = new Set([...range.getClientRects()].filter(x=>x.height>1).map(x=>Math.round(x.top)));
-      return { w: el.getBoundingClientRect().width, lines: lines.size };
+      const er = el.getBoundingClientRect(), br = btn.getBoundingClientRect();
+      const tr = [...range.getClientRects()].filter(x=>x.height>1)[0];
+      return { w: er.width, lines: lines.size,
+               under: er.top >= br.bottom,
+               flush: Math.abs(tr.left - br.left) };
     });
-    ok(`${w}px: wide enough (${Math.round(r.w)}px), ${r.lines} line${r.lines>1?'s':''}`,
-       r.w >= 240 && r.lines <= 2);
+    ok(`${w}px: under the buttons, text flush with their left edge, ${r.lines} line${r.lines>1?'s':''}`,
+       r.under && r.flush < 1 && r.lines <= 2, `flush Δ${r.flush.toFixed(1)}px`);
     await p.close();
   }
 });
