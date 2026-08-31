@@ -328,7 +328,7 @@ test('models: six pills spanning the published spectrum', async b => {
   const pills = await p.evaluate(()=>[...document.querySelectorAll('#pills button')].map(e=>e.textContent));
   ok('six models on offer', pills.length === 6, pills.join(' | '));
   ok('the spectrum is labelled at both ends',
-     /Sanders/.test(pills[0]) && /peer-reviewed/.test(pills[1]) && /most expensive/.test(pills[5]),
+     /Sanders/.test(pills[0]) && /peer-reviewed/.test(pills[1]) && /priciest/.test(pills[5]),
      pills.join(' | '));
 
   const totals = [], notes = new Set();
@@ -350,6 +350,43 @@ test('models: six pills spanning the published spectrum', async b => {
      Math.abs(range.lo - Math.min(...totals)) <= 1 && Math.abs(range.hi - Math.max(...totals)) <= 1,
      `$${range.lo}-$${range.hi} vs $${Math.min(...totals)}-$${Math.max(...totals)}`);
   await p.close();
+});
+
+/* Uniform pills: a segmented control, not a tag cloud. One row, six equal
+ * columns, every label inside its pill -- and below 900px (measured: the
+ * longest role line needs ~106px and a 901px viewport gives ~112px per pill)
+ * the native select takes over and drives the same state. */
+test('models: equal pills in one row, a picker on phones', async b => {
+  for (const w of [1440, 1100, 901]) {
+    const p = await page(b,w,900);
+    const r = await p.evaluate(()=>{
+      const bs=[...document.querySelectorAll('#pills button')];
+      const ws=bs.map(x=>x.getBoundingClientRect().width);
+      return { rows:[...new Set(bs.map(x=>Math.round(x.getBoundingClientRect().top)))].length,
+               spread: Math.max(...ws)-Math.min(...ws),
+               clipped: bs.filter(x=>[...x.children].some(c=>c.scrollWidth > x.clientWidth-16)).length,
+               pick: getComputedStyle(document.getElementById('modelPick')).display };
+    });
+    ok(`${w}px: six equal pills on one row`, r.rows === 1 && r.spread < 1.5,
+       `${r.rows} rows, ${r.spread.toFixed(1)}px spread`);
+    ok(`${w}px: every label fits its pill`, r.clipped === 0, `${r.clipped} clipped`);
+    ok(`${w}px: no picker at this width`, r.pick === 'none');
+    await p.close();
+  }
+  for (const [w,h,m] of [[900,900,false],[390,844,true]]) {
+    const p = await page(b,w,h,m);
+    const r = await p.evaluate(()=>({
+      pills: getComputedStyle(document.getElementById('pills')).display,
+      pick: getComputedStyle(document.getElementById('modelPick')).display,
+      options: document.querySelectorAll('#modelPick option').length }));
+    ok(`${w}px: the picker replaces the pills`, r.pills === 'none' && r.pick !== 'none' && r.options === 6,
+       JSON.stringify(r));
+    await p.locator('#modelPick').selectOption('urban');
+    await p.waitForTimeout(300);
+    ok(`${w}px: the picker drives the model`, await p.evaluate(()=>
+       /Urban Institute/.test(document.getElementById('who').textContent)));
+    await p.close();
+  }
 });
 
 /* The savings panel was pinned to the employer route no matter what the household

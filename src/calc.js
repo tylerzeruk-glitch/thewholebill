@@ -288,7 +288,7 @@
   var MODELS = [
     {
       id: 'sanders1',
-      chip: 'Sanders \u00b7 Option 1',
+      chip: 'Sanders \u00b7 bill\u2019s authors',
       basis: 'published formula',
       note: 'Sen. Bernie Sanders\u2019 office, 2019, from its published list of financing options \u2014 ' +
             'the first of two household-level formulas anyone in this debate has published. A 4% ' +
@@ -311,7 +311,7 @@
     },
     {
       id: 'rand',
-      chip: 'RAND \u00b7 2019',
+      chip: 'RAND \u00b7 nonpartisan',
       basis: 'published estimate + our allocation',
       note: 'RAND Corporation, 2019 \u2014 nonpartisan, modelling the bill WITH long-term care. It ' +
             'found national health spending rising 1.8%, about $69 billion a year; we spread that ' +
@@ -322,7 +322,7 @@
     },
     {
       id: 'cbo5',
-      chip: 'CBO \u00b7 bill-like option',
+      chip: 'CBO \u00b7 the scorekeeper',
       basis: 'published estimate + our allocation',
       note: 'Congressional Budget Office, 2020 \u2014 five illustrative options; CBO never scored the ' +
             'bill itself. We use the option shaped most like the bill (long-term care covered, no ' +
@@ -333,7 +333,7 @@
     },
     {
       id: 'blahous',
-      chip: 'Blahous \u00b7 pessimistic',
+      chip: 'Mercatus \u00b7 the opposition',
       basis: 'published formula + our allocation',
       note: 'Mercatus Center, 2018 \u2014 Koch-funded and written to show single-payer was ' +
             'unaffordable. Blahous modelled two scenarios; his main one has national spending ' +
@@ -346,7 +346,7 @@
     },
     {
       id: 'urban',
-      chip: 'Urban \u00b7 most expensive',
+      chip: 'Urban \u00b7 the priciest',
       basis: 'published estimate + our allocation',
       note: 'Urban Institute, 2019 \u2014 a left-leaning institute\u2019s \u201cSingle-Payer Enhanced\u201d, and ' +
             'the most expensive estimate anyone has published: national spending rising $720 ' +
