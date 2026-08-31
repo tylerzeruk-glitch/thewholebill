@@ -1354,6 +1354,16 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   r = await st();
   ok('a non-cosponsor carries the as-of date', /Not yet a cosponsor · as of \d{4}-\d{2}-\d{2}/.test(r.pos), r.pos);
 
+  // nationwide now: a Connecticut suburb far outside the old metros, and an
+  // at-large state that must never render as a "0th district"
+  await p.locator('#zip').fill('06468'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  r = await st();
+  ok('a ZIP outside the old metros resolves', /Himes \(D\)/.test(r.name), r.name);
+  ok('and names the district', /Connecticut’s 4th district/.test(r.dist), r.dist);
+  await p.locator('#zip').fill('99501'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  r = await st();
+  ok('an at-large seat never says 0th', /at-large district/.test(r.dist) && !/0th/.test(r.dist), r.dist);
+
   // a sample button is a real ZIP now, so it resolves the card like typing one
   await p.locator('#areapick button[data-z="75201"]').click(); await p.waitForTimeout(400);
   r = await st();
@@ -1361,21 +1371,35 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   await p.close();
 });
 
-test('reps: the snapshot is coherent', async () => {
+test('reps: the snapshot is coherent, nationwide', async () => {
   const { readFileSync } = await import('node:fs');
   const txt = readFileSync(resolve(HERE, '../src/reps.js'), 'utf-8');
   const REPS = new Function(txt + '; return REPS;')();
   ok('carries its retrieval date', /^\d{4}-\d{2}-\d{2}$/.test(REPS.asOf), REPS.asOf);
-  const zips = Object.keys(REPS.zip);
-  ok('covers the preview metros', zips.length > 600, `${zips.length} ZIPs`);
-  ok('every ZIP key is five digits', zips.every(z=>/^\d{5}$/.test(z)));
-  const dists = new Set(Object.values(REPS.zip).flat());
+  let zips = 0, splits = 0, badKey = 0;
+  const dists = new Set();
+  for (const [p3, m] of Object.entries(REPS.zip)) {
+    if (!/^\d{3}$/.test(p3)) badKey++;
+    for (const [suf, v] of Object.entries(m)) {
+      if (!/^\d{2}$/.test(suf)) badKey++;
+      zips++;
+      const ds = typeof v === 'string' ? [v] : v;
+      if (ds.length > 1) splits++;
+      for (const d of ds) dists.add(d);
+    }
+  }
+  ok('covers the whole country', zips > 30000, `${zips} ZIPs`);
+  ok('every key is prefix + suffix digits', badKey === 0, `${badKey} bad`);
+  ok('splits are real but a minority', splits / zips > 0.1 && splits / zips < 0.4,
+     `${splits} splits (${(splits / zips * 100).toFixed(0)}%)`);
   ok('every district is well-formed', [...dists].every(d=>/^[A-Z]{2}-\d+$/.test(d)));
   const orphan = [...dists].filter(d=>!REPS.house[d]);
-  ok('at most a vacancy or two lacks a member', orphan.length <= 2, orphan.join(', '));
+  ok('only genuine vacancies lack a member', orphan.length <= 6, orphan.join(', '));
   ok('every member has a name and party', Object.values(REPS.house).every(m=>m.n && /^[DRI]$/.test(m.p)));
-  ok('ten senators, two per state', Object.values(REPS.senate).every(a=>a.length===2)
-     && Object.values(REPS.senate).flat().length === 10);
+  ok('a full house', Object.keys(REPS.house).length >= 430, Object.keys(REPS.house).length + ' members');
+  ok('one hundred senators, two per state', Object.values(REPS.senate).every(a=>a.length===2)
+     && Object.values(REPS.senate).flat().length === 100);
+  ok('at-large seats use district 0', REPS.house['AK-0'] != null && REPS.house['WY-0'] != null);
 });
 
 /* The privacy note in the letter's footer takes a full row of its own, left-

@@ -1596,9 +1596,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      here: it mails someone to the wrong office. */
   var STATE_NAMES = { AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"the District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming" };
   function ordinal(n){ n = +n; var s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+  // District 0 is an at-large seat (one member for the whole state, or DC's
+  // delegate), so "0th district" must never render.
+  function distPhrase(parts){
+    var stn = STATE_NAMES[parts[0]] || parts[0];
+    return parts[1] === "0" ? stn + "’s at-large district"
+                            : stn + "’s " + ordinal(parts[1]) + " district";
+  }
+  // The ZIP table is grouped by 3-digit prefix; a bare string is the common
+  // one-district case, an array is a real split.
+  function repDistricts(zip5){
+    var m = REPS.zip[String(zip5 || "").slice(0, 3)];
+    var v = m && m[String(zip5).slice(3)];
+    return v == null ? null : (typeof v === "string" ? [v] : v);
+  }
   function repFor(){
     if (!state.zip5) return { st:"none" };
-    var ds = REPS.zip[state.zip5];
+    var ds = repDistricts(state.zip5);
     if (!ds || !ds.length) return { st:"unknown" };
     if (ds.length === 1) return { st:"one", d:ds[0], ds:ds };
     if (state.district && ds.indexOf(state.district) > -1) return { st:"picked", d:state.district, ds:ds };
@@ -1624,14 +1638,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       dist.textContent = "Pick yours below.";
       pos.innerHTML = "-";
     } else {
-      var m = REPS.house[r.d], parts = r.d.split("-"), stn = STATE_NAMES[parts[0]] || parts[0];
+      var m = REPS.house[r.d], parts = r.d.split("-");
       if (!m){
         name.textContent = "This seat is vacant";
-        dist.textContent = stn + "’s " + ordinal(parts[1]) + " district has no current member.";
+        dist.textContent = distPhrase(parts) + " has no current member.";
         pos.innerHTML = "-";
       } else {
         name.textContent = m.n + " (" + m.p + ")";
-        dist.textContent = stn + "’s " + ordinal(parts[1]) + " district · " +
+        dist.textContent = distPhrase(parts) + " · " +
           (r.st === "picked" ? "your pick" : "from ZIP " + state.zip5);
         pos.textContent = m.co
           ? "Cosponsor of " + BILL.house
@@ -2343,7 +2357,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // The full five digits also resolve the district -- automatically only
     // when the ZIP sits in exactly one; a split ZIP asks instead.
     state.zip5 = r.zip;
-    var ds = REPS.zip[r.zip] || [];
+    var ds = repDistricts(r.zip) || [];
     state.district = ds.length === 1 ? ds[0]
       : ds.indexOf(state.district) > -1 ? state.district : null;
     if (r.st === "covered"){
