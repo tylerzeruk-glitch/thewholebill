@@ -112,45 +112,39 @@ lightness there.
 
 Build, in order:
 
-1. **Nationwide rep lookup.** Now unblocked: the CMS pipeline shipped nationwide premiums, so
-   the five-metro scope of `src/reps.js` is the last "not covered" surface. The
-   OpenSourceActivismTech crosswalk covers every ZIP (the tool already filters to five metros;
-   widen it), or the Census geocoder adds street-address resolution. The standing rule carries
-   over: a ZIP or address that resolves ambiguously ASKS the reader, never guesses — a letter
-   to the wrong office is the serious failure here.
-2. **Senators row on the rep card.** Already paid for: the 10 senators with S. 1506 cosponsor
+1. **Senators row on the rep card.** Already paid for: all 100 senators with S. 1506 cosponsor
    flags sit unused in `src/reps.js`, and the card already names the Senate companion.
-3. **Real routing.** `#/methodology` becomes `/methodology`; the section is already
+2. **Real routing.** `#/methodology` becomes `/methodology`; the section is already
    self-contained and the router is about twelve lines. Really a pre-go-public item — hash URLs
    look wrong on a public site.
 
 Decisions before code (both deliberately parked by the owner; the CMS precondition on the
 first is now met, so it is ready for a decision whenever the owner wants):
 
-4. **Section 03 framing.** The household-borne basis was accepted with "I may change this
+3. **Section 03 framing.** The household-borne basis was accepted with "I may change this
    later — I think it's slightly misleading." The alternative on the table: an "everyone else
    pays ~$24,826" segment so the universal bar shows a gross. The "decide after CMS" condition
    is satisfied. Do NOT re-frame unilaterally.
-5. **The Medicare tax asymmetry.** Universal figures carry no continuing Medicare tax (~$1,378,
+4. **The Medicare tax asymmetry.** Universal figures carry no continuing Medicare tax (~$1,378,
    ~6% of the headline) — disclosed in "What we know is wrong" rather than modelled. Keep
    disclosing, or model it in.
 
 Whenever the owner decides — not a default:
 
-6. **Go public.** The checklist is in `docs/DEPLOY.md`: `/artifact` exclusion or acceptance,
+5. **Go public.** The checklist is in `docs/DEPLOY.md`: `/artifact` exclusion or acceptance,
    the anonymity re-check, deleting the Access app AND the logo-bypass app together, then
    verifying the gate's removal is the only change.
 
 Ops hygiene (small, anytime):
 
-7. GitHub Actions v4→v5 bump; branch protection on `main`.
-8. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
+6. GitHub Actions v4→v5 bump; branch protection on `main`.
+7. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
    hard-confirm the `workers.dev` route and Preview URLs are dead — currently verified only
    from outside.
-9. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
+8. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
     membership, vacancies (FL-20 today) and cosponsorships all change. The snapshot's as-of
     date shows on the rep card.
-10. Standing ritual, not a task: rerun `node tools/build-benchmarks.mjs` when CMS publishes a
+9. Standing ritual, not a task: rerun `node tools/build-benchmarks.mjs` when CMS publishes a
     new plan year's files (each fall) — it re-downloads everything, re-runs every validation
     (landscape cross-check to the cent, NY and CA published numbers, curve uniformity) and
     refuses to write a table that fails any of them. Update the hardcoded validation values
@@ -180,6 +174,11 @@ The methodology page shows all six derivations and discloses the mixed vintages.
 ~~Route-adaptive slot 03~~ **Done 2026-08-31**: the cliff for marketplace readers, the same
 cliff reframed for employer readers, the bad year (uninsured risk arithmetic, both bankruptcy
 sides printed or neither) for uninsured readers. The slot is constant so numbering never gaps.
+~~Nationwide rep lookup~~ **Done 2026-08-31**: `tools/build-reps.mjs` widened from the five
+preview metros to every ZIP in the 50 states and DC (33,642 ZIPs, 7,299 real splits that ask
+the reader, 432 members plus genuine vacancies, all 100 senators with cosponsor flags). The
+ZIP table groups by 3-digit prefix; district 0 renders as an at-large seat, never "0th".
+Found because the owner's own ZIP came back unknown.
 ~~Stage 2, the CMS pipeline~~ **Done 2026-08-31**: `tools/build-benchmarks.mjs` →
 `src/benchmarks.js`. Per-COUNTY second-lowest-cost silver for plan year 2026 (3,288 entries —
 per county, not per rating area: service areas gate availability and 37% of counties differ),
