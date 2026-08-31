@@ -905,6 +905,13 @@ test('lives: the source caveat is readable without expanding', async b => {
        `${Math.round(r.shut)}px tall vs a ${Math.round(r.h)}px summary`);
     ok(`${w}px: not-peer-reviewed stays visible`, /peer[\s-]?reviewed/.test(r.txt), r.txt.slice(0,70));
     ok(`${w}px: the adviser role stays visible`, /sanders/.test(r.txt), r.txt.slice(0,70));
+    // Recency and the caveats travel together: the dateline over the figure and
+    // the date in this summary must not outshine the disclosures beside them.
+    ok(`${w}px: the preprint's date is in the summary`, /july 2026/.test(r.txt), r.txt.slice(0,70));
+    // textContent, not innerText: the label's text-transform uppercases the
+    // rendered text, and this asserts the authored content.
+    ok(`${w}px: the figure wears its dateline`, await p.evaluate(()=>
+       /Yale School of Public Health\s*·\s*July 2026/.test(document.querySelector('.bigstat').textContent)));
     ok(`${w}px: summary is a 44px target`, r.h >= 44, `${Math.round(r.h)}px`);
     const after = await p.evaluate(()=>{ const d=document.querySelector('.src'); d.open=true;
       return d.getBoundingClientRect().height; });
