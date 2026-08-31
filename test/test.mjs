@@ -325,19 +325,68 @@ test('comparison: the universal bar accounts for its whole figure', async b => {
 test('narrative: the cliff precedes the turn, and the turn wears teal', async b => {
   const p = await page(b,1440,900);
   const r = await p.evaluate(()=>{
+    // Visible eyebrows only: slot 03 keeps a hidden route-variant whose eyebrow
+    // also says 03, and the methodology view (08) is hidden on the main flow.
     const eyebrows=[...document.querySelectorAll('.eyebrow')]
+      .filter(e=>e.offsetParent !== null)
       .map(e=>e.textContent.trim()).filter(t=>/^\d\d/.test(t));
+    const meth=[...document.querySelectorAll('.eyebrow')]
+      .some(e=>/^08/.test(e.textContent.trim()));
     const cliffY=document.getElementById('cliff').offsetTop;
     const cmpY=document.getElementById('pills').closest('section').offsetTop;
     const em=[...document.querySelectorAll('h2 em')].find(e=>/Another way/.test(e.textContent));
-    return { seq: eyebrows.map(t=>t.slice(0,2)).join(','),
+    return { seq: eyebrows.map(t=>t.slice(0,2)).join(','), meth,
              cliffFirst: cliffY < cmpY,
              teal: em ? getComputedStyle(em).color : 'missing' };
   });
-  ok('sections number 01-08 in page order (08 is the methodology view)',
-     r.seq === '01,02,03,04,05,06,07,08', r.seq);
+  ok('visible sections number 01-07 in page order', r.seq === '01,02,03,04,05,06,07', r.seq);
+  ok('the methodology view carries 08', r.meth);
   ok('the cliff sits before the comparison', r.cliffFirst);
   ok('"Another way" wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
+  await p.close();
+});
+
+/* Slot 03 adapts to the route: the cliff for the marketplace, the cliff
+ * reframed for employer readers (whose market it would become), the bad year
+ * for the uninsured -- a subsidy cliff means nothing to a household with no
+ * subsidy and no premium. The slot is constant so the numbering never gaps,
+ * the modeled figure is labelled where it appears, and the statutory
+ * ceiling contrast is stated. */
+test('slot 03: the cliff for the covered, the bad year for the uninsured', async b => {
+  const p = await page(b,1440,900);
+  const view = () => p.evaluate(()=>({
+    cliff: !document.getElementById('cliffView').hidden,
+    bad: !document.getElementById('badYear').hidden,
+    intro: document.getElementById('cliffIntro').textContent,
+    eyebrows: [...document.querySelectorAll('#cliff .eyebrow')]
+      .filter(e=>e.offsetParent !== null).map(e=>e.textContent.trim()) }));
+
+  let r = await view();
+  ok('employer: the cliff shows, reframed as the market waiting',
+     r.cliff && !r.bad && /market waiting/.test(r.intro), r.intro.slice(0,60));
+
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(300);
+  r = await view();
+  ok('marketplace: the cliff speaks as their own market',
+     r.cliff && !r.bad && /^Nothing on this page is modeled/.test(r.intro), r.intro.slice(0,60));
+
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(300);
+  r = await view();
+  ok('uninsured: the bad year replaces the cliff', !r.cliff && r.bad);
+  ok('and keeps slot number 03', r.eyebrows.join() === '03 · The bad year', r.eyebrows.join());
+  const txt = await p.evaluate(()=>document.getElementById('badYear').innerText);
+  ok('the modeled figure is labelled where it appears', /57,000/.test(txt) && /modeled/.test(txt));
+  ok('the statutory ceiling contrast is stated', /\$10,600/.test(txt) && /No limit/.test(txt));
+  ok('both care-avoidance figures appear, tied to their surveys',
+     /three in four/.test(txt) && /38\.6%/.test(txt) && /KFF/.test(txt) && /NHIS/.test(txt));
+
+  await p.evaluate(()=>{location.hash='#/methodology';}); await p.waitForTimeout(300);
+  ok('methodology carries the derivation and the bankruptcy both-sides rule',
+     await p.evaluate(()=>{
+       const t=document.getElementById('methodology').innerText;
+       return /What a bad year costs without coverage/i.test(t) && /3\.4/.test(t)
+           && /66\.5%/.test(t) && /4% of non-elderly/.test(t);
+     }));
   await p.close();
 });
 

@@ -326,6 +326,11 @@ button.step{cursor:pointer;font-family:var(--sans)}
 
 
 /* ---------- the cliff ---------- */
+/* The slot's two route views. display lives HERE, not inline: an inline
+   display:flex beats every stylesheet rule including [hidden]{display:none},
+   and with it both views rendered at once. */
+#cliffView,#badYear{display:flex;flex-direction:column;gap:32px}
+#cliffView[hidden],#badYear[hidden]{display:none}
 .cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:3px;background:var(--ink-surface);overflow:hidden}
 .cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
 .cstat .t{font-size:13.5px;color:var(--im)}
@@ -636,7 +641,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <aside class="dateline">
         <div class="k">What changed this year</div>
         <p>The enhanced premium tax credits expired on 31 December 2025. The 400% subsidy cliff is back.</p>
-        <p>Marketplace enrollees are paying <b>58% more</b> in premiums, average deductibles hit a record <b>$3,786</b>, and roughly <b>five million people</b> dropped out of coverage.</p>
+        <p>Marketplace enrollees are paying <b>58% more</b> in premiums, average deductibles hit a record <b>$3,786</b>, and KFF projects roughly <b>five million fewer enrollees</b> in 2026 &mdash; early federal data already count nearly three million gone.</p>
         <p style="color:var(--pm);font-size:13px">KFF analysis of 2026 Marketplace enrollment.</p>
       </aside>
     </div>
@@ -853,15 +858,22 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     </div>
   </section>
 
-  <!-- ---- 04 THE CLIFF (follows the reveal: the statute is the closing indictment before the turn) ---- -->
+  <!-- ---- 04 THE CLIFF / THE BAD YEAR (route-adaptive slot 03: the statute
+       is the closing indictment before the turn. Marketplace readers get the
+       cliff as their own market; employer readers get the same cliff reframed
+       as the market waiting behind their plan; uninsured readers get the bad
+       year, because a subsidy cliff is meaningless to someone with no subsidy
+       and no premium -- their statute story is that no out-of-pocket ceiling
+       exists at all. The SLOT is constant, so the section numbering never
+       gaps. ---- -->
   <section class="ink" id="cliff">
-    <div class="wrap sec" style="display:flex;flex-direction:column;gap:32px">
+    <div class="wrap sec" id="cliffView">
       <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">03 &middot; The cliff</div>
           <h2>One dollar, <em style="font-style:italic;color:var(--c2)">nine thousand dollars</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)" id="cliffIntro">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
       </div>
 
       <div class="cliffstats">
@@ -873,6 +885,37 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="chartbox"><div id="cliffChart"></div></div>
 
       <p class="note-i" id="cliffNote">The enhanced credits enacted in 2021 capped contributions at 8.5% of income and flattened this edge entirely. They expired on <b style="color:var(--ib);font-weight:400">31 December 2025</b>. The poverty guidelines and IRS applicable-percentage table behind these figures are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>.</p>
+    </div>
+
+    <div class="wrap sec" id="badYear" hidden>
+      <div class="split tie">
+        <div class="stack" style="gap:15px">
+          <div class="eyebrow i">03 &middot; The bad year</div>
+          <h2>Nothing caps <em style="font-style:italic;color:var(--c2)">a bad year</em>.</h2>
+        </div>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">The out-of-pocket maximum is the law&rsquo;s ceiling on a bad year &mdash; for people with coverage. Going without insurance means going without the ceiling: no statute anywhere limits what a hospital can bill you.</p>
+      </div>
+
+      <div class="cliffstats">
+        <div class="cstat"><div class="t">One average hospital stay, billed at list price</div><div class="v" style="color:var(--c2)">&asymp;$57,000</div><div class="s">$16,700 average cost &times; the published 3.4&times; average markup &mdash; modeled</div></div>
+        <div class="cstat"><div class="t">The most an insured person can owe in a year</div><div class="v">$10,600</div><div class="s">the 2026 statutory out-of-pocket maximum, per person</div></div>
+        <div class="cstat" style="border:none"><div class="t">The most an uninsured person can owe</div><div class="v" style="color:var(--c2)">No limit</div><div class="s">no ceiling exists in law</div></div>
+      </div>
+
+      <div class="grid2" style="gap:14px">
+        <div class="card-i" style="gap:9px">
+          <div class="t">After one hospitalization</div>
+          <div class="v" style="font-size:22px">&asymp;$6,000 <span style="font-size:13px;color:var(--im)">in unpaid bills, uninsured &mdash; against &asymp;$300 insured</span></div>
+          <div class="t" style="font-size:12px">A study of a million admissions matched to credit records &mdash; a finding both sides of the medical-bankruptcy debate accept.</div>
+        </div>
+        <div class="card-i" style="gap:9px">
+          <div class="t">Before the bad year even arrives</div>
+          <div class="v" style="font-size:22px">62% <span style="font-size:13px;color:var(--im)">of uninsured adults already carry health-care debt</span></div>
+          <div class="t" style="font-size:12px">KFF survey, 2022 &mdash; against 44% of insured adults.</div>
+        </div>
+      </div>
+
+      <p class="note-i">How often does cost stop care? Asked by KFF in 2025, <b style="color:var(--ib);font-weight:400">three in four</b> uninsured adults said they skipped or postponed care over cost; the federal NHIS survey, asking more narrowly, puts it at <b style="color:var(--ib);font-weight:400">38.6%</b> &mdash; more than double the privately insured. Both figures, and the list-price arithmetic above (our derivation from HCUP&rsquo;s published aggregates and published markup research, one of whose sources is union-funded and labelled so), are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a> &mdash; along with the medical-bankruptcy literature, where the famous numbers disagree and we print both sides or neither.</p>
     </div>
   </section>
   <!-- ---- 05 THE COMPARISON (the turn: after the cliff, the alternative) ---- -->
@@ -1309,6 +1352,38 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
+      <h3>What a bad year costs without coverage <span class="tag mod" style="vertical-align:middle;margin-left:8px">Modeled</span></h3>
+      <p class="body" style="max-width:760px">The uninsured view of section 03 prints three numbers. Two are statutory; the list-price figure is our arithmetic, so here it is in full.</p>
+      <table style="margin-top:12px">
+        <tr>
+          <td style="width:220px"><b style="font-weight:500;color:var(--pk)">One admission, at cost</b></td>
+          <td>About <span class="num">$16,700</span> &mdash; derived by us from HCUP&rsquo;s published 2022 aggregates: $548.5 billion in hospital costs across 32.9 million stays (HCUP Statistical Brief #316). Excludes physician fees, so the real bill runs higher.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">The markup to list price</b></td>
+          <td>Charges average <span class="num">3.4&times;</span> cost nationally (Bai &amp; Anderson, <i>Health Affairs</i> 2015, on 2012 data; the most common ratio was 2.4). A 2020 study by National Nurses United &mdash; a union that advocates single-payer; labelled, like every source here &mdash; measures 4.2&times; by 2018. We use the older, smaller number.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">One admission, as billed</b></td>
+          <td>&asymp;<span class="num">$57,000</span> &mdash; $16,700 &times; 3.4, our multiplication, labelled modeled where it appears. Uninsured patients are billed from list prices. Protections exist but are conditional &mdash; nonprofit hospitals&rsquo; assistance policies under IRS 501(r), good-faith estimates for scheduled care under the No Surprises Act &mdash; and none of them caps the price itself.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">The insured ceiling</b></td>
+          <td><span class="num">$10,600</span> self-only / <span class="num">$21,200</span> family &mdash; the 2026 out-of-pocket maximum, statutory, from CMS&rsquo;s 2025 Marketplace final rule. It applies only to people with coverage. No equivalent exists in law for the uninsured.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">After one hospitalization</b></td>
+          <td>&asymp;<span class="num">$6,000</span> in unpaid bills for an uninsured adult four years on, against &asymp;<span class="num">$300</span> insured &mdash; Dobkin, Finkelstein, Kluender &amp; Notowidigdo&rsquo;s event study of about a million California admissions matched to credit records (<i>American Economic Review</i>, 2018). A finding both camps of the bankruptcy debate below accept.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Debt, and care skipped</b></td>
+          <td><span class="num">62%</span> of uninsured adults carry health-care debt, against 44% of the insured (KFF survey, 2022). Cost stopped or delayed care for <span class="num">three in four</span> uninsured adults in KFF&rsquo;s 2025 poll &mdash; or <span class="num">38.6%</span>, more than double the privately insured, by the narrower federal NHIS measure (2024). Two surveys asking two different questions; we print both.</td>
+        </tr>
+      </table>
+      <p class="fn">The medical-bankruptcy numbers are deliberately absent from section 03, because the famous ones disagree about what they measure. A 2019 AJPH editorial &mdash; a survey of bankruptcy filers with a 29.4% response rate, whose lead authors co-founded Physicians for a National Health Program, which advocates single-payer &mdash; found 66.5% of filers said medical bills or illness-related work loss <i>contributed</i>. A 2018 NEJM analysis by academic economists, linking hospitalizations to credit records, estimates admissions <i>cause</i> about 4% of non-elderly bankruptcies, 6% among the uninsured. Self-reported contribution and measured causation are different questions; neither number refutes the other, and we will not print one without the other.</p>
+    </div>
+
+    <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>What we know is wrong <span class="tag mod" style="vertical-align:middle;margin-left:8px">Modeled</span></h3>
       <p class="body" style="max-width:760px">Every model has soft spots. Ours are listed here rather than left for someone else to find.</p>
       <table style="margin-top:12px">
@@ -1342,7 +1417,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">Uninsured spending</b></td>
-          <td>Modeled, and low for a reason worth stating plainly: uninsured households spend less because they skip care, not because care is cheaper for them. It usually is not.</td>
+          <td>Modeled, and low for a reason worth stating plainly: uninsured households spend less because they skip care, not because care is cheaper for them. It usually is not. Our figure is the cost of the care an uninsured household <i>uses</i> in a year &mdash; cash out of pocket runs lower still (roughly $500&ndash;750 in the last published MEPS breakdowns), because providers collect little of what they bill. Either way it describes a quiet year; the bad-year arithmetic has its own section above.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">Wage incidence</b></td>
@@ -1366,6 +1441,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Single-payer, five options</td><td>CBO, <i>How CBO Analyzes the Costs of Proposals for Single-Payer Health Care Systems</i>, Working Paper 2020-08, December 2020</td></tr>
         <tr><td>Single-payer, most expensive</td><td>Blumberg, Holahan et al., <i>From Incremental to Comprehensive Health Insurance Reform</i>, Urban Institute, October 2019</td></tr>
         <tr><td>Household count</td><td>US Census Bureau, Total Households, 2025</td></tr>
+        <tr><td>Hospital stay costs</td><td>HCUP Statistical Brief #316, AHRQ, February 2026 (2022 data)</td></tr>
+        <tr><td>Hospital markups</td><td>Bai &amp; Anderson, <i>Extreme Markup</i>, Health Affairs, 2015; National Nurses United, <i>Fleecing Patients</i>, 2020 (union-funded)</td></tr>
+        <tr><td>2026 out-of-pocket maximum</td><td>CMS, Marketplace Integrity and Affordability final rule, June 2025</td></tr>
+        <tr><td>Hospitalization aftermath</td><td>Dobkin, Finkelstein, Kluender &amp; Notowidigdo, American Economic Review, 2018</td></tr>
+        <tr><td>Health-care debt</td><td>KFF Health Care Debt Survey, 2022</td></tr>
+        <tr><td>Care skipped over cost</td><td>KFF Health Tracking Poll, May 2025; National Health Interview Survey, 2024</td></tr>
+        <tr><td>Medical bankruptcy, both sides</td><td>Himmelstein et al., AJPH, 2019 (PNHP-affiliated authors); Dobkin et al., NEJM, 2018</td></tr>
         <tr><td>Plan premiums (planned)</td><td>CMS Exchange and State-based Exchange Public Use Files</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Found an error? That is the most useful thing you could send us. The calculation layer is a single file with no dependencies, and every constant on this page appears in it by name.</p>
@@ -1748,6 +1830,16 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var hhs = document.querySelectorAll(".letterHh");
     for (i = 0; i < hhs.length; i++) hhs[i].textContent = hhTxt;
     byId("basis").textContent = S.universal.basis;
+
+    // Slot 03 adapts to the route: the cliff for anyone on (or one bad day
+    // from) the marketplace, the bad year for the uninsured -- a subsidy cliff
+    // means nothing to a household with no subsidy and no premium. The slot
+    // itself is constant, so the section numbering never gaps.
+    byId("cliffView").hidden = state.route === "none";
+    byId("badYear").hidden = state.route !== "none";
+    byId("cliffIntro").textContent = state.route === "employer"
+      ? "Not your market today — but it is the market waiting if the employer plan ever goes away. Nothing on this page is modeled: the premium tax credit does not taper at the top, it stops, and this is what it does to a household that earns one dollar too much."
+      : "Nothing on this page is modeled. The premium tax credit does not taper at the top — it stops. This is what the statute does to a household that earns one dollar too much.";
 
     renderElig();
     renderPills();
