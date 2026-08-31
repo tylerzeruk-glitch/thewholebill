@@ -2236,8 +2236,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   function renderScope(msg){
     var a = W.BENCHMARK[state.area];
     byId("scope").innerHTML = msg || ('Showing the <b>' + a.city + '</b> area. This preview has ' +
-      'five metro areas wired up. The rest of the country needs the CMS plan files, ' +
-      'which is the next build step.');
+      'five metro areas wired up. The ZIP-specific numbers are coming soon.');
     var html = "", keys = Object.keys(W.BENCHMARK), i;
     for (i = 0; i < keys.length; i++){
       html += '<button type="button" data-a="' + keys[i] + '">' + W.BENCHMARK[keys[i]].city + '</button>';
