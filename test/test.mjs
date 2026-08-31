@@ -1352,7 +1352,15 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   await p.locator('#zip').fill('33125'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   await p.locator('#repPickBtns button[data-d="FL-26"]').click(); await p.waitForTimeout(300);
   r = await st();
-  ok('a non-cosponsor carries the as-of date', /Not yet a cosponsor · as of \d{4}-\d{2}-\d{2}/.test(r.pos), r.pos);
+  ok('a non-cosponsor is stated plainly', /^Not yet a cosponsor$/.test(r.pos), r.pos);
+  // the as-of date lives on its own line under the rows, for both claims, and
+  // the position row never wraps (the inline date used to break mid-string)
+  const asOf = await p.evaluate(()=>({
+    shown: !document.getElementById('repAsOf').hidden,
+    txt: document.getElementById('repAsOf').textContent,
+    oneLine: document.getElementById('repPos').getBoundingClientRect().height < 22 }));
+  ok('the as-of date rides its own line', asOf.shown && /as of \d{4}-\d{2}-\d{2}\./.test(asOf.txt), asOf.txt);
+  ok('and the position row stays on one line', asOf.oneLine);
 
   // nationwide now: a Connecticut suburb far outside the old metros, and an
   // at-large state that must never render as a "0th district"
