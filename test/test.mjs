@@ -607,23 +607,32 @@ test('drawer: overrides compose, disclose, and stay in their lane', async b => {
 
 /* The drawer is optional input, and the word itself has to be on the summary --
  * the teal edge and the state line imply it, but implication is not a label.
- * The word is muted, not teal: it qualifies the title, it is not the title. */
-test('drawer: says "optional" on the fold, at every width', async b => {
+ * The word is muted, not teal: it qualifies the title, it is not the title.
+ * And the state line gets a full row of its own at every width: sharing a row
+ * with the title left it a leftover column, and its wrapping set the height of
+ * the box. */
+test('drawer: says "optional" on the fold, and the fold stays flat', async b => {
   for (const w of [1440, 760, 390]) {
     const p = await page(b, w, 900);
     const r = await p.evaluate(()=>{
       const s = document.querySelector('#adv summary');
       const o = s.querySelector('.adv-opt');
+      const k = s.querySelector('.adv-k').getBoundingClientRect();
+      const st = s.querySelector('.adv-s').getBoundingClientRect();
       return {
         txt: s.textContent,
         col: getComputedStyle(o).color,
         titleCol: getComputedStyle(s.querySelector('.adv-k')).color,
         fits: s.scrollWidth <= s.clientWidth + 1,
+        below: st.top >= k.bottom,
+        h: s.getBoundingClientRect().height,
       };
     });
     ok(`${w}px: the fold says optional`, /optional/i.test(r.txt));
     ok(`${w}px: muted, not teal`, r.col === 'rgb(138, 143, 156)' && r.col !== r.titleCol, r.col);
-    ok(`${w}px: the longer label still fits the fold`, r.fits);
+    ok(`${w}px: the label fits the fold`, r.fits);
+    ok(`${w}px: the state line sits under the title`, r.below);
+    ok(`${w}px: one line each — the closed fold stays under 80px`, r.h < 80, `${r.h}px`);
     await p.close();
   }
 });

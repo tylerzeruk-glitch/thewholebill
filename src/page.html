@@ -180,14 +180,17 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
    numbers. Chosen over a plain raised panel and a dashed boundary: the dashed
    convention belongs to other people's interfaces. */
 .adv{background:var(--ink-surface);border:1px solid var(--irule-2);border-left:2px solid var(--teal);border-radius:3px;padding:0 20px}
-.adv > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:15px 0;min-height:44px}
+/* Two rows at every width: title and chevron, then the state line with the whole
+   fold to itself. Sharing a row with the title left the state line a leftover
+   column, and its wrapping set the height of the box. */
+.adv > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k x" "s s";gap:8px 16px;align-items:center;padding:15px 0;min-height:44px}
 .adv > summary::-webkit-details-marker{display:none}
-.adv-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);white-space:nowrap}
-.adv-opt{color:var(--im)}
-.adv-s{font-size:13px;line-height:1.5;color:var(--im);min-width:0}
+.adv-k{grid-area:k;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+.adv-opt{color:var(--im);white-space:nowrap}
+.adv-s{grid-area:s;font-size:13px;line-height:1.5;color:var(--im);min-width:0}
 .adv > summary:hover .adv-s{color:var(--ib)}
 .adv > summary:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
-.adv-x{color:var(--ictrl);flex-shrink:0;transition:transform .22s ease}
+.adv-x{grid-area:x;color:var(--ictrl);flex-shrink:0;transition:transform .22s ease}
 .adv[open] .adv-x{transform:rotate(180deg)}
 .adv-bd{display:flex;flex-direction:column;gap:22px;padding:4px 0 22px}
 /* Lit while THIS field's number is driving the figures, dark otherwise -- the
@@ -478,8 +481,6 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .card-p{padding:26px 24px}
   .src > summary{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k x" "s s";gap:8px 16px}
   .src-k{grid-area:k} .src-s{grid-area:s} .src-x{grid-area:x}
-  .adv > summary{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k x" "s s";gap:8px 16px}
-  .adv-k{grid-area:k;white-space:normal} .adv-s{grid-area:s} .adv-x{grid-area:x}
   .tally{grid-template-columns:14px auto;gap:4px 12px}
   .tally .d{grid-column:1 / -1;padding-left:27px}
   .wf{gap:8px}
@@ -738,7 +739,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <details class="adv" id="adv">
             <summary>
               <span class="adv-k">Your plan&rsquo;s numbers <span class="adv-opt">&middot; optional</span></span>
-              <span class="adv-s" id="advSum">Using survey averages &mdash; open to enter your own.</span>
+              <span class="adv-s" id="advSum">Using survey averages.</span>
               <svg class="adv-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </summary>
             <div class="adv-bd">
@@ -1644,11 +1645,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       if (state.deductPer != null) own.push("deduction");
       if (state.totPrem != null) own.push("total premium");
       if (state.oopOwn != null) own.push("deductible");
+      // Short on purpose: the title already says the fold is optional, and the
+      // state line owns a full row, so every word here is box height.
       var sum = own.length === 0
-        ? "Using survey averages &mdash; open to enter your own."
+        ? "Using survey averages."
         : own.length === 3
           ? "Using your numbers."
-          : "Using your " + own.join(" and ") + " &mdash; survey averages for the rest.";
+          : "Using your " + own.join(" and ") + " &mdash; averages for the rest.";
       if (state.totPrem != null && state.deductPer != null &&
           state.totPrem < state.deductPer * state.period)
         sum += ' <span style="color:var(--c2)">Total premium is less than the deduction &mdash; check the two.</span>';
