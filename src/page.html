@@ -411,8 +411,9 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 mark{background:#F7EDDC;color:inherit;padding:1px 4px}
 .chk{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--prule);border-radius:2px;font-size:14px;font-family:var(--sans);width:100%;text-align:left;cursor:pointer;min-height:44px;color:inherit;transition:background .15s,border-color .15s}
 .chk.on{background:var(--paper-tint)} .chk.off{background:var(--paper-card);color:var(--pm)}
-.chk:hover{border-color:var(--pctrl)}
+.chk:hover:not(:disabled){border-color:var(--pctrl)}
 .chk:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
+.chk:disabled{opacity:.45;cursor:not-allowed}
 .box{width:15px;height:15px;border-radius:2px;flex-shrink:0}
 .box.on{background:var(--amber-deep);display:flex;align-items:center;justify-content:center}
 .box.off{border:1px solid var(--pctrl)}
@@ -1096,8 +1097,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                check any combination on top of that. -->
           <div class="stack" style="gap:9px" id="emph">
             <button type="button" class="chk on" data-em="emp" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What my employer coverage really costs</button>
-            <button type="button" class="chk off" data-em="mkt" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Self-employed, buying on the exchange</button>
             <button type="button" class="chk on" data-em="loss" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Losing coverage when a job ends</button>
+            <button type="button" class="chk off" data-em="mkt" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Self-employed, buying on the exchange</button>
             <button type="button" class="chk off" data-em="nation" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What the country would save</button>
             <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
           </div>
@@ -2194,17 +2195,25 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     letterEdited = true;
     updateLetterMeta();
   });
+  // Contradictory personas cannot share a letter: the employer-coverage story
+  // and the self-employed story are different people, and the self-employed
+  // person's coverage is not tied to a job. Conflicts grey out rather than
+  // silently unchecking something the reader chose.
+  var EMPH_CONFLICTS = { emp:["mkt"], loss:["mkt"], mkt:["emp","loss"], nation:[], story:[] };
   function syncEmph(){
     [].forEach.call(byId("emph").querySelectorAll(".chk"), function(btn){
-      var on = !!state.emph[btn.getAttribute("data-em")];
+      var k = btn.getAttribute("data-em"), on = !!state.emph[k];
+      var dis = !on && EMPH_CONFLICTS[k].some(function(c){ return state.emph[c]; });
       btn.classList.toggle("on", on); btn.classList.toggle("off", !on);
       btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.disabled = dis;
       var box = btn.querySelector(".box");
       box.classList.toggle("on", on); box.classList.toggle("off", !on);
     });
   }
+  syncEmph();
   byId("emph").addEventListener("click", function(ev){
-    var btn = ev.target.closest(".chk"); if (!btn) return;
+    var btn = ev.target.closest(".chk"); if (!btn || btn.disabled) return;
     var k = btn.getAttribute("data-em");
     state.emph[k] = !state.emph[k];
     syncEmph();

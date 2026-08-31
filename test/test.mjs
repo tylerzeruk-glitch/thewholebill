@@ -1016,6 +1016,15 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   ok('the story toggle inserts the writing prompt',
      await p.evaluate(()=>!!document.querySelector('#letterBd .hint')));
 
+  // Contradictory personas exclude each other, greyed rather than unchecked.
+  const dis = k => p.evaluate(k=>document.querySelector(`#emph [data-em="${k}"]`).disabled, k);
+  ok('self-employed is greyed while the job-loss story is checked', await dis('mkt'));
+  await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(150);
+  ok('freeing both conflicts frees self-employed', !(await dis('mkt')));
+  await p.locator('#emph button[data-em="mkt"]').click(); await p.waitForTimeout(250);
+  ok('and self-employed greys the employer and job-loss stories',
+     (await dis('emp')) && (await dis('loss')));
+
   await p.locator('#letterBd > div').first().click();
   await p.keyboard.press('End'); await p.keyboard.type(' XEDITX');
   await setIncome(p, 120000);
