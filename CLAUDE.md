@@ -64,6 +64,10 @@ first run.
 - **Chart geometry carries magnitude; colour carries category.** Never make colour do both — an
   early waterfall encoded sequence as decreasing lightness and ran out of contrast before it ran
   out of steps.
+- **An inline `display` defeats the `hidden` attribute.** Inline styles beat every stylesheet
+  rule including the UA's `[hidden]{display:none}` — slot 03's two route views both rendered at
+  once until a geometry test caught the duplicate eyebrow. If an element toggles `hidden`, its
+  `display` must live in the stylesheet, never inline.
 
 ## Money
 
