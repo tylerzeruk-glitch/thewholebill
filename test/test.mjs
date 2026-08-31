@@ -130,28 +130,45 @@ test('narrative: each figure sits at the end of its own bar', async b => {
   }
 });
 
-/* Supporting text inherits the width of whatever chart it sits under, so these
- * blocks ran 108-147 characters per line against a readable 45-75 -- the worst
- * of them WHILE carrying max-width:820px, because a pixel cap cannot know the
- * type was made smaller. The cap is in `ch` now; this asserts the result rather
- * than the rule, so shrinking a font or widening a container fails here. */
-test('readability: supporting text keeps a readable measure', async b => {
-  for (const [w,h] of [[1440,900],[1100,900]]) {
-    const p = await page(b,w,h);
-    for (const view of ['main','methodology']) {
-      if (view === 'methodology') { await p.evaluate(()=>{location.hash='#/methodology';}); await p.waitForTimeout(300); }
-      const bad = await p.evaluate(()=>[...document.querySelectorAll('p.note,p.note-i,p.fn')]
-        .filter(e=>e.offsetHeight>0)
-        .map(e=>{ const r=document.createRange(); r.selectNodeContents(e);
-          const lines=new Set([...r.getClientRects()].filter(x=>x.height>1).map(x=>Math.round(x.top)));
-          const t=e.textContent.trim().replace(/\s+/g,' ');
-          return { cpl: lines.size ? Math.round(t.length/lines.size) : 0, t:t.slice(0,44) }; })
-        .filter(x=>x.cpl>75));
-      ok(`${w}px ${view}: every note under 75 characters per line`, bad.length === 0,
-         bad.slice(0,2).map(x=>`${x.cpl}cpl "${x.t}…"`).join(' | '));
-    }
+/* Notes take the width of what they annotate. These carried a 56ch measure cap
+ * for a day (the readability pass); a narrow ragged column under a full-width
+ * chart read as a layout accident, and one-to-three-line captions do not pay
+ * the long-measure penalty paragraphs do. Deliberate reversal, 2026-08-31 --
+ * this asserts the six notes from that comment round actually span their
+ * containers, so a reintroduced cap fails loudly rather than quietly. */
+test('readability: chart notes span the width of what they annotate', async b => {
+  for (const w of [1440,1100]) {
+    const p = await page(b,w,900);
+    const bad = await p.evaluate(()=>
+      ['panelNote','wfNote','cmpNote','cliffNote','livesNote','sec2Note']
+        .map(id=>{ const e=document.getElementById(id);
+          if (!e || !e.offsetHeight) return {id, w:0, cw:0, skip:!e};
+          const cs=getComputedStyle(e.parentElement);
+          const cw=e.parentElement.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+          return {id, w:e.getBoundingClientRect().width, cw}; })
+        .filter(x=>x.skip || x.w < x.cw*0.55));
+    ok(`${w}px: every chart note spans its container`, bad.length === 0,
+       bad.map(x=>`${x.id} ${Math.round(x.w)}/${Math.round(x.cw)}px`).join(', '));
     await p.close();
   }
+});
+
+/* The tally figures sit level with the bottom of their own descriptions. With
+ * first-baseline alignment the figure hung level with the first line while a
+ * two-line description ran on below it. */
+test('lives: tally figures align with the bottom of their text', async b => {
+  const p = await page(b,1440,900);
+  const bad = await p.evaluate(()=>{
+    const t=document.querySelector('.tally');
+    const vs=[...t.querySelectorAll('.v')], ds=[...t.querySelectorAll('.d')];
+    return vs.map((v,i)=>{
+      const d=+(ds[i].getBoundingClientRect().bottom - v.getBoundingClientRect().bottom).toFixed(1);
+      return {i, d};
+    }).filter(x=>Math.abs(x.d) > 2);
+  });
+  ok('each figure bottom-aligns with its description', bad.length === 0,
+     bad.map(x=>`row ${x.i} Δ${x.d}px`).join(', '));
+  await p.close();
 });
 
 /* A heading and its one supporting line are meant to sit on the same bottom line.
@@ -572,7 +589,8 @@ test('drawer: overrides compose, disclose, and stay in their lane', async b => {
   await p.waitForTimeout(250);
   ok('with both premium fields the share is exact', n((await cards())[1]) === 30000-13000);
   ok('the OOP override lands', n((await cards())[2]) === 6000);
-  ok('all three reads as your numbers', /Using your numbers/.test(await sum()));
+  ok('all three reads as your numbers, and offers the way back',
+     /using your plan.s numbers.*Reset/i.test(await sum()), await sum());
 
   const mktOop = await p.evaluate(()=>{
     const line=[...document.getElementById('mktSub').innerText.split('\n')].find(l=>/out-of-pocket/.test(l));
@@ -626,13 +644,17 @@ test('drawer: says "optional" on the fold, and the fold stays flat', async b => 
         fits: s.scrollWidth <= s.clientWidth + 1,
         below: st.top >= k.bottom,
         h: s.getBoundingClientRect().height,
+        foldW: s.getBoundingClientRect().width,
       };
     });
     ok(`${w}px: the fold says optional`, /optional/i.test(r.txt));
     ok(`${w}px: muted, not teal`, r.col === 'rgb(138, 143, 156)' && r.col !== r.titleCol, r.col);
     ok(`${w}px: the label fits the fold`, r.fits);
     ok(`${w}px: the state line sits under the title`, r.below);
-    ok(`${w}px: one line each — the closed fold stays under 80px`, r.h < 80, `${r.h}px`);
+    // Keyed to the FOLD's width, not the viewport: at 1440 the drawer sits in a
+    // 368px panel column, narrower than its 760px self. The action-hint wording
+    // earns a second line in a narrow fold, and never a third anywhere.
+    ok(`${w}px: the closed fold stays flat`, r.h < (r.foldW > 450 ? 80 : 104), `${r.h}px at fold ${Math.round(r.foldW)}px`);
     await p.close();
   }
 });

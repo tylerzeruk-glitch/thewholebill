@@ -40,7 +40,30 @@ six-digit code.
   only pushes to `main` build. If previews are ever re-enabled, they come back
   ungated -- re-close or gate them deliberately.
 - **Going public is one deliberate act:** delete the Access application. No code
-  changes. Do the artifact.html cleanup above first.
+  changes. Work through the go-public checklist below first.
+
+## Go-public checklist
+
+Each of these before deleting the Access application:
+
+1. **artifact.html** — exclude it from the deploy, or accept that `/artifact`
+   serves a bare fragment (see the hosting notes above).
+2. **Anonymity re-check.** As of 2026-08-31 the owner's name is not reachable
+   from the site, and launch is when that's worth re-verifying:
+   - Shipped pages and headers carry no name, email, or repo link. Re-check:
+     `grep -riE 'tyler|zeruk|gmail|github' dist/ src/ docs/` should stay empty
+     for `dist/` and `src/`.
+   - WHOIS/RDAP registrant data is redacted by Cloudflare Registrar by default;
+     only the state ("CT") stays visible, per ICANN rules. Verify:
+     `curl -s https://rdap.cloudflare.com/rdap/v1/domain/thewholebill.org`
+     should show `DATA REDACTED` on the registrant.
+   - The GitHub repo is **private**, and the site must not link to it. Making
+     the repo public attributes the site via commit author, account name, and
+     PR history — if the code should ever be public without attribution, that
+     is a fresh-history push from a new account, not a visibility flip.
+3. **Verify the gate is the only thing that changed:** immediately after
+   deleting the Access app, the curl below should return `200` — and nothing
+   else about the site should differ.
 
 ## Verifying the gate
 
