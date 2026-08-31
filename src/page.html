@@ -1286,6 +1286,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <td>Individual-market, on-exchange, non-dental silver plans, excluding child-only offerings. Healthcare.gov states come from the CMS Exchange PUFs (rate, plan attributes, service area); the 21 state-run exchanges come from the CMS State-based Exchange PUFs. Both are published federal tables; no key, no scraping of insurer sites.</td>
         </tr>
         <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Why the second lowest</b></td>
+          <td>The choice is statute, not ours: 26 U.S.C. &sect;36B defines the credit as this benchmark minus your expected contribution. Congress pegged it to the <i>second</i>-lowest silver so the credit always leaves at least two plans within your expected share, and so a single cut-rate outlier cannot set the subsidy for a whole market.</td>
+        </tr>
+        <tr>
           <td><b style="font-weight:500;color:var(--pk)">Per county, not per rating area</b></td>
           <td>A rating area sets the price, but each plan&rsquo;s service area decides where it is sold, and the two disagree often: in 37% of healthcare.gov counties the county&rsquo;s true second-lowest silver differs from its rating area&rsquo;s. So we take the plans whose service area covers your county, price them at your county&rsquo;s rating area, sort, and take the second. Roughly 3,300 county figures, precomputed and shipped with the page.</td>
         </tr>
@@ -2237,7 +2241,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
         'poverty line, this household is expected to contribute <b>' +
         (m.applicablePercentage * 100).toFixed(2) + '%</b> of income toward a benchmark silver plan: a ' +
-        'credit of ' + money(m.subsidy) + ' a year.' +
+        'credit of ' + money(m.subsidy) + ' a year. The benchmark is the law’s, not ours: the ' +
+        'second-lowest-cost silver plan where you live, chosen so at least two plans cost you no ' +
+        'more than your expected share and no single cut-rate plan can drag every credit down.' +
         (m.chipLikely ? ' The children may also qualify for CHIP, which reaches further up the income scale.' : '') +
         '</div></div>';
     }
