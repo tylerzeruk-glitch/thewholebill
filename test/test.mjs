@@ -1448,6 +1448,42 @@ test('content: no dead links or stale placeholders', async b => {
   await p.close();
 });
 
+/* The rich-world chart is authored rows of published OECD figures. The drawn
+ * length must BE the number: each row carries data-val, and the rendered fill
+ * width has to match its share of the US value. Colour only separates the US
+ * from its peers; magnitude lives in length alone. */
+test('rich world: bar lengths are the OECD numbers', async b => {
+  for (const [w, h] of [[1440, 900], [390, 844]]) {
+    const p = await page(b, w, h);
+    const r = await p.evaluate(() => {
+      const rows = [...document.querySelectorAll('#oecd .oecd-row')];
+      const us = rows[0];
+      const usVal = +us.getAttribute('data-val');
+      const usW = us.querySelector('.oecd-fill').getBoundingClientRect().width;
+      let worst = 0, badText = 0, wrapped = 0;
+      const out = rows.map(row => {
+        const val = +row.getAttribute('data-val');
+        const fw = row.querySelector('.oecd-fill').getBoundingClientRect().width;
+        const drawn = fw / usW, truth = val / usVal;
+        worst = Math.max(worst, Math.abs(drawn - truth));
+        const txt = row.querySelector('.oecd-val').textContent;
+        if (txt !== '$' + val.toLocaleString('en-US')) badText++;
+        if (row.querySelector('.oecd-name').getBoundingClientRect().height > 24) wrapped++;
+        return val;
+      });
+      const sorted = out.slice(1).every((v, i) => i === 0 || out[i] >= v);
+      return { n: out.length, worst, badText, wrapped,
+               usFirst: us.classList.contains('us'),
+               descending: out.slice(1).every((v, i, a) => i === 0 || a[i - 1] >= v) };
+    });
+    ok(`${w}px: ten countries, US first`, r.n === 10 && r.usFirst, `${r.n}`);
+    ok(`${w}px: drawn length matches the value`, r.worst < 0.005, `worst off by ${(r.worst * 100).toFixed(2)}%`);
+    ok(`${w}px: printed value matches data-val`, r.badText === 0, `${r.badText} mismatched`);
+    ok(`${w}px: peers descend, no label wraps`, r.descending && r.wrapped === 0);
+    await p.close();
+  }
+});
+
 /* The ZIP submit scrolls the instrument into view, and the sticky results bar
  * floats over the top of the page, so without a scroll margin the section
  * title parks underneath it. Measured, not assumed, at both bar layouts. */

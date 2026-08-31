@@ -376,6 +376,27 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .src[open] .src-x{transform:rotate(180deg)}
 .src-bd{display:flex;flex-direction:column;gap:18px;padding-bottom:26px}
 
+/* ---------- the rich world ---------- */
+/* Static published figures, so the bars are authored in markup: each row
+   carries data-val (dollars) and the width is that value against the US.
+   Colour carries category only (US vs peers); magnitude is length. Fills
+   measured against the 3:1 graphics floor on the tint track: amber-deep
+   4.8:1, plabel 4.4:1. The mid ambers and pctrl fail there; do not swap
+   them in. */
+.oecd{display:flex;flex-direction:column;gap:9px}
+.oecd-row{display:grid;grid-template-columns:132px minmax(0,1fr) 76px;gap:14px;align-items:center}
+.oecd-name{font-size:13.5px;color:var(--pb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oecd-track{height:20px;background:var(--paper-tint);border-radius:1px;min-width:0}
+.oecd-fill{height:100%;border-radius:1px;background:var(--plabel)}
+.oecd-row.us .oecd-name{color:var(--pk);font-weight:500}
+.oecd-row.us .oecd-fill{background:var(--amber-deep)}
+.oecd-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13.5px;text-align:right;color:var(--pm)}
+.oecd-row.us .oecd-val{color:var(--amber-deep)}
+@media (max-width:760px){
+  .oecd-row{grid-template-columns:104px minmax(0,1fr) 64px;gap:10px}
+  .oecd-name,.oecd-val{font-size:12px}
+}
+
 /* ---------- critics / act ---------- */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
 .card-p{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;padding:34px 36px;display:flex;flex-direction:column;gap:16px}
@@ -1115,6 +1136,31 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       </div>
     </div>
 
+    <!-- The affordability objection has a reference class, and it is published:
+         OECD current health expenditure per person, 2024, all payers combined.
+         Authored rows, not script: these are fixed published figures, and each
+         row's data-val lets the suite verify the drawn length IS the number. -->
+    <div class="stack" style="gap:14px;border-top:1px solid var(--prule);margin-top:48px;padding-top:26px">
+      <div class="row" style="justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap">
+        <div class="lbl p">What the rich world spends</div>
+        <div class="note">Health spending per person, all payers combined &middot; OECD, 2024</div>
+      </div>
+      <p class="note" style="font-size:14px;max-width:640px">The affordability question has a reference class. Every country below the United States here runs universal coverage, and covers everyone for between two fifths and two thirds of what the US spends per person.</p>
+      <div class="oecd" id="oecd">
+        <div class="oecd-row us" data-val="14823"><span class="oecd-name">United States</span><div class="oecd-track"><div class="oecd-fill" style="width:100%"></div></div><span class="oecd-val">$14,823</span></div>
+        <div class="oecd-row" data-val="9927"><span class="oecd-name">Switzerland</span><div class="oecd-track"><div class="oecd-fill" style="width:67.0%"></div></div><span class="oecd-val">$9,927</span></div>
+        <div class="oecd-row" data-val="9584"><span class="oecd-name">Germany</span><div class="oecd-track"><div class="oecd-fill" style="width:64.7%"></div></div><span class="oecd-val">$9,584</span></div>
+        <div class="oecd-row" data-val="8696"><span class="oecd-name">Netherlands</span><div class="oecd-track"><div class="oecd-fill" style="width:58.7%"></div></div><span class="oecd-val">$8,696</span></div>
+        <div class="oecd-row" data-val="7906"><span class="oecd-name">Sweden</span><div class="oecd-track"><div class="oecd-fill" style="width:53.3%"></div></div><span class="oecd-val">$7,906</span></div>
+        <div class="oecd-row" data-val="7885"><span class="oecd-name">Australia</span><div class="oecd-track"><div class="oecd-fill" style="width:53.2%"></div></div><span class="oecd-val">$7,885</span></div>
+        <div class="oecd-row" data-val="7433"><span class="oecd-name">France</span><div class="oecd-track"><div class="oecd-fill" style="width:50.1%"></div></div><span class="oecd-val">$7,433</span></div>
+        <div class="oecd-row" data-val="7372"><span class="oecd-name">Canada</span><div class="oecd-track"><div class="oecd-fill" style="width:49.7%"></div></div><span class="oecd-val">$7,372</span></div>
+        <div class="oecd-row" data-val="7008"><span class="oecd-name">United Kingdom</span><div class="oecd-track"><div class="oecd-fill" style="width:47.3%"></div></div><span class="oecd-val">$7,008</span></div>
+        <div class="oecd-row" data-val="5884"><span class="oecd-name">Japan</span><div class="oecd-track"><div class="oecd-fill" style="width:39.7%"></div></div><span class="oecd-val">$5,884</span></div>
+      </div>
+      <p class="fn">Current health expenditure per person: everything a country consumes in care, with government, insurers and households&rsquo; own cash all counted, converted at economy-wide purchasing power parities (a conversion that narrows this gap if it does anything, since US medical prices run high even against US prices generally). Spending per person is what a country pays per head, not what any one household pays. Every peer here covers 99.8 to 100% of its people through government or compulsory schemes; the US reaches 91.8% only after counting voluntary private insurance. Australia&rsquo;s figure is an OECD estimate and Japan&rsquo;s is provisional. OECD Health Expenditure and Financing database, 2024 data, accessed 31 August 2026; Peterson-KFF&rsquo;s tracker independently puts the US at about 1.9 times its peers&rsquo; average.</p>
+    </div>
+
     <div class="rule" style="margin:48px 0 24px"></div>
     <div class="row" style="justify-content:space-between;gap:20px;flex-wrap:wrap">
       <p class="note" style="font-size:14px">Every figure here traces to a published source, listed on the <a class="q" href="#/methodology">methodology page</a>. Disagree with an assumption? Change it and watch the numbers move.</p>
@@ -1490,6 +1536,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Rating area definitions</td><td>CMS, State Specific Geographic Rating Areas</td></tr>
         <tr><td>ZIP to county</td><td>Census 2020 ZCTA-county relationship file; GeoNames (CC BY 4.0) for PO-box-only ZIPs</td></tr>
         <tr><td>Medicaid expansion &amp; CHIP limits</td><td>Medicaid.gov, Medicaid and CHIP eligibility levels</td></tr>
+        <tr><td>Peer-country spending per person</td><td>OECD, Health Expenditure and Financing database, 2024 data (accessed 31 August 2026); cross-checked against the Peterson-KFF Health System Tracker</td></tr>
+        <tr><td>Peer-country coverage rates</td><td>OECD, Healthcare Coverage database (government and compulsory schemes; US total includes voluntary private insurance)</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Found an error? That is the most useful thing you could send us. The calculation layer is a single file with no dependencies, and every constant on this page appears in it by name.</p>
     </div>
