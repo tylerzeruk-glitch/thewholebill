@@ -266,8 +266,20 @@ button.step{cursor:pointer;font-family:var(--sans)}
 
 /* ---------- comparison ---------- */
 .pills{display:flex;gap:8px;flex-wrap:wrap}
-.pill{padding:13px 20px;border-radius:2px;font-size:14px;font-weight:500;cursor:pointer;background:var(--ink-raised);color:var(--im);border:1px solid var(--ictrl);transition:background .18s,color .18s,border-color .18s}
+/* Six equal columns, one row: a segmented control, not a tag cloud. The source
+   name carries the pill; its place in the debate rides a small second line
+   inside it, so every pill is the same size and the row reads as a spectrum.
+   Below 760px six columns cannot hold the labels -- a native select takes over
+   (see the media block), because a six-high pill stack is a page, not a control. */
+.pill{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 8px;border-radius:2px;cursor:pointer;background:var(--ink-raised);color:var(--im);border:1px solid var(--ictrl);transition:background .18s,color .18s,border-color .18s}
+.pill-n{font-size:14px;font-weight:500;white-space:nowrap}
+/* --im, not --ifaint: at 10px this line sits right at the 4.5:1 text floor, and
+   --ifaint on the raised ground measures 4.45:1 -- under it. Same reason the
+   selected state reuses the pill's own dark text rather than a mid teal. */
+.pill-r{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--im);white-space:nowrap;transition:color .18s}
 .pill.on{background:var(--teal);color:#0C1F1E;border-color:var(--teal)}
+.pill.on .pill-r{color:#0C1F1E}
+#modelPick{display:none}
 .prov{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:3px;padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:44px;align-items:start}
 .bars{display:flex;flex-direction:column;gap:19px}
 .bar-row{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:center}
@@ -484,6 +496,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .rlabels{display:flex;justify-content:space-between;gap:12px;height:auto;white-space:normal}
   .rlabels > span{position:static !important;left:auto !important;transform:none !important}
   .rlabels > span:first-child{display:none}
+
+  /* Below here six equal pill columns cannot hold their role lines -- measured:
+     the longest ("the scorekeeper") needs ~106px and a 901px viewport gives each
+     pill ~112px of text room, so 900 is the real floor, not 760. The native
+     select takes over; a six-high pill stack is a page, not a control. */
+  .pills{display:none}
+  #modelPick{display:block}
 }
 
 @media (max-width:760px){
@@ -848,6 +867,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="stack" style="gap:14px">
         <div class="lbl">Financing model</div>
         <div class="pills" id="pills"></div>
+        <select class="ctrl" id="modelPick" aria-label="Financing model"></select>
       </div>
 
       <div class="prov">
@@ -1230,24 +1250,57 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>What universal coverage would cost you</h3>
-      <p class="body" style="max-width:760px">This is where we are most exposed, so here is the whole derivation. We show two figures. One uses the only household-level formula anyone has published. The other deliberately uses the least friendly published estimate in the debate.</p>
+      <p class="body" style="max-width:760px">This is where we are most exposed, so here is the whole derivation, for all six models. Two are published household-level formulas &mdash; the only two anyone has written down. The other four are our allocation of a published national estimate: the source&rsquo;s own annual spending change against current law, spread evenly across 134.79 million households (Census, 2025) and added to the Sanders formula. The range deliberately runs from the only peer-reviewed estimate to the most expensive one anyone has published &mdash; the argument has to survive the hostile end, or it is not an argument.</p>
 
       <div class="grid2" style="margin-top:20px">
         <div class="card-p">
           <div class="lbl p">Model one <span class="tag stat" style="margin-left:6px">Published formula</span></div>
-          <div class="quote" style="font-size:23px">Sanders &middot; Option 1</div>
-          <p class="body">From the financing options published by Sen. Sanders&rsquo; office in 2019 &mdash; the only household-level formula in this debate that anyone actually wrote down.</p>
+          <div class="quote" style="font-size:23px">Sanders &middot; bill&rsquo;s authors</div>
+          <p class="body">From the financing options published by Sen. Sanders&rsquo; office in 2019 (its &ldquo;Option 1&rdquo;) &mdash; the first of the two household-level formulas in this debate that anyone actually wrote down.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">4% &times; (income &minus; $29,200)<br>+ 7.5% &times; income<br><br>= 4% &times; $65,800 &nbsp;=&nbsp; $2,632<br>+ 7.5% &times; $95,000 &nbsp;=&nbsp; $7,125<br><b>= $9,757 a year</b></p>
           <p class="fn">Our one liberty: the 2019 list presents the income premium and the payroll tax as <i>separate</i> options. We pair them. Say so out loud rather than let someone discover it.</p>
         </div>
 
         <div class="card-p">
-          <div class="lbl p">Model two <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
-          <div class="quote" style="font-size:23px">Blahous &middot; pessimistic</div>
+          <div class="lbl p">Model two <span class="tag stat" style="margin-left:6px">Published formula</span></div>
+          <div class="quote" style="font-size:23px">Lancet &middot; peer-reviewed</div>
+          <p class="body">Galvani, Parpia, Foster, Singer &amp; Fitzpatrick, <i>The Lancet</i>, February 2020 &mdash; the only peer-reviewed estimate in this set, and the second published household formula: a 5% income tax above the paper&rsquo;s stated $29,000 exemption, plus a 10% payroll tax replacing employer premiums (12.29% is the paper&rsquo;s break-even upper bound).</p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">5% &times; (income &minus; $29,000)<br>+ 10% &times; income<br><br>= 5% &times; $66,000 &nbsp;=&nbsp; $3,300<br>+ 10% &times; $95,000 &nbsp;=&nbsp; $9,500<br><b>= $12,800 a year</b></p>
+          <p class="fn">The senior author was an unpaid adviser to Sen. Sanders&rsquo; office &mdash; disclosed for the same reason Mercatus is labelled Koch-funded. The paper leaves about $507 average out-of-pocket, which every model here excludes for comparability. The paper states one $29,000 threshold; halving it for single filers mirrors our Sanders treatment and is our convention, not the paper&rsquo;s. The same team&rsquo;s 2026 preprint (not peer reviewed, produced for a Rep. Khanna inquiry) re-ran the model on 2024 data: national spending falling $1,041 billion, 19.7%.</p>
+        </div>
+
+        <div class="card-p">
+          <div class="lbl p">Model three <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
+          <div class="quote" style="font-size:23px">RAND &middot; nonpartisan</div>
+          <p class="body">Liu &amp; Eibner, RAND Corporation, 2019 &mdash; nonpartisan, modelling the bill <i>with</i> long-term care at payment rates around 109% of Medicare. National health spending rises 1.8% &mdash; $3,823 billion to $3,892 billion.</p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$68.8B &divide; 134,790,000 households<br>= <b>$510</b> per household per year<br><br>$9,757 + $510 = <b>$10,267</b></p>
+          <p class="fn">RAND assumed supply constraints absorb half of new demand; without that assumption its increase is 9.8%. RAND published no household figure &mdash; the allocation is ours, same convention as Blahous.</p>
+        </div>
+
+        <div class="card-p">
+          <div class="lbl p">Model four <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
+          <div class="quote" style="font-size:23px">CBO &middot; the scorekeeper</div>
+          <p class="body">Congressional Budget Office, December 2020 &mdash; five illustrative options for 2030; CBO has never scored the bill itself. We use Option 5, the one shaped most like the bill (long-term care covered, no cost sharing), which <b>raises</b> national spending $290 billion &mdash; the least friendly of the five. CBO&rsquo;s four options <i>without</i> long-term care all <b>lower</b> national spending, by $42 to $743 billion.</p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$290B &divide; 134,790,000 households<br>= <b>$2,151</b> per household per year<br><br>$9,757 + $2,151 = <b>$11,908</b></p>
+          <p class="fn">CBO published no household figure &mdash; the allocation is ours, same convention as Blahous. Its $290 billion is a 2030 projection against CBO&rsquo;s own $6,631 billion baseline; we spread the source&rsquo;s dollars as published rather than false-precision adjust them to a common year.</p>
+        </div>
+
+        <div class="card-p">
+          <div class="lbl p">Model five <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
+          <div class="quote" style="font-size:23px">Mercatus &middot; the opposition</div>
           <p class="body">Charles Blahous, Mercatus Center, 2018 &mdash; Koch-funded and written to show single-payer was unaffordable. He modelled two scenarios. His <i>main</i> one has national health spending <b>falling $2.05 trillion</b> over a decade against current law. His alternative, where provider payments do not fall to Medicare rates, has it <b>rising $3.25 trillion</b>.</p>
           <p class="body">We use the alternative, so this site never rests on the friendly reading of an unfriendly study.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">$3.252T &divide; 10 years<br>&divide; 134,790,000 households<br>= <b>$2,413</b> per household per year<br><br>$9,757 + $2,413 = <b>$12,170</b></p>
           <p class="fn">Blahous published no household figure, so that allocation is ours. Spreading it flat across all households is a simplification &mdash; real financing would be progressive, which would move this number down for most households and up for high earners.</p>
+        </div>
+
+        <div class="card-p">
+          <div class="lbl p">Model six <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
+          <div class="quote" style="font-size:23px">Urban &middot; the priciest</div>
+          <p class="body">Blumberg, Holahan and colleagues, Urban Institute, October 2019 &mdash; a left-leaning institute&rsquo;s &ldquo;Single-Payer Enhanced&rdquo;, and the most expensive estimate anyone has published: national spending rising <b>$719.7 billion a year (+20.6%)</b>, covering long-term care, dental, zero cost sharing and every US resident.</p>
+          <p class="body">We include it so the top of the range is the hardest number on offer &mdash; if the argument survives this one, it survives.</p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$719.7B &divide; 134,790,000 households<br>= <b>$5,340</b> per household per year<br><br>$9,757 + $5,340 = <b>$15,097</b></p>
+          <p class="fn">Urban published no household figure &mdash; the allocation is ours, same convention as Blahous. Its &ldquo;Single-Payer Lite&rdquo; option, without long-term care and with income-scaled cost sharing, <i>cuts</i> national spending 6.0% &mdash; we use the expensive one.</p>
         </div>
       </div>
     </div>
@@ -1277,6 +1330,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <td>A contribution, not a cost of care. The other two bars show what covering this household costs in full; this one shows the share of it the household would pay. Their care would still cost roughly what it costs now &mdash; <b>$30,600 to $34,600</b> a year on the models above &mdash; and the household would pay about <b>28&ndash;32%</b> of that, the rest coming from progressive financing and the federal health spending that already exists. Read as a like-for-like total, it flatters universal coverage. Putting a number on that remainder would mean allocating national spending per household, a second modeled figure stacked on the one we already publish, so for now we say this instead.</td>
         </tr>
         <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Mixed vintages in the allocations</b></td>
+          <td>The four allocated models spread each source&rsquo;s own dollars &mdash; Blahous&rsquo;s 2020s decade, Urban&rsquo;s 2020, RAND&rsquo;s 2019, CBO&rsquo;s 2030 projection &mdash; over one 2025 household count. Inflating them all to one year would add false precision to numbers whose real uncertainty is the model, not the deflator; leaving them as published understates the older sources slightly. We chose the disclosure over the adjustment.</td>
+        </tr>
+        <tr>
           <td><b style="font-weight:500;color:var(--pk)">One income number</b></td>
           <td>The statutes want three different ones: the subsidy runs on MAGI, the Medicare payroll tax on wages, and the Sanders premium on income above an exemption. We run all three from the single figure you enter. Close for a household whose income is mostly wages; retirement deferrals drive them apart, since Medicare wages include a 401(k) deferral and MAGI does not. We also treat any household larger than one as filing jointly.</td>
         </tr>
@@ -1300,7 +1357,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Employer premiums</td><td>KFF Employer Health Benefits Survey, 2025</td></tr>
         <tr><td>2026 marketplace changes</td><td>KFF, 2026 Marketplace enrollment, premiums and deductibles</td></tr>
         <tr><td>Single-payer financing</td><td>Office of Sen. Bernie Sanders, financing options, 2019</td></tr>
+        <tr><td>Single-payer, peer-reviewed</td><td>Galvani et al., <i>Improving the prognosis of health care in the USA</i>, The Lancet 395:524&ndash;533, 2020</td></tr>
         <tr><td>Single-payer national cost</td><td>Blahous, <i>The Costs of a National Single-Payer Healthcare System</i>, Mercatus Center, 2018</td></tr>
+        <tr><td>Single-payer, nonpartisan</td><td>Liu &amp; Eibner, <i>National Health Spending Estimates Under Medicare for All</i>, RAND RR-3106, 2019</td></tr>
+        <tr><td>Single-payer, five options</td><td>CBO, <i>How CBO Analyzes the Costs of Proposals for Single-Payer Health Care Systems</i>, Working Paper 2020-08, December 2020</td></tr>
+        <tr><td>Single-payer, most expensive</td><td>Blumberg, Holahan et al., <i>From Incremental to Comprehensive Health Insurance Reform</i>, Urban Institute, October 2019</td></tr>
         <tr><td>Household count</td><td>US Census Bureau, Total Households, 2025</td></tr>
         <tr><td>Plan premiums (planned)</td><td>CMS Exchange and State-based Exchange Public Use Files</td></tr>
       </table>
@@ -1633,6 +1694,28 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("nowMk").style.left = nowPct.toFixed(1) + "%";
     place(byId("nowLbl"), nowPct);
     place(byId("rangeLbl"), (S.universalRange.lo + S.universalRange.hi) / 2 / max * 100);
+    // The two labels are placed independently on their own marks, and with six
+    // models the range's centre can land within a label-width of "today" -- the
+    // marketplace route collided by 15px just above the 900px legend breakpoint.
+    // Measured, not assumed: if they overlap, each yields half, clamped to the
+    // strip. place() resets the transform every paint, so this stays idempotent.
+    if (!window.matchMedia("(max-width:900px)").matches){
+      var rlab = byId("rangeLbl"), nlab = byId("nowLbl");
+      var lbEl = rlab.getBoundingClientRect().left <= nlab.getBoundingClientRect().left ? rlab : nlab;
+      var rbEl = lbEl === rlab ? nlab : rlab;
+      var lbR = lbEl.getBoundingClientRect(), rbR = rbEl.getBoundingClientRect();
+      var lapPx = lbR.right - rbR.left + 10;   // 10px of breathing room
+      if (lapPx > 0){
+        var strip = rlab.parentElement.getBoundingClientRect();
+        var shl = Math.max(0, Math.min(lapPx / 2, lbR.left - strip.left));
+        var shr = Math.max(0, Math.min(lapPx - shl, strip.right - rbR.right));
+        // place() may have set "none", which cannot be appended to
+        var lbase = lbEl.style.transform === "none" ? "" : lbEl.style.transform;
+        var rbase = rbEl.style.transform === "none" ? "" : rbEl.style.transform;
+        lbEl.style.transform = (lbase + " translateX(" + (-shl).toFixed(1) + "px)").trim();
+        rbEl.style.transform = (rbase + " translateX(" + shr.toFixed(1) + "px)").trim();
+      }
+    }
 
     // inputs + derived readouts
     byId("sizeVal").textContent   = state.size;
@@ -1683,7 +1766,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   var UNI_PARTS = {
     premium:    { tone:"var(--teal-l)", who:"from you" },
     payroll:    { tone:"var(--teal)",   who:"from your employer" },
-    blahousGap: { tone:"var(--teal-d)", who:"our allocation" }   // ours, not Blahous's -- he published no household figure
+    // The allocation bands are ours, not the source's -- none of these studies
+    // published a household figure. Same dark teal for all four: the colour
+    // says "our allocation", the pill says whose estimate it allocates.
+    blahousGap: { tone:"var(--teal-d)", who:"our allocation" },
+    randGap:    { tone:"var(--teal-d)", who:"our allocation" },
+    cboGap:     { tone:"var(--teal-d)", who:"our allocation" },
+    urbanGap:   { tone:"var(--teal-d)", who:"our allocation" }
   };
 
   var TONE = { 1:"var(--c1)", 2:"var(--c2)", 3:"var(--c3)", 4:"var(--c4)" };
@@ -2026,6 +2115,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     for (var i = 0; i < pills.children.length; i++){
       pills.children[i].className = "pill" + (W.MODELS[i].id === state.model ? " on" : "");
     }
+    byId("modelPick").value = state.model;
   }
 
 
@@ -2153,11 +2243,28 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   }
   function setW(id, frac){ byId(id).style.width = (frac * 100).toFixed(1) + "%"; }
 
+  // One chip string per model ("Source · role"), split here so the pill can set
+  // the name over the role and the phone select can join them with a dash.
   W.MODELS.forEach(function(m){
+    var cut = m.chip.indexOf(" · ");
+    var name = cut > -1 ? m.chip.slice(0, cut) : m.chip;
+    var role = cut > -1 ? m.chip.slice(cut + 3) : "";
     var b = document.createElement("button");
-    b.className = "pill"; b.type = "button"; b.textContent = m.chip;
+    b.className = "pill"; b.type = "button";
+    b.innerHTML = '<span class="pill-n"></span><span class="pill-r"></span>';
+    b.firstChild.textContent = name;
+    b.lastChild.textContent = role;
     b.addEventListener("click", function(){ state.model = m.id; paint(); });
     pills.appendChild(b);
+
+    var o = document.createElement("option");
+    o.value = m.id;
+    o.textContent = role ? name + " — " + role : name;
+    byId("modelPick").appendChild(o);
+  });
+  byId("modelPick").addEventListener("change", function(){
+    state.model = this.value;
+    paint();
   });
 
   var routeEl = byId("route");
