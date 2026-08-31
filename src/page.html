@@ -706,7 +706,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="rule" style="margin:56px 0 24px"></div>
     <div class="row" style="gap:56px;flex-wrap:wrap">
-      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labelled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark plan premiums are modeled.</p>
+      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labelled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums come from the CMS 2026 plan files for your county.</p>
       <p class="note" style="max-width:360px">Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
     </div>
   </div>
@@ -741,14 +741,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <div style="font-size:13.5px;color:var(--im);line-height:1.55">Every number to the right updates as you type.</div>
           </div>
           <div class="field">
-            <div class="lbl">State</div>
-            <select class="ctrl" id="area">
-              <option value="CT-1">Connecticut · Hartford area</option>
-              <option value="NY-4">New York · NYC area</option>
-              <option value="PA-9">Pennsylvania · Philadelphia</option>
-              <option value="TX-26">Texas · Dallas area</option>
-              <option value="FL-27">Florida · Miami area</option>
-            </select>
+            <div class="lbl">Where you live</div>
+            <div class="ctrl" id="placeCtrl" style="cursor:default"><span id="placeName"></span><span class="note-i" style="font-size:11px">from your ZIP</span></div>
             <div class="note-i" id="areaNote"></div>
           </div>
           <div class="row" style="gap:14px">
@@ -776,7 +770,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <input type="range" id="income" min="12000" max="260000" step="1000" value="95000" aria-label="Household income">
             <div class="row num" style="justify-content:space-between;font-size:11px;color:var(--ifaint);margin-top:5px"><span>$12k</span><span id="fplVal"></span><span>$260k</span></div>
           </div>
-          <div class="note-i" id="agesNote" hidden style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this preview does not price, so they are counted as adults here.</div>
+          <div class="note-i" id="agesNote" hidden style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this site does not price. They are counted here at the oldest marketplace rate, a 64-year-old&rsquo;s.</div>
           <div class="field">
             <div class="lbl">How you&rsquo;re covered now</div>
             <div class="seg" id="route"><button type="button" data-r="employer" class="on">Employer</button><button type="button" data-r="marketplace">Marketplace</button><button type="button" data-r="none">Uninsured</button></div>
@@ -835,7 +829,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           </div>
           <div class="cards" id="cards"></div>
           <div id="elig"></div>
-          <p class="note-i" id="panelNote">Employer premiums are KFF 2025 survey averages. Subsidy maths follows the IRS 2026 applicable-percentage table exactly. Benchmark plan premiums and out-of-pocket spend are <b style="color:var(--c2);font-weight:400">modeled placeholders</b> until the CMS public-use files are wired in.</p>
+          <p class="note-i" id="panelNote">Employer premiums are KFF 2025 survey averages. Subsidy maths follows the IRS 2026 applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan from the CMS 2026 plan files, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
         </div>
       </div>
     </div>
@@ -1251,7 +1245,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <td><span class="tag mod">Modeled</span></td>
-          <td>Our estimate. Benchmark plan premiums outside our five demo areas, out-of-pocket spending, and part of the universal figures. Labelled everywhere it appears.</td>
+          <td>Our estimate. Out-of-pocket spending, uninsured cash spending, and part of the universal figures. Labelled everywhere it appears.</td>
         </tr>
       </table>
     </div>
@@ -1281,6 +1275,42 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">400% and above</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit at all</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
+    </div>
+
+    <div class="stack" style="gap:16px;margin-bottom:56px">
+      <h3>The benchmark premium <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
+      <p class="body" style="max-width:760px">The credit is measured against the second-lowest-cost silver plan available to your household, so that premium is the hinge of every marketplace figure here. It comes from the published 2026 federal plan files, computed per county, and here is exactly how.</p>
+      <table style="margin-top:12px">
+        <tr>
+          <td style="width:220px"><b style="font-weight:500;color:var(--pk)">The plan set</b></td>
+          <td>Individual-market, on-exchange, non-dental silver plans, excluding child-only offerings. Healthcare.gov states come from the CMS Exchange PUFs (rate, plan attributes, service area); the 21 state-run exchanges come from the CMS State-based Exchange PUFs. Both are published federal tables; no key, no scraping of insurer sites.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Why the second lowest</b></td>
+          <td>The choice is statute, not ours: 26 U.S.C. &sect;36B defines the credit as this benchmark minus your expected contribution. Congress pegged it to the <i>second</i>-lowest silver so the credit always leaves at least two plans within your expected share, and so a single cut-rate outlier cannot set the subsidy for a whole market.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Per county, not per rating area</b></td>
+          <td>A rating area sets the price, but each plan&rsquo;s service area decides where it is sold, and the two disagree often: in 37% of healthcare.gov counties the county&rsquo;s true second-lowest silver differs from its rating area&rsquo;s. So we take the plans whose service area covers your county, price them at your county&rsquo;s rating area, sort, and take the second. Roughly 3,300 county figures, precomputed and shipped with the page.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">Ages</b></td>
+          <td>Each person is priced at their own age on their state&rsquo;s rate curve, which we derive from the state&rsquo;s own rate file rather than assume (Utah&rsquo;s curve is unlike anyone else&rsquo;s; Alabama, Mississippi and Oregon price children differently; everyone else matches the federal 3-to-1 default). At most the three oldest children under 21 are charged, which is the ACA&rsquo;s own family rule.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">New York and Vermont</b></td>
+          <td>Both ban age rating entirely and quote four family tiers instead: individual, couple, one adult with children, two adults with children. We use their published tier rates directly. A third adult in the household is priced as their own individual policy, which is how they would actually buy in.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">ZIPs that decide the price</b></td>
+          <td>Alaska and Massachusetts define rating areas by the first three ZIP digits, and Los Angeles County is split between two rating areas the same way, so there your ZIP picks the rate table directly. Everywhere else your ZIP resolves to a county; a ZIP spanning two rating areas asks you which county is yours rather than guessing.</td>
+        </tr>
+        <tr>
+          <td><b style="font-weight:500;color:var(--pk)">How we know it is right</b></td>
+          <td>Three independent checks, run every time the table is rebuilt: every healthcare.gov county must match the separately published QHP landscape file&rsquo;s own second-lowest silver premium to the cent; New York&rsquo;s county floors must match NY State of Health&rsquo;s published 2026 lowest-cost-silver table to the cent; and Los Angeles must match Covered California&rsquo;s published 2026 rate booklet. A build that fails any check does not ship.</td>
+        </tr>
+      </table>
+      <p class="fn">Two judgment calls to know about. &ldquo;Second lowest&rdquo; counts plans, not distinct prices, so if two plans tie for cheapest the benchmark equals that tied price; the IRS defines it the same way. And the credit legally counts only the essential-health-benefits share of the benchmark premium, typically 99% to 100% of it; the plan files publish that share only as a whole percent, so we use the full premium, which can overstate a credit by a fraction of a percent (about $7 a month on a $3,081 Connecticut benchmark, checked against the state exchange&rsquo;s own quote).</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
@@ -1388,12 +1418,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <p class="body" style="max-width:760px">Every model has soft spots. Ours are listed here rather than left for someone else to find.</p>
       <table style="margin-top:12px">
         <tr>
-          <td style="width:220px"><b style="font-weight:500;color:var(--pk)">Benchmark premiums</b></td>
-          <td>Five metro areas are wired up with modeled figures, and they are not age-rated: everyone 21 and over prices as one flat adult rate, when the real ACA curve charges a 64-year-old about three times a 21-year-old. Real, age-rated premiums for every rating area come from the CMS public use files: Exchange PUFs for healthcare.gov states, State-based Exchange PUFs for the 21 states running their own. That is the next build step. Anyone 65+ is usually on Medicare, which we do not price at all.</td>
+          <td style="width:220px"><b style="font-weight:500;color:var(--pk)">Ages the market does not price</b></td>
+          <td>Anyone 65 or over is usually on Medicare, which we do not price; we charge them the 64-year-old rate, the oldest the marketplace curve has, which overstates a Medicare household&rsquo;s real premium and understates its risk. Tobacco surcharges (up to 50% in most states) are not modeled; every figure is the non-tobacco rate.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">ZIP codes</b></td>
-          <td>Rating areas are defined by county, not ZIP. Our five-area lookup matches on the first three digits, which is an approximation. The CMS Service Area file maps ZIP and county exactly and will replace it.</td>
+          <td><b style="font-weight:500;color:var(--pk)">ZIP boundaries</b></td>
+          <td>Our ZIP table is built from the Census 2020 ZCTA-to-county file, and ZCTAs approximate postal ZIPs rather than matching them exactly. A ZIP whose counties sit in different rating areas asks you to pick; about 140 PO-box-only ZIPs carry no homes of their own and inherit the nearest deliverable ZIP&rsquo;s county, which we note here rather than hide.</td>
         </tr>
         <tr>
           <td><b style="font-weight:500;color:var(--pk)">Out-of-pocket spending</b></td>
@@ -1448,7 +1478,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Health-care debt</td><td>KFF Health Care Debt Survey, 2022</td></tr>
         <tr><td>Care skipped over cost</td><td>KFF Health Tracking Poll, May 2025; National Health Interview Survey, 2024</td></tr>
         <tr><td>Medical bankruptcy, both sides</td><td>Himmelstein et al., AJPH, 2019 (PNHP-affiliated authors); Dobkin et al., NEJM, 2018</td></tr>
-        <tr><td>Plan premiums (planned)</td><td>CMS Exchange and State-based Exchange Public Use Files</td></tr>
+        <tr><td>Benchmark premiums, healthcare.gov states</td><td>CMS Exchange PUFs (rate, plan attributes, service area) and the QHP Landscape file, plan year 2026</td></tr>
+        <tr><td>Benchmark premiums, state exchanges</td><td>CMS State-based Exchange QHP PUFs, plan year 2026 (data as of June 2026)</td></tr>
+        <tr><td>Benchmark cross-checks</td><td>NY State of Health, 2026 Lowest Cost Silver Plan by County; Covered California, 2026 QHP Rates by County</td></tr>
+        <tr><td>Rating area definitions</td><td>CMS, State Specific Geographic Rating Areas</td></tr>
+        <tr><td>ZIP to county</td><td>Census 2020 ZCTA-county relationship file; GeoNames (CC BY 4.0) for PO-box-only ZIPs</td></tr>
+        <tr><td>Medicaid expansion &amp; CHIP limits</td><td>Medicaid.gov, Medicaid and CHIP eligibility levels</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Found an error? That is the most useful thing you could send us. The calculation layer is a single file with no dependencies, and every constant on this page appears in it by name.</p>
     </div>
@@ -1482,28 +1517,34 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   </div>
 </footer>
 
+<script>/*__BENCH__*/</script>
 <script>/*__CALC__*/</script>
 <script>/*__REPS__*/</script>
 <script>
 (function(){
   var W = window.WholeBill;
+  W.useBenchmarks(window.WholeBillBench);
 
   // Bill numbers change every Congress. One place to update them.
   var BILL = { house: "H.R. 3069", senate: "S. 1506", congress: "119th" };
 
   /* ages is the source of truth and size is derived from it -- two controls
-     describing the same people must not be able to disagree. The split is coarse
-     on purpose: under 21 is a child (the ACA child-rate boundary), 21+ an adult,
-     65+ flagged as Medicare territory but still priced as an adult. Real age-rated
-     premiums (the 3:1 curve) need the Stage 2 CMS files; until then a 26-year-old
-     and a 62-year-old price the same, and the methodology page says so. */
+     describing the same people must not be able to disagree. Under 21 is a
+     child for the three-oldest-children charging rule; every age is priced on
+     the state's own curve from the CMS files. 65+ is flagged as Medicare
+     territory and priced at the top of the curve (64), the oldest marketplace
+     rate that exists. */
   /* deductPer is the user's own per-paycheck deduction, or null for the KFF
      average. The pair (deductPer, period) is what the user actually stated, so
      changing the cadence keeps the typed amount and recomputes the year -- while
      the un-overridden average is an ANNUAL survey figure, so there the cadence
      only changes how it is displayed. An empty field is the road back: clearing
      it returns to the average, which is what makes the override optional. */
-  var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
+  /* bkey is the county entry in the benchmark table ("09003", or "25025|5"
+     where a 3-digit ZIP decides the rating area). bChoices holds the counties
+     of a ZIP that spans rating areas until the reader picks one -- ask, never
+     guess, same rule as the rep card. */
+  var state = { bkey:"09003", bChoices:null, size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
                 tone:"direct", emph:{ emp:true, mkt:false, loss:true, nation:false, story:false },
                 zip5:"06106", district:"CT-1" };
   function adultsOf(ages){
@@ -1548,7 +1589,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      split (the reader picks -- they know which town they live in, we do not),
      and a vacant seat. Guessing a split ZIP is the one unforgivable failure
      here: it mails someone to the wrong office. */
-  var STATE_NAMES = { CT:"Connecticut", NY:"New York", PA:"Pennsylvania", TX:"Texas", FL:"Florida" };
+  var STATE_NAMES = { AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"the District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming" };
   function ordinal(n){ n = +n; var s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   function repFor(){
     if (!state.zip5) return { st:"none" };
@@ -1673,8 +1714,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   function paint(){
     var opts = { income: state.income, size: state.size,
-                 adults: adultsOf(state.ages), area: state.area,
-                 region: "contiguous", model: state.model };
+                 adults: adultsOf(state.ages), ages: state.ages,
+                 bkey: state.bkey, model: state.model };
     var eTier = W.EMPLOYER[state.size > 1 ? "family" : "single"];
     if (state.deductPer != null) opts.workerPremium = state.deductPer * state.period;
     if (state.totPrem != null){
@@ -1807,18 +1848,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("agesNote").hidden = !state.ages.some(function(a){ return a >= 65; });
     byId("incomeVal").textContent = money(state.income);
     byId("fplVal").textContent    = Math.round(S.fpl.ratio * 100) + "% of poverty line";
+    var a = S.marketplace.place;
+    byId("placeName").textContent = countyLabel(a) + " \u00b7 " + a.state;
     byId("areaNote").textContent  =
-      (S.marketplace.area.exchange === "state" ? "State-run exchange" : "Healthcare.gov") +
-      " \u00b7 Medicaid " + (S.marketplace.area.medicaidExpanded ? "expanded" : "not expanded");
+      "Rating area " + a.ra + " \u00b7 " +
+      (a.exchange === "state" ? "State-run exchange" : "Healthcare.gov") +
+      " \u00b7 Medicaid " + (a.expanded ? "expanded" : "not expanded");
     byId("who").textContent  = S.universal.note;
-    var a = S.marketplace.area;
     // Must match the sticky bar's two-row breakpoint in the stylesheet (900px).
     // The long form plus the Year/Month switch does not fit on one row below it.
     var tight = window.matchMedia("(max-width:900px)").matches;
     byId("who-line").textContent = tight
-      ? state.size + " \u00b7 " + a.city + " \u00b7 $" + Math.round(state.income / 1000) + "k"
-      : "Household of " + state.size + " \u00b7 " + a.city + " \u00b7 " + money(state.income);
-    byId("letterPlace").textContent = a.city;
+      ? state.size + " \u00b7 " + a.county + " \u00b7 $" + Math.round(state.income / 1000) + "k"
+      : "Household of " + state.size + " \u00b7 " + a.county + " \u00b7 " + money(state.income);
+    byId("letterPlace").textContent = countyLabel(a);
     renderRep();
     byId("repBill").textContent = BILL.house + " (" + BILL.congress + ")";
     byId("senBill").textContent = BILL.senate;
@@ -2043,7 +2086,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   // can never disagree with the numbers beside it.
   function renderCliff(){
     var opts = { size: state.size, adults: adultsOf(state.ages),
-                 area: state.area, region: "contiguous" };
+                 ages: state.ages, bkey: state.bkey };
     var d = W.cliffDrop(opts), c = W.cliffCurve(opts, 200);
     byId("cliffUnder").textContent = fmt(d.under);
     byId("cliffOver").textContent  = fmt(d.over);
@@ -2198,7 +2241,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
         'poverty line, this household is expected to contribute <b>' +
         (m.applicablePercentage * 100).toFixed(2) + '%</b> of income toward a benchmark silver plan: a ' +
-        'credit of ' + money(m.subsidy) + ' a year.' +
+        'credit of ' + money(m.subsidy) + ' a year. The benchmark is the law’s, not ours: the ' +
+        'second-lowest-cost silver plan where you live, chosen so at least two plans cost you no ' +
+        'more than your expected share and no single cut-rate plan can drag every credit down.' +
         (m.chipLikely ? ' The children may also qualify for CHIP, which reaches further up the income scale.' : '') +
         '</div></div>';
     }
@@ -2214,68 +2259,88 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   }
 
 
-  /* ZIP -> rating area. Real rating areas are defined by COUNTY, not ZIP prefix, so this
-   * three-digit table is an approximation good enough for five demo metros and no more.
-   * Stage 2 replaces it with the CMS Service Area PUF, which maps ZIP and county exactly.
-   * Until then the site must never imply it knows an area it does not have. */
-  var ZIP_PREFIX = {
-    "060":"CT-1","061":"CT-1","062":"CT-1",
-    "100":"NY-4","101":"NY-4","102":"NY-4","103":"NY-4","104":"NY-4",
-    "111":"NY-4","112":"NY-4","113":"NY-4","114":"NY-4","116":"NY-4",
-    "190":"PA-9","191":"PA-9",
-    "750":"TX-26","751":"TX-26","752":"TX-26","753":"TX-26",
-    "330":"FL-27","331":"FL-27","332":"FL-27","333":"FL-27"
-  };
-  function lookupZip(z){
-    z = String(z || "").replace(/\D/g, "");
-    if (z.length < 5) return { ok:false, reason:"short", zip:z };
-    var hit = ZIP_PREFIX[z.slice(0,3)];
-    return hit ? { ok:true, area:hit, zip:z } : { ok:false, reason:"uncovered", zip:z };
+  /* ZIP -> county -> benchmark entry, nationwide, via the table generated from
+   * the CMS plan files (see tools/build-benchmarks.mjs). About one ZIP in eight
+   * spans more than one rating area; those ask the reader which county is
+   * theirs, the same rule the rep card follows. */
+  var SAMPLES = [["Hartford","06106"],["New York City","10002"],["Dallas","75201"],["Miami","33130"],["Philadelphia","19103"]];
+
+  function countyLabel(a){
+    var n = a.county || a;
+    return /(city|City|Parish|Borough|Municipality|Municipio|Area|Region|Columbia|Island|Islands)$/.test(n)
+      ? n : n + " County";
   }
 
   function renderScope(msg){
-    var a = W.BENCHMARK[state.area];
-    byId("scope").innerHTML = msg || ('Showing the <b>' + a.city + '</b> area. This preview has ' +
-      'five metro areas wired up. The ZIP-specific numbers are coming soon.');
-    var html = "", keys = Object.keys(W.BENCHMARK), i;
-    for (i = 0; i < keys.length; i++){
-      html += '<button type="button" data-a="' + keys[i] + '">' + W.BENCHMARK[keys[i]].city + '</button>';
+    var scope;
+    if (msg){
+      scope = msg;
+    } else if (state.bChoices){
+      scope = 'ZIP <b>' + state.bChoices.zip + '</b> spans ' +
+        (state.bChoices.choices.length === 2 ? 'two' : state.bChoices.choices.length) +
+        ' rating areas. You know which county you live in; we don’t:';
+    } else {
+      var e = WholeBillBench.counties[state.bkey];
+      var stAbbr = WholeBillBench.fips[state.bkey.slice(0,2)];
+      var placeTxt = stAbbr === 'DC' ? 'the District of Columbia'
+        : countyLabel(e[2]) + ', ' + (STATE_NAMES[stAbbr] || stAbbr);
+      scope = 'Showing <b>' + placeTxt +
+        '</b>, priced from the CMS 2026 plan files. Type any US ZIP, or try a sample:';
+    }
+    byId("scope").innerHTML = scope;
+    var html = "", i;
+    if (state.bChoices){
+      for (i = 0; i < state.bChoices.choices.length; i++){
+        var c = state.bChoices.choices[i];
+        html += '<button type="button" data-k="' + c.key + '">' + countyLabel(c.county) +
+                ' · ' + WholeBillBench.fips[c.fips.slice(0,2)] + '</button>';
+      }
+    } else {
+      for (i = 0; i < SAMPLES.length; i++){
+        html += '<button type="button" data-z="' + SAMPLES[i][1] + '">' + SAMPLES[i][0] + '</button>';
+      }
     }
     byId("areapick").innerHTML = html;
     [].forEach.call(byId("areapick").querySelectorAll("button"), function(b){
       b.addEventListener("click", function(){
-        state.area = b.getAttribute("data-a");
-        byId("area").value = state.area;
-        byId("zip").value = "";
-        // A metro pick is not a ZIP: the district is unknown again.
-        state.zip5 = null;
-        state.district = null;
-        paint();
-        document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
+        if (b.hasAttribute("data-k")){
+          state.bkey = b.getAttribute("data-k");
+          state.bChoices = null;
+          paint();
+          document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
+        } else {
+          byId("zip").value = b.getAttribute("data-z");
+          submitZip();
+        }
       });
     });
   }
 
   function submitZip(){
-    var r = lookupZip(byId("zip").value);
-    if (r.ok){
-      state.area = r.area;
-      byId("area").value = r.area;
-      // The full five digits also resolve the district -- automatically only
-      // when the ZIP sits in exactly one; a split ZIP asks instead.
-      state.zip5 = r.zip;
-      var ds = REPS.zip[r.zip] || [];
-      state.district = ds.length === 1 ? ds[0]
-        : ds.indexOf(state.district) > -1 ? state.district : null;
-      paint();
-      document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
+    var r = W.zipResolve(byId("zip").value);
+    if (r.st === "short"){ renderScope('Enter all five digits.'); return; }
+    if (r.st === "uncovered"){
+      renderScope('<b>' + r.zip + '</b> is not a residential US ZIP we can price. ' +
+        'Check the digits, or try a sample:');
       return;
     }
-    renderScope(r.reason === "short"
-      ? 'Enter all five digits.'
-      : '<b>' + r.zip + '</b> is not in this preview yet. Five metro areas are wired up so far. ' +
-        'Pick one to see how the calculator works, and read <a href="#/methodology">why the rest need ' +
-        'the CMS plan files</a>.');
+    // The full five digits also resolve the district -- automatically only
+    // when the ZIP sits in exactly one; a split ZIP asks instead.
+    state.zip5 = r.zip;
+    var ds = REPS.zip[r.zip] || [];
+    state.district = ds.length === 1 ? ds[0]
+      : ds.indexOf(state.district) > -1 ? state.district : null;
+    if (r.st === "covered"){
+      state.bkey = r.key;
+      state.bChoices = null;
+      paint();
+      document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
+    } else {
+      // spans rating areas: the figures keep the previous county until the
+      // reader picks; guessing a price is the same failure as guessing a rep
+      state.bChoices = r;
+      paint();
+    }
   }
 
 
@@ -2411,7 +2476,6 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   byId("zipGo").addEventListener("click", submitZip);
   byId("zip").addEventListener("keydown", function(e){ if (e.key === "Enter") submitZip(); });
-  byId("area").addEventListener("change", function(){ state.area = this.value; byId("zip").value = ""; paint(); });
   byId("income").addEventListener("input", function(){ state.income = +this.value; paint(); });
   function agesToField(){ byId("ages").value = state.ages.join(", "); }
   // Stepping up appends an adult until there are two, then children -- the shape

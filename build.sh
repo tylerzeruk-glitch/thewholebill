@@ -12,12 +12,13 @@ python3 - <<'PY'
 import io
 calc = io.open('src/calc.js', encoding='utf-8').read()
 reps = io.open('src/reps.js', encoding='utf-8').read()
+bench = io.open('src/benchmarks.js', encoding='utf-8').read()
 page = io.open('src/page.html', encoding='utf-8').read()
-if '/*__CALC__*/' not in page:
-    raise SystemExit('build: /*__CALC__*/ marker missing from src/page.html')
-if '/*__REPS__*/' not in page:
-    raise SystemExit('build: /*__REPS__*/ marker missing from src/page.html')
-out = page.replace('/*__CALC__*/', '\n' + calc + '\n', 1)
+for marker in ('/*__CALC__*/', '/*__REPS__*/', '/*__BENCH__*/'):
+    if marker not in page:
+        raise SystemExit('build: ' + marker + ' marker missing from src/page.html')
+out = page.replace('/*__BENCH__*/', '\n' + bench + '\n', 1)
+out = out.replace('/*__CALC__*/', '\n' + calc + '\n', 1)
 out = out.replace('/*__REPS__*/', '\n' + reps + '\n', 1)
 io.open('dist/artifact.html', 'w', encoding='utf-8').write(out)
 

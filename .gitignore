@@ -7,3 +7,4 @@ dist/
 # JSON the pipeline emits, never the source archives.
 data/raw/
 *.zip
+tools/cache/
