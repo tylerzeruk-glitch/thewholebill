@@ -1116,6 +1116,24 @@ test('reps: the snapshot is coherent', async () => {
      && Object.values(REPS.senate).flat().length === 10);
 });
 
+/* The privacy note in the letter's footer wraps to its own row when the button
+ * row is tight, instead of being crushed beside it -- it once wore a 190px cap
+ * and ran three cramped lines. */
+test('letter: the privacy note gets room to breathe', async b => {
+  for (const w of [1440, 900, 390]) {
+    const p = await page(b,w,900);
+    const r = await p.evaluate(()=>{
+      const el = document.querySelector('.letter .ft p');
+      const range = document.createRange(); range.selectNodeContents(el);
+      const lines = new Set([...range.getClientRects()].filter(x=>x.height>1).map(x=>Math.round(x.top)));
+      return { w: el.getBoundingClientRect().width, lines: lines.size };
+    });
+    ok(`${w}px: wide enough (${Math.round(r.w)}px), ${r.lines} line${r.lines>1?'s':''}`,
+       r.w >= 240 && r.lines <= 2);
+    await p.close();
+  }
+});
+
 test('content: no dead links or stale placeholders', async b => {
   const p = await page(b,1440,900);
   const r = await p.evaluate(()=>({
