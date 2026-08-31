@@ -26,6 +26,74 @@ const page = async (browser, w, h, mobile=false) => {
 };
 const setIncome = async (p, v) => { await p.locator('#income').fill(String(v)); await p.locator('#income').dispatchEvent('input'); await p.waitForTimeout(120); };
 
+/* The benchmark table is generated data, so the suite re-verifies the
+ * guarantees the pipeline asserted when it was built: real coverage, tier
+ * shapes, published ratios, and that every ZIP resolves to a county entry
+ * that actually exists. If a regeneration breaks any of this, tests fail
+ * before the site ever ships it. */
+test('benchmarks: the generated county table holds its shape', async () => {
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const B = require('../src/benchmarks.js');
+  ok('plan year 2026', B.planYear === 2026);
+  const nCo = Object.keys(B.counties).length;
+  ok('a nationwide county table', nCo > 3200, nCo + ' entries');
+  let nZip = 0;
+  for (const m of Object.values(B.zip)) nZip += Object.keys(m).length;
+  ok('a nationwide ZIP table', nZip > 40000, nZip + ' ZIPs');
+
+  // Hartford: the launch metro, an age-rated county
+  const hart = B.counties['09003'];
+  ok('Hartford is rating area 2', hart && hart[1] === 2, JSON.stringify(hart));
+  ok('Hartford SLCSP is a sane monthly premium', hart[0] > 30000 && hart[0] < 120000, '$' + (hart[0] / 100).toFixed(2));
+
+  // NY and VT rate by family tier; their published tier ratios are law
+  const ny = B.counties['36061'][0], vt = B.counties['50007'][0];
+  ok('Manhattan prices by family tier', Array.isArray(ny) && ny.length === 8);
+  ok('NY couple tier is 2x individual', Math.abs(ny[1] / ny[0] - 2.0) < 0.001, (ny[1] / ny[0]).toFixed(3));
+  ok('NY parent+children tier is 1.7x', Math.abs(ny[2] / ny[0] - 1.7) < 0.001, (ny[2] / ny[0]).toFixed(3));
+  ok('NY family tier is 2.85x', Math.abs(ny[5] / ny[0] - 2.85) < 0.001, (ny[5] / ny[0]).toFixed(3));
+  ok('VT parent+children tier is 1.93x', Math.abs(vt[2] / vt[0] - 1.93) < 0.001, (vt[2] / vt[0]).toFixed(3));
+
+  // age curves: the federal default anchors, and Utah's own curve
+  const fed = B.curves[B.states.FL.curve];
+  ok('federal curve: age 21 is the base', fed[21] === 1000);
+  ok('federal curve: 3:1 at 64', fed[64] === 3000);
+  ok('federal curve: 0.765 child factor', fed[0] === 765);
+  const ut = B.curves[B.states.UT.curve];
+  ok('Utah has its own curve', B.states.UT.curve !== B.states.FL.curve && Math.abs(ut[40] - 1479) <= 3, ut[40]);
+  ok('AL and MS share the 0.635 child factor', B.curves[B.states.AL.curve][0] === 635 && B.states.MS.curve === B.states.AL.curve);
+  ok('tier states carry no curve', B.states.NY.tiers && B.states.VT.tiers && B.states.NY.curve === null);
+
+  // every ZIP value must resolve to a county entry that exists
+  const zip3ra = B.zip3ra;
+  let bad = 0, asks = 0, checked = 0;
+  for (const [p3, m] of Object.entries(B.zip)) {
+    for (const [suf, v] of Object.entries(m)) {
+      checked++;
+      const cands = Array.isArray(v) ? v : [v];
+      if (Array.isArray(v)) asks++;
+      for (const c of cands) {
+        if (c[0] === '!') { if (!B.counties[c.slice(1)]) bad++; continue; }
+        let key = c;
+        if (c.slice(0, 2) === '02') key = c + '|' + zip3ra.AK[p3];
+        else if (c.slice(0, 2) === '25') key = c + '|' + zip3ra.MA[p3];
+        else if (c === '06037') key = c + '|' + zip3ra.LA[p3];
+        if (!B.counties[key]) bad++;
+      }
+    }
+  }
+  ok('every ZIP resolves to a real county entry', bad === 0, bad + ' of ' + checked + ' broken');
+  ok('split ZIPs ask, and they are a minority', asks > 3000 && asks < checked * 0.2, asks + ' asks');
+
+  // the five original metros still resolve
+  for (const [zip, fips] of [['06106', '09003'], ['75201', '48113'], ['33125', null], ['19103', '42101']]) {
+    const v = B.zip[zip.slice(0, 3)][zip.slice(3)];
+    ok('metro ZIP ' + zip + ' is covered', v != null, JSON.stringify(v));
+    if (fips) ok('  and lands on ' + fips, v === fips || (Array.isArray(v) && v.includes(fips)), JSON.stringify(v));
+  }
+});
+
 test('calc: loads and computes in node, outside any browser', async () => {
   const { createRequire } = await import('node:module');
   const require = createRequire(import.meta.url);
