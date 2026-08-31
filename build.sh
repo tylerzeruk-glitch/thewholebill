@@ -2,6 +2,8 @@
 # src/page.html + src/calc.js  ->  dist/
 #   dist/artifact.html   page content only (the Artifact host supplies the skeleton)
 #   dist/index.html      full standalone document (deploy / open locally / tests)
+#   dist/logo.svg        the mark the Access login page loads via its one-path
+#                        bypass (see docs/DEPLOY.md) -- the only public file
 # The source template is never modified.
 set -e
 cd "$(dirname "$0")"
@@ -25,4 +27,5 @@ head = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
 io.open('dist/index.html', 'w', encoding='utf-8').write(
     head + out[:i] + '\n</head>\n<body>\n' + out[i:] + '\n</body>\n</html>\n')
 PY
-echo "built dist/index.html and dist/artifact.html"
+cp src/logo.svg dist/logo.svg
+echo "built dist/index.html, dist/artifact.html and dist/logo.svg"
