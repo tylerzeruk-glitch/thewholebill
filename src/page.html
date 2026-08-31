@@ -394,12 +394,33 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
 .letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:17.5px;line-height:1.72;color:#2A2620}
 .letter .ft{display:flex;gap:10px;padding:22px 36px;border-top:1px solid var(--prule-soft);align-items:center;flex-wrap:wrap}
+.letter .bd[contenteditable]:focus-visible{outline:2px solid var(--amber-deep);outline-offset:-2px}
+.letter .bd .hint{color:var(--pm);font-style:italic}
+/* Print = the letter and nothing else. The .print-letter class is set by the
+   Print button (and removed on afterprint); a plain Ctrl+P still prints the
+   whole page, which is the reader's own choice. visibility, not display, so the
+   letter keeps its layout; absolute position pulls it to page one; height:0 on
+   body keeps the invisible remainder from emitting blank pages. */
+@media print{
+  body.print-letter{height:0;overflow:visible}
+  body.print-letter *{visibility:hidden}
+  body.print-letter .letter,body.print-letter .letter *{visibility:visible}
+  body.print-letter .letter{position:absolute;top:0;left:0;right:0;border:none}
+  body.print-letter .letter .hd,body.print-letter .letter .ft{display:none}
+}
 mark{background:#F7EDDC;color:inherit;padding:1px 4px}
-.chk{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--prule);border-radius:2px;font-size:14px}
+.chk{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--prule);border-radius:2px;font-size:14px;font-family:var(--sans);width:100%;text-align:left;cursor:pointer;min-height:44px;color:inherit;transition:background .15s,border-color .15s}
 .chk.on{background:var(--paper-tint)} .chk.off{background:var(--paper-card);color:var(--pm)}
+.chk:hover{border-color:var(--pctrl)}
+.chk:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
 .box{width:15px;height:15px;border-radius:2px;flex-shrink:0}
 .box.on{background:var(--amber-deep);display:flex;align-items:center;justify-content:center}
 .box.off{border:1px solid var(--pctrl)}
+.box.off svg{display:none}
+/* Tone picker, paper-side: .seg's buttons are ink-themed, and this sits on paper. */
+.tbtn{flex-grow:1;height:44px;background:var(--paper-card);border:1px solid var(--prule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm);font-family:var(--sans);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.tbtn.on{background:var(--pk);border-color:var(--pk);color:var(--paper);font-weight:500}
+.tbtn:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
 footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-height:1.6}
 
 /* ---------- responsive ----------
@@ -1070,20 +1091,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
         <div class="card-p" style="padding:28px 30px;gap:16px">
           <div class="lbl p">What to emphasize</div>
-          <div class="stack" style="gap:9px">
-            <div class="chk on"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>My household&rsquo;s actual costs</div>
-            <div class="chk on"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Job-lock and losing coverage</div>
-            <div class="chk off"><span class="box off"></span>Small business burden</div>
-            <div class="chk off"><span class="box off"></span>A personal story</div>
+          <div class="stack" style="gap:9px" id="emph">
+            <button type="button" class="chk on" data-em="costs" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>My household&rsquo;s actual costs</button>
+            <button type="button" class="chk on" data-em="risk" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Job-lock and losing coverage</button>
+            <button type="button" class="chk off" data-em="biz" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Small business burden</button>
+            <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
           </div>
         </div>
 
         <div class="stack" style="gap:9px">
           <div class="lbl p">Tone</div>
-          <div class="seg" style="gap:6px">
-            <div style="flex-grow:1;height:42px;background:var(--paper-card);border:1px solid var(--prule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm)">Measured</div>
-            <div style="flex-grow:1;height:42px;background:var(--pk);border:1px solid var(--pk);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--paper);font-weight:500">Direct</div>
-            <div style="flex-grow:1;height:42px;background:var(--paper-card);border:1px solid var(--prule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm)">Personal</div>
+          <div class="row" style="gap:6px" id="tone">
+            <button type="button" class="tbtn" data-tone="measured">Measured</button>
+            <button type="button" class="tbtn on" data-tone="direct">Direct</button>
+            <button type="button" class="tbtn" data-tone="personal">Personal</button>
           </div>
         </div>
       </div>
@@ -1091,22 +1112,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="letter">
         <div class="hd">
           <div class="lbl p">Your letter</div>
-          <div class="note" style="font-size:13px">Editable &middot; 169 words</div>
+          <div class="note" style="font-size:13px" id="letterCount">Editable</div>
         </div>
-        <div class="bd">
-          <div>Dear Representative [name],</div>
-          <div>I am a constituent in <span id="letterPlace">Hartford</span>, and I am writing to ask you to support the Medicare for All Act, <span id="letterBill">H.R. 3069</span>.</div>
-          <div>I added up what my household actually spends on healthcare, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span id="letterHh">family of four</span>&rsquo;s healthcare costs <mark data-fig="emp.total">$31,578</mark> <span data-uw="a">a year</span>. Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before.</div>
-          <div>Under the financing models I looked at &mdash; including one produced by opponents of the policy &mdash; my household would pay between <mark data-fig="uni.rangeLo">$8,400</mark> and <mark data-fig="uni.rangeHi">$14,600</mark>. Every one of them is less than what we pay now.</div>
-          <div>I also want to be plain about the part that worries me most: if I lost my job tomorrow, keeping this coverage would cost <span data-fig="cobra.annual">$2,244</span> <span data-uw="a">a month</span>. My family&rsquo;s access to a doctor should not depend on my employer&rsquo;s procurement decisions.</div>
-          <div>Thank you for your time.</div>
-          <div style="color:var(--pm)">[Your name] &middot; [Your address]</div>
-          <div style="color:var(--pm);font-size:15px;border-top:1px solid var(--prule-soft);padding-top:15px">Figures calculated at thewholebill.org &mdash; the sources and assumptions are published there.</div>
-        </div>
+        <!-- Built by renderLetter() from route, tone and emphasis; the figures
+             inside resolve through the same data-fig map as the rest of the
+             page. Editable by hand -- and a control change rewrites the body,
+             which the header says while an edit is in force. -->
+        <div class="bd" id="letterBd" contenteditable="true" spellcheck="true" aria-label="Your letter. Editable text."></div>
         <div class="ft">
-          <button class="btn-dark" style="height:50px;padding:0 30px;font-size:15px">Send to [name] &rarr;</button>
-          <button class="btn-ghost">Copy text</button>
-          <button class="btn-ghost">Download PDF</button>
+          <a class="btn-dark" id="sendBtn" href="#" style="height:50px;padding:0 30px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Open in your mail app &rarr;</a>
+          <button class="btn-ghost" id="copyBtn" type="button">Copy text</button>
+          <button class="btn-ghost" id="printBtn" type="button">Print</button>
           <div class="grow"></div>
           <p class="note" style="font-size:12.5px;max-width:190px;text-align:right">We never see your letter. It opens in your own mail client.</p>
         </div>
@@ -1326,7 +1342,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      the un-overridden average is an ANNUAL survey figure, so there the cadence
      only changes how it is displayed. An empty field is the road back: clearing
      it returns to the average, which is what makes the override optional. */
-  var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null };
+  var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
+                tone:"direct", emph:{ costs:true, risk:true, biz:false, story:false } };
   function adultsOf(ages){
     var n = 0, i;
     for (i = 0; i < ages.length; i++) if (ages[i] >= 21) n++;
@@ -1363,6 +1380,72 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     };
   }
 
+  /* ---------- the letter ----------
+     Built from route, tone and emphasis, and rebuilt ONLY when one of those (or
+     a fact the prose states, like which side of the cliff) changes -- so a hand
+     edit survives a slider drag, and the header says "Edited by you" while one
+     is in force. Figures inside resolve through the same data-fig map as the
+     rest of the page: the letter cannot disagree with the charts. */
+  var letterSig = "", letterEdited = false;
+  function letterHTML(){
+    var t = state.tone, r = state.route, e = state.emph, m = S.marketplace;
+    var P = [];
+    P.push("Dear Representative [name],");
+    P.push(t === "measured"
+      ? 'I am a constituent in <span id="letterPlace"></span>. I am writing to ask you to consider supporting the Medicare for All Act, <span id="letterBill"></span>.'
+      : t === "personal"
+        ? 'I live in <span id="letterPlace"></span>, in your district, and I am writing because of what healthcare has been doing to my family&rsquo;s budget. I am asking you to support the Medicare for All Act, <span id="letterBill"></span>.'
+        : 'I am a constituent in <span id="letterPlace"></span>, and I am writing to ask you to support the Medicare for All Act, <span id="letterBill"></span>.');
+    if (e.costs){
+      if (r === "employer")
+        P.push('I added up what my household actually spends on healthcare, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span id="letterHh"></span>&rsquo;s healthcare costs <mark data-fig="emp.total"></mark> <span data-uw="a"></span>. Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before.');
+      else if (r === "marketplace")
+        P.push(m.overCliff
+          ? 'We buy our own coverage on the marketplace, past the income cliff where the tax credit ends &mdash; no subsidy, full price. Between the premiums, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span id="letterHh"></span>&rsquo;s healthcare costs <mark data-fig="mkt.household"></mark> <span data-uw="a"></span>.'
+          : 'We buy our own coverage on the marketplace. Between the premiums after the tax credit, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span id="letterHh"></span>&rsquo;s healthcare costs <mark data-fig="mkt.household"></mark> <span data-uw="a"></span> &mdash; and that is with <mark data-fig="mkt.subsidy"></mark> <span data-uw="a"></span> of taxpayer help underneath it.');
+      else
+        P.push('My household is uninsured. Even with no plan at all, between what care costs us out of pocket and the Medicare payroll tax we already pay, my <span id="letterHh"></span>&rsquo;s healthcare costs <mark data-fig="route.borne"></mark> <span data-uw="a"></span> &mdash; and that is a quiet year, with no accident or diagnosis in it.');
+    }
+    P.push('Under the financing models I looked at &mdash; including one produced by opponents of the policy &mdash; my household would pay between <mark data-fig="uni.rangeLo"></mark> and <mark data-fig="uni.rangeHi"></mark>. <span id="letterCmp"></span>');
+    if (e.risk){
+      if (r === "employer")
+        P.push('I also want to be plain about the part that worries me most: if I lost my job tomorrow, keeping this coverage would cost <span data-fig="cobra.annual"></span> <span data-uw="a"></span>. My family&rsquo;s access to a doctor should not depend on my employer&rsquo;s procurement decisions.');
+      else if (r === "marketplace")
+        P.push(m.overCliff
+          ? 'The part that worries me most is the cliff we are already over: one dollar of income past 400% of the poverty line and the credit does not taper, it vanishes. A good year should not be able to cost a family thousands in premiums.'
+          : 'The part that worries me most is how much of this depends on a tax credit that Congress lets lapse and restore &mdash; the enhanced credits already expired this January. A family should be able to plan further ahead than one budget cycle.');
+      else
+        P.push('The part that worries me most is the arithmetic of one bad day: a single hospital stay could undo years of saving. Going without coverage was less a choice than a price we could not pay.');
+    }
+    if (e.biz)
+      P.push('I would also ask you to weigh what this system does to small employers. Covering one family costs an employer around <mark data-fig="emp.employer"></mark> <span data-uw="a"></span> before the worker pays anything &mdash; a hiring decision for a firm of five, and a wall between small employers and the large ones that can absorb it.');
+    if (e.story)
+      P.push('<span class="hint">[Your story goes here &mdash; who is covered, what it has cost, what you have put off. One or two sentences in your own words are the part a staffer remembers.]</span>');
+    P.push(t === "measured" ? "Thank you for your time and consideration."
+         : t === "personal" ? "Thank you for reading this far."
+         : "Thank you for your time.");
+    var out = P.map(function(p){ return "<div>" + p + "</div>"; }).join("");
+    out += '<div style="color:var(--pm)">[Your name] &middot; [Your address]</div>';
+    out += '<div style="color:var(--pm);font-size:15px;border-top:1px solid var(--prule-soft);padding-top:15px">Figures calculated at thewholebill.org &mdash; the sources and assumptions are published there.</div>';
+    return out;
+  }
+  function renderLetter(){
+    var sig = [state.route, state.tone, state.emph.costs, state.emph.risk,
+               state.emph.biz, state.emph.story, S.marketplace.overCliff].join("|");
+    if (sig === letterSig) return;
+    letterSig = sig; letterEdited = false;
+    byId("letterBd").innerHTML = letterHTML();
+  }
+  function updateLetterMeta(){
+    var txt = byId("letterBd").innerText.replace(/\n{2,}/g, "\n").trim();
+    var words = (txt.match(/\S+/g) || []).length;
+    byId("letterCount").textContent =
+      (letterEdited ? "Edited by you" : "Editable") + " · " + words + " words";
+    byId("sendBtn").href = "mailto:?subject=" +
+      encodeURIComponent("From a constituent: my household's healthcare numbers (" + BILL.house + ")") +
+      "&body=" + encodeURIComponent(txt.replace(/\n/g, "\n\n"));
+  }
+
   function paint(){
     var opts = { income: state.income, size: state.size,
                  adults: adultsOf(state.ages), area: state.area,
@@ -1397,6 +1480,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     S.savings = Math.abs(sav.delta);
     S.decade  = Math.abs(sav.delta) * 10;
     S.savingsNegative = sav.delta < 0;
+
+    // Before the fig loop, so freshly injected marks get filled this same pass.
+    renderLetter();
+    // The range comparison changes continuously with income, so it lives in a
+    // span refreshed every paint rather than in the rebuild-on-signature body --
+    // and it is conditional because "every one of them is less" is only
+    // sometimes true, and this letter does not get to lie for effect.
+    byId("letterCmp").textContent = S.breakdown.borne > S.universalRange.hi
+      ? "Every one of them is less than what healthcare costs us now."
+      : S.universalRange.lo > S.breakdown.borne
+        ? "All of them are more than my household bears today; I am writing in support even so."
+        : "For my household it is close either way — some models come in under what we bear now, some over.";
+
     var F = figures(), i, el;
 
     var figs = document.querySelectorAll("[data-fig]");
@@ -1468,7 +1564,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("repBill").textContent = BILL.house + " (" + BILL.congress + ")";
     byId("senBill").textContent = BILL.senate;
     byId("letterBill").textContent = BILL.house;
-    byId("letterHh").textContent = state.size === 1 ? "household" :
+    // Guarded: the costs paragraph (and this span with it) is a toggle away.
+    var lh = byId("letterHh");
+    if (lh) lh.textContent = state.size === 1 ? "household" :
       "family of " + ["one","two","three","four","five","six","seven","eight"][state.size - 1];
     byId("basis").textContent = S.universal.basis;
 
@@ -1477,6 +1575,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     renderScope();
     renderCliff();
     paintUnit();
+    updateLetterMeta();
   }
 
 
@@ -2062,6 +2161,55 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     state.deductPer = state.totPrem = state.oopOwn = null;
     ["deduct","totPrem","oopIn"].forEach(function(id){ byId(id).blur(); });
     paint();
+  });
+
+  // ---------- letter controls ----------
+  byId("letterBd").addEventListener("input", function(){
+    letterEdited = true;
+    updateLetterMeta();
+  });
+  byId("emph").addEventListener("click", function(ev){
+    var btn = ev.target.closest(".chk"); if (!btn) return;
+    var k = btn.getAttribute("data-em"), on = !state.emph[k];
+    state.emph[k] = on;
+    btn.classList.toggle("on", on); btn.classList.toggle("off", !on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    var box = btn.querySelector(".box");
+    box.classList.toggle("on", on); box.classList.toggle("off", !on);
+    paint();
+  });
+  byId("tone").addEventListener("click", function(ev){
+    var btn = ev.target.closest(".tbtn"); if (!btn) return;
+    state.tone = btn.getAttribute("data-tone");
+    var bs = byId("tone").querySelectorAll(".tbtn");
+    for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("on", bs[i] === btn);
+    paint();
+  });
+  byId("copyBtn").addEventListener("click", function(){
+    var txt = byId("letterBd").innerText;
+    function done(){
+      var btn = byId("copyBtn");
+      btn.textContent = "Copied ✓";
+      setTimeout(function(){ btn.textContent = "Copy text"; }, 1600);
+    }
+    // execCommand fallback: headless and older browsers land here.
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      ta.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(txt).then(done, fallback);
+    else fallback();
+  });
+  byId("printBtn").addEventListener("click", function(){
+    document.body.classList.add("print-letter");
+    window.print();
+  });
+  window.addEventListener("afterprint", function(){
+    document.body.classList.remove("print-letter");
   });
 
   var unitEl = byId("unit");
