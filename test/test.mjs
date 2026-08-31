@@ -968,19 +968,28 @@ test('letter: built from the route, honest about the comparison', async b => {
   ok('employer route tells the employer story',
      /payroll deduction/.test(await txt()) && /keeping this coverage/.test(await txt()));
   ok('and its comparison holds', /Every one of them is less/.test(await txt()));
+  ok('figures are rounded, each with its hedge word', await p.evaluate(()=>{
+    const t = document.getElementById('letterBd').innerText;
+    const n = s => +s.replace(/[^0-9]/g,'');
+    const more = t.match(/more than \$([\d,]+)/g) || [];
+    const range = t.match(/between roughly \$([\d,]+) and \$([\d,]+)/);
+    return more.length >= 2 && range &&
+      more.every(s=>n(s) % 500 === 0) &&
+      n(range[1]) % 500 === 0 && n(range[2]) % 500 === 0 && n(range[1]) < n(range[2]);
+  }), (await txt()).match(/more than \$[\d,]+|between[^.]+/g)?.join(' | '));
   ok('word count is the real count', await p.evaluate(()=>{
     const words=(document.getElementById('letterBd').innerText.match(/\S+/g)||[]).length;
     return document.getElementById('letterCount').textContent.includes(words+' words');
   }));
 
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
-  ok('marketplace route swaps the story',
-     /marketplace/.test(await txt()) && !/payroll deduction/.test(await txt()));
+  ok('marketplace route swaps to the self-employed story',
+     /I buy my own coverage/.test(await txt()) && !/payroll deduction/.test(await txt()));
   ok('subsidized households disclose the taxpayer help', /taxpayer help/.test(await txt()));
 
   await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
   const u = await txt();
-  ok('uninsured route says so', /uninsured/.test(u) && !/keeping this coverage/.test(u));
+  ok('uninsured route says so', /uninsured today/.test(u) && !/keeping this coverage/.test(u));
   ok('and does NOT claim universal is cheaper -- for this household it is not',
      /more than my household bears today/.test(u));
   await p.close();
@@ -996,10 +1005,13 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   ok('measured tone asks rather than tells', /consider supporting/.test(await txt()));
 
   const before = await count();
-  await p.locator('#emph button[data-em="costs"]').click(); await p.waitForTimeout(250);
+  await p.locator('#emph button[data-em="emp"]').click(); await p.waitForTimeout(250);
   const after = await count();
   ok('dropping an emphasis drops its paragraph',
      after < before && !/payroll deduction/.test(await txt()), `${before} -> ${after}`);
+  await p.locator('#emph button[data-em="nation"]').click(); await p.waitForTimeout(250);
+  ok('the national block quotes both sides with their labels on',
+     /Koch-funded/.test(await txt()) && /Lancet/.test(await txt()));
   await p.locator('#emph button[data-em="story"]').click(); await p.waitForTimeout(250);
   ok('the story toggle inserts the writing prompt',
      await p.evaluate(()=>!!document.querySelector('#letterBd .hint')));

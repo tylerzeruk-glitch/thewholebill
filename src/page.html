@@ -1091,10 +1091,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
         <div class="card-p" style="padding:28px 30px;gap:16px">
           <div class="lbl p">What to emphasize</div>
+          <!-- Persona blocks, not abstractions: each is a story a real reader
+               owns. Picking a route sets sensible defaults; the reader can
+               check any combination on top of that. -->
           <div class="stack" style="gap:9px" id="emph">
-            <button type="button" class="chk on" data-em="costs" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>My household&rsquo;s actual costs</button>
-            <button type="button" class="chk on" data-em="risk" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Job-lock and losing coverage</button>
-            <button type="button" class="chk off" data-em="biz" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Small business burden</button>
+            <button type="button" class="chk on" data-em="emp" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What my employer coverage really costs</button>
+            <button type="button" class="chk off" data-em="mkt" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Self-employed, buying on the exchange</button>
+            <button type="button" class="chk on" data-em="loss" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Losing coverage when a job ends</button>
+            <button type="button" class="chk off" data-em="nation" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What the country would save</button>
             <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
           </div>
         </div>
@@ -1343,7 +1347,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      only changes how it is displayed. An empty field is the road back: clearing
      it returns to the average, which is what makes the override optional. */
   var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
-                tone:"direct", emph:{ costs:true, risk:true, biz:false, story:false } };
+                tone:"direct", emph:{ emp:true, mkt:false, loss:true, nation:false, story:false } };
   function adultsOf(ages){
     var n = 0, i;
     for (i = 0; i < ages.length; i++) if (ages[i] >= 21) n++;
@@ -1396,29 +1400,27 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       : t === "personal"
         ? 'I live in <span id="letterPlace"></span>, in your district, and I am writing because of what healthcare has been doing to my family&rsquo;s budget. I am asking you to support the Medicare for All Act, <span id="letterBill"></span>.'
         : 'I am a constituent in <span id="letterPlace"></span>, and I am writing to ask you to support the Medicare for All Act, <span id="letterBill"></span>.');
-    if (e.costs){
-      if (r === "employer")
-        P.push('I added up what my household actually spends on healthcare, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span id="letterHh"></span>&rsquo;s healthcare costs <mark data-fig="emp.total"></mark> <span data-uw="a"></span>. Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before.');
+    // Rounded, hedged figures: "more than" rounds DOWN, "as much as" rounds UP,
+    // "roughly" rounds to nearest -- the hedge word and the rounding direction
+    // have to agree or the hedge is a lie. The data-round attribute carries the
+    // direction into the fig loop.
+    if (e.emp)
+      P.push('I added up what my household actually spends on healthcare, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span class="letterHh"></span>&rsquo;s healthcare costs more than <mark data-fig="emp.total" data-round="down"></mark> <span data-uw="a"></span>. Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before.');
+    if (e.mkt)
+      P.push(m.overCliff
+        ? 'I buy my own coverage through the marketplace &mdash; I am my own employer, so nothing about this cost is hidden from me &mdash; and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this district carries this cost in a way their larger competitors do not.'
+        : 'I buy my own coverage through the marketplace &mdash; I am my own employer, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span> &mdash; and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this district carries this cost in a way their larger competitors do not.');
+    P.push('Under the financing models I looked at &mdash; including one produced by opponents of the policy &mdash; my household would pay between roughly <mark data-fig="uni.rangeLo" data-round="down"></mark> and <mark data-fig="uni.rangeHi" data-round="up"></mark>. <span id="letterCmp"></span>');
+    if (e.loss){
+      if (r === "none")
+        P.push('My household is uninsured today &mdash; the coverage that came with a job went with it. Even now, between care paid in cash and the Medicare payroll tax we still pay, a quiet year costs us roughly <mark data-fig="route.borne" data-round="near"></mark> <span data-uw="a"></span> &mdash; and one hospital stay could undo years of saving.');
       else if (r === "marketplace")
-        P.push(m.overCliff
-          ? 'We buy our own coverage on the marketplace, past the income cliff where the tax credit ends &mdash; no subsidy, full price. Between the premiums, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span id="letterHh"></span>&rsquo;s healthcare costs <mark data-fig="mkt.household"></mark> <span data-uw="a"></span>.'
-          : 'We buy our own coverage on the marketplace. Between the premiums after the tax credit, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span id="letterHh"></span>&rsquo;s healthcare costs <mark data-fig="mkt.household"></mark> <span data-uw="a"></span> &mdash; and that is with <mark data-fig="mkt.subsidy"></mark> <span data-uw="a"></span> of taxpayer help underneath it.');
+        P.push('Part of why we buy our own coverage is that the employer kind can vanish with a job &mdash; keeping a lost plan through COBRA runs more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. Access to a doctor should not depend on anyone&rsquo;s payroll status.');
       else
-        P.push('My household is uninsured. Even with no plan at all, between what care costs us out of pocket and the Medicare payroll tax we already pay, my <span id="letterHh"></span>&rsquo;s healthcare costs <mark data-fig="route.borne"></mark> <span data-uw="a"></span> &mdash; and that is a quiet year, with no accident or diagnosis in it.');
+        P.push('I also want to be plain about the part that worries me most: if I lost my job tomorrow, keeping this coverage through COBRA would cost more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. My family&rsquo;s access to a doctor should not depend on my employer&rsquo;s procurement decisions.');
     }
-    P.push('Under the financing models I looked at &mdash; including one produced by opponents of the policy &mdash; my household would pay between <mark data-fig="uni.rangeLo"></mark> and <mark data-fig="uni.rangeHi"></mark>. <span id="letterCmp"></span>');
-    if (e.risk){
-      if (r === "employer")
-        P.push('I also want to be plain about the part that worries me most: if I lost my job tomorrow, keeping this coverage would cost <span data-fig="cobra.annual"></span> <span data-uw="a"></span>. My family&rsquo;s access to a doctor should not depend on my employer&rsquo;s procurement decisions.');
-      else if (r === "marketplace")
-        P.push(m.overCliff
-          ? 'The part that worries me most is the cliff we are already over: one dollar of income past 400% of the poverty line and the credit does not taper, it vanishes. A good year should not be able to cost a family thousands in premiums.'
-          : 'The part that worries me most is how much of this depends on a tax credit that Congress lets lapse and restore &mdash; the enhanced credits already expired this January. A family should be able to plan further ahead than one budget cycle.');
-      else
-        P.push('The part that worries me most is the arithmetic of one bad day: a single hospital stay could undo years of saving. Going without coverage was less a choice than a price we could not pay.');
-    }
-    if (e.biz)
-      P.push('I would also ask you to weigh what this system does to small employers. Covering one family costs an employer around <mark data-fig="emp.employer"></mark> <span data-uw="a"></span> before the worker pays anything &mdash; a hiring decision for a firm of five, and a wall between small employers and the large ones that can absorb it.');
+    if (e.nation)
+      P.push('This is not only my household&rsquo;s arithmetic. The least friendly published estimate &mdash; from a Koch-funded center, written to argue the policy is unaffordable &mdash; still found national health spending about $2 trillion lower over a decade in its main scenario, and a peer-reviewed study in <i>The Lancet</i> put the saving at roughly $450 billion a year. I am not asking you to take the friendliest number; even the hostile one, on its own main assumptions, comes out ahead.');
     if (e.story)
       P.push('<span class="hint">[Your story goes here &mdash; who is covered, what it has cost, what you have put off. One or two sentences in your own words are the part a staffer remembers.]</span>');
     P.push(t === "measured" ? "Thank you for your time and consideration."
@@ -1430,8 +1432,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     return out;
   }
   function renderLetter(){
-    var sig = [state.route, state.tone, state.emph.costs, state.emph.risk,
-               state.emph.biz, state.emph.story, S.marketplace.overCliff].join("|");
+    var sig = [state.route, state.tone, state.emph.emp, state.emph.mkt,
+               state.emph.loss, state.emph.nation, state.emph.story,
+               S.marketplace.overCliff].join("|");
     if (sig === letterSig) return;
     letterSig = sig; letterEdited = false;
     byId("letterBd").innerHTML = letterHTML();
@@ -1500,9 +1503,21 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       el = figs[i];
       var v = F[el.getAttribute("data-fig")];
       if (v == null) continue;
-      // the decade total is a ten-year sum in either view, so it never divides
-      el.textContent = (el.getAttribute("data-pre") || "") +
-        (el.getAttribute("data-fig") === "uni.decade" ? money(v) : fmt(v));
+      var pre = el.getAttribute("data-pre") || "";
+      var rmode = el.getAttribute("data-round");
+      if (el.getAttribute("data-fig") === "uni.decade"){
+        // the decade total is a ten-year sum in either view, so it never divides
+        el.textContent = pre + money(v);
+      } else if (rmode){
+        // Letter figures: rounded, in the direction the hedge word promised.
+        // "more than" carries down, "as much as" carries up, "roughly" nearest.
+        var rv = state.unit === "y" ? v : v / 12;
+        var gran = rv >= 20000 ? 1000 : rv >= 5000 ? 500 : 100;
+        var rf = rmode === "up" ? Math.ceil : rmode === "down" ? Math.floor : Math.round;
+        el.textContent = pre + money(rf(rv / gran) * gran);
+      } else {
+        el.textContent = pre + fmt(v);
+      }
     }
     var words = document.querySelectorAll("[data-uw]");
     for (i = 0; i < words.length; i++){
@@ -1564,10 +1579,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("repBill").textContent = BILL.house + " (" + BILL.congress + ")";
     byId("senBill").textContent = BILL.senate;
     byId("letterBill").textContent = BILL.house;
-    // Guarded: the costs paragraph (and this span with it) is a toggle away.
-    var lh = byId("letterHh");
-    if (lh) lh.textContent = state.size === 1 ? "household" :
+    // A class, not an id: the household phrase appears in whichever persona
+    // blocks are checked, which can be none of them or several.
+    var hhTxt = state.size === 1 ? "household" :
       "family of " + ["one","two","three","four","five","six","seven","eight"][state.size - 1];
+    var hhs = document.querySelectorAll(".letterHh");
+    for (i = 0; i < hhs.length; i++) hhs[i].textContent = hhTxt;
     byId("basis").textContent = S.universal.basis;
 
     renderElig();
@@ -2063,6 +2080,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     b.addEventListener("click", function(){
       state.route = b.getAttribute("data-r");
       [].forEach.call(routeEl.querySelectorAll("button"), function(x){ x.className = (x === b ? "on" : ""); });
+      // Picking a route resets the letter's emphasis to that route's story --
+      // predictable, since a route change rewrites the letter anyway. The
+      // reader's checks on top of a route survive everything BUT a route change.
+      state.emph = state.route === "marketplace"
+        ? { emp:false, mkt:true,  loss:false, nation:false, story:false }
+        : state.route === "none"
+          ? { emp:false, mkt:false, loss:true, nation:false, story:false }
+          : { emp:true,  mkt:false, loss:true, nation:false, story:false };
+      syncEmph();
       paint();
     });
   });
@@ -2168,14 +2194,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     letterEdited = true;
     updateLetterMeta();
   });
+  function syncEmph(){
+    [].forEach.call(byId("emph").querySelectorAll(".chk"), function(btn){
+      var on = !!state.emph[btn.getAttribute("data-em")];
+      btn.classList.toggle("on", on); btn.classList.toggle("off", !on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      var box = btn.querySelector(".box");
+      box.classList.toggle("on", on); box.classList.toggle("off", !on);
+    });
+  }
   byId("emph").addEventListener("click", function(ev){
     var btn = ev.target.closest(".chk"); if (!btn) return;
-    var k = btn.getAttribute("data-em"), on = !state.emph[k];
-    state.emph[k] = on;
-    btn.classList.toggle("on", on); btn.classList.toggle("off", !on);
-    btn.setAttribute("aria-pressed", on ? "true" : "false");
-    var box = btn.querySelector(".box");
-    box.classList.toggle("on", on); box.classList.toggle("off", !on);
+    var k = btn.getAttribute("data-em");
+    state.emph[k] = !state.emph[k];
+    syncEmph();
     paint();
   });
   byId("tone").addEventListener("click", function(ev){
