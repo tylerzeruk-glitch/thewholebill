@@ -14,7 +14,7 @@ Three surfaces exist and this is how each stays current:
 The Pages project is connected to the GitHub repo. Settings that matter:
 
 - Framework preset: **None** · Build command: **`npm run build`** · Output directory: **`dist`**
-- Production branch: `main`. Every push deploys; every PR branch gets a preview URL.
+- Production branch: `main`. Every push to it deploys. Branch builds are OFF, so PRs carry only the GitHub CI check.
 - The Pages build does **not** run the test suite — GitHub CI remains the gate on PRs.
   Keep it that way: Playwright in the Pages image would slow every deploy for a
   check that already ran.
@@ -28,15 +28,17 @@ The Pages project is connected to the GitHub repo. Settings that matter:
 ## The gate: Cloudflare Access
 
 The site is **not public**. A Zero Trust Access application covers
-`thewholebill.org` (team: `green-wildflower-b78a`), login method One-Time PIN:
+`thewholebill.org` (team: `thewholebill-preview`), login method One-Time PIN:
 a visitor enters their email, and only addresses on the Allow policy receive a
 six-digit code.
 
 - **Add or remove a person:** Zero Trust → Access → Applications → the app →
   edit the Allow policy's email list. Takes effect immediately.
-- **Preview deployments:** the `*.pages.dev` URLs are a second door. The Pages
-  project's Access toggle (project → Settings) must stay on, or previews leak
-  the site ungated.
+- **Side doors are closed at the source (2026-08-31):** the `workers.dev` route,
+  Preview URLs, and builds for non-production branches are all disabled in the
+  project's settings. The site exists at thewholebill.org and nowhere else, and
+  only pushes to `main` build. If previews are ever re-enabled, they come back
+  ungated -- re-close or gate them deliberately.
 - **Going public is one deliberate act:** delete the Access application. No code
   changes. Do the artifact.html cleanup above first.
 
@@ -46,7 +48,7 @@ From any machine NOT signed in:
 
     curl -sS -o /dev/null -w "%{http_code} %{redirect_url}\n" https://thewholebill.org
 
-Gated: `302 https://green-wildflower-b78a.cloudflareaccess.com/...`
+Gated: `302 https://thewholebill-preview.cloudflareaccess.com/...`
 Broken open: `200` with an empty redirect — treat that as an incident, not a
 curiosity; it happened once during setup when the Access application was created
 without attaching to the zone's domain.
