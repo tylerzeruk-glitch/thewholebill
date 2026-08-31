@@ -1416,6 +1416,24 @@ test('content: no dead links or stale placeholders', async b => {
   await p.close();
 });
 
+/* The ZIP submit scrolls the instrument into view, and the sticky results bar
+ * floats over the top of the page, so without a scroll margin the section
+ * title parks underneath it. Measured, not assumed, at both bar layouts. */
+test('scroll: the ZIP submit clears the sticky bar', async b => {
+  for (const [w, h] of [[1280, 900], [800, 900]]) {
+    const p = await page(b, w, h);
+    await p.locator('#zip').fill('60601'); await p.locator('#zipGo').click();
+    await p.waitForTimeout(1000);   // smooth scroll settles
+    const g = await p.evaluate(() => ({
+      instr: document.querySelector('.instr').getBoundingClientRect().top,
+      bar: document.querySelector('.sticky').getBoundingClientRect().bottom
+    }));
+    ok(`${w}px: the section starts below the bar`, g.instr >= g.bar - 0.5,
+       `instr ${g.instr.toFixed(1)} vs bar ${g.bar.toFixed(1)}`);
+    await p.close();
+  }
+});
+
 /* The site's public copy carries no em or en dashes: the owner's standing
  * style rule (CLAUDE.md, Language). Code comments are exempt. This scans what
  * a reader can see, across every state that swaps copy in: routes, models,
