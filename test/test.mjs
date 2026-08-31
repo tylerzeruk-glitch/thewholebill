@@ -958,6 +958,103 @@ test('scope: ZIP never returns someone else\'s numbers', async b => {
   await p.close();
 });
 
+/* Section 07: the letter is built from route, tone and emphasis, its figures
+ * resolve through the same data-fig map as the charts, and its comparative
+ * sentence is conditional -- "every one of them is less" is only sometimes
+ * true, and the letter does not get to lie for effect. */
+test('letter: built from the route, honest about the comparison', async b => {
+  const p = await page(b,1440,900);
+  const txt = () => p.evaluate(()=>document.getElementById('letterBd').innerText);
+  ok('employer route tells the employer story',
+     /payroll deduction/.test(await txt()) && /keeping this coverage/.test(await txt()));
+  ok('and its comparison holds', /Every one of them is less/.test(await txt()));
+  ok('figures are rounded, each with its hedge word', await p.evaluate(()=>{
+    const t = document.getElementById('letterBd').innerText;
+    const n = s => +s.replace(/[^0-9]/g,'');
+    const more = t.match(/more than \$([\d,]+)/g) || [];
+    const range = t.match(/between roughly \$([\d,]+) and \$([\d,]+)/);
+    return more.length >= 2 && range &&
+      more.every(s=>n(s) % 500 === 0) &&
+      n(range[1]) % 500 === 0 && n(range[2]) % 500 === 0 && n(range[1]) < n(range[2]);
+  }), (await txt()).match(/more than \$[\d,]+|between[^.]+/g)?.join(' | '));
+  ok('word count is the real count', await p.evaluate(()=>{
+    const words=(document.getElementById('letterBd').innerText.match(/\S+/g)||[]).length;
+    return document.getElementById('letterCount').textContent.includes(words+' words');
+  }));
+
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+  ok('marketplace route swaps to the self-employed story',
+     /I buy my own coverage/.test(await txt()) && !/payroll deduction/.test(await txt()));
+  ok('subsidized households disclose the taxpayer help', /taxpayer help/.test(await txt()));
+
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
+  const u = await txt();
+  ok('uninsured route says so', /uninsured today/.test(u) && !/keeping this coverage/.test(u));
+  ok('and does NOT claim universal is cheaper -- for this household it is not',
+     /more than my household bears today/.test(u));
+  await p.close();
+});
+
+test('letter: controls write the letter, edits survive the slider', async b => {
+  const p = await page(b,1440,900);
+  const txt = () => p.evaluate(()=>document.getElementById('letterBd').innerText);
+  const count = () => p.evaluate(()=>+document.getElementById('letterCount').textContent.match(/(\d+) words/)[1]);
+  await p.locator('#tone button[data-tone="personal"]').click(); await p.waitForTimeout(250);
+  ok('personal tone rewrites the opener', /I live in/.test(await txt()));
+  await p.locator('#tone button[data-tone="measured"]').click(); await p.waitForTimeout(250);
+  ok('measured tone asks rather than tells', /consider supporting/.test(await txt()));
+
+  const before = await count();
+  await p.locator('#emph button[data-em="emp"]').click(); await p.waitForTimeout(250);
+  const after = await count();
+  ok('dropping an emphasis drops its paragraph',
+     after < before && !/payroll deduction/.test(await txt()), `${before} -> ${after}`);
+  await p.locator('#emph button[data-em="nation"]').click(); await p.waitForTimeout(250);
+  ok('the national block quotes both sides with their labels on',
+     /Koch-funded/.test(await txt()) && /Lancet/.test(await txt()));
+  await p.locator('#emph button[data-em="story"]').click(); await p.waitForTimeout(250);
+  ok('the story toggle inserts the writing prompt',
+     await p.evaluate(()=>!!document.querySelector('#letterBd .hint')));
+
+  // Contradictory personas exclude each other, greyed rather than unchecked.
+  const dis = k => p.evaluate(k=>document.querySelector(`#emph [data-em="${k}"]`).disabled, k);
+  ok('self-employed is greyed while the job-loss story is checked', await dis('mkt'));
+  await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(150);
+  ok('freeing both conflicts frees self-employed', !(await dis('mkt')));
+  await p.locator('#emph button[data-em="mkt"]').click(); await p.waitForTimeout(250);
+  ok('and self-employed greys the employer and job-loss stories',
+     (await dis('emp')) && (await dis('loss')));
+
+  await p.locator('#letterBd > div').first().click();
+  await p.keyboard.press('End'); await p.keyboard.type(' XEDITX');
+  await setIncome(p, 120000);
+  ok('a hand edit survives an income change', /XEDITX/.test(await txt()));
+  ok('while the figures inside stay live', await p.evaluate(()=>
+     document.querySelector('#letterBd [data-fig="uni.rangeLo"]').textContent.length > 1));
+  ok('and the header discloses the edit', await p.evaluate(()=>
+     /Edited by you/.test(document.getElementById('letterCount').textContent)));
+  await p.close();
+});
+
+test('letter: send, copy and print work without the letter leaving the browser', async b => {
+  const p = await page(b,1440,900);
+  const href = await p.evaluate(()=>document.getElementById('sendBtn').getAttribute('href'));
+  ok('send is a mailto with the letter as the body',
+     href.startsWith('mailto:?subject=') && decodeURIComponent(href).includes('Dear Representative'));
+  await p.locator('#copyBtn').click(); await p.waitForTimeout(250);
+  ok('copy confirms itself', await p.evaluate(()=>
+     document.getElementById('copyBtn').textContent.includes('Copied')));
+  await p.evaluate(()=>document.body.classList.add('print-letter'));
+  await p.emulateMedia({media:'print'});
+  const pr = await p.evaluate(()=>({
+    hero: getComputedStyle(document.querySelector('h1')).visibility,
+    letter: getComputedStyle(document.querySelector('.letter .bd')).visibility,
+    chrome: getComputedStyle(document.querySelector('.letter .ft')).display }));
+  ok('print shows the letter and nothing else',
+     pr.hero==='hidden' && pr.letter==='visible' && pr.chrome==='none', JSON.stringify(pr));
+  await p.close();
+});
+
 test('content: no dead links or stale placeholders', async b => {
   const p = await page(b,1440,900);
   const r = await p.evaluate(()=>({
