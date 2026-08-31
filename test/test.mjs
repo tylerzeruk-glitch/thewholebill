@@ -1331,11 +1331,11 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
     sal: document.getElementById('letterBd').innerText.split('\n')[0] }));
 
   let r = await st();
-  ok('a one-district ZIP names the member', /Larson \(D\)/.test(r.name), r.name);
-  ok('and says where the district came from', /from ZIP 06106/.test(r.dist));
+  ok('a one-district ZIP names the member', /Crockett \(D\)/.test(r.name), r.name);
+  ok('and says where the district came from', /from ZIP 75201/.test(r.dist));
   ok('with the boundary hedge showing', r.hedge);
   ok('cosponsorship is stated', /Cosponsor of H\.R\. 3069/.test(r.pos), r.pos);
-  ok('the letter greets them by name', /Dear Representative Larson,/.test(r.sal), r.sal);
+  ok('the letter greets them by name', /Dear Representative Crockett,/.test(r.sal), r.sal);
 
   await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   r = await st();
