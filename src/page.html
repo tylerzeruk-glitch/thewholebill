@@ -853,13 +853,35 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     </div>
   </section>
 
-  <!-- ---- 05 THE COMPARISON ---- -->
+  <!-- ---- 04 THE CLIFF (follows the reveal: the statute is the closing indictment before the turn) ---- -->
+  <section class="ink" id="cliff">
+    <div class="wrap sec" style="display:flex;flex-direction:column;gap:32px">
+      <div class="split tie">
+        <div class="stack" style="gap:15px">
+          <div class="eyebrow i">03 &middot; The cliff</div>
+          <h2>One dollar, <em style="font-style:italic;color:var(--c2)">nine thousand dollars</em>.</h2>
+        </div>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
+      </div>
+
+      <div class="cliffstats">
+        <div class="cstat"><div class="t">A dollar under the line</div><div class="v" id="cliffUnder"></div><div class="s" id="cliffUnderSub"></div></div>
+        <div class="cstat"><div class="t">A dollar over it</div><div class="v" style="color:var(--c2)" id="cliffOver"></div><div class="s">no credit at all</div></div>
+        <div class="cstat" style="border:none"><div class="t">The difference</div><div class="v" style="color:var(--c2)" id="cliffDrop"></div><div class="s">for one extra dollar earned</div></div>
+      </div>
+
+      <div class="chartbox"><div id="cliffChart"></div></div>
+
+      <p class="note-i" id="cliffNote">The enhanced credits enacted in 2021 capped contributions at 8.5% of income and flattened this edge entirely. They expired on <b style="color:var(--ib);font-weight:400">31 December 2025</b>. The poverty guidelines and IRS applicable-percentage table behind these figures are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>.</p>
+    </div>
+  </section>
+  <!-- ---- 05 THE COMPARISON (the turn: after the cliff, the alternative) ---- -->
   <section class="ink">
     <div class="wrap sec" style="display:flex;flex-direction:column;gap:30px">
       <div class="split tie">
         <div class="stack" style="gap:15px">
-          <div class="eyebrow i">03 &middot; The comparison</div>
-          <h2>Three ways to pay for the same care.</h2>
+          <div class="eyebrow i">04 &middot; The comparison</div>
+          <h2><em style="font-style:italic;color:var(--teal)">Another way</em> to pay for the same care.</h2>
         </div>
         <p style="font-size:15px;line-height:1.65;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust &mdash; including the ones written to make it look bad.</p>
       </div>
@@ -947,29 +969,6 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <span id="nowLbl" style="color:var(--c2)"><span data-fig="route.borne">$31,578</span> &nbsp;today</span>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ---- 04 THE CLIFF ---- -->
-  <section class="ink" id="cliff">
-    <div class="wrap sec" style="display:flex;flex-direction:column;gap:32px">
-      <div class="split tie">
-        <div class="stack" style="gap:15px">
-          <div class="eyebrow i">04 &middot; The cliff</div>
-          <h2>One dollar, <em style="font-style:italic;color:var(--c2)">nine thousand dollars</em>.</h2>
-        </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nothing on this page is modeled. The premium tax credit does not taper at the top &mdash; it stops. This is what the statute does to a household that earns one dollar too much.</p>
-      </div>
-
-      <div class="cliffstats">
-        <div class="cstat"><div class="t">A dollar under the line</div><div class="v" id="cliffUnder"></div><div class="s" id="cliffUnderSub"></div></div>
-        <div class="cstat"><div class="t">A dollar over it</div><div class="v" style="color:var(--c2)" id="cliffOver"></div><div class="s">no credit at all</div></div>
-        <div class="cstat" style="border:none"><div class="t">The difference</div><div class="v" style="color:var(--c2)" id="cliffDrop"></div><div class="s">for one extra dollar earned</div></div>
-      </div>
-
-      <div class="chartbox"><div id="cliffChart"></div></div>
-
-      <p class="note-i" id="cliffNote">The enhanced credits enacted in 2021 capped contributions at 8.5% of income and flattened this edge entirely. They expired on <b style="color:var(--ib);font-weight:400">31 December 2025</b>. The poverty guidelines and IRS applicable-percentage table behind these figures are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>.</p>
     </div>
   </section>
 
