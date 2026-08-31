@@ -710,6 +710,7 @@ function keyFor(fips, zip) {
   const today = new Date().toISOString().slice(0, 10);
   const data = {
     asOf: today, planYear: 2026,
+    fips: ST_OF_FIPS2,
     zip3ra: { AK: AK_ZIP3, MA: graZip3.MA, LA: graZip3.CA_LA },
     curves: curveOut, states, counties: co, zip: zipOut
   };
