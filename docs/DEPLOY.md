@@ -39,6 +39,13 @@ six-digit code.
   project's settings. The site exists at thewholebill.org and nowhere else, and
   only pushes to `main` build. If previews are ever re-enabled, they come back
   ungated -- re-close or gate them deliberately.
+- **One deliberate hole: `/logo.svg`.** The Access login page shows a logo to
+  people who are not signed in yet, so the mark it loads cannot sit behind the
+  gate. A second, path-scoped Access application (`thewholebill.org/logo.svg`,
+  policy: Bypass · Everyone) exposes exactly that file — the most specific
+  application wins, so the site-wide app still covers everything else. The SVG
+  is four amber rectangles; it carries no data. Keep the path exact: no
+  wildcard.
 - **Going public is one deliberate act:** delete the Access application. No code
   changes. Work through the go-public checklist below first.
 
@@ -61,7 +68,10 @@ Each of these before deleting the Access application:
      the repo public attributes the site via commit author, account name, and
      PR history — if the code should ever be public without attribution, that
      is a fresh-history push from a new account, not a visibility flip.
-3. **Verify the gate is the only thing that changed:** immediately after
+3. **Delete the logo-bypass application too.** The `/logo.svg` bypass app only
+   exists to serve the login page's mark; with the gate gone it is a leftover
+   exception with nothing to except. Remove both Access applications together.
+4. **Verify the gate is the only thing that changed:** immediately after
    deleting the Access app, the curl below should return `200` — and nothing
    else about the site should differ.
 
