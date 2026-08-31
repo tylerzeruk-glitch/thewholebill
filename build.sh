@@ -9,10 +9,14 @@ mkdir -p dist
 python3 - <<'PY'
 import io
 calc = io.open('src/calc.js', encoding='utf-8').read()
+reps = io.open('src/reps.js', encoding='utf-8').read()
 page = io.open('src/page.html', encoding='utf-8').read()
 if '/*__CALC__*/' not in page:
     raise SystemExit('build: /*__CALC__*/ marker missing from src/page.html')
+if '/*__REPS__*/' not in page:
+    raise SystemExit('build: /*__REPS__*/ marker missing from src/page.html')
 out = page.replace('/*__CALC__*/', '\n' + calc + '\n', 1)
+out = out.replace('/*__REPS__*/', '\n' + reps + '\n', 1)
 io.open('dist/artifact.html', 'w', encoding='utf-8').write(out)
 
 i = out.index('\n<!-- ============ 01 HERO')

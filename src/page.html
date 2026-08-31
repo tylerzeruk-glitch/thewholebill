@@ -1078,16 +1078,25 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             </div>
             <div class="stack" style="gap:4px">
-              <div style="font-family:var(--serif);font-size:23px;line-height:1.15">[Representative name]</div>
-              <div class="note" style="font-size:13.5px"><span id="repDistrict">Connecticut &mdash; [district]</span></div>
+              <div style="font-family:var(--serif);font-size:23px;line-height:1.15" id="repName">&mdash;</div>
+              <div class="note" style="font-size:13.5px"><span id="repDistrict">Enter your five-digit ZIP above.</span></div>
             </div>
+          </div>
+          <!-- A quarter of covered ZIPs genuinely span two or three districts.
+               The reader knows which town they live in; we do not. Ask, never
+               guess -- a letter to the wrong office is this card's one
+               unforgivable failure. -->
+          <div class="stack" style="gap:8px" id="repPick" hidden>
+            <div class="note" style="font-size:13px" id="repPickWhy"></div>
+            <div class="row" style="gap:6px;flex-wrap:wrap" id="repPickBtns"></div>
           </div>
           <div style="height:1px;background:var(--prule-soft)"></div>
           <div class="stack" style="gap:11px">
             <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">House bill</span><span id="repBill"></span></div>
             <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Senate companion</span><span id="senBill"></span></div>
-            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Their position</span><span style="color:var(--pm)">[not yet wired]</span></div>
+            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Their position</span><span id="repPos" style="color:var(--pm)">&mdash;</span></div>
           </div>
+          <p class="note" style="font-size:12px" id="repHedge" hidden>District from your ZIP &mdash; if you live near a district line, double-check on your representative&rsquo;s site.</p>
         </div>
 
         <div class="card-p" style="padding:28px 30px;gap:16px">
@@ -1328,6 +1337,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 </footer>
 
 <script>/*__CALC__*/</script>
+<script>/*__REPS__*/</script>
 <script>
 (function(){
   var W = window.WholeBill;
@@ -1348,7 +1358,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      only changes how it is displayed. An empty field is the road back: clearing
      it returns to the average, which is what makes the override optional. */
   var state = { area:"CT-1", size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
-                tone:"direct", emph:{ emp:true, mkt:false, loss:true, nation:false, story:false } };
+                tone:"direct", emph:{ emp:true, mkt:false, loss:true, nation:false, story:false },
+                zip5:"06106", district:"CT-1" };
   function adultsOf(ages){
     var n = 0, i;
     for (i = 0; i < ages.length; i++) if (ages[i] >= 21) n++;
@@ -1385,6 +1396,68 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     };
   }
 
+  /* ---------- the representative ----------
+     REPS is a checked-in snapshot (tools/build-reps.mjs) with its retrieval
+     date shown in the card. Four states: no ZIP yet, one district, a genuine
+     split (the reader picks -- they know which town they live in, we do not),
+     and a vacant seat. Guessing a split ZIP is the one unforgivable failure
+     here: it mails someone to the wrong office. */
+  var STATE_NAMES = { CT:"Connecticut", NY:"New York", PA:"Pennsylvania", TX:"Texas", FL:"Florida" };
+  function ordinal(n){ n = +n; var s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+  function repFor(){
+    if (!state.zip5) return { st:"none" };
+    var ds = REPS.zip[state.zip5];
+    if (!ds || !ds.length) return { st:"unknown" };
+    if (ds.length === 1) return { st:"one", d:ds[0], ds:ds };
+    if (state.district && ds.indexOf(state.district) > -1) return { st:"picked", d:state.district, ds:ds };
+    return { st:"split", ds:ds };
+  }
+  function repMember(){ var r = repFor(); return (r.d && REPS.house[r.d]) || null; }
+  function repLast(m){ return m.n.replace(/\s+(Jr\.|Sr\.|II|III|IV)$/, "").split(" ").pop(); }
+  function renderRep(){
+    var r = repFor();
+    var name = byId("repName"), dist = byId("repDistrict"), pos = byId("repPos");
+    byId("repPick").hidden = !(r.st === "split" || r.st === "picked");
+    byId("repHedge").hidden = r.st !== "one";
+    if (r.st === "none"){
+      name.innerHTML = "&mdash;";
+      dist.textContent = "Enter your five-digit ZIP above.";
+      pos.innerHTML = "&mdash;";
+    } else if (r.st === "unknown"){
+      name.innerHTML = "&mdash;";
+      dist.textContent = "We don’t have a district for ZIP " + state.zip5 + ".";
+      pos.innerHTML = "&mdash;";
+    } else if (r.st === "split"){
+      name.textContent = (r.ds.length === 2 ? "Two" : r.ds.length) + " districts share your ZIP";
+      dist.textContent = "Pick yours below.";
+      pos.innerHTML = "&mdash;";
+    } else {
+      var m = REPS.house[r.d], parts = r.d.split("-"), stn = STATE_NAMES[parts[0]] || parts[0];
+      if (!m){
+        name.textContent = "This seat is vacant";
+        dist.textContent = stn + "’s " + ordinal(parts[1]) + " district has no current member.";
+        pos.innerHTML = "&mdash;";
+      } else {
+        name.textContent = m.n + " (" + m.p + ")";
+        dist.textContent = stn + "’s " + ordinal(parts[1]) + " district · " +
+          (r.st === "picked" ? "your pick" : "from ZIP " + state.zip5);
+        pos.textContent = m.co
+          ? "Cosponsor of " + BILL.house
+          : "Not yet a cosponsor · as of " + REPS.asOf;
+      }
+    }
+    if (!byId("repPick").hidden){
+      byId("repPickWhy").textContent = "ZIP " + state.zip5 + " spans " + r.ds.length + " districts — you know which town you live in; we don’t:";
+      var html = "", i, k, mm;
+      for (i = 0; i < r.ds.length; i++){
+        k = r.ds[i]; mm = REPS.house[k];
+        html += '<button type="button" class="tbtn' + (state.district === k ? " on" : "") + '" data-d="' + k + '">' +
+          k + " · " + (mm ? repLast(mm) : "vacant") + '</button>';
+      }
+      byId("repPickBtns").innerHTML = html;
+    }
+  }
+
   /* ---------- the letter ----------
      Built from route, tone and emphasis, and rebuilt ONLY when one of those (or
      a fact the prose states, like which side of the cliff) changes -- so a hand
@@ -1394,8 +1467,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   var letterSig = "", letterEdited = false;
   function letterHTML(){
     var t = state.tone, r = state.route, e = state.emph, m = S.marketplace;
+    var rep = repMember();
     var P = [];
-    P.push("Dear Representative [name],");
+    P.push("Dear Representative " + (rep ? repLast(rep) : "[name]") + ",");
     P.push(t === "measured"
       ? 'I am a constituent in <span id="letterPlace"></span>. I am writing to ask you to consider supporting the Medicare for All Act, <span id="letterBill"></span>.'
       : t === "personal"
@@ -1433,9 +1507,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     return out;
   }
   function renderLetter(){
+    var rep = repMember();
     var sig = [state.route, state.tone, state.emph.emp, state.emph.mkt,
                state.emph.loss, state.emph.nation, state.emph.story,
-               S.marketplace.overCliff].join("|");
+               S.marketplace.overCliff, rep ? rep.n : ""].join("|");
     if (sig === letterSig) return;
     letterSig = sig; letterEdited = false;
     byId("letterBd").innerHTML = letterHTML();
@@ -1576,7 +1651,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       ? state.size + " \u00b7 " + a.city + " \u00b7 $" + Math.round(state.income / 1000) + "k"
       : "Household of " + state.size + " \u00b7 " + a.city + " \u00b7 " + money(state.income);
     byId("letterPlace").textContent = a.city;
-    byId("repDistrict").textContent = a.st + " \u2014 [district]";
+    renderRep();
     byId("repBill").textContent = BILL.house + " (" + BILL.congress + ")";
     byId("senBill").textContent = BILL.senate;
     byId("letterBill").textContent = BILL.house;
@@ -1988,6 +2063,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         state.area = b.getAttribute("data-a");
         byId("area").value = state.area;
         byId("zip").value = "";
+        // A metro pick is not a ZIP: the district is unknown again.
+        state.zip5 = null;
+        state.district = null;
         paint();
         document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
       });
@@ -1999,6 +2077,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (r.ok){
       state.area = r.area;
       byId("area").value = r.area;
+      // The full five digits also resolve the district -- automatically only
+      // when the ZIP sits in exactly one; a split ZIP asks instead.
+      state.zip5 = r.zip;
+      var ds = REPS.zip[r.zip] || [];
+      state.district = ds.length === 1 ? ds[0]
+        : ds.indexOf(state.district) > -1 ? state.district : null;
       paint();
       document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
       return;
@@ -2244,6 +2328,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (navigator.clipboard && navigator.clipboard.writeText)
       navigator.clipboard.writeText(txt).then(done, fallback);
     else fallback();
+  });
+  byId("repPickBtns").addEventListener("click", function(ev){
+    var b = ev.target.closest("button"); if (!b) return;
+    state.district = b.getAttribute("data-d");
+    paint();
   });
   byId("printBtn").addEventListener("click", function(){
     document.body.classList.add("print-letter");

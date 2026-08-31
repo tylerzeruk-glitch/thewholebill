@@ -101,9 +101,15 @@ lightness there.
    Replace it from the CMS Exchange PUFs (healthcare.gov states) and State-based Exchange PUFs
    (21 states). Precompute the second-lowest-cost silver benchmark per rating area — roughly 500
    numbers, shipped as JSON. No API key, no backend.
-2. **Rep lookup.** Google's Civic Representatives API was retired in April 2025. Use
-   `unitedstates/congress-legislators` plus real geocoding — ZIP-only is wrong often enough to
-   send people to the wrong office, which for this site is a serious failure.
+2. **Rep lookup — done for the preview metros (2026-08-31), nationwide still open.**
+   `src/reps.js` is a checked-in snapshot (regenerate: `node tools/build-reps.mjs`) joining
+   `unitedstates/congress-legislators`, the OpenSourceActivismTech ZIP→district crosswalk, and
+   govinfo BILLSTATUS cosponsor lists — all keyless. The rule that makes ZIP-based lookup
+   acceptable: a ZIP spanning several districts (a quarter of covered ZIPs) ASKS the reader
+   which is theirs, never guesses. Cosponsor claims carry their as-of date. Senators are in the
+   snapshot but unused so far. Nationwide needs real geocoding — ZIP-only guessing sends people
+   to the wrong office, which for this site is a serious failure. Rerun the tool when Congress
+   changes: membership, vacancies (FL-20 today), and cosponsorships all move.
 3. **Real routing.** `#/methodology` becomes `/methodology`; the section is already self-contained
    and the router is about twelve lines.
 4. ~~Deploy~~ **Done 2026-08-30**: live at thewholebill.org via Cloudflare Pages,
