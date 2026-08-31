@@ -1055,6 +1055,67 @@ test('letter: send, copy and print work without the letter leaving the browser',
   await p.close();
 });
 
+/* The rep card's one unforgivable failure is guessing: about a quarter of
+ * covered ZIPs genuinely span districts, and a wrong guess mails someone to
+ * the wrong office. So: named when the ZIP is unambiguous, asked when it is
+ * not, and the cosponsor claim carries its as-of date. */
+test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
+  const p = await page(b,1440,900);
+  const st = () => p.evaluate(()=>({
+    name: document.getElementById('repName').textContent,
+    dist: document.getElementById('repDistrict').textContent,
+    pos: document.getElementById('repPos').textContent,
+    pick: !document.getElementById('repPick').hidden,
+    hedge: !document.getElementById('repHedge').hidden,
+    sal: document.getElementById('letterBd').innerText.split('\n')[0] }));
+
+  let r = await st();
+  ok('a one-district ZIP names the member', /Larson \(D\)/.test(r.name), r.name);
+  ok('and says where the district came from', /from ZIP 06106/.test(r.dist));
+  ok('with the boundary hedge showing', r.hedge);
+  ok('cosponsorship is stated', /Cosponsor of H\.R\. 3069/.test(r.pos), r.pos);
+  ok('the letter greets them by name', /Dear Representative Larson,/.test(r.sal), r.sal);
+
+  await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  r = await st();
+  ok('a split ZIP asks instead of guessing', /share your ZIP/.test(r.name) && r.pick, r.name);
+  ok('and the letter falls back to the placeholder', /\[name\]/.test(r.sal));
+  ok('the picker offers each district by name', await p.evaluate(()=>
+     document.querySelectorAll('#repPickBtns button').length === 2));
+
+  await p.locator('#repPickBtns button[data-d="NY-12"]').click(); await p.waitForTimeout(300);
+  r = await st();
+  ok('picking resolves it', /Nadler \(D\)/.test(r.name) && /your pick/.test(r.dist), r.name);
+  ok('and the letter follows', /Dear Representative Nadler,/.test(r.sal));
+
+  await p.locator('#zip').fill('33125'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  await p.locator('#repPickBtns button[data-d="FL-26"]').click(); await p.waitForTimeout(300);
+  r = await st();
+  ok('a non-cosponsor carries the as-of date', /Not yet a cosponsor · as of \d{4}-\d{2}-\d{2}/.test(r.pos), r.pos);
+
+  await p.locator('#areapick button[data-a="TX-26"]').click(); await p.waitForTimeout(300);
+  r = await st();
+  ok('a metro pill is not a ZIP: the card resets', /Enter your five-digit ZIP/.test(r.dist) && !r.pick);
+  await p.close();
+});
+
+test('reps: the snapshot is coherent', async () => {
+  const { readFileSync } = await import('node:fs');
+  const txt = readFileSync(resolve(HERE, '../src/reps.js'), 'utf-8');
+  const REPS = new Function(txt + '; return REPS;')();
+  ok('carries its retrieval date', /^\d{4}-\d{2}-\d{2}$/.test(REPS.asOf), REPS.asOf);
+  const zips = Object.keys(REPS.zip);
+  ok('covers the preview metros', zips.length > 600, `${zips.length} ZIPs`);
+  ok('every ZIP key is five digits', zips.every(z=>/^\d{5}$/.test(z)));
+  const dists = new Set(Object.values(REPS.zip).flat());
+  ok('every district is well-formed', [...dists].every(d=>/^[A-Z]{2}-\d+$/.test(d)));
+  const orphan = [...dists].filter(d=>!REPS.house[d]);
+  ok('at most a vacancy or two lacks a member', orphan.length <= 2, orphan.join(', '));
+  ok('every member has a name and party', Object.values(REPS.house).every(m=>m.n && /^[DRI]$/.test(m.p)));
+  ok('ten senators, two per state', Object.values(REPS.senate).every(a=>a.length===2)
+     && Object.values(REPS.senate).flat().length === 10);
+});
+
 test('content: no dead links or stale placeholders', async b => {
   const p = await page(b,1440,900);
   const r = await p.evaluate(()=>({
