@@ -95,24 +95,76 @@ figure or copy written before that assumed the old schedule and is wrong.
 in `docs/design-brief.md`. The ink ground runs out of contrast quickly — do not encode meaning in
 lightness there.
 
-## Next
+## Next (prioritized 2026-08-31)
+
+Build, in order:
 
 1. **Stage 2 — the CMS pipeline.** `BENCHMARK` in `calc.js` is five hand-modelled metro areas.
    Replace it from the CMS Exchange PUFs (healthcare.gov states) and State-based Exchange PUFs
    (21 states). Precompute the second-lowest-cost silver benchmark per rating area — roughly 500
-   numbers, shipped as JSON. No API key, no backend.
-2. **Rep lookup — done for the preview metros (2026-08-31), nationwide still open.**
-   `src/reps.js` is a checked-in snapshot (regenerate: `node tools/build-reps.mjs`) joining
-   `unitedstates/congress-legislators`, the OpenSourceActivismTech ZIP→district crosswalk, and
-   govinfo BILLSTATUS cosponsor lists — all keyless. The rule that makes ZIP-based lookup
-   acceptable: a ZIP spanning several districts (a quarter of covered ZIPs) ASKS the reader
-   which is theirs, never guesses. Cosponsor claims carry their as-of date. Senators are in the
-   snapshot but unused so far. Nationwide needs real geocoding — ZIP-only guessing sends people
-   to the wrong office, which for this site is a serious failure. Rerun the tool when Congress
-   changes: membership, vacancies (FL-20 today), and cosponsorships all move.
-3. **Real routing.** `#/methodology` becomes `/methodology`; the section is already self-contained
-   and the router is about twelve lines.
-4. ~~Deploy~~ **Done 2026-08-30**: live at thewholebill.org via Cloudflare Pages,
-   auto-deployed from `main`, gated by Cloudflare Access (allowlisted emails only).
-   Settings, gate management and the go-public checklist: `docs/DEPLOY.md`.
-   Going public is a deliberate step, not a default.
+   numbers, shipped as JSON. No API key, no backend. This one fixes THREE disclosed honesty gaps
+   at once — modelled benchmark premiums, no age rating (the real 3:1 ACA curve), and the
+   ZIP-prefix→rating-area approximation (the Service Area PUF maps ZIP↔county exactly) — and
+   unlocks nationwide coverage, which everything below wants.
+2. **Senators row on the rep card.** Already paid for: the 10 senators with S. 1506 cosponsor
+   flags sit unused in `src/reps.js`, and the card already names the Senate companion.
+3. **Real routing.** `#/methodology` becomes `/methodology`; the section is already
+   self-contained and the router is about twelve lines. Really a pre-go-public item — hash URLs
+   look wrong on a public site.
+
+Decisions before code (both deliberately parked by the owner):
+
+4. **Section 03 framing.** The household-borne basis was accepted with "I may change this
+   later — I think it's slightly misleading." The alternative on the table: an "everyone else
+   pays ~$24,826" segment so the universal bar shows a gross. Decide after CMS, when the other
+   bars get more precise. Do NOT re-frame unilaterally.
+5. **The Medicare tax asymmetry.** Universal figures carry no continuing Medicare tax (~$1,378,
+   ~6% of the headline) — disclosed in "What we know is wrong" rather than modelled. Keep
+   disclosing, or model it in.
+
+After CMS:
+
+6. **Nationwide rep lookup.** The Census geocoder (free, keyless, returns the congressional
+   district from a street address) plus the full crosswalk replaces the five-metro scope of
+   `src/reps.js`. Sequenced after CMS: a nationwide rep card without nationwide premiums is a
+   card on a page that says "not in this preview yet." The standing rule carries over: a ZIP or
+   address that resolves ambiguously ASKS the reader, never guesses — a letter to the wrong
+   office is the serious failure here.
+
+Whenever the owner decides — not a default:
+
+7. **Go public.** The checklist is in `docs/DEPLOY.md`: `/artifact` exclusion or acceptance,
+   the anonymity re-check, deleting the Access app AND the logo-bypass app together, then
+   verifying the gate's removal is the only change.
+
+Ops hygiene (small, anytime):
+
+8. GitHub Actions v4→v5 bump; branch protection on `main`.
+9. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
+   hard-confirm the `workers.dev` route and Preview URLs are dead — currently verified only
+   from outside.
+10. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
+    membership, vacancies (FL-20 today) and cosponsorships all change. The snapshot's as-of
+    date shows on the rep card.
+
+Possibly dropped with the resolved comment threads — confirm with the owner before doing:
+the methodology page's `.body` measure still runs ~93 characters per line, and the rep card
+could link each member's house.gov site (the URL is already in `reps.js`).
+
+~~Deploy~~ **Done 2026-08-30**: live at thewholebill.org via Cloudflare Workers Builds,
+auto-deployed from `main`, gated by Cloudflare Access One-Time PIN (allowlisted emails only,
+branded login page, `/logo.svg` served through a one-path bypass). Settings, gate management
+and the go-public checklist: `docs/DEPLOY.md`.
+~~Rep lookup, preview metros~~ **Done 2026-08-31**: `src/reps.js` snapshot joining
+`unitedstates/congress-legislators`, the OpenSourceActivismTech ZIP→district crosswalk, and
+govinfo BILLSTATUS cosponsor lists — all keyless. A ZIP spanning several districts (a quarter
+of covered ZIPs) asks the reader which is theirs, never guesses; cosponsor claims carry their
+as-of date.
+~~Section 07~~ **Done 2026-08-31**: dynamic letter (route/tone/persona blocks, rounded hedged
+figures, honest comparative sentence, edit-preserving rebuilds, Copy/mailto/Print) and the
+live rep card.
+~~More financing models~~ **Done 2026-08-31**: six models spanning the published spectrum —
+Sanders and Lancet 2020 as formulas, RAND 2019 / CBO 2020 Option 5 / Blahous alternative /
+Urban Enhanced as disclosed allocations, every figure verified against the primary documents.
+The pills are a segmented control (equal widths, one row) with a native select below 900px.
+The methodology page shows all six derivations and discloses the mixed vintages.
