@@ -605,6 +605,29 @@ test('drawer: overrides compose, disclose, and stay in their lane', async b => {
   await p.close();
 });
 
+/* The drawer is optional input, and the word itself has to be on the summary --
+ * the teal edge and the state line imply it, but implication is not a label.
+ * The word is muted, not teal: it qualifies the title, it is not the title. */
+test('drawer: says "optional" on the fold, at every width', async b => {
+  for (const w of [1440, 760, 390]) {
+    const p = await page(b, w, 900);
+    const r = await p.evaluate(()=>{
+      const s = document.querySelector('#adv summary');
+      const o = s.querySelector('.adv-opt');
+      return {
+        txt: s.textContent,
+        col: getComputedStyle(o).color,
+        titleCol: getComputedStyle(s.querySelector('.adv-k')).color,
+        fits: s.scrollWidth <= s.clientWidth + 1,
+      };
+    });
+    ok(`${w}px: the fold says optional`, /optional/i.test(r.txt));
+    ok(`${w}px: muted, not teal`, r.col === 'rgb(138, 143, 156)' && r.col !== r.titleCol, r.col);
+    ok(`${w}px: the longer label still fits the fold`, r.fits);
+    await p.close();
+  }
+});
+
 test('sticky: the bar never scrolls sideways', async b => {
   for (const [w,h,m] of [[1440,900,false],[1200,900,false],[1024,900,false],[901,900,false],[899,900,false],[768,1024,false],[390,844,true],[360,780,true]]) {
     const p = await page(b,w,h,m);
