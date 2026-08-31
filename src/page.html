@@ -1159,7 +1159,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="stack" style="gap:11px">
             <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">House bill</span><span id="repBill"></span></div>
             <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Senate companion</span><span id="senBill"></span></div>
-            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Their position</span><span id="repPos" style="color:var(--pm)">-</span></div>
+            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm);white-space:nowrap">Their position</span><span id="repPos" style="color:var(--pm);text-align:right">-</span></div>
+            <p class="note" style="font-size:12px" id="repAsOf" hidden>Cosponsor status as of <span id="repAsOfDate"></span>.</p>
           </div>
           <p class="note" style="font-size:12px" id="repHedge" hidden>District from your ZIP. If you live near a district line, double-check on your representative&rsquo;s site.</p>
         </div>
@@ -1625,6 +1626,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var name = byId("repName"), dist = byId("repDistrict"), pos = byId("repPos");
     byId("repPick").hidden = !(r.st === "split" || r.st === "picked");
     byId("repHedge").hidden = r.st !== "one";
+    // The as-of date rides its own line under the rows, not inside the position
+    // value: inline it broke the date across lines, and both claims (cosponsor
+    // and not-yet) are snapshots that deserve the same date.
+    var member = (r.st === "one" || r.st === "picked") && REPS.house[r.d];
+    byId("repAsOf").hidden = !member;
+    byId("repAsOfDate").textContent = REPS.asOf;
     if (r.st === "none"){
       name.innerHTML = "-";
       dist.textContent = "Enter your five-digit ZIP above.";
@@ -1649,7 +1656,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           (r.st === "picked" ? "your pick" : "from ZIP " + state.zip5);
         pos.textContent = m.co
           ? "Cosponsor of " + BILL.house
-          : "Not yet a cosponsor · as of " + REPS.asOf;
+          : "Not yet a cosponsor";
       }
     }
     if (!byId("repPick").hidden){
