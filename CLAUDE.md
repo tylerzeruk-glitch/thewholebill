@@ -163,3 +163,8 @@ as-of date.
 ~~Section 07~~ **Done 2026-08-31**: dynamic letter (route/tone/persona blocks, rounded hedged
 figures, honest comparative sentence, edit-preserving rebuilds, Copy/mailto/Print) and the
 live rep card.
+~~More financing models~~ **Done 2026-08-31**: six models spanning the published spectrum —
+Sanders and Lancet 2020 as formulas, RAND 2019 / CBO 2020 Option 5 / Blahous alternative /
+Urban Enhanced as disclosed allocations, every figure verified against the primary documents.
+The pills are a segmented control (equal widths, one row) with a native select below 900px.
+The methodology page shows all six derivations and discloses the mixed vintages.
