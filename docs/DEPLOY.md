@@ -53,13 +53,36 @@ six-digit code.
 
 Each of these before deleting the Access application:
 
-1. **artifact.html** — exclude it from the deploy, or accept that `/artifact`
-   serves a bare fragment (see the hosting notes above).
-2. **Anonymity re-check.** As of 2026-08-31 the owner's name is not reachable
+1. **artifact.html stays out of the deploy** — the build now writes it to
+   `preview/` and deletes any stale `dist/artifact.html`, and the suite
+   asserts both. Verify once after the launch deploy: `/artifact` and
+   `/artifact.html` should 404.
+2. **Decide the parked questions first.** Section 03's framing, the Medicare
+   tax asymmetry, and the parked rich-world PR should each get a deliberate
+   yes/no/ship-as-is BEFORE strangers read the site. Reframing under public
+   criticism reads as retreat; reframing before launch is editorial control.
+3. **The contact address must work, and decide the reply posture.**
+   Email Routing for contact@thewholebill.org verified end to end (send a
+   test from an outside account). Replying from the personal inbox reveals
+   the owner's name and address: either do not reply from it, or set up a
+   send-as so replies come from contact@ before public mail starts.
+4. **Launch-day data freshness**: rerun `node tools/build-reps.mjs` that
+   morning so every cosponsor claim carries a launch-day as-of date.
+   Benchmarks are frozen by CMS until the next plan year; nothing to do.
+5. **Analytics is a values decision; make it on purpose.** The site promises
+   "we never see your letter." Consistent options: no analytics, or
+   Cloudflare Web Analytics (cookieless). Nothing heavier — a reader
+   checking the network tab and finding a tracker spends that against us.
+6. **Branch protection on `main`** before public attention.
+7. **Anonymity re-check.** As of 2026-08-31 the owner's name is not reachable
    from the site, and launch is when that's worth re-verifying:
    - Shipped pages and headers carry no name, email, or repo link. Re-check:
-     `grep -riE 'tyler|zeruk|gmail|github' dist/ src/ docs/` should stay empty
-     for `dist/` and `src/`.
+     `grep -riIE 'zeruk|gmail' dist/ src/` should stay empty, and
+     `grep -riI 'github' dist/ src/ | grep -v 'unitedstates.github.io'` too
+     (the member portraits legitimately load from the @unitedstates
+     collection on github.io; that is a data source, not attribution).
+     The first name alone is no longer a useful probe: Tyler County, TX and
+     Tyler County, WV live in the benchmark data on their own merits.
    - WHOIS/RDAP registrant data is redacted by Cloudflare Registrar by default;
      only the state ("CT") stays visible, per ICANN rules. Verify:
      `curl -s https://rdap.cloudflare.com/rdap/v1/domain/thewholebill.org`
@@ -68,12 +91,19 @@ Each of these before deleting the Access application:
      the repo public attributes the site via commit author, account name, and
      PR history — if the code should ever be public without attribution, that
      is a fresh-history push from a new account, not a visibility flip.
-3. **Delete the logo-bypass application too.** The `/logo.svg` bypass app only
+8. **Delete the logo-bypass application too.** The `/logo.svg` bypass app only
    exists to serve the login page's mark; with the gate gone it is a leftover
    exception with nothing to except. Remove both Access applications together.
-4. **Verify the gate is the only thing that changed:** immediately after
-   deleting the Access app, the curl below should return `200` — and nothing
-   else about the site should differ.
+9. **Verify the launch, not just the gate:** immediately after deleting the
+   Access apps, from a machine not signed in:
+   - `/`, `/methodology` and `/logo.svg` return `200`; `/artifact` and a
+     nonsense path return the branded 404.
+   - Paste the URL into a LinkedIn/Bluesky draft (do not post) and confirm
+     the share card unfurls: title, description, and the card image.
+   - Nothing else about the site should differ from the gated version.
+10. **Then the announcement posts** — the LinkedIn and Bluesky threads that
+    recruited reviewers are the natural place for the "it is open now"
+    follow-up, and that second touch reaches the people who engaged first.
 
 ## Verifying the gate
 

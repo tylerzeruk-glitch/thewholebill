@@ -1,0 +1,6 @@
+# Served by Cloudflare Pages-style static hosting. Modest hardening only:
+# a CSP is deliberately absent (the page runs inline scripts by design).
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
