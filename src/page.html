@@ -1205,6 +1205,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           </div>
         </div>
 
+        <!-- The letter can go to the House member or either senator; the
+             salutation, the bill number and the district/state phrasing all
+             follow, and a recipient who already cosponsors is thanked and
+             asked to push, never asked to "consider supporting". -->
+        <div class="stack" style="gap:9px" id="recBlock" hidden>
+          <div class="lbl p">Write to</div>
+          <div class="row" style="gap:6px;flex-wrap:wrap" id="recPick"></div>
+        </div>
+
         <div class="stack" style="gap:9px">
           <div class="lbl p">Tone</div>
           <div class="row" style="gap:6px" id="tone">
@@ -1579,7 +1588,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      guess, same rule as the rep card. */
   var state = { bkey:"48113", bChoices:null, size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
                 tone:"direct", emph:{ emp:true, mkt:false, loss:true, nation:false, story:false },
-                zip5:"75201", district:"TX-30" };
+                recipient:"rep", zip5:"75201", district:"TX-30" };
   function adultsOf(ages){
     var n = 0, i;
     for (i = 0; i < ages.length; i++) if (ages[i] >= 21) n++;
@@ -1680,6 +1689,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   function repMember(){ var r = repFor(); return (r.d && REPS.house[r.d]) || null; }
   function repLast(m){ return m.n.replace(/\s+(Jr\.|Sr\.|II|III|IV)$/, "").split(" ").pop(); }
+  // Who the letter is addressed to. Senators need only the state, but the
+  // same resolution gate applies: an unresolved split ZIP addresses nobody.
+  function recipient(){
+    var r = repFor();
+    var resolved = r.st === "one" || r.st === "picked";
+    if (resolved && (state.recipient === "sen0" || state.recipient === "sen1")){
+      var s = (REPS.senate[r.d.split("-")[0]] || [])[state.recipient === "sen0" ? 0 : 1];
+      if (s) return { kind:"sen", m:s, bill:BILL.senate, title:"Senator" };
+    }
+    return { kind:"rep", m:(resolved && REPS.house[r.d]) || null, bill:BILL.house, title:"Representative" };
+  }
   function renderRep(){
     var r = repFor();
     var name = byId("repName"), dist = byId("repDistrict"), pos = byId("repPos");
@@ -1693,6 +1713,21 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("repAsOf").hidden = !resolved;
     byId("repAsOfDate").textContent = REPS.asOf;
     renderSenators(resolved ? r.d.split("-")[0] : null);
+    // the recipient picker mirrors the card: the member and both senators,
+    // by last name, disabled only where a seat is vacant
+    byId("recBlock").hidden = !resolved;
+    if (resolved){
+      var sens = REPS.senate[r.d.split("-")[0]] || [];
+      var html = '<button type="button" class="tbtn' + (state.recipient === "rep" ? " on" : "") + '"' +
+        (member ? '' : ' disabled') + ' data-rec="rep">' +
+        (member ? "Rep. " + repLast(member) : "Seat vacant") + '</button>';
+      for (var si = 0; si < sens.length; si++){
+        var key = "sen" + si;
+        html += '<button type="button" class="tbtn' + (state.recipient === key ? " on" : "") + '" data-rec="' + key + '">' +
+          "Sen. " + repLast(sens[si]) + '</button>';
+      }
+      byId("recPick").innerHTML = html;
+    }
     // The portrait loads only for the resolved member (one request), shows on
     // load, and yields back to the silhouette on any failure. src is only
     // touched when it changes: renderRep runs on every slider repaint.
@@ -1757,14 +1792,25 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   var letterSig = "", letterEdited = false;
   function letterHTML(){
     var t = state.tone, r = state.route, e = state.emph, m = S.marketplace;
-    var rep = repMember();
+    var rec = recipient();
+    var co = !!(rec.m && rec.m.co);
+    var seat = rec.kind === "sen" ? "state" : "district";
     var P = [];
-    P.push("Dear Representative " + (rep ? repLast(rep) : "[name]") + ",");
-    P.push(t === "measured"
-      ? 'I am a constituent in <span id="letterPlace"></span>. I am writing to ask you to consider supporting the Medicare for All Act, <span id="letterBill"></span>.'
-      : t === "personal"
-        ? 'I live in <span id="letterPlace"></span>, in your district, and I am writing because of what healthcare has been doing to my family&rsquo;s budget. I am asking you to support the Medicare for All Act, <span id="letterBill"></span>.'
-        : 'I am a constituent in <span id="letterPlace"></span>, and I am writing to ask you to support the Medicare for All Act, <span id="letterBill"></span>.');
+    P.push("Dear " + rec.title + " " + (rec.m ? repLast(rec.m) : "[name]") + ",");
+    // A recipient who already cosponsors is thanked and asked to push; asking
+    // them to "consider supporting" their own bill tells the staffer the
+    // writer never checked.
+    P.push(co
+      ? (t === "measured"
+        ? 'I am a constituent in <span id="letterPlace"></span>. Thank you for cosponsoring the Medicare for All Act, <span id="letterBill"></span>; I am writing to ask you to keep pressing for it.'
+        : t === "personal"
+          ? 'I live in <span id="letterPlace"></span>, in your ' + seat + ', and I am writing because of what healthcare has been doing to my family&rsquo;s budget. Thank you for cosponsoring the Medicare for All Act, <span id="letterBill"></span>; please keep at it.'
+          : 'I am a constituent in <span id="letterPlace"></span>, and I am writing to thank you for cosponsoring the Medicare for All Act, <span id="letterBill"></span>, and to ask you to push for its passage.')
+      : (t === "measured"
+        ? 'I am a constituent in <span id="letterPlace"></span>. I am writing to ask you to consider supporting the Medicare for All Act, <span id="letterBill"></span>.'
+        : t === "personal"
+          ? 'I live in <span id="letterPlace"></span>, in your ' + seat + ', and I am writing because of what healthcare has been doing to my family&rsquo;s budget. I am asking you to support the Medicare for All Act, <span id="letterBill"></span>.'
+          : 'I am a constituent in <span id="letterPlace"></span>, and I am writing to ask you to support the Medicare for All Act, <span id="letterBill"></span>.'));
     // Rounded, hedged figures: "more than" rounds DOWN, "as much as" rounds UP,
     // "roughly" rounds to nearest -- the hedge word and the rounding direction
     // have to agree or the hedge is a lie. The data-round attribute carries the
@@ -1773,8 +1819,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       P.push('I added up what my household actually spends on healthcare, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span class="letterHh"></span>&rsquo;s healthcare costs more than <mark data-fig="emp.total" data-round="down"></mark> <span data-uw="a"></span>. Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before.');
     if (e.mkt)
       P.push(m.overCliff
-        ? 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this district carries this cost in a way their larger competitors do not.'
-        : 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this district carries this cost in a way their larger competitors do not.');
+        ? 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
+        : 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.');
     P.push('Under the financing models I looked at, including one produced by opponents of the policy, my household would pay between roughly <mark data-fig="uni.rangeLo" data-round="down"></mark> and <mark data-fig="uni.rangeHi" data-round="up"></mark>. <span id="letterCmp"></span>');
     if (e.loss){
       if (r === "none")
@@ -1797,10 +1843,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     return out;
   }
   function renderLetter(){
-    var rep = repMember();
+    var rec = recipient();
     var sig = [state.route, state.tone, state.emph.emp, state.emph.mkt,
                state.emph.loss, state.emph.nation, state.emph.story,
-               S.marketplace.overCliff, rep ? rep.n : ""].join("|");
+               S.marketplace.overCliff, rec.kind, rec.m ? rec.m.n + rec.m.co : ""].join("|");
     if (sig === letterSig) return;
     letterSig = sig; letterEdited = false;
     byId("letterBd").innerHTML = letterHTML();
@@ -1811,7 +1857,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("letterCount").textContent =
       (letterEdited ? "Edited by you" : "Editable") + " · " + words + " words";
     byId("sendBtn").href = "mailto:?subject=" +
-      encodeURIComponent("From a constituent: my household's healthcare numbers (" + BILL.house + ")") +
+      encodeURIComponent("From a constituent: my household's healthcare numbers (" + recipient().bill + ")") +
       "&body=" + encodeURIComponent(txt.replace(/\n/g, "\n\n"));
   }
 
@@ -1968,7 +2014,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     renderRep();
     byId("repBill").textContent = BILL.house + " (" + BILL.congress + ")";
     byId("senBillLbl").textContent = BILL.senate;
-    byId("letterBill").textContent = BILL.house;
+    byId("letterBill").textContent = recipient().bill;
     // A class, not an id: the household phrase appears in whichever persona
     // blocks are checked, which can be none of them or several.
     var hhTxt = state.size === 1 ? "household" :
@@ -2444,6 +2490,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var ds = repDistricts(r.zip) || [];
     state.district = ds.length === 1 ? ds[0]
       : ds.indexOf(state.district) > -1 ? state.district : null;
+    // A new ZIP can mean new senators; carrying a senator INDEX across states
+    // would silently swap who the letter addresses. Back to the rep.
+    state.recipient = "rep";
     if (r.st === "covered"){
       state.bkey = r.key;
       state.bChoices = null;
@@ -2680,6 +2729,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var k = btn.getAttribute("data-em");
     state.emph[k] = !state.emph[k];
     syncEmph();
+    paint();
+  });
+  byId("recPick").addEventListener("click", function(ev){
+    var btn = ev.target.closest(".tbtn"); if (!btn || btn.disabled) return;
+    state.recipient = btn.getAttribute("data-rec");
     paint();
   });
   byId("tone").addEventListener("click", function(ev){

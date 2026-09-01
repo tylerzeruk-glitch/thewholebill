@@ -1253,6 +1253,30 @@ test('letter: built from the route, honest about the comparison', async b => {
   ok('uninsured route says so', /uninsured today/.test(u) && !/keeping this coverage/.test(u));
   ok('and does NOT claim universal is cheaper -- for this household it is not',
      /more than my household bears today/.test(u));
+
+  /* Recipient switching: the letter can go to either senator, and everything
+   * follows -- title, the Senate bill, statewide phrasing, the mailto subject.
+   * A cosponsor is thanked; a non-cosponsor is asked. */
+  await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(250);
+  ok('the default cosponsoring rep is thanked, not lobbied cold',
+     /thank you for cosponsoring/i.test(await txt()));
+  await p.locator('#recPick .tbtn[data-rec="sen0"]').click(); await p.waitForTimeout(300);
+  const sTxt = await txt();
+  ok('a senator letter is addressed as one', /^Dear Senator Cornyn,/.test(sTxt), sTxt.split('\n')[0]);
+  ok('and names the Senate companion', /Medicare for All Act, S\. 1506/.test(sTxt));
+  ok('a non-cosponsor is asked, not thanked', !/thank you for cosponsoring/i.test(sTxt));
+  const subj = await p.evaluate(()=>decodeURIComponent(document.getElementById('sendBtn').href.split('subject=')[1].split('&')[0]));
+  ok('the mailto subject follows the bill', /S\. 1506/.test(subj), subj);
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+  ok('the self-employed line goes statewide for a senator',
+     /in this state carries this cost/.test(await txt()));
+  // a cosponsoring SENATOR is thanked too (Blumenthal), and a fresh ZIP
+  // returns the letter to the House member rather than a same-index senator
+  await p.locator('#zip').fill('06468'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  ok('a new ZIP addresses the rep again', /^Dear Representative Himes,/.test(await txt()), (await txt()).split('\n')[0]);
+  await p.locator('#recPick .tbtn[data-rec="sen0"]').click(); await p.waitForTimeout(300);
+  ok('a cosponsoring senator is thanked', /^Dear Senator Blumenthal,/.test(await txt()) &&
+     /thank you for cosponsoring/i.test(await txt()), (await txt()).split('\n')[0]);
   await p.close();
 });
 
@@ -1263,7 +1287,9 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   await p.locator('#tone button[data-tone="personal"]').click(); await p.waitForTimeout(250);
   ok('personal tone rewrites the opener', /I live in/.test(await txt()));
   await p.locator('#tone button[data-tone="measured"]').click(); await p.waitForTimeout(250);
-  ok('measured tone asks rather than tells', /consider supporting/.test(await txt()));
+  // the default rep cosponsors, so measured thanks and presses rather than
+  // asking them to consider their own bill
+  ok('measured tone stays polite', /keep pressing for it/.test(await txt()));
 
   const before = await count();
   await p.locator('#emph button[data-em="emp"]').click(); await p.waitForTimeout(250);
@@ -1539,6 +1565,17 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
   for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
   await scan('every marketplace letter block');
+  // recipient variants: the senator letters (non-cosponsor openings in TX)
+  // across every tone; the cosponsor thank-you variants are the rep default
+  for (const rec of ['sen0', 'sen1']) {
+    await p.locator(`#recPick .tbtn[data-rec="${rec}"]`).click(); await p.waitForTimeout(200);
+    await scan(`letter to ${rec}`);
+  }
+  for (const t of ['measured', 'personal', 'direct']) {
+    await p.locator(`#tone .tbtn[data-tone="${t}"]`).click(); await p.waitForTimeout(200);
+    await scan(`senator letter, tone ${t}`);
+  }
+  await p.locator('#recPick .tbtn[data-rec="rep"]').click(); await p.waitForTimeout(200);
   await setIncome(p, 40000);  await scan('subsidy qualifying, with CHIP');
   await setIncome(p, 240000); await scan('over the cliff');
   await setIncome(p, 95000);
