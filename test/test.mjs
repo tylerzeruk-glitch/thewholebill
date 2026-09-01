@@ -1362,6 +1362,16 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   ok('the as-of date rides its own line', asOf.shown && /as of \d{4}-\d{2}-\d{2}\./.test(asOf.txt), asOf.txt);
   ok('and the position row stays on one line', asOf.oneLine);
 
+  // the portrait: src keyed by the member's bioguide id, silhouette on failure
+  const ph = await p.evaluate(()=>({
+    src: document.getElementById('repPhoto').getAttribute('src') || '',
+    b: REPS.house['FL-26'].b }));
+  ok('the portrait is keyed by bioguide id', ph.src.includes('/congress/225x275/' + ph.b + '.jpg'), ph.src);
+  ok('a failed load falls back to the silhouette', await p.evaluate(()=>{
+    const i = document.getElementById('repPhoto');
+    i.dispatchEvent(new Event('error'));
+    return i.hidden; }));
+
   // nationwide now: a Connecticut suburb far outside the old metros, and an
   // at-large state that must never render as a "0th district"
   await p.locator('#zip').fill('06468'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);

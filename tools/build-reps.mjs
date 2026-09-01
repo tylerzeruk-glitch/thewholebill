@@ -76,6 +76,7 @@ for (const m of legis) {
     n: m.name.official_full,
     p: t.party[0],
     u: t.url || "",
+    b: m.id.bioguide,   // keys the official portrait in the @unitedstates images collection
     co: false,
   };
   if (t.type === "rep") {
