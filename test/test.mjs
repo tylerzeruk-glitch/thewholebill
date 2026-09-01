@@ -18,12 +18,14 @@ const ok = (name, cond, detail='') => {
 };
 
 // doc picks which built document loads: the calculator by default, the
-// artifact build for hash-router coverage, /methodology for its own page.
+// artifact build (which lives OUTSIDE dist so it never deploys) for
+// hash-router coverage, /methodology for its own page.
 const page = async (browser, w, h, mobile=false, doc='index.html') => {
   const p = await browser.newPage({ viewport:{width:w,height:h}, deviceScaleFactor:1, isMobile:mobile, hasTouch:mobile });
   p.on('pageerror', e => ok('no page errors', false, e.message));
   p.on('console', m => { if (m.type()==='error' && !/TUNNEL|ERR_|net::/.test(m.text())) ok('no console errors', false, m.text()); });
-  await p.goto(pathToFileURL(resolve(HERE, '../dist/' + doc)).href); await p.waitForTimeout(1200);
+  const base = doc === 'artifact.html' ? '../preview/' : '../dist/';
+  await p.goto(pathToFileURL(resolve(HERE, base + doc)).href); await p.waitForTimeout(1200);
   return p;
 };
 const setIncome = async (p, v) => { await p.locator('#income').fill(String(v)); await p.locator('#income').dispatchEvent('input'); await p.waitForTimeout(120); };
@@ -1580,6 +1582,55 @@ test('scroll: the ZIP submit clears the sticky bar', async b => {
        `instr ${g.instr.toFixed(1)} vs bar ${g.bar.toFixed(1)}`);
     await p.close();
   }
+});
+
+/* Launch furniture: share metadata on both documents, the branded 404, the
+ * crawler files, and the artifact OUT of the deploy directory. All asserted
+ * against the built output, because a stale dist/artifact.html once survived
+ * a build change and would have deployed a bare duplicate of the site. */
+test('launch: share metadata, 404, crawler files, no artifact in dist', async b => {
+  const { existsSync, readFileSync: rf } = await import('node:fs');
+  ok('the artifact is not in the deploy directory', !existsSync(resolve(HERE, '../dist/artifact.html')));
+  ok('the artifact builds outside it', existsSync(resolve(HERE, '../preview/artifact.html')));
+  for (const f of ['card.png', '404.html', 'robots.txt', 'sitemap.txt', '_headers'])
+    ok(f + ' ships', existsSync(resolve(HERE, '../dist/' + f)));
+  ok('the sitemap lists both pages', /thewholebill\.org\/\n.*thewholebill\.org\/methodology/s.test(rf(resolve(HERE, '../dist/sitemap.txt'), 'utf-8')));
+
+  const p = await page(b, 1280, 900);
+  const m = await p.evaluate(() => ({
+    desc: (document.querySelector('meta[name="description"]') || {}).content || '',
+    ogImage: (document.querySelector('meta[property="og:image"]') || {}).content || '',
+    ogUrl: (document.querySelector('meta[property="og:url"]') || {}).content || '',
+    canon: (document.querySelector('link[rel="canonical"]') || {}).href || '',
+    twitter: (document.querySelector('meta[name="twitter:card"]') || {}).content || '' }));
+  ok('index carries a description', m.desc.length > 80 && m.desc.length < 170, m.desc.length + ' chars');
+  ok('and an absolute share image', m.ogImage === 'https://thewholebill.org/card.png', m.ogImage);
+  ok('and its canonical URL', m.canon === 'https://thewholebill.org/' && m.ogUrl === m.canon, m.canon);
+  ok('and a large-image twitter card', m.twitter === 'summary_large_image');
+  await p.close();
+
+  const pm = await page(b, 1280, 900, false, 'methodology/index.html');
+  const mm = await pm.evaluate(() => ({
+    title: document.title,
+    ogTitle: (document.querySelector('meta[property="og:title"]') || {}).content || '',
+    ogUrl: (document.querySelector('meta[property="og:url"]') || {}).content || '',
+    canon: (document.querySelector('link[rel="canonical"]') || {}).href || '',
+    desc: (document.querySelector('meta[name="description"]') || {}).content || '' }));
+  ok('methodology carries its own share identity',
+     /^Methodology/.test(mm.ogTitle) && mm.ogUrl === 'https://thewholebill.org/methodology' &&
+     mm.canon === mm.ogUrl && /traced to its source/.test(mm.desc), mm.ogUrl);
+  await pm.close();
+
+  // the 404: branded, links home and to the methodology, and dash-free
+  const p4 = await page(b, 1280, 900, false, '404.html');
+  const f = await p4.evaluate(() => ({
+    home: !!document.querySelector('a[href="/"]'),
+    meth: !!document.querySelector('a[href="/methodology"]'),
+    noindex: ((document.querySelector('meta[name="robots"]') || {}).content || '') === 'noindex',
+    dashes: (document.body.textContent.match(/[–—]/g) || []).length }));
+  ok('the 404 links home and to the methodology', f.home && f.meth);
+  ok('the 404 is noindex and dash-free', f.noindex && f.dashes === 0);
+  await p4.close();
 });
 
 /* The site's public copy carries no em or en dashes: the owner's standing

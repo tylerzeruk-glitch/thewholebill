@@ -1,8 +1,11 @@
 #!/bin/sh
 # src/page.html + src/calc.js + src/benchmarks.js + src/reps.js  ->  dist/
-#   dist/artifact.html            page content only, hash-routed methodology
+#   preview/artifact.html         page content only, hash-routed methodology
 #                                 (the Artifact host serves ONE document and
-#                                 supplies the skeleton)
+#                                 supplies the skeleton). OUTSIDE dist on
+#                                 purpose: dist deploys wholesale, and the
+#                                 public site should not carry a bare duplicate
+#                                 of itself at /artifact
 #   dist/index.html               the calculator, standalone; methodology
 #                                 stripped, links point at /methodology, and
 #                                 old #/methodology links redirect there
@@ -11,10 +14,12 @@
 #                                 scripts (the page is fully static)
 #   dist/logo.svg                 the mark the Access login page loads via its
 #                                 one-path bypass (see docs/DEPLOY.md)
+#   dist/card.png, 404.html, robots.txt, sitemap.txt, _headers
+#                                 launch furniture, copied verbatim from src/
 # The source template is never modified.
 set -e
 cd "$(dirname "$0")"
-mkdir -p dist dist/methodology
+mkdir -p dist dist/methodology preview
 python3 - <<'PY'
 import io
 calc = io.open('src/calc.js', encoding='utf-8').read()
@@ -30,8 +35,8 @@ out = page.replace('/*__BENCH__*/', '\n' + bench + '\n', 1)
 out = out.replace('/*__CALC__*/', '\n' + calc + '\n', 1)
 out = out.replace('/*__REPS__*/', '\n' + reps + '\n', 1)
 
-# --- artifact: the whole document, hash-routed, unchanged shape -------------
-io.open('dist/artifact.html', 'w', encoding='utf-8').write(out)
+# --- artifact: the whole document, hash-routed, outside the deploy ----------
+io.open('preview/artifact.html', 'w', encoding='utf-8').write(out)
 
 HERO = '\n<!-- ============ 01 HERO'
 head = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
@@ -50,6 +55,15 @@ io.open('dist/index.html', 'w', encoding='utf-8').write(
 meth_head = out[:out.index(HERO)]
 meth_head = meth_head.replace('<title>The Whole Bill</title>',
                               '<title>Methodology · The Whole Bill</title>')
+meth_head = meth_head.replace('<link rel="canonical" href="https://thewholebill.org/">',
+                              '<link rel="canonical" href="https://thewholebill.org/methodology">')
+meth_head = meth_head.replace('<meta property="og:title" content="The Whole Bill">',
+                              '<meta property="og:title" content="Methodology · The Whole Bill">')
+meth_head = meth_head.replace('<meta property="og:url" content="https://thewholebill.org/">',
+                              '<meta property="og:url" content="https://thewholebill.org/methodology">')
+meth_head = meth_head.replace(
+    "What your household's healthcare actually costs, including the employer share that never touches a paystub, and what universal coverage would cost instead.",
+    "Every number on The Whole Bill, traced to its source: the tables, the arithmetic, and what we know is wrong.")
 meth = out[ms:me]
 meth = meth.replace('<div id="methBack" hidden ', '<div id="methBack" ', 1)
 meth = meth.replace('<section class="paper view" id="methodology" hidden>',
@@ -64,4 +78,7 @@ io.open('dist/methodology/index.html', 'w', encoding='utf-8').write(
     head + meth_head + '\n</head>\n<body>\n' + body + '\n</body>\n</html>\n')
 PY
 cp src/logo.svg dist/logo.svg
-echo "built dist/index.html, dist/methodology/index.html, dist/artifact.html and dist/logo.svg"
+cp src/card.png src/404.html src/robots.txt src/sitemap.txt src/_headers dist/
+# the artifact moved to preview/; a stale copy in dist would deploy publicly
+rm -f dist/artifact.html
+echo "built dist/ (index, methodology, 404, launch furniture) and preview/artifact.html"
