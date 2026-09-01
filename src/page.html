@@ -458,7 +458,10 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
    split) look inert and are. */
 .rec-hit{appearance:none;-webkit-appearance:none;background:none;border:0;padding:6px;margin:-6px;border-radius:3px;font:inherit;color:inherit;cursor:pointer;transition:box-shadow .15s}
 .rec-hit:hover:not(:disabled){background:var(--paper-tint)}
-.rec-hit.on{box-shadow:0 0 0 2px var(--amber-deep)}
+/* The inflated hit areas of adjacent rows overlap by a few pixels, so the
+   selected ring must stack above a neighbour's hover tint or hovering one
+   senator paints over the other's ring. */
+.rec-hit.on{box-shadow:0 0 0 2px var(--amber-deep);position:relative;z-index:1}
 .rec-hit:focus-visible{outline:2px solid var(--amber-deep);outline-offset:4px}
 .rec-hit:disabled{cursor:default}
 
@@ -1239,11 +1242,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
              which the header says while an edit is in force. -->
         <div class="bd" id="letterBd" contenteditable="true" spellcheck="true" aria-label="Your letter. Editable text."></div>
         <div class="ft">
-          <a class="btn-dark" id="sendBtn" href="#" style="height:50px;padding:0 30px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Open in your mail app &rarr;</a>
+          <!-- Congressional offices take constituent mail through the web
+               forms on their own sites, never a public inbox, so there is no
+               address a mailto could honestly fill in. The primary action
+               goes to the recipient's official site; the mailto survives as
+               the secondary way out (mail it to yourself, forward it on). -->
+          <a class="btn-dark" id="formBtn" href="#" target="_blank" rel="noopener" style="height:50px;padding:0 30px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Copy it to their site &rarr;</a>
           <button class="btn-ghost" id="copyBtn" type="button">Copy text</button>
           <button class="btn-ghost" id="printBtn" type="button">Print</button>
+          <a class="btn-ghost" id="sendBtn" href="#" style="height:48px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Mail app</a>
           <div class="grow"></div>
-          <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left">We never see your letter. It opens in your own mail client.</p>
+          <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote">Congressional offices take letters through the forms on their own sites, not a public inbox. The dark button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</p>
         </div>
       </div>
     </div>
@@ -1857,11 +1866,24 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   function updateLetterMeta(){
     var txt = byId("letterBd").innerText.replace(/\n{2,}/g, "\n").trim();
     var words = (txt.match(/\S+/g) || []).length;
+    var rec = recipient();
     byId("letterCount").textContent =
       (letterEdited ? "Edited by you" : "Editable") + " · " + words + " words";
     byId("sendBtn").href = "mailto:?subject=" +
-      encodeURIComponent("From a constituent: my household's healthcare numbers (" + recipient().bill + ")") +
+      encodeURIComponent("From a constituent: my household's healthcare numbers (" + rec.bill + ")") +
       "&body=" + encodeURIComponent(txt.replace(/\n/g, "\n\n"));
+    // The primary action goes to the recipient's own site: offices accept
+    // letters through their contact forms, never a public inbox.
+    var fb = byId("formBtn");
+    if (rec.m && rec.m.u){
+      fb.href = rec.m.u;
+      fb.removeAttribute("aria-disabled");
+      fb.style.opacity = "";
+    } else {
+      fb.href = "#";
+      fb.setAttribute("aria-disabled", "true");
+      fb.style.opacity = ".45";
+    }
   }
 
   function paint(){
@@ -2751,13 +2773,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("on", bs[i] === btn);
     paint();
   });
-  byId("copyBtn").addEventListener("click", function(){
+  function copyLetter(done){
     var txt = byId("letterBd").innerText;
-    function done(){
-      var btn = byId("copyBtn");
-      btn.textContent = "Copied ✓";
-      setTimeout(function(){ btn.textContent = "Copy text"; }, 1600);
-    }
     // execCommand fallback: headless and older browsers land here.
     function fallback(){
       var ta = document.createElement("textarea");
@@ -2769,6 +2786,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (navigator.clipboard && navigator.clipboard.writeText)
       navigator.clipboard.writeText(txt).then(done, fallback);
     else fallback();
+  }
+  byId("copyBtn").addEventListener("click", function(){
+    copyLetter(function(){
+      var btn = byId("copyBtn");
+      btn.textContent = "Copied ✓";
+      setTimeout(function(){ btn.textContent = "Copy text"; }, 1600);
+    });
+  });
+  // The dark button copies on the way out, so the letter is on the clipboard
+  // when the member's contact form opens in the new tab.
+  byId("formBtn").addEventListener("click", function(ev){
+    if (this.getAttribute("aria-disabled") === "true"){ ev.preventDefault(); return; }
+    copyLetter(function(){
+      var b = byId("formBtn");
+      b.textContent = "Copied ✓ paste it there";
+      setTimeout(function(){ b.innerHTML = "Copy it to their site &rarr;"; }, 2600);
+    });
   });
   byId("repPickBtns").addEventListener("click", function(ev){
     var b = ev.target.closest("button"); if (!b) return;

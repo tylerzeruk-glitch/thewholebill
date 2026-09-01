@@ -1274,6 +1274,16 @@ test('letter: built from the route, honest about the comparison', async b => {
   ok('a non-cosponsor is asked, not thanked', !/thank you for cosponsoring/i.test(sTxt));
   const subj = await p.evaluate(()=>decodeURIComponent(document.getElementById('sendBtn').href.split('subject=')[1].split('&')[0]));
   ok('the mailto subject follows the bill', /S\. 1506/.test(subj), subj);
+  // there is no public congressional inbox to fill a To: line with, so the
+  // primary action opens the recipient's own site, where the contact form is
+  ok('the primary action opens the senator\'s own site', await p.evaluate(()=>
+    /cornyn\.senate\.gov/.test(document.getElementById('formBtn').getAttribute('href'))));
+  // the selected ring must stack above a neighbour's hover tint
+  ok('the selection ring stacks above hover', await p.evaluate(()=>{
+    const on = document.querySelector('.rec-hit.on');
+    const cs = getComputedStyle(on);
+    return cs.position === 'relative' && cs.zIndex === '1';
+  }));
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
   ok('the self-employed line goes statewide for a senator',
      /in this state carries this cost/.test(await txt()));
@@ -1281,6 +1291,8 @@ test('letter: built from the route, honest about the comparison', async b => {
   // returns the letter to the House member rather than a same-index senator
   await p.locator('#zip').fill('06468'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   ok('a new ZIP addresses the rep again', /^Dear Representative Himes,/.test(await txt()), (await txt()).split('\n')[0]);
+  ok('and the site button follows', await p.evaluate(()=>
+    /himes\.house\.gov/.test(document.getElementById('formBtn').getAttribute('href'))));
   await p.locator('#senRows .rec-hit[data-rec="sen0"]').click(); await p.waitForTimeout(300);
   ok('a cosponsoring senator is thanked', /^Dear Senator Blumenthal,/.test(await txt()) &&
      /thank you for cosponsoring/i.test(await txt()), (await txt()).split('\n')[0]);
@@ -1486,7 +1498,7 @@ test('letter: the privacy note sits left-aligned under the buttons', async b => 
     const p = await page(b,w,900);
     const r = await p.evaluate(()=>{
       const el = document.querySelector('.letter .ft p');
-      const btn = document.getElementById('sendBtn');
+      const btn = document.getElementById('formBtn');   // the first button in the row
       const range = document.createRange(); range.selectNodeContents(el);
       const lines = new Set([...range.getClientRects()].filter(x=>x.height>1).map(x=>Math.round(x.top)));
       const er = el.getBoundingClientRect(), br = btn.getBoundingClientRect();
@@ -1495,8 +1507,10 @@ test('letter: the privacy note sits left-aligned under the buttons', async b => 
                under: er.top >= br.bottom,
                flush: Math.abs(tr.left - br.left) };
     });
+    // the note carries the copy-and-paste flow now, so it runs longer than the
+    // old one-liner; the caps keep it from becoming a paragraph
     ok(`${w}px: under the buttons, text flush with their left edge, ${r.lines} line${r.lines>1?'s':''}`,
-       r.under && r.flush < 1 && r.lines <= 2, `flush Δ${r.flush.toFixed(1)}px`);
+       r.under && r.flush < 1 && r.lines <= (w <= 390 ? 5 : 3), `flush Δ${r.flush.toFixed(1)}px`);
     await p.close();
   }
 });
