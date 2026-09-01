@@ -1264,6 +1264,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 </section>
 
 <!-- ============ 08 METHODOLOGY ============ -->
+<!-- METH:START — build.sh strips this block from the deployed index.html and
+     builds /methodology from it (unhidden, scripts removed). The markers are
+     load-bearing; the artifact keeps the block and its hash router. -->
 <div id="methBack" hidden style="background:var(--paper);border-bottom:1px solid var(--prule)">
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:22px;padding-bottom:22px">
     <a class="brand" href="#" style="color:inherit">
@@ -1548,6 +1551,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     </div>
   </div>
 </section>
+<!-- METH:END -->
 
 <footer>
   <div class="wrap stack" style="gap:26px">
@@ -2537,13 +2541,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
 
   /* Two views in one file so the preview behaves like the shipped site: the main flow
-   * and the methodology page. At deploy these become separate documents and the only
-   * change is "#/methodology" -> "/methodology". */
+   * and the methodology page. On the deployed site these ARE separate
+   * documents: build.sh strips the methodology from index.html (its links
+   * point at /methodology, a real page) and this router's only remaining job
+   * there is redirecting old #/methodology links. The artifact and the local
+   * file build keep the hash router, since neither can serve a second path. */
   function route(){
     var meth = location.hash.indexOf("methodology") > -1;
+    var methEl = byId("methodology");
+    if (!methEl){
+      // stripped build: send old #/methodology links to the real page (only
+      // where a server can answer; file:// has nowhere to go)
+      if (meth && /^https?:$/.test(location.protocol)) location.replace("/methodology");
+      return;
+    }
     var main = document.querySelectorAll("section:not(.view), .inkzone, footer");
     for (var i = 0; i < main.length; i++) main[i].hidden = meth;
-    byId("methodology").hidden = !meth;
+    methEl.hidden = !meth;
     byId("methBack").hidden = !meth;
     document.title = meth ? "Methodology · The Whole Bill" : "The Whole Bill";
     if (meth) window.scrollTo(0, 0);

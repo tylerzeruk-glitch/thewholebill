@@ -30,7 +30,8 @@ because a shortcut got caught.
 | `modeled` | our estimate — **must be labelled wherever it is shown** |
 
 Never ship an unlabelled modeled figure. The UI surfaces the tag; the methodology page
-(`#/methodology`) shows the arithmetic. If you add a figure, add its basis.
+(`/methodology`, its own static document; the artifact keeps `#/methodology`) shows the
+arithmetic. If you add a figure, add its basis.
 
 ## Disclose provenance, including for sources you agree with
 
@@ -110,39 +111,33 @@ lightness there.
 
 ## Next (prioritized 2026-08-31, CMS done 2026-08-31)
 
-Build, in order:
-
-1. **Real routing.** `#/methodology` becomes `/methodology`; the section is already
-   self-contained and the router is about twelve lines. Really a pre-go-public item — hash URLs
-   look wrong on a public site.
-
 Decisions before code (both deliberately parked by the owner; the CMS precondition on the
 first is now met, so it is ready for a decision whenever the owner wants):
 
-2. **Section 03 framing.** The household-borne basis was accepted with "I may change this
+1. **Section 03 framing.** The household-borne basis was accepted with "I may change this
    later — I think it's slightly misleading." The alternative on the table: an "everyone else
    pays ~$24,826" segment so the universal bar shows a gross. The "decide after CMS" condition
    is satisfied. Do NOT re-frame unilaterally.
-3. **The Medicare tax asymmetry.** Universal figures carry no continuing Medicare tax (~$1,378,
+2. **The Medicare tax asymmetry.** Universal figures carry no continuing Medicare tax (~$1,378,
    ~6% of the headline) — disclosed in "What we know is wrong" rather than modelled. Keep
    disclosing, or model it in.
 
 Whenever the owner decides — not a default:
 
-4. **Go public.** The checklist is in `docs/DEPLOY.md`: `/artifact` exclusion or acceptance,
+3. **Go public.** The checklist is in `docs/DEPLOY.md`: `/artifact` exclusion or acceptance,
    the anonymity re-check, deleting the Access app AND the logo-bypass app together, then
    verifying the gate's removal is the only change.
 
 Ops hygiene (small, anytime):
 
-5. GitHub Actions v4→v5 bump; branch protection on `main`.
-6. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
+4. GitHub Actions v4→v5 bump; branch protection on `main`.
+5. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
    hard-confirm the `workers.dev` route and Preview URLs are dead — currently verified only
    from outside.
-7. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
+6. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
     membership, vacancies (FL-20 today) and cosponsorships all change. The snapshot's as-of
     date shows on the rep card.
-8. Standing ritual, not a task: rerun `node tools/build-benchmarks.mjs` when CMS publishes a
+7. Standing ritual, not a task: rerun `node tools/build-benchmarks.mjs` when CMS publishes a
     new plan year's files (each fall) — it re-downloads everything, re-runs every validation
     (landscape cross-check to the cent, NY and CA published numbers, curve uniformity) and
     refuses to write a table that fails any of them. Update the hardcoded validation values
@@ -172,6 +167,10 @@ The methodology page shows all six derivations and discloses the mixed vintages.
 ~~Route-adaptive slot 03~~ **Done 2026-08-31**: the cliff for marketplace readers, the same
 cliff reframed for employer readers, the bad year (uninsured risk arithmetic, both bankruptcy
 sides printed or neither) for uninsured readers. The slot is constant so numbering never gaps.
+~~Real routing~~ **Done 2026-09-01**: three documents from one source. `/methodology` is its
+own fully static page (METH markers in src/page.html; build.sh strips it from index.html,
+whose links become real paths and whose router only redirects old hash links); the artifact
+keeps the hash router because its host serves one document. The suite asserts all three.
 ~~Senators row~~ **Done 2026-09-01**: both of the state's senators on the rep card, each with
 their own S. 1506 position and portrait, one dated as-of line covering every cosponsor claim.
 Hidden while a split ZIP is unresolved, like everything else on the card.
