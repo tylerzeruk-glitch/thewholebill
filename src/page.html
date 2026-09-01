@@ -449,9 +449,18 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
 .repph img[hidden]{display:none}
 /* The senators' smaller portraits keep the same 4:5 and fallback behaviour. */
 .repph.sm{width:34px;height:42px}
-.senrow{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center}
-.sen-n{font-size:13.5px;color:var(--pk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.senrow{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%}
+.sen-n{font-size:13.5px;color:var(--pk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
 .sen-s{font-size:12.5px;color:var(--pm);white-space:nowrap}
+/* The recipient control is the people themselves. Selection is a box-shadow
+   ring, not an outline, so keyboard focus (outline) stays distinguishable;
+   not a border, so nothing shifts. Disabled hits (vacant seat, unresolved
+   split) look inert and are. */
+.rec-hit{appearance:none;-webkit-appearance:none;background:none;border:0;padding:6px;margin:-6px;border-radius:3px;font:inherit;color:inherit;cursor:pointer;transition:box-shadow .15s}
+.rec-hit:hover:not(:disabled){background:var(--paper-tint)}
+.rec-hit.on{box-shadow:0 0 0 2px var(--amber-deep)}
+.rec-hit:focus-visible{outline:2px solid var(--amber-deep);outline-offset:4px}
+.rec-hit:disabled{cursor:default}
 
 /* Tone picker, paper-side: .seg's buttons are ink-themed, and this sits on paper. */
 .tbtn{flex-grow:1;height:44px;background:var(--paper-card);border:1px solid var(--prule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm);font-family:var(--sans);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
@@ -1152,7 +1161,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="stack" style="gap:20px">
         <div class="card-p" style="padding:28px 30px;gap:20px">
           <div class="lbl p">Your representative</div>
-          <div class="row" style="gap:16px;align-items:center">
+          <!-- The people ARE the recipient control: click the member or a
+               senator to address the letter to them. The selected one carries
+               the amber outline, and the letter highlights their name. -->
+          <button type="button" class="rec-hit row" id="recRep" data-rec="rep" style="gap:16px;align-items:center" aria-pressed="true">
             <div class="repph">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               <!-- No loading="lazy" here: a hidden (display:none) image never
@@ -1160,11 +1172,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                    all. Only the one resolved member's photo is requested. -->
               <img id="repPhoto" alt="" hidden decoding="async" referrerpolicy="no-referrer">
             </div>
-            <div class="stack" style="gap:4px">
+            <div class="stack" style="gap:4px;text-align:left">
               <div style="font-family:var(--serif);font-size:23px;line-height:1.15" id="repName">-</div>
               <div class="note" style="font-size:13.5px"><span id="repDistrict">Enter your five-digit ZIP above.</span></div>
             </div>
-          </div>
+          </button>
           <!-- A quarter of covered ZIPs genuinely span two or three districts.
                The reader knows which town they live in; we do not. Ask, never
                guess -- a letter to the wrong office is this card's one
@@ -1186,6 +1198,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <div style="height:1px;background:var(--prule-soft)"></div>
             <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Your senators</span><span class="note" style="font-size:12.5px">on <span id="senBillLbl"></span>, the Senate companion</span></div>
             <div class="stack" style="gap:9px" id="senRows"></div>
+            <p class="note" style="font-size:12px" id="recHint">The letter is addressed to the outlined name. Pick another to switch.</p>
           </div>
           <p class="note" style="font-size:12px" id="repAsOf" hidden>Cosponsor status as of <span id="repAsOfDate"></span>.</p>
           <p class="note" style="font-size:12px" id="repHedge" hidden>District from your ZIP. If you live near a district line, double-check on your representative&rsquo;s site.</p>
@@ -1203,15 +1216,6 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <button type="button" class="chk off" data-em="nation" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What the country would save</button>
             <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
           </div>
-        </div>
-
-        <!-- The letter can go to the House member or either senator; the
-             salutation, the bill number and the district/state phrasing all
-             follow, and a recipient who already cosponsors is thanked and
-             asked to push, never asked to "consider supporting". -->
-        <div class="stack" style="gap:9px" id="recBlock" hidden>
-          <div class="lbl p">Write to</div>
-          <div class="row" style="gap:6px;flex-wrap:wrap" id="recPick"></div>
         </div>
 
         <div class="stack" style="gap:9px">
@@ -1673,11 +1677,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     senSig = stCode;
     var list = REPS.senate[stCode] || [], html = "", i;
     for (i = 0; i < list.length; i++){
-      html += '<div class="senrow"><div class="repph sm">' +
+      html += '<button type="button" class="senrow rec-hit" data-rec="sen' + i + '" aria-pressed="false"><div class="repph sm">' +
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' +
         '<img alt="Official portrait of ' + list[i].n + '" hidden decoding="async" referrerpolicy="no-referrer">' +
         '</div><span class="sen-n">' + list[i].n + ' (' + list[i].p + ')</span>' +
-        '<span class="sen-s">' + (list[i].co ? 'Cosponsor' : 'Not yet') + '</span></div>';
+        '<span class="sen-s">' + (list[i].co ? 'Cosponsor' : 'Not yet') + '</span></button>';
     }
     byId("senRows").innerHTML = html;
     [].forEach.call(byId("senRows").querySelectorAll("img"), function(img, idx){
@@ -1713,21 +1717,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("repAsOf").hidden = !resolved;
     byId("repAsOfDate").textContent = REPS.asOf;
     renderSenators(resolved ? r.d.split("-")[0] : null);
-    // the recipient picker mirrors the card: the member and both senators,
-    // by last name, disabled only where a seat is vacant
-    byId("recBlock").hidden = !resolved;
-    if (resolved){
-      var sens = REPS.senate[r.d.split("-")[0]] || [];
-      var html = '<button type="button" class="tbtn' + (state.recipient === "rep" ? " on" : "") + '"' +
-        (member ? '' : ' disabled') + ' data-rec="rep">' +
-        (member ? "Rep. " + repLast(member) : "Seat vacant") + '</button>';
-      for (var si = 0; si < sens.length; si++){
-        var key = "sen" + si;
-        html += '<button type="button" class="tbtn' + (state.recipient === key ? " on" : "") + '" data-rec="' + key + '">' +
-          "Sen. " + repLast(sens[si]) + '</button>';
-      }
-      byId("recPick").innerHTML = html;
-    }
+    // the people are the recipient control: mark the selected one, disable
+    // what cannot receive a letter (vacant seat, unresolved card)
+    var effective = recipient();
+    var recRep = byId("recRep");
+    recRep.disabled = !member;
+    recRep.classList.toggle("on", !!member && effective.kind === "rep");
+    recRep.setAttribute("aria-pressed", !!member && effective.kind === "rep" ? "true" : "false");
+    [].forEach.call(byId("senRows").querySelectorAll(".rec-hit"), function(btn){
+      var on = effective.kind === "sen" && state.recipient === btn.getAttribute("data-rec");
+      btn.classList.toggle("on", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    byId("recHint").hidden = !resolved;
     // The portrait loads only for the resolved member (one request), shows on
     // load, and yields back to the silhouette on any failure. src is only
     // touched when it changes: renderRep runs on every slider repaint.
@@ -1796,7 +1798,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var co = !!(rec.m && rec.m.co);
     var seat = rec.kind === "sen" ? "state" : "district";
     var P = [];
-    P.push("Dear " + rec.title + " " + (rec.m ? repLast(rec.m) : "[name]") + ",");
+    // The highlighted name closes the loop with the outlined person on the card.
+    P.push("Dear " + rec.title + " " + (rec.m ? "<mark>" + repLast(rec.m) + "</mark>" : "[name]") + ",");
     // A recipient who already cosponsors is thanked and asked to push; asking
     // them to "consider supporting" their own bill tells the staffer the
     // writer never checked.
@@ -2731,8 +2734,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     syncEmph();
     paint();
   });
-  byId("recPick").addEventListener("click", function(ev){
-    var btn = ev.target.closest(".tbtn"); if (!btn || btn.disabled) return;
+  byId("recRep").addEventListener("click", function(){
+    if (this.disabled) return;
+    state.recipient = "rep";
+    paint();
+  });
+  byId("senRows").addEventListener("click", function(ev){
+    var btn = ev.target.closest(".rec-hit"); if (!btn) return;
     state.recipient = btn.getAttribute("data-rec");
     paint();
   });

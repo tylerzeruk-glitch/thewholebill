@@ -1260,9 +1260,16 @@ test('letter: built from the route, honest about the comparison', async b => {
   await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(250);
   ok('the default cosponsoring rep is thanked, not lobbied cold',
      /thank you for cosponsoring/i.test(await txt()));
-  await p.locator('#recPick .tbtn[data-rec="sen0"]').click(); await p.waitForTimeout(300);
+  ok('the rep block carries the selection ring by default', await p.evaluate(()=>
+    document.getElementById('recRep').classList.contains('on')));
+  await p.locator('#senRows .rec-hit[data-rec="sen0"]').click(); await p.waitForTimeout(300);
   const sTxt = await txt();
   ok('a senator letter is addressed as one', /^Dear Senator Cornyn,/.test(sTxt), sTxt.split('\n')[0]);
+  ok('the ring moves to the senator', await p.evaluate(()=>
+    document.querySelector('#senRows .rec-hit[data-rec="sen0"]').classList.contains('on') &&
+    !document.getElementById('recRep').classList.contains('on')));
+  ok('and the salutation highlights the name', await p.evaluate(()=>
+    /Dear Senator <mark>Cornyn<\/mark>,/.test(document.getElementById('letterBd').innerHTML)));
   ok('and names the Senate companion', /Medicare for All Act, S\. 1506/.test(sTxt));
   ok('a non-cosponsor is asked, not thanked', !/thank you for cosponsoring/i.test(sTxt));
   const subj = await p.evaluate(()=>decodeURIComponent(document.getElementById('sendBtn').href.split('subject=')[1].split('&')[0]));
@@ -1274,7 +1281,7 @@ test('letter: built from the route, honest about the comparison', async b => {
   // returns the letter to the House member rather than a same-index senator
   await p.locator('#zip').fill('06468'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   ok('a new ZIP addresses the rep again', /^Dear Representative Himes,/.test(await txt()), (await txt()).split('\n')[0]);
-  await p.locator('#recPick .tbtn[data-rec="sen0"]').click(); await p.waitForTimeout(300);
+  await p.locator('#senRows .rec-hit[data-rec="sen0"]').click(); await p.waitForTimeout(300);
   ok('a cosponsoring senator is thanked', /^Dear Senator Blumenthal,/.test(await txt()) &&
      /thank you for cosponsoring/i.test(await txt()), (await txt()).split('\n')[0]);
   await p.close();
@@ -1421,7 +1428,7 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
       n: x.querySelector('.sen-n').textContent,
       s: x.querySelector('.sen-s').textContent,
       src: (x.querySelector('img').getAttribute('src')||''),
-      oneLine: x.getBoundingClientRect().height < 46 })),
+      oneLine: x.getBoundingClientRect().height < 58 })),   // 42px portrait + the hit's 6px padding each side
     bill: document.getElementById('senBillLbl').textContent,
     bio: REPS.senate.TX.map(m=>m.b) }));
   ok('two senators for the state', !sen.hidden && sen.rows.length === 2, JSON.stringify(sen.rows.map(x=>x.n)));
@@ -1568,14 +1575,14 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   // recipient variants: the senator letters (non-cosponsor openings in TX)
   // across every tone; the cosponsor thank-you variants are the rep default
   for (const rec of ['sen0', 'sen1']) {
-    await p.locator(`#recPick .tbtn[data-rec="${rec}"]`).click(); await p.waitForTimeout(200);
+    await p.locator(`#senRows .rec-hit[data-rec="${rec}"]`).click(); await p.waitForTimeout(200);
     await scan(`letter to ${rec}`);
   }
   for (const t of ['measured', 'personal', 'direct']) {
     await p.locator(`#tone .tbtn[data-tone="${t}"]`).click(); await p.waitForTimeout(200);
     await scan(`senator letter, tone ${t}`);
   }
-  await p.locator('#recPick .tbtn[data-rec="rep"]').click(); await p.waitForTimeout(200);
+  await p.locator('#recRep').click(); await p.waitForTimeout(200);
   await setIncome(p, 40000);  await scan('subsidy qualifying, with CHIP');
   await setIncome(p, 240000); await scan('over the cliff');
   await setIncome(p, 95000);
