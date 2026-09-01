@@ -1278,11 +1278,17 @@ test('letter: built from the route, honest about the comparison', async b => {
   // primary action opens the recipient's own site, where the contact form is
   ok('the primary action opens the senator\'s own site', await p.evaluate(()=>
     /cornyn\.senate\.gov/.test(document.getElementById('formBtn').getAttribute('href'))));
-  // the selected ring must stack above a neighbour's hover tint
+  // the selected ring must stack above a neighbour's hover tint, and the
+  // neighbour's box must physically clear the 2px ring: measured, because a
+  // 6px hit inflation once made the tint touch the ring and read as overlap
   ok('the selection ring stacks above hover', await p.evaluate(()=>{
     const on = document.querySelector('.rec-hit.on');
     const cs = getComputedStyle(on);
     return cs.position === 'relative' && cs.zIndex === '1';
+  }));
+  ok('a neighbour clears the ring', await p.evaluate(()=>{
+    const rows = [...document.querySelectorAll('#senRows .rec-hit')].map(x=>x.getBoundingClientRect());
+    return rows.length === 2 && rows[1].top - rows[0].bottom >= 2;
   }));
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
   ok('the self-employed line goes statewide for a senator',

@@ -456,7 +456,11 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
    ring, not an outline, so keyboard focus (outline) stays distinguishable;
    not a border, so nothing shifts. Disabled hits (vacant seat, unresolved
    split) look inert and are. */
-.rec-hit{appearance:none;-webkit-appearance:none;background:none;border:0;padding:6px;margin:-6px;border-radius:3px;font:inherit;color:inherit;cursor:pointer;transition:box-shadow .15s}
+/* Vertical inflation is 3px, not 6: adjacent rows sit 9px apart, so 3px of
+   box each side plus the 2px ring leaves 1px of true clearance between a
+   neighbour's hover tint and the selected ring. 6px made them overlap. The
+   hit still clears 44px (42px portrait + 6). */
+.rec-hit{appearance:none;-webkit-appearance:none;background:none;border:0;padding:3px 6px;margin:-3px -6px;border-radius:3px;font:inherit;color:inherit;cursor:pointer;transition:box-shadow .15s}
 .rec-hit:hover:not(:disabled){background:var(--paper-tint)}
 /* The inflated hit areas of adjacent rows overlap by a few pixels, so the
    selected ring must stack above a neighbour's hover tint or hovering one
