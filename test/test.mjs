@@ -1386,6 +1386,30 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   await p.locator('#areapick button[data-z="75201"]').click(); await p.waitForTimeout(400);
   r = await st();
   ok('a sample click is a ZIP: the card follows', /Crockett/.test(r.name), r.name);
+
+  // the senators row: both of the state's senators with their own positions,
+  // portraits keyed by bioguide, hidden while a split ZIP is unresolved
+  const sen = await p.evaluate(()=>({
+    hidden: document.getElementById('senBlock').hidden,
+    rows: [...document.querySelectorAll('#senRows .senrow')].map(x=>({
+      n: x.querySelector('.sen-n').textContent,
+      s: x.querySelector('.sen-s').textContent,
+      src: (x.querySelector('img').getAttribute('src')||''),
+      oneLine: x.getBoundingClientRect().height < 46 })),
+    bill: document.getElementById('senBillLbl').textContent,
+    bio: REPS.senate.TX.map(m=>m.b) }));
+  ok('two senators for the state', !sen.hidden && sen.rows.length === 2, JSON.stringify(sen.rows.map(x=>x.n)));
+  ok('the block names the companion bill', sen.bill === 'S. 1506', sen.bill);
+  ok('each carries a position', sen.rows.every(x=>/^(Cosponsor|Not yet)$/.test(x.s)), sen.rows.map(x=>x.s).join('/'));
+  ok('portraits keyed by bioguide', sen.rows.every((x,i)=>x.src.includes(sen.bio[i])), sen.rows.map(x=>x.src.slice(-16)).join(' '));
+  ok('rows stay compact', sen.rows.every(x=>x.oneLine));
+
+  await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  ok('a split hides the senators until the pick', await p.evaluate(()=>document.getElementById('senBlock').hidden));
+  await p.locator('#repPickBtns button[data-d="NY-12"]').click(); await p.waitForTimeout(400);
+  const ny = await p.evaluate(()=>[...document.querySelectorAll('#senRows .senrow')].map(x=>
+    x.querySelector('.sen-n').textContent + ' ' + x.querySelector('.sen-s').textContent));
+  ok('a cosponsoring senator says so', ny.some(x=>/Gillibrand.*Cosponsor/.test(x)), ny.join(' | '));
   await p.close();
 });
 

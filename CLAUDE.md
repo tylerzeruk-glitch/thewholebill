@@ -112,39 +112,37 @@ lightness there.
 
 Build, in order:
 
-1. **Senators row on the rep card.** Already paid for: all 100 senators with S. 1506 cosponsor
-   flags sit unused in `src/reps.js`, and the card already names the Senate companion.
-2. **Real routing.** `#/methodology` becomes `/methodology`; the section is already
+1. **Real routing.** `#/methodology` becomes `/methodology`; the section is already
    self-contained and the router is about twelve lines. Really a pre-go-public item — hash URLs
    look wrong on a public site.
 
 Decisions before code (both deliberately parked by the owner; the CMS precondition on the
 first is now met, so it is ready for a decision whenever the owner wants):
 
-3. **Section 03 framing.** The household-borne basis was accepted with "I may change this
+2. **Section 03 framing.** The household-borne basis was accepted with "I may change this
    later — I think it's slightly misleading." The alternative on the table: an "everyone else
    pays ~$24,826" segment so the universal bar shows a gross. The "decide after CMS" condition
    is satisfied. Do NOT re-frame unilaterally.
-4. **The Medicare tax asymmetry.** Universal figures carry no continuing Medicare tax (~$1,378,
+3. **The Medicare tax asymmetry.** Universal figures carry no continuing Medicare tax (~$1,378,
    ~6% of the headline) — disclosed in "What we know is wrong" rather than modelled. Keep
    disclosing, or model it in.
 
 Whenever the owner decides — not a default:
 
-5. **Go public.** The checklist is in `docs/DEPLOY.md`: `/artifact` exclusion or acceptance,
+4. **Go public.** The checklist is in `docs/DEPLOY.md`: `/artifact` exclusion or acceptance,
    the anonymity re-check, deleting the Access app AND the logo-bypass app together, then
    verifying the gate's removal is the only change.
 
 Ops hygiene (small, anytime):
 
-6. GitHub Actions v4→v5 bump; branch protection on `main`.
-7. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
+5. GitHub Actions v4→v5 bump; branch protection on `main`.
+6. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
    hard-confirm the `workers.dev` route and Preview URLs are dead — currently verified only
    from outside.
-8. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
+7. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
     membership, vacancies (FL-20 today) and cosponsorships all change. The snapshot's as-of
     date shows on the rep card.
-9. Standing ritual, not a task: rerun `node tools/build-benchmarks.mjs` when CMS publishes a
+8. Standing ritual, not a task: rerun `node tools/build-benchmarks.mjs` when CMS publishes a
     new plan year's files (each fall) — it re-downloads everything, re-runs every validation
     (landscape cross-check to the cent, NY and CA published numbers, curve uniformity) and
     refuses to write a table that fails any of them. Update the hardcoded validation values
@@ -174,6 +172,9 @@ The methodology page shows all six derivations and discloses the mixed vintages.
 ~~Route-adaptive slot 03~~ **Done 2026-08-31**: the cliff for marketplace readers, the same
 cliff reframed for employer readers, the bad year (uninsured risk arithmetic, both bankruptcy
 sides printed or neither) for uninsured readers. The slot is constant so numbering never gaps.
+~~Senators row~~ **Done 2026-09-01**: both of the state's senators on the rep card, each with
+their own S. 1506 position and portrait, one dated as-of line covering every cosponsor claim.
+Hidden while a split ZIP is unresolved, like everything else on the card.
 ~~Nationwide rep lookup~~ **Done 2026-08-31**: `tools/build-reps.mjs` widened from the five
 preview metros to every ZIP in the 50 states and DC (33,642 ZIPs, 7,299 real splits that ask
 the reader, 432 members plus genuine vacancies, all 100 senators with cosponsor flags). The
