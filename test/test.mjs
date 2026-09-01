@@ -1253,6 +1253,55 @@ test('letter: built from the route, honest about the comparison', async b => {
   ok('uninsured route says so', /uninsured today/.test(u) && !/keeping this coverage/.test(u));
   ok('and does NOT claim universal is cheaper -- for this household it is not',
      /more than my household bears today/.test(u));
+
+  /* Recipient switching: the letter can go to either senator, and everything
+   * follows -- title, the Senate bill, statewide phrasing, the mailto subject.
+   * A cosponsor is thanked; a non-cosponsor is asked. */
+  await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(250);
+  ok('the default cosponsoring rep is thanked, not lobbied cold',
+     /thank you for cosponsoring/i.test(await txt()));
+  ok('the rep block carries the selection ring by default', await p.evaluate(()=>
+    document.getElementById('recRep').classList.contains('on')));
+  await p.locator('#senRows .rec-hit[data-rec="sen0"]').click(); await p.waitForTimeout(300);
+  const sTxt = await txt();
+  ok('a senator letter is addressed as one', /^Dear Senator Cornyn,/.test(sTxt), sTxt.split('\n')[0]);
+  ok('the ring moves to the senator', await p.evaluate(()=>
+    document.querySelector('#senRows .rec-hit[data-rec="sen0"]').classList.contains('on') &&
+    !document.getElementById('recRep').classList.contains('on')));
+  ok('and the salutation highlights the name', await p.evaluate(()=>
+    /Dear Senator <mark>Cornyn<\/mark>,/.test(document.getElementById('letterBd').innerHTML)));
+  ok('and names the Senate companion', /Medicare for All Act, S\. 1506/.test(sTxt));
+  ok('a non-cosponsor is asked, not thanked', !/thank you for cosponsoring/i.test(sTxt));
+  const subj = await p.evaluate(()=>decodeURIComponent(document.getElementById('sendBtn').href.split('subject=')[1].split('&')[0]));
+  ok('the mailto subject follows the bill', /S\. 1506/.test(subj), subj);
+  // there is no public congressional inbox to fill a To: line with, so the
+  // primary action opens the recipient's own site, where the contact form is
+  ok('the primary action opens the senator\'s own site', await p.evaluate(()=>
+    /cornyn\.senate\.gov/.test(document.getElementById('formBtn').getAttribute('href'))));
+  // the selected ring must stack above a neighbour's hover tint, and the
+  // neighbour's box must physically clear the 2px ring: measured, because a
+  // 6px hit inflation once made the tint touch the ring and read as overlap
+  ok('the selection ring stacks above hover', await p.evaluate(()=>{
+    const on = document.querySelector('.rec-hit.on');
+    const cs = getComputedStyle(on);
+    return cs.position === 'relative' && cs.zIndex === '1';
+  }));
+  ok('a neighbour clears the ring', await p.evaluate(()=>{
+    const rows = [...document.querySelectorAll('#senRows .rec-hit')].map(x=>x.getBoundingClientRect());
+    return rows.length === 2 && rows[1].top - rows[0].bottom >= 2;
+  }));
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+  ok('the self-employed line goes statewide for a senator',
+     /in this state carries this cost/.test(await txt()));
+  // a cosponsoring SENATOR is thanked too (Blumenthal), and a fresh ZIP
+  // returns the letter to the House member rather than a same-index senator
+  await p.locator('#zip').fill('06468'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  ok('a new ZIP addresses the rep again', /^Dear Representative Himes,/.test(await txt()), (await txt()).split('\n')[0]);
+  ok('and the site button follows', await p.evaluate(()=>
+    /himes\.house\.gov/.test(document.getElementById('formBtn').getAttribute('href'))));
+  await p.locator('#senRows .rec-hit[data-rec="sen0"]').click(); await p.waitForTimeout(300);
+  ok('a cosponsoring senator is thanked', /^Dear Senator Blumenthal,/.test(await txt()) &&
+     /thank you for cosponsoring/i.test(await txt()), (await txt()).split('\n')[0]);
   await p.close();
 });
 
@@ -1263,7 +1312,9 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   await p.locator('#tone button[data-tone="personal"]').click(); await p.waitForTimeout(250);
   ok('personal tone rewrites the opener', /I live in/.test(await txt()));
   await p.locator('#tone button[data-tone="measured"]').click(); await p.waitForTimeout(250);
-  ok('measured tone asks rather than tells', /consider supporting/.test(await txt()));
+  // the default rep cosponsors, so measured thanks and presses rather than
+  // asking them to consider their own bill
+  ok('measured tone stays polite', /keep pressing for it/.test(await txt()));
 
   const before = await count();
   await p.locator('#emph button[data-em="emp"]').click(); await p.waitForTimeout(250);
@@ -1386,6 +1437,30 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   await p.locator('#areapick button[data-z="75201"]').click(); await p.waitForTimeout(400);
   r = await st();
   ok('a sample click is a ZIP: the card follows', /Crockett/.test(r.name), r.name);
+
+  // the senators row: both of the state's senators with their own positions,
+  // portraits keyed by bioguide, hidden while a split ZIP is unresolved
+  const sen = await p.evaluate(()=>({
+    hidden: document.getElementById('senBlock').hidden,
+    rows: [...document.querySelectorAll('#senRows .senrow')].map(x=>({
+      n: x.querySelector('.sen-n').textContent,
+      s: x.querySelector('.sen-s').textContent,
+      src: (x.querySelector('img').getAttribute('src')||''),
+      oneLine: x.getBoundingClientRect().height < 58 })),   // 42px portrait + the hit's 6px padding each side
+    bill: document.getElementById('senBillLbl').textContent,
+    bio: REPS.senate.TX.map(m=>m.b) }));
+  ok('two senators for the state', !sen.hidden && sen.rows.length === 2, JSON.stringify(sen.rows.map(x=>x.n)));
+  ok('the block names the companion bill', sen.bill === 'S. 1506', sen.bill);
+  ok('each carries a position', sen.rows.every(x=>/^(Cosponsor|Not yet)$/.test(x.s)), sen.rows.map(x=>x.s).join('/'));
+  ok('portraits keyed by bioguide', sen.rows.every((x,i)=>x.src.includes(sen.bio[i])), sen.rows.map(x=>x.src.slice(-16)).join(' '));
+  ok('rows stay compact', sen.rows.every(x=>x.oneLine));
+
+  await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  ok('a split hides the senators until the pick', await p.evaluate(()=>document.getElementById('senBlock').hidden));
+  await p.locator('#repPickBtns button[data-d="NY-12"]').click(); await p.waitForTimeout(400);
+  const ny = await p.evaluate(()=>[...document.querySelectorAll('#senRows .senrow')].map(x=>
+    x.querySelector('.sen-n').textContent + ' ' + x.querySelector('.sen-s').textContent));
+  ok('a cosponsoring senator says so', ny.some(x=>/Gillibrand.*Cosponsor/.test(x)), ny.join(' | '));
   await p.close();
 });
 
@@ -1429,7 +1504,7 @@ test('letter: the privacy note sits left-aligned under the buttons', async b => 
     const p = await page(b,w,900);
     const r = await p.evaluate(()=>{
       const el = document.querySelector('.letter .ft p');
-      const btn = document.getElementById('sendBtn');
+      const btn = document.getElementById('formBtn');   // the first button in the row
       const range = document.createRange(); range.selectNodeContents(el);
       const lines = new Set([...range.getClientRects()].filter(x=>x.height>1).map(x=>Math.round(x.top)));
       const er = el.getBoundingClientRect(), br = btn.getBoundingClientRect();
@@ -1438,8 +1513,10 @@ test('letter: the privacy note sits left-aligned under the buttons', async b => 
                under: er.top >= br.bottom,
                flush: Math.abs(tr.left - br.left) };
     });
+    // the note carries the copy-and-paste flow now, so it runs longer than the
+    // old one-liner; the caps keep it from becoming a paragraph
     ok(`${w}px: under the buttons, text flush with their left edge, ${r.lines} line${r.lines>1?'s':''}`,
-       r.under && r.flush < 1 && r.lines <= 2, `flush Δ${r.flush.toFixed(1)}px`);
+       r.under && r.flush < 1 && r.lines <= (w <= 390 ? 5 : 3), `flush Δ${r.flush.toFixed(1)}px`);
     await p.close();
   }
 });
@@ -1515,6 +1592,17 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
   for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
   await scan('every marketplace letter block');
+  // recipient variants: the senator letters (non-cosponsor openings in TX)
+  // across every tone; the cosponsor thank-you variants are the rep default
+  for (const rec of ['sen0', 'sen1']) {
+    await p.locator(`#senRows .rec-hit[data-rec="${rec}"]`).click(); await p.waitForTimeout(200);
+    await scan(`letter to ${rec}`);
+  }
+  for (const t of ['measured', 'personal', 'direct']) {
+    await p.locator(`#tone .tbtn[data-tone="${t}"]`).click(); await p.waitForTimeout(200);
+    await scan(`senator letter, tone ${t}`);
+  }
+  await p.locator('#recRep').click(); await p.waitForTimeout(200);
   await setIncome(p, 40000);  await scan('subsidy qualifying, with CHIP');
   await setIncome(p, 240000); await scan('over the cliff');
   await setIncome(p, 95000);
