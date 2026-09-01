@@ -17,11 +17,13 @@ const ok = (name, cond, detail='') => {
   else { fail++; console.log(`  \x1b[31m✗\x1b[0m ${name}  ${detail}`); }
 };
 
-const page = async (browser, w, h, mobile=false) => {
+// doc picks which built document loads: the calculator by default, the
+// artifact build for hash-router coverage, /methodology for its own page.
+const page = async (browser, w, h, mobile=false, doc='index.html') => {
   const p = await browser.newPage({ viewport:{width:w,height:h}, deviceScaleFactor:1, isMobile:mobile, hasTouch:mobile });
   p.on('pageerror', e => ok('no page errors', false, e.message));
   p.on('console', m => { if (m.type()==='error' && !/TUNNEL|ERR_|net::/.test(m.text())) ok('no console errors', false, m.text()); });
-  await p.goto(URL); await p.waitForTimeout(1200);
+  await p.goto(pathToFileURL(resolve(HERE, '../dist/' + doc)).href); await p.waitForTimeout(1200);
   return p;
 };
 const setIncome = async (p, v) => { await p.locator('#income').fill(String(v)); await p.locator('#income').dispatchEvent('input'); await p.waitForTimeout(120); };
@@ -421,17 +423,15 @@ test('narrative: the cliff precedes the turn, and the turn wears teal', async b 
     const eyebrows=[...document.querySelectorAll('.eyebrow')]
       .filter(e=>e.offsetParent !== null)
       .map(e=>e.textContent.trim()).filter(t=>/^\d\d/.test(t));
-    const meth=[...document.querySelectorAll('.eyebrow')]
-      .some(e=>/^08/.test(e.textContent.trim()));
     const cliffY=document.getElementById('cliff').offsetTop;
     const cmpY=document.getElementById('pills').closest('section').offsetTop;
     const em=[...document.querySelectorAll('h2 em')].find(e=>/Another way/.test(e.textContent));
-    return { seq: eyebrows.map(t=>t.slice(0,2)).join(','), meth,
+    return { seq: eyebrows.map(t=>t.slice(0,2)).join(','),
              cliffFirst: cliffY < cmpY,
              teal: em ? getComputedStyle(em).color : 'missing' };
   });
   ok('visible sections number 01-07 in page order', r.seq === '01,02,03,04,05,06,07', r.seq);
-  ok('the methodology view carries 08', r.meth);
+  // the 08 eyebrow lives on /methodology now; the routing test asserts it
   ok('the cliff sits before the comparison', r.cliffFirst);
   ok('"Another way" wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
   await p.close();
@@ -471,14 +471,16 @@ test('slot 03: the cliff for the covered, the bad year for the uninsured', async
   ok('both care-avoidance figures appear, tied to their surveys',
      /three in four/.test(txt) && /38\.6%/.test(txt) && /KFF/.test(txt) && /NHIS/.test(txt));
 
-  await p.evaluate(()=>{location.hash='#/methodology';}); await p.waitForTimeout(300);
+  await p.close();
+  // the bad-year derivation lives on /methodology, its own document now
+  const pm = await page(b,1440,900,false,'methodology/index.html');
   ok('methodology carries the derivation and the bankruptcy both-sides rule',
-     await p.evaluate(()=>{
+     await pm.evaluate(()=>{
        const t=document.getElementById('methodology').innerText;
        return /What a bad year costs without coverage/i.test(t) && /3\.4/.test(t)
            && /66\.5%/.test(t) && /4% of non-elderly/.test(t);
      }));
-  await p.close();
+  await pm.close();
 });
 
 /* Six models, friendliest formula to most expensive allocation. The argument is
@@ -1180,19 +1182,46 @@ test('mobile: touch targets and sticky layout', async b => {
   await p.close();
 });
 
-test('routing: methodology is its own view', async b => {
+/* Real routing: on the deployed site the methodology is its own document at
+ * /methodology, stripped from index.html; the artifact (one document by
+ * necessity) keeps the hash router. All three shapes are asserted. */
+test('routing: methodology is its own page; the artifact keeps the hash', async b => {
+  // index: stripped, links point at the real path, old hash links redirect
   const p = await page(b,1440,900);
-  const st = () => p.evaluate(()=>({ meth:!document.getElementById('methodology').hidden,
+  ok('the methodology is not in the calculator document',
+     await p.evaluate(()=>document.getElementById('methodology') === null));
+  ok('its links point at the real path', await p.evaluate(()=>
+    [...document.querySelectorAll('a[href="/methodology"]')].length >= 2 &&
+    [...document.querySelectorAll('a[href^="#/"]')].length === 0));
+  await p.close();
+
+  // /methodology: its own static document
+  const pm = await page(b,1440,900,false,'methodology/index.html');
+  const m = await pm.evaluate(()=>({
+    title: document.title,
+    eyebrow: [...document.querySelectorAll('.eyebrow')].some(e=>/^08/.test(e.textContent.trim())),
+    visible: !document.getElementById('methodology').hidden && !document.getElementById('methBack').hidden,
+    back: (document.querySelector('#methBack a.q')||{}).getAttribute?.('href'),
+    scripts: document.querySelectorAll('script').length }));
+  ok('the page carries its own title', /Methodology · The Whole Bill/.test(m.title), m.title);
+  ok('the 08 eyebrow lives here', m.eyebrow);
+  ok('nothing is hidden and the back link goes home', m.visible && m.back === '/', m.back);
+  ok('the document is fully static', m.scripts === 0, m.scripts + ' scripts');
+  await pm.close();
+
+  // the artifact: one document, hash-routed as before
+  const pa = await page(b,1440,900,false,'artifact.html');
+  const st = () => pa.evaluate(()=>({ meth:!document.getElementById('methodology').hidden,
     hero:!document.querySelector('section.paper').hidden, title:document.title }));
   const a = await st();
-  ok('main view by default', a.meth===false && a.hero===true);
-  await p.evaluate(()=>{location.hash='#/methodology';}); await p.waitForTimeout(300);
+  ok('artifact: main view by default', a.meth===false && a.hero===true);
+  await pa.evaluate(()=>{location.hash='#/methodology';}); await pa.waitForTimeout(300);
   const c = await st();
-  ok('methodology view hides the flow', c.meth===true && c.hero===false);
-  ok('title changes', /Methodology/.test(c.title), c.title);
-  await p.evaluate(()=>{location.hash='';}); await p.waitForTimeout(300);
-  ok('back to main', (await st()).hero===true);
-  await p.close();
+  ok('artifact: hash shows the methodology and hides the flow', c.meth===true && c.hero===false);
+  ok('artifact: title changes', /Methodology/.test(c.title), c.title);
+  await pa.evaluate(()=>{location.hash='';}); await pa.waitForTimeout(300);
+  ok('artifact: back to main', (await st()).hero===true);
+  await pa.close();
 });
 
 test('scope: ZIP never returns someone else\'s numbers', async b => {
@@ -1610,10 +1639,15 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
     await p.locator('#zip').fill(z); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
     await scan(`zip ${z}`);
   }
-  await p.evaluate(() => { location.hash = '#/methodology'; });
-  await p.waitForTimeout(400);
-  await scan('methodology view');
   await p.close();
+  // the methodology is its own static document now; scan it whole
+  const pm = await page(b, 1280, 900, false, 'methodology/index.html');
+  const mHits = await pm.evaluate(() => {
+    const t = document.body.textContent + ' ' + document.title;
+    return (t.match(/[^\n]{0,25}[–—][^\n]{0,25}/g) || []).slice(0, 3);
+  });
+  ok('no dashes: the methodology document', mHits.length === 0, mHits.join(' | '));
+  await pm.close();
 });
 
 const b = await chromium.launch();
