@@ -439,6 +439,15 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
 .box.on{background:var(--amber-deep);display:flex;align-items:center;justify-content:center}
 .box.off{border:1px solid var(--pctrl)}
 .box.off svg{display:none}
+/* The member's official portrait, when the @unitedstates images collection has
+   one. 4:5 like the congressional pictorial directory, so nobody's head gets
+   cropped by a square. The silhouette sits underneath as the fallback for
+   vacancies, splits, missing photos, and hosts that block third-party images
+   (the artifact preview does). The img's display lives HERE so [hidden] wins. */
+.repph{width:62px;height:77px;border-radius:2px;background:var(--prule-soft);border:1px solid var(--prule);flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.repph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.repph img[hidden]{display:none}
+
 /* Tone picker, paper-side: .seg's buttons are ink-themed, and this sits on paper. */
 .tbtn{flex-grow:1;height:44px;background:var(--paper-card);border:1px solid var(--prule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm);font-family:var(--sans);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
 .tbtn.on{background:var(--pk);border-color:var(--pk);color:var(--paper);font-weight:500}
@@ -1139,8 +1148,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="card-p" style="padding:28px 30px;gap:20px">
           <div class="lbl p">Your representative</div>
           <div class="row" style="gap:16px;align-items:center">
-            <div style="width:62px;height:62px;border-radius:2px;background:var(--prule-soft);border:1px solid var(--prule);flex-shrink:0;display:flex;align-items:center;justify-content:center">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <div class="repph">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <!-- No loading="lazy" here: a hidden (display:none) image never
+                   intersects the viewport, so a lazy one would never load at
+                   all. Only the one resolved member's photo is requested. -->
+              <img id="repPhoto" alt="" hidden decoding="async" referrerpolicy="no-referrer">
             </div>
             <div class="stack" style="gap:4px">
               <div style="font-family:var(--serif);font-size:23px;line-height:1.15" id="repName">-</div>
@@ -1490,6 +1503,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Rating area definitions</td><td>CMS, State Specific Geographic Rating Areas</td></tr>
         <tr><td>ZIP to county</td><td>Census 2020 ZCTA-county relationship file; GeoNames (CC BY 4.0) for PO-box-only ZIPs</td></tr>
         <tr><td>Medicaid expansion &amp; CHIP limits</td><td>Medicaid.gov, Medicaid and CHIP eligibility levels</td></tr>
+        <tr><td>Member portraits</td><td>The @unitedstates images collection (official congressional photos, public domain), loaded per member from unitedstates.github.io</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Found an error? That is the most useful thing you could send us. The calculation layer is a single file with no dependencies, and every constant on this page appears in it by name.</p>
     </div>
@@ -1619,6 +1633,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (state.district && ds.indexOf(state.district) > -1) return { st:"picked", d:state.district, ds:ds };
     return { st:"split", ds:ds };
   }
+  // Official portraits, keyed by bioguide id, from the same public-data
+  // collective the member list comes from. Public domain (GPO / member
+  // offices); one image is requested, lazily, for the resolved member only.
+  var PHOTO_BASE = "https://unitedstates.github.io/images/congress/225x275/";
+  byId("repPhoto").addEventListener("load", function(){ this.hidden = false; });
+  byId("repPhoto").addEventListener("error", function(){ this.hidden = true; });
+
   function repMember(){ var r = repFor(); return (r.d && REPS.house[r.d]) || null; }
   function repLast(m){ return m.n.replace(/\s+(Jr\.|Sr\.|II|III|IV)$/, "").split(" ").pop(); }
   function renderRep(){
@@ -1632,6 +1653,22 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var member = (r.st === "one" || r.st === "picked") && REPS.house[r.d];
     byId("repAsOf").hidden = !member;
     byId("repAsOfDate").textContent = REPS.asOf;
+    // The portrait loads only for the resolved member (one request), shows on
+    // load, and yields back to the silhouette on any failure. src is only
+    // touched when it changes: renderRep runs on every slider repaint.
+    var photo = byId("repPhoto");
+    if (member && member.b){
+      var want = PHOTO_BASE + member.b + ".jpg";
+      if (photo.getAttribute("src") !== want){
+        photo.hidden = true;
+        photo.src = want;
+      }
+      photo.alt = "Official portrait of " + member.n;
+    } else {
+      photo.hidden = true;
+      photo.removeAttribute("src");
+      photo.alt = "";
+    }
     if (r.st === "none"){
       name.innerHTML = "-";
       dist.textContent = "Enter your five-digit ZIP above.";
