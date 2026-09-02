@@ -617,10 +617,12 @@ test('figures: the two sections agree on what a route costs', async b => {
       const t=e=>document.querySelector(e).textContent.trim();
       const bands=[...document.querySelectorAll('#wf .wcol:not(.wcol-total) .wlab')].map(e=>e.textContent);
       return { whole:t('#wf .wcol-total .wlab'), borne:t('[data-fig="route.borne"]'),
-               mkt:t('[data-fig="mkt.household"]'), bands };
+               big:t('[data-fig="route.whole"]'), mkt:t('[data-fig="mkt.household"]'), bands };
     });
-    // the waterfall's total column is the whole bill for this route
-    ok(`${route}: waterfall total is the route's whole bill`, n(r.whole) > 0, r.whole);
+    // the waterfall's total column is the whole bill for this route, and it has
+    // to be the same number the section's headline figure shows
+    ok(`${route}: waterfall total is the route's whole bill`, n(r.whole) > 0 && Math.abs(n(r.whole) - n(r.big)) <= 1,
+       `waterfall ${r.whole} vs headline ${r.big}`);
     if (route === 'marketplace')
       ok('marketplace bar matches what the waterfall says the household bears',
          Math.abs(n(r.mkt) - n(r.borne)) <= 1, `bar ${r.mkt} vs borne $${n(r.borne).toLocaleString()}`);
@@ -1403,14 +1405,15 @@ test('letter: send, copy and print work without the letter leaving the browser',
   await p.locator('#copyBtn').click(); await p.waitForTimeout(250);
   ok('copy confirms itself', await p.evaluate(()=>
      document.getElementById('copyBtn').textContent.includes('Copied')));
-  await p.evaluate(()=>document.body.classList.add('print-letter'));
+  await p.evaluate(()=>{ window.print = () => {}; });
+  await p.locator('#printBtn').click(); await p.waitForTimeout(100);
   await p.emulateMedia({media:'print'});
   const pr = await p.evaluate(()=>({
-    hero: getComputedStyle(document.querySelector('h1')).visibility,
-    letter: getComputedStyle(document.querySelector('.letter .bd')).visibility,
+    hero: getComputedStyle(document.querySelector('h1')).display,
+    letter: getComputedStyle(document.querySelector('.letter .bd')).display,
     chrome: getComputedStyle(document.querySelector('.letter .ft')).display }));
   ok('print shows the letter and nothing else',
-     pr.hero==='hidden' && pr.letter==='visible' && pr.chrome==='none', JSON.stringify(pr));
+     pr.hero==='none' && pr.letter!=='none' && pr.chrome==='none', JSON.stringify(pr));
   await p.close();
 });
 
@@ -1671,6 +1674,87 @@ test('marketplace: below the floor and in Medicaid\'s range there is no credit, 
   await setIncome(p, 22000);
   t = await p.evaluate(() => document.getElementById('elig').innerText);
   ok('just above the ceiling the credit returns', /what you qualify for today/i.test(t) && /credit of \$/.test(t), t.slice(0, 100));
+  await p.close();
+});
+
+/* Pre-launch review, PR 2: each of these shipped past the suite. */
+test('rep card: hidden blocks are actually hidden, across ZIP changes', async b => {
+  const p = await page(b, 1200, 900);
+  const box = async id => p.evaluate(id => { const e = document.getElementById(id), r = e.getBoundingClientRect();
+    return { hidden: e.hidden, h: Math.round(r.height), text: e.innerText.replace(/\s+/g, ' ').slice(0, 120) }; }, id);
+  await p.locator('#zip').fill('30165'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  await p.locator('#areapick button[data-k]').first().click(); await p.waitForTimeout(350);   // county first; then the district asks
+  let s = await box('senBlock'), r = await box('repPick');
+  ok('split ZIP: the senators block is hidden and measures nothing', s.hidden && s.h === 0, JSON.stringify(s));
+  ok('split ZIP: the district chooser is showing', !r.hidden && r.h > 40, JSON.stringify(r));
+  await p.locator('#zip').fill('33313'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  r = await box('repPick'); s = await box('senBlock');
+  ok('next ZIP: the stale chooser is gone', r.hidden && r.h === 0, JSON.stringify(r));
+  ok('next ZIP: the senators are Florida\'s', !s.hidden && /Scott|Moody/.test(s.text), s.text);
+  await p.close();
+});
+
+test('print: the letter prints on one page', async b => {
+  const p = await page(b, 1280, 900);
+  await p.evaluate(() => { window.print = () => {}; });   // headless has no dialog and fires no afterprint
+  await p.locator('#printBtn').click(); await p.waitForTimeout(100);
+  await p.emulateMedia({ media: 'print' });
+  const letterBox = await p.evaluate(() => { const r = document.querySelector('.letter .bd').getBoundingClientRect(); return { w: r.width, h: r.height }; });
+  ok('print: the letter body has size', letterBox.w > 300 && letterBox.h > 300, JSON.stringify(letterBox));
+  for (const format of ['Letter', 'A4']) {
+    await p.evaluate(() => document.getElementById('printBtn').click()); await p.waitForTimeout(100);   // page.pdf fires afterprint, which disarms; the button is display:none in print media
+    const buf = await p.pdf({ format });
+    const pages = (buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
+    ok(`print: ${format} is exactly one page`, pages === 1, `${pages} pages`);
+  }
+  await p.emulateMedia({ media: 'screen' });
+  await p.close();
+});
+
+test('letter: a reader\'s edit never freezes the calculator', async b => {
+  const p = await page(b, 1280, 900);
+  const errs = []; p.on('pageerror', e => errs.push(e.message));
+  await p.evaluate(() => { const l = document.getElementById('letterBd');
+    l.innerHTML = '<p>Dear Representative, a short note of my own.</p>'; l.dispatchEvent(new Event('input', { bubbles: true })); });
+  await setIncome(p, 120000);
+  ok('after an edit the figures still move', await p.evaluate(() => document.getElementById('incomeVal').textContent) === '$120,000');
+  ok('and nothing threw', errs.length === 0, errs[0] || '');
+  await p.close();
+});
+
+test('split ZIP: the rep card waits for the county, like the figures', async b => {
+  const p = await page(b, 1280, 900);
+  const read = () => p.evaluate(() => ({ place: document.getElementById('placeName').textContent,
+    rep: document.getElementById('repName').textContent, letter: document.getElementById('letterBd').innerText.slice(0, 120) }));
+  await p.locator('#zip').fill('10537'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);   // Putnam / Westchester, NY
+  let r = await read();
+  ok('before the pick, place and rep still agree (both the previous ZIP)', /Dallas/.test(r.place) && /Crockett/.test(r.rep), `${r.place} / ${r.rep}`);
+  await p.locator('#areapick button[data-k]').first().click(); await p.waitForTimeout(350);
+  r = await read();
+  ok('after the pick, both moved together', /NY/.test(r.place) && /Lawler/.test(r.rep), `${r.place} / ${r.rep}`);
+  ok('and the letter names the new county to the new member', /Lawler/.test(r.letter) && /(Putnam|Westchester) County/.test(r.letter) && !/Dallas/.test(r.letter), r.letter);
+  await p.close();
+});
+
+test('scope: county names that end in City, Columbia or Island keep their "County"', async b => {
+  const p = await page(b, 1280, 900);
+  for (const [z, want] of [['12017', 'Columbia County · NY'], ['98236', 'Island County · WA'], ['23081', 'James City County · VA'], ['89701', 'Carson City · NV'], ['20001', 'District of Columbia · DC']]) {
+    await p.locator('#zip').fill(z); await p.locator('#zipGo').click(); await p.waitForTimeout(300);
+    const got = await p.evaluate(() => document.getElementById('placeName').textContent);
+    ok(`${z} reads "${want}"`, got === want, got);
+  }
+  await p.close();
+});
+
+test('range strip: the band stays inside the strip', async b => {
+  const p = await page(b, 1440, 900);
+  await p.locator('#ages').fill('40'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(150);
+  await setIncome(p, 260000);
+  const g = await p.evaluate(() => { const band = document.getElementById('rangeBand').getBoundingClientRect(),
+    strip = document.querySelector('.range').getBoundingClientRect(), mk = document.getElementById('mk').getBoundingClientRect();
+    return { band: Math.round(band.right - strip.right), mk: Math.round(mk.right - strip.right), left: Math.round(band.left - strip.left) }; });
+  ok('single adult at $260,000: the band ends inside the strip', g.band <= 0 && g.left >= 0, `band overruns by ${g.band}px`);
+  ok('and the marker does too', g.mk <= 2, `marker overruns by ${g.mk}px`);
   await p.close();
 });
 
