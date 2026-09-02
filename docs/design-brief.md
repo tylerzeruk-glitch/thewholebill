@@ -57,8 +57,10 @@ calculator lives. The shift in ground signals "now we're computing your numbers.
   - Teal `#3FB5AE` = universal
   - Gray `#5E6472` / `#8A8F9C` = marketplace
   - Deliberately no red/blue anywhere — the palette must carry meaning, not allegiance.
-- A faint ledger-rule texture on the paper ground (1px at ~3% opacity, 34px pitch) ties the
-  editorial half to the instrument half without gradients or ornament.
+- A faint paper grain on the paper ground (an inline SVG fractal-noise tile at about 7%
+  opacity, 240px) ties the light sections together. It replaced a 1px ledger rule at 34px
+  pitch on 2026-09-02 after readers said the rules read as lined paper and distracted from
+  the text; the grain keeps the printed-stock feel with nothing for the eye to track.
 - **Sticky results bar:** once enough input exists to compute, a slim persistent bar keeps the
   user's three numbers on screen for the rest of the scroll. Every later argument then happens
   with their own number visible. Cheap to build; converts reading-an-argument into being-inside-one.
