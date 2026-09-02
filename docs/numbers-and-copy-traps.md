@@ -10,7 +10,9 @@ IS a line on every paystub. Lumping it into the invisible bucket hands a skeptic
 
 - On the paystub: premium deduction + Medicare tax
 - Genuinely invisible: employer premium share + deductible/OOP
-- Sample household: $8,278 visible / $23,300 invisible / $31,578 total
+- Sample household: $8,228 visible / $23,943 invisible / $32,171 total (the static placeholders
+  are generated from the default state at build time by `tools/default-figures.mjs`, so they
+  cannot drift from what the page paints)
 
 Pick ONE definition of "money you see" and hold it across every screen, the letter included.
 Three screens drifting into three definitions is how this breaks.

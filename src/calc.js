@@ -338,29 +338,42 @@
     years: 10,
     households: 134790000 // Census, 2025
   };
-  var BLAHOUS_ADDER = BLAHOUS.altDelta / BLAHOUS.years / BLAHOUS.households;
+  /* Every allocation is rounded to the dollar ONCE, here. The methodology page
+   * prints this arithmetic and invites the reader to redo it; carrying cents
+   * into the sum made the page say $15,096 where the methodology said
+   * $9,757 + $5,340 = $15,097. Now both surfaces print the same integer. */
+  var BLAHOUS_ADDER = Math.round(BLAHOUS.altDelta / BLAHOUS.years / BLAHOUS.households);
 
   /* RAND RR-3106 (Liu & Eibner, 2019): NHE +$68.8B (+1.8%) in 2019 with the plan
    * fully in place — $3,823.1B -> $3,891.9B, Table 1. Models the bill WITH
    * long-term care, payment rates ~109% of Medicare, supply constraints
    * absorbing half of new demand (+9.8% without that constraint). */
-  var RAND_ADDER = 68.8e9 / BLAHOUS.households;
+  var RAND_ADDER = Math.round(68.8e9 / BLAHOUS.households);
 
   /* CBO Working Paper 2020-08 (Dec 2020), Exhibit 1-1: five illustrative
    * options for 2030. We use Option 5 — the one shaped most like the bill
    * (LTSS covered, no cost sharing) — which RAISES NHE $290B, the least
    * friendly of the five. CBO's four options WITHOUT long-term care all LOWER
    * national spending (-$42B to -$743B). CBO never scored the bill itself. */
-  var CBO_ADDER = 290e9 / BLAHOUS.households;
+  var CBO_ADDER = Math.round(290e9 / BLAHOUS.households);
 
   /* Urban Institute, "From Incremental to Comprehensive" (Oct 2019), Table 13:
    * "Single-Payer Enhanced" raises national health spending $719.7B (+20.6%)
    * in 2020 — the most expensive estimate anyone has published. LTSS, dental,
    * zero cost sharing, all residents covered. */
-  var URBAN_ADDER = 719.7e9 / BLAHOUS.households;
+  var URBAN_ADDER = Math.round(719.7e9 / BLAHOUS.households);
 
+  /* Sanders' 2019 list exempts "the standard deduction" from the 4% premium
+   * (its worked example: $29,000 for a family of four, 2019). This is a 2026
+   * calculator, so it uses the 2026 standard deduction: $32,200 joint, $16,100
+   * single, IRS Rev. Proc. 2025-32. The list also exempts an employer's first
+   * $2M of payroll from the 7.5% levy; a household cannot know where its
+   * employer stands, so the levy is applied to all wages here, which if
+   * anything overstates the cost. Both choices are stated on the methodology
+   * page. Galvani (below) keeps its paper's literal $29,000. */
+  var SANDERS_EXEMPT = { joint: 32200, single: 16100 };
   function sandersOne(income, size) {
-    var exempt = size > 1 ? 29200 : 14600;
+    var exempt = size > 1 ? SANDERS_EXEMPT.joint : SANDERS_EXEMPT.single;
     var premium = 0.04 * Math.max(0, income - exempt);
     var payroll = 0.075 * income;
     return { total: premium + payroll, parts: { premium: premium, payroll: payroll } };
@@ -402,9 +415,10 @@
       basis: 'published formula',
       note: 'Sen. Bernie Sanders\u2019 office, 2019, from its published list of financing options, ' +
             'the first of two household-level formulas anyone in this debate has published. A 4% ' +
-            'income-based premium above a standard-deduction exemption, plus a 7.5% employer payroll ' +
-            'tax replacing what your employer pays now. The list presents these as separate options; ' +
-            'pairing them is our doing.',
+            'income-based premium above the standard deduction ($32,200 joint, $16,100 single in ' +
+            '2026), plus a 7.5% employer payroll tax replacing what your employer pays now. The ' +
+            'list presents these as separate options; pairing them is our doing. It also exempts an ' +
+            'employer\u2019s first $2 million of payroll from the levy; we apply it to all wages.',
       compute: sandersOne
     },
     {

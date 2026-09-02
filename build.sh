@@ -21,7 +21,7 @@ set -e
 cd "$(dirname "$0")"
 mkdir -p dist dist/methodology preview
 python3 - <<'PY'
-import io
+import io, json, re, subprocess
 calc = io.open('src/calc.js', encoding='utf-8').read()
 reps = io.open('src/reps.js', encoding='utf-8').read()
 bench = io.open('src/benchmarks.js', encoding='utf-8').read()
@@ -31,6 +31,24 @@ for marker in ('/*__CALC__*/', '/*__REPS__*/', '/*__BENCH__*/',
                '<title>The Whole Bill</title>'):
     if marker not in page:
         raise SystemExit('build: ' + marker + ' marker missing from src/page.html')
+# --- placeholders: every static figure is generated from the default state ---
+# The HTML shows figures before JavaScript runs (crawlers, reader mode, the
+# share unfurl). They used to be typed by hand and drifted from what the code
+# painted a second later. Now tools/default-figures.mjs computes them from the
+# same arithmetic and they are written into each data-fig element here.
+figs = json.loads(subprocess.check_output(['node', 'tools/default-figures.mjs']))
+missing = []
+def fill(mo):
+    key = mo.group(2)
+    if key not in figs:
+        missing.append(key)
+        return mo.group(0)
+    return mo.group(1) + figs[key] + mo.group(3)
+page, nfilled = re.subn(r'(<[^>]*\bdata-fig="([^"]+)"[^>]*>)\$[0-9,]+(<)', fill, page)
+if missing:
+    raise SystemExit('build: no default figure for data-fig ' + ', '.join(sorted(set(missing))))
+if nfilled < 10:
+    raise SystemExit('build: only %d placeholder figures filled; the markup changed shape' % nfilled)
 out = page.replace('/*__BENCH__*/', '\n' + bench + '\n', 1)
 out = out.replace('/*__CALC__*/', '\n' + calc + '\n', 1)
 out = out.replace('/*__REPS__*/', '\n' + reps + '\n', 1)
@@ -81,4 +99,4 @@ cp src/logo.svg dist/logo.svg
 cp src/card.png src/404.html src/robots.txt src/sitemap.txt src/_headers dist/
 # the artifact moved to preview/; a stale copy in dist would deploy publicly
 rm -f dist/artifact.html
-echo "built dist/ (index, methodology, 404, launch furniture) and preview/artifact.html"
+echo "built dist/ (index, methodology, 404, launch furniture) and preview/artifact.html; placeholders generated from the default household"
