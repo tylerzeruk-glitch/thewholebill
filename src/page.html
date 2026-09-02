@@ -1338,7 +1338,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <p class="body" style="max-width:760px">The credit is the gap between the benchmark plan&rsquo;s premium and what the law says your household is expected to contribute. That expected share comes from IRS Rev. Proc. 2025-25, and it rises <i>linearly within each band</i>, not in steps.</p>
       <table style="margin-top:12px">
         <tr><th>Household income</th><th>Contribution rises from</th><th>to</th></tr>
-        <tr><td>Under 133% of the poverty line</td><td class="num">2.10%</td><td class="num">2.10%</td></tr>
+        <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">Below 100% of the poverty line</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit</td></tr>
+        <tr><td>100% to 133%</td><td class="num">2.10%</td><td class="num">2.10%</td></tr>
         <tr><td>133% to 150%</td><td class="num">3.14%</td><td class="num">4.19%</td></tr>
         <tr><td>150% to 200%</td><td class="num">4.19%</td><td class="num">6.60%</td></tr>
         <tr><td>200% to 250%</td><td class="num">6.60%</td><td class="num">8.44%</td></tr>
@@ -1347,6 +1348,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">400% and above</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit at all</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
+      <p class="fn">The first row is the floor, and it matters most in the ten states that have not expanded Medicaid (Alabama, Florida, Georgia, Kansas, Mississippi, South Carolina, Tennessee, Texas, Wisconsin and Wyoming). An adult there below the poverty line is too poor for the credit and, unless a parent with very low income, ineligible for Medicaid as well: the coverage gap. In the states that expanded Medicaid, adults under 138% of the poverty line (215% in the District of Columbia) qualify for Medicaid, and the law gives no marketplace credit to anyone eligible for Medicaid, so the calculator shows no credit there either and says why. The 100% to 133% row applies only to lawfully present immigrants whom Medicaid excludes; they can take the credit. The calculator cannot know who they are, so it shows the common case and labels the exception.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
@@ -1851,6 +1853,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (e.mkt)
       P.push(m.overCliff
         ? 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
+        : m.noCredit
+        ? 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me, and my income sits below the level where the marketplace tax credit begins: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
         : 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.');
     P.push('Under the financing models I looked at, including one produced by opponents of the policy, my household would pay between roughly <mark data-fig="uni.rangeLo" data-round="down"></mark> and <mark data-fig="uni.rangeHi" data-round="up"></mark>. <span id="letterCmp"></span>');
     if (e.loss){
@@ -1877,7 +1881,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var rec = recipient();
     var sig = [state.route, state.tone, state.emph.emp, state.emph.mkt,
                state.emph.loss, state.emph.nation, state.emph.story,
-               S.marketplace.overCliff, rec.kind, rec.m ? rec.m.n + rec.m.co : ""].join("|");
+               S.marketplace.overCliff, S.marketplace.noCredit, rec.kind, rec.m ? rec.m.n + rec.m.co : ""].join("|");
     if (sig === letterSig) return;
     letterSig = sig; letterEdited = false;
     byId("letterBd").innerHTML = letterHTML();
@@ -1990,6 +1994,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     drawSegments("mktBar", "mktSub", W.routeBreakdown("marketplace", opts).parts, max);
     byId("mktNote").innerHTML = S.marketplace.overCliff
       ? '<span style="color:var(--c2)">No subsidy · over the 400% cliff</span>'
+      : S.marketplace.belowFloor
+      ? '<span style="color:var(--c2)">No subsidy · below the credit\u2019s floor</span>'
+      : S.marketplace.medicaidLikely
+      ? '<span style="color:var(--c2)">No subsidy · Medicaid\u2019s range, full price shown</span>'
       : "What you pay, after the credit";
     renderUniversalBar(max);
     var mkPos = (S.universal.total / max * 100).toFixed(1) + "%";
@@ -2437,6 +2445,26 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         'poverty line this household is above 400% and gets <b>no premium tax credit at all</b>, not a ' +
         'reduced one. The enhanced credits that smoothed this cliff expired on 31 December 2025. Earning ' +
         'one dollar less could be worth thousands.</div></div>';
+    } else if (m.belowFloor){
+      var stn = STATE_NAMES[m.place.state] || m.place.state;
+      html = '<div class="warn"><div class="lbl" style="color:var(--c2)">Below the credit\u2019s floor</div>' +
+        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
+        'poverty line this household is under 100%, where the marketplace tax credit begins, so it gets ' +
+        '<b>no credit at all</b>. ' +
+        (m.place.expanded
+          ? stn + ' has expanded Medicaid, so adults at this income qualify for Medicaid rather than a marketplace plan, and children for Medicaid or CHIP.'
+          : stn + ' has not expanded Medicaid, so adults here usually fall in the coverage gap: too poor for the credit, and over the state\u2019s Medicaid limit for parents. Children may still qualify for Medicaid or CHIP.') +
+        ' The marketplace figure above is the benchmark plan at full price, which is what the marketplace would charge, not what this household is expected to pay. ' +
+        '(Lawfully present immigrants whom Medicaid excludes are the exception; they can take the credit.)</div></div>';
+    } else if (m.medicaidLikely){
+      var stn2 = STATE_NAMES[m.place.state] || m.place.state;
+      html = '<div class="warn"><div class="lbl" style="color:var(--c2)">In Medicaid\u2019s range, not the marketplace\u2019s</div>' +
+        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
+        'poverty line, adults in this household qualify for Medicaid in ' + stn2 + ', which covers adults to ' +
+        Math.round(m.medicaidCeiling * 100) + '% of the poverty line. The law gives <b>no marketplace credit</b> to anyone ' +
+        'eligible for Medicaid, so the marketplace figure above is the benchmark plan at full price. Medicaid itself ' +
+        'would cost far less; this calculator does not model it. (Lawfully present immigrants whom Medicaid excludes ' +
+        'are the exception; they can take the credit.)</div></div>';
     } else {
       html = '<div class="callout-i"><div class="lbl" style="color:var(--teal)">What you qualify for today</div>' +
         '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
