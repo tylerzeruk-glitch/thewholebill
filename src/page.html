@@ -19,7 +19,7 @@
   --prule:#E3DDD2; --prule-soft:#EFEAE1; --pctrl:#988B76;
 
   --ink:#12141A; --ink-surface:#171A22; --ink-raised:#1A1D26; --ink-chip:#232836;
-  --irule:#1F2330; --irule-2:#262A35; --ictrl:#5E6472;
+  --irule:#1F2330; --irule-2:#262A35; --ictrl:#6C7383;   /* --ictrl was #5E6472: 2.84:1 against the raised surface, under the 3:1 boundary floor */
   --ik:#E8E6E1; --ib:#B9BCC4; --im:#8A8F9C; --ilabel:#8B92A4; --ifaint:#7C8395;
 
   --c1:#F0C98D; --c2:#D99A3F; --c3:#A87A43; --c4:#86603E; --c4l:#C39258;
@@ -65,7 +65,8 @@ p{margin:0;text-wrap:pretty}
 
 /* ---------- hero ---------- */
 .masthead{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:40px 0 22px;border-bottom:1px solid var(--prule);flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit;padding:10px 0;margin:-10px 0}   /* 44px hit area on a 24px mark */
+footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /* 44px hit area on a 16px line */
 .brand svg{display:block;flex-shrink:0}
 .wordmark{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.012em;line-height:1;white-space:nowrap}
 .domain{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em}
@@ -178,8 +179,8 @@ p{margin:0;text-wrap:pretty}
 .step{width:40px;align-self:stretch;background:none;border:0;border-left:1px solid var(--ictrl);display:flex;align-items:center;justify-content:center;color:var(--im);font-size:17px;line-height:1;transition:background .15s,color .15s}
 .steps{display:flex;align-self:stretch}
 .seg{display:flex;gap:6px}
-.seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--irule-2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
-.seg > div.on,.seg > button.on{background:#2C3140;border-color:#3D4457;color:var(--ik);font-weight:500}
+.seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
+.seg > div.on,.seg > button.on{background:#2C3140;border-color:var(--ib);color:var(--ik);font-weight:500}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;margin:6px 0 0;cursor:pointer;display:block}
 input[type=range]:focus{outline:none}
 input[type=range]:focus-visible{outline:2px solid var(--c2);outline-offset:6px;border-radius:2px}
@@ -410,7 +411,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .meth td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--pk);white-space:nowrap}
 .meth h3{font-family:var(--serif);font-size:clamp(22px,2.2vw,27px);font-weight:400;margin:0;letter-spacing:-.01em}
 .meth .card-p{gap:14px}
-.tag{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:2px;white-space:nowrap}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:2px;white-space:nowrap}
 .tag.stat{background:#DDE9DF;color:#245239}
 .tag.surv{background:#E4E0EC;color:#413659}
 .tag.mod{background:#F5E7CE;color:#7A4E0C}
@@ -491,6 +492,7 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
 .repph.sm{width:34px;height:42px}
 .senrow{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%}
 .sen-n{font-size:13.5px;color:var(--pk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+@media (max-width:440px){.sen-n{white-space:normal}}   /* names wrap rather than ellipsize on phones */
 .sen-s{font-size:12.5px;color:var(--pm);white-space:nowrap}
 /* The recipient control is the people themselves. Selection is a box-shadow
    ring, not an outline, so keyboard focus (outline) stays distinguishable;
@@ -654,8 +656,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      of them. CI caught a 1px overflow here that macOS did not -- Linux sets the
      same mono a shade wider -- so this leaves several px of slack, not none. */
   .wf{gap:5px}
-  .wlab{font-size:clamp(8px,2.5vw,10px);letter-spacing:-.035em;margin-bottom:8px}
-  .wlab.big{font-size:clamp(8px,2.5vw,10px)}
+  .wlab{font-size:clamp(9px,2.8vw,11px);letter-spacing:-.035em;margin-bottom:8px}
+  .wlab.big{font-size:clamp(9px,2.8vw,11.5px)}
   .wlab.total{font-size:clamp(13px,4.3vw,17px);letter-spacing:-.03em}
   .wkick{font-size:9px;letter-spacing:.08em;margin-bottom:6px}
   .wcaps{flex-direction:column;gap:8px;margin-top:18px}
@@ -725,7 +727,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="footline">
       <span>&darr; Scroll</span>
       <span class="domain">thewholebill.org</span>
-      <span>KFF, CMS &amp; Census data &middot; a live preview</span>
+      <span>KFF, CMS &amp; Census data</span>
     </div>
   </div>
 </section>
@@ -783,7 +785,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="rule" style="margin:56px 0 24px"></div>
     <div class="row" style="gap:56px;flex-wrap:wrap">
-      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labelled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums come from the CMS 2026 plan files for your county.</p>
+      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labeled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums come from the CMS 2026 plan files for your county.</p>
       <p class="note" style="max-width:360px">Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
     </div>
   </div>
@@ -800,7 +802,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="fig sm-hide"><span class="dot" style="background:var(--ictrl)"></span><span class="t">Marketplace</span><span class="n" data-fig="mkt.household">$27,200</span></div>
         <div class="fig"><span class="dot" style="background:var(--teal)"></span><span class="t">Universal</span><span class="n" id="stickyU" data-fig="uni.total" style="color:var(--teal)">$9,800</span></div>
       </div>
-      <button class="unit" id="unit" type="button" role="switch" aria-checked="false" aria-label="Show figures per year or per month">
+      <button class="unit" id="unit" type="button" role="switch" aria-checked="false" aria-label="Show monthly figures">
         <span class="unit-thumb" aria-hidden="true"></span>
         <span class="unit-l on" data-u="y">Year</span>
         <span class="unit-l" data-u="m">Month</span>
@@ -840,14 +842,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
               </div>
               <div class="num" style="font-size:19px" id="incomeVal">$95,000</div>
             </div>
-            <div class="qpop" id="incomeQPop" hidden>
+            <div class="qpop" id="incomeQPop" role="tooltip" hidden>
               <div class="lbl" style="margin-bottom:8px">What to enter</div>
               All the money your household expects to make this year, <b style="font-weight:500;color:var(--ik)">before taxes</b>. A close guess is fine. Drag the slider to see how much it matters.
             </div>
             <input type="range" id="income" min="12000" max="260000" step="1000" value="95000" aria-label="Household income">
             <div class="row num" style="justify-content:space-between;font-size:11px;color:var(--ifaint);margin-top:5px"><span>$12k</span><span id="fplVal"></span><span>$260k</span></div>
           </div>
-          <div class="note-i" id="agesNote" hidden style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this site does not price. They are counted here at the oldest marketplace rate, a 64-year-old&rsquo;s.</div>
+          <div class="note-i" id="agesNote" hidden aria-live="polite" style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this site does not price. They are counted here at the oldest marketplace rate, a 64-year-old&rsquo;s.</div>
           <div class="field">
             <div class="lbl" id="routeLbl">How you&rsquo;re covered now</div>
             <div class="seg" id="route" role="group" aria-labelledby="routeLbl"><button type="button" data-r="employer" class="on" aria-pressed="true">Employer</button><button type="button" data-r="marketplace" aria-pressed="false">Marketplace</button><button type="button" data-r="none" aria-pressed="false">Uninsured</button></div>
@@ -907,7 +909,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           </div>
           <div class="cards" id="cards"></div>
           <div id="elig"></div>
-          <p class="note-i" id="panelNote">Employer premiums are KFF 2025 survey averages. Subsidy maths follows the IRS 2026 applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan from the CMS 2026 plan files, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
+          <p class="note-i" id="panelNote">Employer premiums are KFF 2025 survey averages. Subsidy math follows the IRS 2026 applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan from the CMS 2026 plan files, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
         </div>
       </div>
     </div>
@@ -970,7 +972,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
       <div class="cliffstats">
         <div class="cstat"><div class="t">One average hospital stay, billed at list price</div><div class="v" style="color:var(--c2)">&asymp;$57,000</div><div class="s">$16,700 average cost &times; the published 3.4&times; average markup, modeled</div></div>
-        <div class="cstat"><div class="t">The most an insured person can owe in a year</div><div class="v">$10,600</div><div class="s">the 2026 statutory out-of-pocket maximum, per person</div></div>
+        <div class="cstat"><div class="t">The most an insured person can owe in a year</div><div class="v">$10,600</div><div class="s">the 2026 statutory out-of-pocket maximum, per person, for covered in-network care</div></div>
         <div class="cstat" style="border:none"><div class="t">The most an uninsured person can owe</div><div class="v" style="color:var(--c2)">No limit</div><div class="s">no ceiling exists in law</div></div>
       </div>
 
@@ -987,7 +989,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
       </div>
 
-      <p class="note-i">How often does cost stop care? Asked by KFF in 2025, <b style="color:var(--ib);font-weight:400">three in four</b> uninsured adults said they skipped or postponed care over cost; the federal NHIS survey, asking more narrowly, puts it at <b style="color:var(--ib);font-weight:400">38.6%</b>, more than double the privately insured. Both figures, and the list-price arithmetic above (our derivation from HCUP&rsquo;s published aggregates and published markup research, one of whose sources is union-funded and labelled so), are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>, along with the medical-bankruptcy literature, where the famous numbers disagree and we print both sides or neither.</p>
+      <p class="note-i">How often does cost stop care? Asked by KFF in 2025, <b style="color:var(--ib);font-weight:400">three in four</b> uninsured adults said they skipped or postponed care over cost; the federal NHIS survey, asking more narrowly, puts it at <b style="color:var(--ib);font-weight:400">38.6%</b>, more than double the privately insured. Both figures, and the list-price arithmetic above (our derivation from HCUP&rsquo;s published aggregates and published markup research, one of whose sources is union-funded and labeled so), are <a class="q" href="#/methodology" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>, along with the medical-bankruptcy literature, where the famous numbers disagree and we print both sides or neither.</p>
     </div>
   </section>
   <!-- ---- 05 THE COMPARISON (the turn: after the cliff, the alternative) ---- -->
@@ -998,7 +1000,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">04 &middot; The comparison</div>
           <h2><em style="font-style:italic;color:var(--teal)">Another way</em> to pay for the same care.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust, including the ones written to make it look bad.</p>
+        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust, including the one funded by its opponents.</p>
       </div>
 
       <div class="stack" style="gap:14px">
@@ -1055,7 +1057,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="stack" style="gap:5px">
             <div style="font-size:13.5px;color:var(--im)" id="decadeLbl">Over a decade</div>
             <div class="v2" id="decade" data-fig="uni.decade"></div>
-            <div style="font-size:13px;color:var(--ifaint)">before wage growth</div>
+            <div style="font-size:13px;color:var(--ifaint)">at today&rsquo;s prices</div>
           </div>
         </div>
         <div class="cobra">
@@ -1064,7 +1066,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <div class="num" style="font-size:32px;letter-spacing:-.025em;color:var(--c2)" data-fig="cobra.annual">$2,244</div>
             <div style="font-size:13.5px;color:var(--im)"><span data-uw="slash">/ year</span>, COBRA</div>
           </div>
-          <div class="note-i">The employer share does not disappear. It moves onto your card.</div>
+          <div class="note-i">The employer share does not disappear. It moves onto your bill.</div>
         </div>
       </div>
 
@@ -1184,7 +1186,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="lbl p">Objection 04</div>
         <div class="quote">&ldquo;The country simply cannot afford it.&rdquo;</div>
         <p class="body">The headline figure is enormous: on the order of $30 to $40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.<sup class="fnr">*</sup></p>
-        <p class="fn"><span class="fnm">*</span>The Mercatus study is the useful one here. Funded by opponents and built to be damning, it still showed lower national spending than the status quo. But that result depends on the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
+        <p class="fn"><span class="fnm">*</span>The Mercatus study is the useful one here. Funded by opponents of the policy, it still showed lower national spending than the status quo. But that result depends on the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
       </div>
     </div>
 
@@ -1260,11 +1262,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                owns. Picking a route sets sensible defaults; the reader can
                check any combination on top of that. -->
           <div class="stack" style="gap:9px" id="emph">
-            <button type="button" class="chk on" data-em="emp" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What my employer coverage really costs</button>
-            <button type="button" class="chk on" data-em="loss" aria-pressed="true"><span class="box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Losing coverage when a job ends</button>
-            <button type="button" class="chk off" data-em="mkt" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Self-employed, buying on the exchange</button>
-            <button type="button" class="chk off" data-em="nation" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What the country would save</button>
-            <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
+            <button type="button" class="chk on" data-em="emp" aria-pressed="true"><span class="box on"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What my employer coverage really costs</button>
+            <button type="button" class="chk on" data-em="loss" aria-pressed="true"><span class="box on"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Losing coverage when a job ends</button>
+            <button type="button" class="chk off" data-em="mkt" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Self-employed, buying on the exchange</button>
+            <button type="button" class="chk off" data-em="nation" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What the country would save</button>
+            <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
           </div>
         </div>
 
@@ -1287,7 +1289,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
              inside resolve through the same data-fig map as the rest of the
              page. Editable by hand -- and a control change rewrites the body,
              which the header says while an edit is in force. -->
-        <div class="bd" id="letterBd" contenteditable="true" spellcheck="true" aria-label="Your letter. Editable text."></div>
+        <div class="bd" id="letterBd" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="Your letter. Editable text."></div>
         <div class="ft">
           <!-- Congressional offices take constituent mail through the web
                forms on their own sites, never a public inbox, so there is no
@@ -1299,7 +1301,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <button class="btn-ghost" id="printBtn" type="button">Print</button>
           <a class="btn-ghost" id="sendBtn" href="#" style="height:48px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Mail app</a>
           <div class="grow"></div>
-          <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote">Congressional offices take letters through the forms on their own sites, not a public inbox. The dark button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</p>
+          <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote"><span id="ftNoteSite">Congressional offices take letters through the forms on their own sites, not a public inbox. The dark button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</span><span id="ftNoteNoSite" hidden>Congressional offices take letters through the forms on their own sites, not a public inbox. We do not have this member&rsquo;s site on file, so the dark button is off: use Copy text, then paste the letter into the contact form listed on their house.gov page. We never see your letter.</span><span id="ftLong" hidden> Your letter is longer than some mail apps accept in a link, so the Mail app button copies it and opens a blank message with the subject filled in; paste the letter in.</span></p>
         </div>
       </div>
     </div>
@@ -1338,7 +1340,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>Three kinds of number</h3>
       <p class="body" style="max-width:760px">Every figure the calculator produces is one of these three, and the interface says which. If a number is ours rather than someone else&rsquo;s, we would rather tell you than have you find out.</p>
-      <table style="margin-top:12px"><caption class="vh">How the three kinds of number are labelled</caption>
+      <table style="margin-top:12px"><caption class="vh">How the three kinds of number are labeled</caption>
         <tr>
           <th scope="row" class="rowh" style="width:130px"><span class="tag stat">Statutory</span></th>
           <td>Fixed in law or in a published federal table. Exact, not an estimate. The poverty guidelines, the premium-credit schedule, the Medicare payroll rate, the COBRA 102% cap.</td>
@@ -1389,7 +1391,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <table style="margin-top:12px"><caption class="vh">How the benchmark premium is built</caption>
         <tr>
           <th scope="row" class="rowh" style="width:220px"><b style="font-weight:500;color:var(--pk)">The plan set</b></th>
-          <td>Individual-market, on-exchange, non-dental silver plans, excluding child-only offerings. Healthcare.gov states come from the CMS Exchange PUFs (rate, plan attributes, service area); the 21 state-run exchanges come from the CMS State-based Exchange PUFs. Both are published federal tables; no key, no scraping of insurer sites.</td>
+          <td>Individual-market, on-exchange, non-dental silver plans, excluding child-only offerings. HealthCare.gov states come from the CMS Exchange PUFs (rate, plan attributes, service area); the 21 state-run exchanges come from the CMS State-based Exchange PUFs. Both are published federal tables; no key, no scraping of insurer sites.</td>
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Why the second lowest</b></th>
@@ -1397,7 +1399,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Per county, not per rating area</b></th>
-          <td>A rating area sets the price, but each plan&rsquo;s service area decides where it is sold, and the two disagree often: in 37% of healthcare.gov counties the county&rsquo;s true second-lowest silver differs from its rating area&rsquo;s. So we take the plans whose service area covers your county, price them at your county&rsquo;s rating area, sort, and take the second. Roughly 3,300 county figures, precomputed and shipped with the page.</td>
+          <td>A rating area sets the price, but each plan&rsquo;s service area decides where it is sold, and the two disagree often: in 37% of HealthCare.gov counties the county&rsquo;s true second-lowest silver differs from its rating area&rsquo;s. So we take the plans whose service area covers your county, price them at your county&rsquo;s rating area, sort, and take the second. Roughly 3,300 county figures, precomputed and shipped with the page.</td>
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Ages</b></th>
@@ -1413,7 +1415,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">How we know it is right</b></th>
-          <td>Three independent checks, run every time the table is rebuilt: every healthcare.gov county must match the separately published QHP landscape file&rsquo;s own second-lowest silver premium to the cent; New York&rsquo;s county floors must match NY State of Health&rsquo;s published 2026 lowest-cost-silver table to the cent; and Los Angeles must match Covered California&rsquo;s published 2026 rate booklet. A build that fails any check does not ship.</td>
+          <td>Three independent checks, run every time the table is rebuilt: every HealthCare.gov county must match the separately published QHP landscape file&rsquo;s own second-lowest silver premium to the cent; New York&rsquo;s county floors must match NY State of Health&rsquo;s published 2026 lowest-cost-silver table to the cent; and Los Angeles must match Covered California&rsquo;s published 2026 rate booklet. A build that fails any check does not ship.</td>
         </tr>
       </table>
       <p class="fn">Two judgment calls to know about. &ldquo;Second lowest&rdquo; counts plans, not distinct prices, so if two plans tie for cheapest the benchmark equals that tied price; the IRS defines it the same way. And the credit legally counts only the essential-health-benefits share of the benchmark premium, typically 99% to 100% of it; the plan files publish that share only as a whole percent, so we use the full premium, which can overstate a credit by a fraction of a percent (about $7 a month on a $3,081 Connecticut benchmark, checked against the state exchange&rsquo;s own quote).</p>
@@ -1432,7 +1434,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>What universal coverage would cost you</h3>
-      <p class="body" style="max-width:760px">This is where we are most exposed, so here is the whole derivation, for all six models. Two are published household-level formulas, the only two anyone has written down. The other four are our allocation of a published national estimate: the source&rsquo;s own annual spending change against current law, spread evenly across 134.79 million households (Census, 2025) and added to the Sanders formula. The range deliberately runs from the only peer-reviewed estimate to the most expensive one anyone has published. The argument has to survive the hostile end, or it is not an argument.</p>
+      <p class="body" style="max-width:760px">This is where we are most exposed, so here is the whole derivation, for all six models. Two are published household-level formulas, the only two anyone has written down. The other four are our allocation of a published national estimate: the source&rsquo;s own annual spending change against current law, spread evenly across 134.79 million households (Census, 2025) and added to the Sanders formula. The range deliberately runs from the only peer-reviewed estimate to the most expensive one we know of. The argument has to survive the hostile end, or it is not an argument.</p>
 
       <div class="grid2" style="margin-top:20px">
         <div class="card-p">
@@ -1449,13 +1451,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="quote" style="font-size:23px">Lancet &middot; peer-reviewed</div>
           <p class="body">Galvani, Parpia, Foster, Singer &amp; Fitzpatrick, <i>The Lancet</i>, February 2020: the only peer-reviewed estimate in this set, and the second published household formula: a 5% income tax above the paper&rsquo;s stated $29,000 exemption, plus a 10% payroll tax replacing employer premiums (the authors&rsquo; manuscript gives 11.29% as the break-even upper bound; some summaries quote 12.29%).</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">5% &times; (income &minus; $29,000)<br>+ 10% &times; income<br><br>= 5% &times; $66,000 &nbsp;=&nbsp; $3,300<br>+ 10% &times; $95,000 &nbsp;=&nbsp; $9,500<br><b>= $12,800 a year</b></p>
-          <p class="fn">The senior author was an unpaid adviser to Sen. Sanders&rsquo; office, disclosed for the same reason Mercatus is labelled Koch-funded. The paper leaves about $507 average out-of-pocket, which every model here excludes for comparability. The paper states one $29,000 threshold; halving it for single filers mirrors our Sanders treatment and is our convention, not the paper&rsquo;s. The same team&rsquo;s 2026 preprint (not peer reviewed, produced for a Rep. Khanna inquiry) re-ran the model on 2024 data: national spending falling $1,041 billion, 19.7%.</p>
+          <p class="fn">The senior author was an unpaid adviser to Sen. Sanders&rsquo; office, disclosed for the same reason Mercatus is labeled Koch-funded. The paper leaves about $507 average out-of-pocket, which every model here excludes for comparability. The paper states one $29,000 threshold; halving it for single filers mirrors our Sanders treatment and is our convention, not the paper&rsquo;s. The same team&rsquo;s 2026 preprint (not peer reviewed, produced for a Rep. Khanna inquiry) re-ran the model on 2024 data: national spending falling $1,041 billion, 19.7%.</p>
         </div>
 
         <div class="card-p">
           <div class="lbl p">Model three <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">RAND &middot; nonpartisan</div>
-          <p class="body">Liu &amp; Eibner, RAND Corporation, 2019: nonpartisan, modelling the bill <i>with</i> long-term care at payment rates around 109% of Medicare. National health spending rises 1.8%, from $3,823 billion to $3,892 billion.</p>
+          <p class="body">Liu &amp; Eibner, RAND Corporation, 2019: nonpartisan, modeling the bill <i>with</i> long-term care at payment rates around 109% of Medicare. National health spending rises 1.8%, from $3,823 billion to $3,892 billion.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$68.8B &divide; 134,790,000 households<br>= <b>$510</b> per household per year<br><br>$9,637 + $510 = <b>$10,147</b></p>
           <p class="fn">RAND assumed supply constraints absorb half of new demand; without that assumption its increase is 9.8%. RAND published no household figure. The allocation is ours, same convention as Blahous.</p>
         </div>
@@ -1471,7 +1473,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="card-p">
           <div class="lbl p">Model five <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">Mercatus &middot; the opposition</div>
-          <p class="body">Charles Blahous, Mercatus Center, 2018: Koch-funded and written to show single-payer was unaffordable. He modelled two scenarios. His <i>main</i> one has national health spending <b>falling $2.05 trillion</b> over a decade against current law. His alternative, where provider payments do not fall to Medicare rates, has it <b>rising $3.25 trillion</b>.</p>
+          <p class="body">Charles Blahous, Mercatus Center, 2018: Koch-funded, and its author opposes the policy. He modeled two scenarios. His <i>main</i> one has national health spending <b>falling $2.05 trillion</b> over a decade against current law. His alternative, where provider payments do not fall to Medicare rates, has it <b>rising $3.25 trillion</b>.</p>
           <p class="body">We use the alternative, so this site never rests on the friendly reading of an unfriendly study.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">$3.252T &divide; 10 years<br>&divide; 134,790,000 households<br>= <b>$2,413</b> per household per year<br><br>$9,637 + $2,413 = <b>$12,050</b></p>
           <p class="fn">Blahous published no household figure, so that allocation is ours. Spreading it flat across all households is a simplification: real financing would be progressive, which would move this number down for most households and up for high earners.</p>
@@ -1480,7 +1482,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="card-p">
           <div class="lbl p">Model six <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">Urban &middot; the priciest</div>
-          <p class="body">Blumberg, Holahan and colleagues, Urban Institute, October 2019, in a report financed by the Commonwealth Fund (named for the same reason Mercatus&rsquo; funder is): a left-leaning institute&rsquo;s &ldquo;Single-Payer Enhanced&rdquo;, and the most expensive estimate anyone has published: national spending rising <b>$719.7 billion a year (+20.6%)</b>, covering long-term care, dental, zero cost sharing and every US resident.</p>
+          <p class="body">Blumberg, Holahan and colleagues, Urban Institute, October 2019, in a report financed by the Commonwealth Fund (named for the same reason Mercatus&rsquo; funder is): a left-leaning institute&rsquo;s &ldquo;Single-Payer Enhanced&rdquo;, and the most expensive estimate we know of: national spending rising <b>$719.7 billion a year (+20.6%)</b>, covering long-term care, dental, zero cost sharing and every US resident.</p>
           <p class="body">We include it so the top of the range is the hardest number on offer. If the argument survives this one, it survives.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$719.7B &divide; 134,790,000 households<br>= <b>$5,339</b> per household per year<br><br>$9,637 + $5,339 = <b>$14,976</b></p>
           <p class="fn">Urban published no household figure. The allocation is ours, same convention as Blahous. Its &ldquo;Single-Payer Lite&rdquo; option, without long-term care and with income-scaled cost sharing, <i>cuts</i> national spending 6.0%. We use the expensive one.</p>
@@ -1498,11 +1500,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">The markup to list price</b></th>
-          <td>Charges average <span class="num">3.4&times;</span> cost nationally (Bai &amp; Anderson, <i>Health Affairs</i> 2015, on 2012 data; the most common ratio was 2.4). A 2020 study by National Nurses United (a union that advocates single-payer; labelled, like every source here) measures 4.2&times; by 2018. We use the older, smaller number.</td>
+          <td>Charges average <span class="num">3.4&times;</span> cost nationally (Bai &amp; Anderson, <i>Health Affairs</i> 2015, on 2012 data; the most common ratio was 2.4). A 2020 study by National Nurses United (a union that advocates single-payer; labeled, like every source here) measures 4.2&times; by 2018. We use the older, smaller number.</td>
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">One admission, as billed</b></th>
-          <td>&asymp;<span class="num">$57,000</span>: $16,700 &times; 3.4, our multiplication, labelled modeled where it appears. Uninsured patients are billed from list prices. Protections exist but are conditional (nonprofit hospitals&rsquo; assistance policies under IRS 501(r), good-faith estimates for scheduled care under the No Surprises Act), and none of them caps the price itself.</td>
+          <td>&asymp;<span class="num">$57,000</span>: $16,700 &times; 3.4, our multiplication, labeled modeled where it appears. Uninsured patients are billed from list prices. Protections exist but are conditional (nonprofit hospitals&rsquo; assistance policies under IRS 501(r), good-faith estimates for scheduled care under the No Surprises Act), and none of them caps the price itself.</td>
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">The insured ceiling</b></th>
@@ -1514,7 +1516,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Debt, and care skipped</b></th>
-          <td><span class="num">62%</span> of uninsured adults carry health-care debt, against 44% of the insured (KFF survey, 2022). Cost stopped or delayed care for <span class="num">three in four</span> uninsured adults in KFF&rsquo;s 2025 poll, or <span class="num">38.6%</span>, more than double the privately insured, by the narrower federal NHIS measure (2024). Two surveys asking two different questions; we print both.</td>
+          <td><span class="num">62%</span> of uninsured adults carry healthcare debt, against 44% of the insured (KFF survey, 2022). Cost stopped or delayed care for <span class="num">three in four</span> uninsured adults in KFF&rsquo;s 2025 poll, or <span class="num">38.6%</span>, more than double the privately insured, by the narrower federal NHIS measure (2024). Two surveys asking two different questions; we print both.</td>
         </tr>
       </table>
       <p class="fn">The medical-bankruptcy numbers are deliberately absent from section 03, because the famous ones disagree about what they measure. A 2019 AJPH editorial (a survey of bankruptcy filers with a 29.4% response rate, whose lead authors co-founded Physicians for a National Health Program, which advocates single-payer) found 66.5% of filers said medical bills or illness-related work loss <i>contributed</i>. A 2018 NEJM analysis by academic economists, linking hospitalizations to credit records, estimates admissions <i>cause</i> about 4% of non-elderly bankruptcies, 6% among the uninsured. Self-reported contribution and measured causation are different questions; neither number refutes the other, and we will not print one without the other.</p>
@@ -1588,7 +1590,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Health-care debt</td><td>KFF Health Care Debt Survey, 2022</td></tr>
         <tr><td>Care skipped over cost</td><td>KFF Health Tracking Poll, May 2025; National Health Interview Survey, 2024</td></tr>
         <tr><td>Medical bankruptcy, both sides</td><td>Himmelstein et al., AJPH, 2019 (PNHP-affiliated authors); Dobkin et al., NEJM, 2018</td></tr>
-        <tr><td>Benchmark premiums, healthcare.gov states</td><td>CMS Exchange PUFs (rate, plan attributes, service area) and the QHP Landscape file, plan year 2026</td></tr>
+        <tr><td>Benchmark premiums, HealthCare.gov states</td><td>CMS Exchange PUFs (rate, plan attributes, service area) and the QHP Landscape file, plan year 2026</td></tr>
         <tr><td>Benchmark premiums, state exchanges</td><td>CMS State-based Exchange QHP PUFs, plan year 2026 (data as of June 2026)</td></tr>
         <tr><td>Benchmark cross-checks</td><td>NY State of Health, 2026 Lowest Cost Silver Plan by County; Covered California, 2026 QHP Rates by County</td></tr>
         <tr><td>Rating area definitions</td><td>CMS, State Specific Geographic Rating Areas</td></tr>
@@ -1624,7 +1626,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     </div>
     <div style="height:1px;background:var(--irule)"></div>
     <div class="row" style="justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:12.5px;color:var(--ifaint)">
-      <span>A live preview, still being built. The starting household is an example; every figure follows the one you set.</span>
+      <span>The starting household is an example; every figure follows the one you set. Fonts load from Google and member portraits from a public GitHub collection; nothing else leaves this page.</span>
       <span>Spotted something wrong? <a class="q" href="mailto:contact@thewholebill.org" style="color:inherit;border-bottom-color:var(--irule-2)">contact@thewholebill.org</a></span>
     </div>
   </div>
@@ -1703,6 +1705,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      and a vacant seat. Guessing a split ZIP is the one unforgivable failure
      here: it mails someone to the wrong office. */
   var STATE_NAMES = { AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"the District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming" };
+  // "2026-09-01" reads as "1 September 2026", the date form the rest of the page uses
+  function longDate(iso){
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    if (!m) return iso || "";
+    return (+m[3]) + " " + ["January","February","March","April","May","June","July","August","September","October","November","December"][+m[2] - 1] + " " + m[1];
+  }
   function ordinal(n){ n = +n; var s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   // District 0 is an at-large seat (one member for the whole state, or DC's
   // delegate), so "0th district" must never render.
@@ -1782,7 +1790,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var resolved = r.st === "one" || r.st === "picked";
     var member = resolved && REPS.house[r.d];
     byId("repAsOf").hidden = !resolved;
-    byId("repAsOfDate").textContent = REPS.asOf;
+    byId("repAsOfDate").textContent = longDate(REPS.asOf);
     renderSenators(resolved ? r.d.split("-")[0] : null);
     // the people are the recipient control: mark the selected one, disable
     // what cannot receive a letter (vacant seat, unresolved card)
@@ -1858,7 +1866,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      edit survives a slider drag, and the header says "Edited by you" while one
      is in force. Figures inside resolve through the same data-fig map as the
      rest of the page: the letter cannot disagree with the charts. */
-  var letterSig = "", letterEdited = false;
+  var letterSig = "", letterEdited = false, letterLong = false, MAILTO_MAX = 1900;
   function letterHTML(){
     var t = state.tone, r = state.route, e = state.emph, m = S.marketplace;
     var rec = recipient();
@@ -1889,14 +1897,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       P.push('I added up what healthcare actually costs my household, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span class="letterHh"></span>&rsquo;s healthcare costs more than <mark data-fig="emp.total" data-round="down"></mark> <span data-uw="a"></span>. <span id="letterShare"></span>');
     if (e.mkt)
       P.push(m.overCliff
-        ? 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
+        ? 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
         : m.noCredit
-        ? 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me, and my income sits below the level where the marketplace tax credit begins: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
-        : 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.');
+        ? 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me, and my income sits below the level where the marketplace tax credit begins: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
+        : 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.');
     P.push('Under the financing models I looked at, including one produced by opponents of the policy, my household would pay between roughly <mark data-fig="uni.rangeLo" data-round="down"></mark> and <mark data-fig="uni.rangeHi" data-round="up"></mark>. <span id="letterCmp"></span>');
     if (e.loss){
       if (r === "none")
-        P.push('My household is uninsured today. The coverage that came with a job went with it. Even now, between the care we use and the Medicare payroll tax we still pay, a quiet year costs us roughly <mark data-fig="route.borne" data-round="near"></mark> <span data-uw="a"></span>, and one hospital stay could undo years of saving.');
+        P.push('My household is uninsured today. Even now, between the care we use and the Medicare payroll tax we still pay, we are out roughly <mark data-fig="route.borne" data-round="near"></mark> <span data-uw="a"></span> with no emergency at all, and one hospital stay could undo years of saving.');
       else if (r === "marketplace")
         P.push('Part of why we buy our own coverage is that the employer kind can vanish with a job. Keeping a lost plan through COBRA runs more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. Access to a doctor should not depend on anyone&rsquo;s payroll status.');
       else
@@ -1929,13 +1937,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var rec = recipient();
     byId("letterCount").textContent =
       (letterEdited ? "Edited by you" : "Editable") + " · " + words + " words";
-    byId("sendBtn").href = "mailto:?subject=" +
-      encodeURIComponent("From a constituent: my household's healthcare numbers (" + rec.bill + ")") +
-      "&body=" + encodeURIComponent(txt.replace(/\n/g, "\n\n"));
+    var subject = "mailto:?subject=" +
+      encodeURIComponent("From a constituent: my household's healthcare numbers (" + rec.bill + ")");
+    var full = subject + "&body=" + encodeURIComponent(txt.replace(/\n/g, "\n\n"));
+    // Windows Mail and Outlook truncate mailto URLs around 2,000 characters,
+    // so a long letter arrived cut off mid-sentence. Past the limit the button
+    // copies the letter and opens a subject-only message instead, and says so.
+    letterLong = full.length > MAILTO_MAX;
+    byId("sendBtn").href = letterLong ? subject : full;
+    byId("ftLong").hidden = !letterLong;
     // The primary action goes to the recipient's own site: offices accept
     // letters through their contact forms, never a public inbox.
-    var fb = byId("formBtn");
-    if (rec.m && rec.m.u){
+    var fb = byId("formBtn"), noSite = !(rec.m && rec.m.u);
+    if (!noSite){
       fb.href = rec.m.u;
       fb.removeAttribute("aria-disabled");
       fb.style.opacity = "";
@@ -1944,6 +1958,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       fb.setAttribute("aria-disabled", "true");
       fb.style.opacity = ".45";
     }
+    byId("ftNoteSite").hidden = noSite;
+    byId("ftNoteNoSite").hidden = !noSite;
   }
 
   function paint(){
@@ -2091,7 +2107,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("narrRest").style.width  = (100 - vis).toFixed(1) + "%";
 
     byId("saveLbl").textContent   = S.savingsNegative ? "Your household would pay" : "Your household would keep";
-    byId("decadeLbl").textContent = S.savingsNegative ? "Over a decade, extra" : "Over a decade";
+    byId("decadeLbl").textContent = S.savingsNegative ? "Over a decade, on top" : "Over a decade";
     document.querySelector(".save").classList.toggle("neg", S.savingsNegative);
     // "today" on the range strip is this household's route, so the marker cannot
     // sit at the right edge by default -- only the employer route reaches it.
@@ -2136,7 +2152,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("placeName").textContent = countyLabel(a) + " \u00b7 " + a.state;
     byId("areaNote").textContent  =
       "Rating area " + a.ra + " \u00b7 " +
-      (a.exchange === "state" ? "State-run exchange" : "Healthcare.gov") +
+      (a.exchange === "state" ? "State-run exchange" : "HealthCare.gov") +
       " \u00b7 Medicaid " + (a.expanded ? "expanded" : "not expanded");
     byId("who").textContent  = S.universal.note;
     // The short form below 1100px: at 1024 the long form truncated to "$95,0…"
@@ -2154,7 +2170,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (blEl) blEl.textContent = recipient().bill;
     // A class, not an id: the household phrase appears in whichever persona
     // blocks are checked, which can be none of them or several.
-    var hhTxt = state.size === 1 ? "household" :
+    var hhTxt = state.size === 1 ? "household" : state.size === 2 ? "household of two" :
       "family of " + ["one","two","three","four","five","six","seven","eight"][state.size - 1];
     var hhs = document.querySelectorAll(".letterHh");
     for (i = 0; i < hhs.length; i++) hhs[i].textContent = hhTxt;
@@ -2338,7 +2354,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             fmt(R.whole - R.borne) + '</b> of it is carried by taxpayers, not by you.'
           : 'Nothing here hides on a paystub, and past the 400% cliff nobody shares it: every dollar is yours.')
       : '<b style="color:var(--ik);font-weight:400">' + fmt(R.offPaystub) +
-        '</b> of that never appears on a paystub.' +
+        (R.uninsured ? '</b> of that is care; the rest is payroll tax.' : '</b> of that never appears on a paystub.') +
         (R.borne < R.whole ? ' A further ' + fmt(R.whole - R.borne) + ' is carried by taxpayers, not by you.' : '');
 
     // The drawer describes the user's employer plan, so it exists only where that
@@ -2350,7 +2366,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       var setF = function(id, own, avg){
         var el = byId(id);
         if (document.activeElement !== el)
-          el.value = "$" + (own != null ? own : avg).toFixed(2);
+          el.value = "$" + (own != null ? own : avg).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       };
       var eT = W.EMPLOYER[state.size > 1 ? "family" : "single"];
       setF("deduct", state.deductPer, S.employer.worker / state.period);
@@ -2462,7 +2478,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
            '" stroke="#1F2330" stroke-width="1"/>';
       g += '<text x="' + (mL - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" fill="#7C8395" ' +
            'font-family="IBM Plex Mono, monospace" font-size="' + fA + '">' + (state.unit === "y"
-             ? "$" + Math.round(v / 1000) + "k" : "$" + Math.round(v / 12 / 100) * 100) + '</text>';
+             ? "$" + Math.round(v / 1000) + "k" : money(Math.round(v / 12 / 100) * 100)) + '</text>';
     }
     // % of poverty line along the bottom
     for (i = 2; i <= 5; i++){
@@ -2472,7 +2488,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
            'font-family="IBM Plex Mono, monospace" font-size="' + fA + '">' + (i * 100) + '%</text>';
     }
     g += '<text x="' + ((mL + Wd - mR) / 2).toFixed(1) + '" y="' + (Ht - 10) + '" text-anchor="middle" fill="#5E6472" ' +
-         'font-family="IBM Plex Mono, monospace" font-size="' + (narrow ? 9.5 : 10.5) + '" letter-spacing="1.2">' +
+         'font-family="IBM Plex Mono, monospace" font-size="' + (narrow ? 10.5 : 10.5) + '" letter-spacing="1.2">' +
          (narrow ? "% OF THE POVERTY LINE" : "HOUSEHOLD INCOME, AS A SHARE OF THE POVERTY LINE") + '</text>';
 
     var xc = X(c.cliffIncome), yUnder = Y(pre[pre.length - 1].household), yOver = Y(post[0].household);
@@ -2647,7 +2663,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       var placeTxt = stAbbr === 'DC' ? 'the District of Columbia'
         : countyLabel(e[2]) + ', ' + (STATE_NAMES[stAbbr] || stAbbr);
       scope = 'Showing <b>' + placeTxt +
-        '</b>, priced from the CMS 2026 plan files. Type any US ZIP, or try a sample:';
+        '</b>, priced from the CMS 2026 plan files. Type any US ZIP, or try a city:';
     }
     byId("scope").innerHTML = scope;
     var html = "", i;
@@ -2679,13 +2695,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     });
   }
 
+  // A minus sign is a refusal, not a digit to strip: "-50" once became 50.
+  function parseMoney(raw){
+    if (/-/.test(raw)) return null;
+    var v = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
+    return isFinite(v) ? v : null;
+  }
   function scrollBehavior(){ return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"; }
   function submitZip(){
     var r = W.zipResolve(byId("zip").value);
     if (r.st === "short"){ renderScope('Enter all five digits.'); return; }
     if (r.st === "uncovered"){
+      // an unresolved county chooser from the previous ZIP must not keep
+      // offering counties under a message about a different ZIP
+      state.bChoices = null;
+      byId("areapick").innerHTML = "";
       renderScope('<b>' + r.zip + '</b> is not a residential US ZIP we can price. ' +
-        'Check the digits, or try a sample:');
+        'Check the digits, or try a city:');
       return;
     }
     // The full five digits also resolve the district -- automatically only
@@ -2883,9 +2909,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   // caret is how inputs eat their own text. A half-typed entry (trailing comma,
   // stray letter) leaves the last good list in force.
   byId("ages").addEventListener("input", function(){
-    var tokens = this.value.split(/[^0-9]+/).filter(Boolean).map(Number)
-      .filter(function(n){ return n >= 0 && n <= 120; });
-    if (tokens.length < 1 || tokens.length > 8) return;
+    // Split on commas and spaces only, and take whole years only: "40, 12.5"
+    // used to become three people (40, 12 and 5). A token that is not an
+    // integer age leaves the last good list in force.
+    var raw = this.value.split(/[,\s]+/).filter(Boolean);
+    if (raw.some(function(t){ return !/^\d{1,3}$/.test(t); })) return;
+    var tokens = raw.map(Number).filter(function(n){ return n >= 0 && n <= 120; });
+    if (tokens.length !== raw.length || tokens.length < 1 || tokens.length > 8) return;
     state.ages = tokens;
     state.size = tokens.length;
     paint();
@@ -2894,8 +2924,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   byId("deduct").addEventListener("input", function(){
     if (state.route !== "employer") return;
-    var v = parseFloat(this.value.replace(/[^0-9.]/g, ""));
-    state.deductPer = (isFinite(v) && v > 0 && v < 100000) ? v : null;
+    var v = parseMoney(this.value);
+    state.deductPer = (v != null && v > 0 && v < 100000) ? v : null;
     paint();
   });
   byId("deduct").addEventListener("change", function(){ paint(); });
@@ -2971,35 +3001,51 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     for (var i = 0; i < bs.length; i++){ bs[i].classList.toggle("on", bs[i] === btn); bs[i].setAttribute("aria-pressed", bs[i] === btn ? "true" : "false"); }
     paint();
   });
-  function copyLetter(done){
+  function copyLetter(done, fail){
     var txt = byId("letterBd").innerText;
     // execCommand fallback: headless and older browsers land here.
     function fallback(){
       var ta = document.createElement("textarea");
       ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
       document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); done(); } catch (e) {}
+      // execCommand reports failure with a boolean, not an exception; treating
+      // any non-throw as success told readers "Copied" over an empty clipboard.
+      var okc = false;
+      try { okc = document.execCommand("copy") === true; } catch (e) { okc = false; }
       ta.remove();
+      if (okc) done(); else if (fail) fail();
     }
     if (navigator.clipboard && navigator.clipboard.writeText)
       navigator.clipboard.writeText(txt).then(done, fallback);
     else fallback();
   }
   byId("copyBtn").addEventListener("click", function(){
+    var btn = byId("copyBtn");
     copyLetter(function(){
-      var btn = byId("copyBtn");
       btn.textContent = "Copied ✓";
       setTimeout(function(){ btn.textContent = "Copy text"; }, 1600);
+    }, function(){
+      btn.textContent = "Copy failed, select the letter and copy it";
+      setTimeout(function(){ btn.textContent = "Copy text"; }, 3200);
     });
   });
   // The dark button copies on the way out, so the letter is on the clipboard
-  // when the member's contact form opens in the new tab.
+  // when the member's contact form opens. The tab is opened from inside the
+  // resolved copy, never before it: opening first could take focus away and
+  // make the clipboard write fail after the label had already said "Copied".
   byId("formBtn").addEventListener("click", function(ev){
-    if (this.getAttribute("aria-disabled") === "true"){ ev.preventDefault(); return; }
+    ev.preventDefault();
+    var b = byId("formBtn"), url = b.getAttribute("href");
+    if (b.getAttribute("aria-disabled") === "true" || !url || url === "#") return;
     copyLetter(function(){
-      var b = byId("formBtn");
       b.textContent = "Copied ✓ paste it there";
       setTimeout(function(){ b.innerHTML = "Copy it to their site &rarr;"; }, 2600);
+      var w = null;
+      try { w = window.open(url, "_blank", "noopener"); } catch (e) { w = null; }
+      if (!w) location.href = url;
+    }, function(){
+      b.textContent = "Copy failed, use Copy text first";
+      setTimeout(function(){ b.innerHTML = "Copy it to their site &rarr;"; }, 3200);
     });
   });
   byId("repPickBtns").addEventListener("click", function(ev){
@@ -3012,6 +3058,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     for (n = el && el.parentElement; n && n !== document.documentElement; n = n.parentElement) n.classList.add("pk");
     document.body.classList.add("print-letter");
   }
+  byId("sendBtn").addEventListener("click", function(){
+    if (letterLong) copyLetter(function(){}, function(){});   // subject-only link: the body rides the clipboard
+  });
   byId("printBtn").addEventListener("click", function(){
     preparePrint();
     window.print();

@@ -3029,7 +3029,7 @@ var REPS = {"asOf":"2026-09-01",
  "CA-1": {
   "n": "James Gallagher",
   "p": "R",
-  "u": "",
+  "u": "https://gallagher.house.gov/",
   "b": "G000607",
   "co": false
  }

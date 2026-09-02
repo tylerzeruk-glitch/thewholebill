@@ -62,7 +62,12 @@ for (const z of Object.keys(flat).sort()) {
 }
 
 // --- cosponsors + sponsors, by bioguide -------------------------------------
-const bioguides = (xml) => new Set([...xml.matchAll(/<bioguideId>([A-Z0-9]+)<\/bioguideId>/g)].map(m => m[1]));
+// A cosponsor who has withdrawn (sponsorshipWithdrawnDate set) is not current.
+// None today; the guard is here so the day one withdraws the card is right.
+const bioguides = (xml) => new Set([...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
+  .map(m => m[1])
+  .filter(item => !/<sponsorshipWithdrawnDate>\s*\S/.test(item))
+  .flatMap(item => [...item.matchAll(/<bioguideId>([A-Z0-9]+)<\/bioguideId>/g)].map(x => x[1])));
 const houseCo = bioguides(houseXml), senateCo = bioguides(senateXml);
 
 // --- every current member ---------------------------------------------------
@@ -75,7 +80,9 @@ for (const m of legis) {
   const entry = {
     n: m.name.official_full,
     p: t.party[0],
-    u: t.url || "",
+    // a member with no URL in the dataset gets the house.gov convention, so the
+    // dark button is never greyed out for want of a link (CA-1 shipped that way)
+    u: t.url || (t.type === "rep" ? `https://${m.name.last.toLowerCase().replace(/[^a-z]/g, "")}.house.gov/` : ""),
     b: m.id.bioguide,   // keys the official portrait in the @unitedstates images collection
     co: false,
   };
@@ -88,6 +95,13 @@ for (const m of legis) {
   }
 }
 
+// Names and URLs go into innerHTML on the card. Every one is plain text and a
+// house.gov / senate.gov address today; refuse to write a table where that stops
+// being true rather than trust it silently.
+for (const m of [...Object.values(house), ...Object.values(senate).flat()]) {
+  if (/[<>&]/.test(m.n)) throw new Error(`build-reps: name needs escaping: ${m.n}`);   // nicknames carry quotes; names are set as text
+  if (m.u && !/^https:\/\/[a-z0-9.-]+\.(house|senate)\.gov\/?[a-z0-9\/._-]*$/i.test(m.u)) throw new Error(`build-reps: unexpected URL ${m.u} for ${m.n}`);
+}
 const missing = [...needed].filter(k => !house[k]);
 if (missing.length) console.warn("WARN: districts with no current member (vacancy?):", missing.join(", "));
 

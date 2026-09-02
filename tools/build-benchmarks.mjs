@@ -495,14 +495,7 @@ function computeCounty(fips, ra, st) {
   // NY State of Health, 2026 LCSP by county (PDF): Albany 680.51, Bronx 806.61,
   // Erie 581.62, Monroe 730.00, Tompkins 1041.11 — the LOWEST silver individual tier.
   const ny = { '36001': 68051, '36005': 80661, '36029': 58162, '36055': 73000, '36109': 104111 };
-  for (const [fips, want] of Object.entries(ny)) {
-    const e = entries[fips];
-    if (!e) fail('NY entry missing ' + fips);
-    const lo = e.lo != null ? e.lo : null;
-    const gotLo = lo != null ? lo : Math.min(e.p[0], Infinity);
-    const first = Array.isArray(e.p) ? null : null;
-    // for tier states lo isn't stored; recompute nothing — compare the lowest we kept
-  }
+  for (const fips of Object.keys(ny)) if (!entries[fips]) fail('NY entry missing ' + fips);
   // NY is a tier state: entries hold the SECOND-lowest tier array; validate the
   // lowest separately by recomputing.
   const lows = {};
@@ -524,9 +517,7 @@ function computeCounty(fips, ra, st) {
   log('validated: NY county floors match the published LCSP PDF to the cent');
   // Covered California 2026 booklet, LA County: R15 lowest 391.59 / 2nd 463.41 at age 40.
   const r15 = entries['06037|15'];
-  const caCurve = [];   // derive CA factor 40/21 from any CA silver plan
-  const anyCA = Object.entries(rateOf).find(([k, v]) => k.startsWith('06037'.slice(0)) && v instanceof Float64Array && k.includes('CA'));
-  // simpler: use the plan rates directly at age 40 for LA R15
+  // the plan rates directly at age 40 for LA R15
   const prems40 = [];
   for (const [scid, p] of Object.entries(silverPlan)) {
     if (p.st !== 'CA') continue;
