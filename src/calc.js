@@ -52,6 +52,14 @@
   ];
   var CLIFF = 4.00;
 
+  // 26 U.S.C. §36B(c)(1)(A): the credit needs household income of at least 100%
+  // of the poverty line. §36B(c)(2)(B): anyone eligible for Medicaid gets no
+  // credit either, which in a state that expanded Medicaid is every adult under
+  // 138% (133% in 42 U.S.C. §1396a(a)(10)(A)(i)(VIII) plus the five-point income
+  // disregard of §1396a(e)(14)(I)). The District covers adults to 215%.
+  var MEDICAID_ADULT = 1.38;
+  var MEDICAID_ADULT_BY_STATE = { DC: 2.15 };
+
   // KFF Employer Health Benefits Survey 2025.
   var EMPLOYER = {
     family: { premium: 26993, worker: 6850 },   // employer share = 20,143
@@ -183,7 +191,8 @@
   // Returns the share of income a household is expected to contribute toward the
   // benchmark plan, or null when it is over the cliff and gets nothing.
   function applicablePercentage(ratio) {
-    if (ratio >= CLIFF) return null;
+    // "does not exceed 400 percent": a household at exactly 400% still qualifies.
+    if (ratio > CLIFF) return null;
     for (var i = 0; i < APPLICABLE.length; i++) {
       var b = APPLICABLE[i];
       if (ratio >= b.lo && ratio < b.hi) {
@@ -248,7 +257,19 @@
     var benchmark = bp.annual;
 
     var ratio = fplRatio(o.income, o.size, region);
-    var pct = applicablePercentage(ratio);
+    // The floor. Below 100% of the poverty line there is no credit at all; in a
+    // state that has not expanded Medicaid, adults there are in the coverage gap.
+    // In an expansion state, adults under the Medicaid ceiling are Medicaid's,
+    // not the marketplace's, and the law gives them no credit. The one exception
+    // is lawfully present immigrants whom Medicaid excludes: they can take the
+    // credit, and they are the entire reason the IRS table has an "under 133%"
+    // row. We cannot know who they are, so these flags are the common case and
+    // the copy says so. An earlier build skipped this floor and showed a
+    // $25,108 credit to a Texas family at 93% of the poverty line.
+    var belowFloor = ratio < 1.00;
+    var medicaidCeiling = MEDICAID_ADULT_BY_STATE[bp.state] || MEDICAID_ADULT;
+    var medicaidLikely = !belowFloor && !!bp.expanded && ratio < medicaidCeiling;
+    var pct = (belowFloor || medicaidLikely) ? null : applicablePercentage(ratio);
     var expected = pct === null ? benchmark : o.income * pct;
     var subsidy = pct === null ? 0 : Math.max(0, benchmark - expected);
     var net = Math.max(0, benchmark - subsidy);
@@ -271,7 +292,11 @@
       household: net + oop + tax,          // what the household bears
       total: benchmark + oop + tax,        // the whole bill, however routed
       fplRatio: ratio,
-      overCliff: pct === null,
+      overCliff: ratio > CLIFF,
+      belowFloor: belowFloor,               // under 100% FPL: no credit exists
+      medicaidLikely: medicaidLikely,       // expansion state, under its adult ceiling
+      medicaidCeiling: medicaidCeiling,
+      noCredit: pct === null,               // any of the three reasons
       chipLikely: kids > 0 && ratio <= bp.chipUpTo,
       place: bp,                            // county, state, rating area, exchange
       basis: { benchmark: 'statutory', applicablePercentage: 'statutory', oop: 'modeled', medicareTax: 'statutory' }

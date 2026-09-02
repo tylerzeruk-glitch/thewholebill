@@ -109,8 +109,24 @@ test('calc: loads and computes in node, outside any browser', async () => {
   ok('poverty line for a household of 4', Math.round(s.fpl.line) === 32150, `$${Math.round(s.fpl.line)}`);
   ok('employer total is the sum of its parts',
      Math.abs(s.employer.total - (s.employer.worker + s.employer.employer + s.employer.oop + s.employer.medicareTax)) < 0.01);
-  ok('the 400% cliff has no credit', W.applicablePercentage(4.0) === null);
-  ok('just under the cliff still has one', W.applicablePercentage(3.99) > 0);
+  ok('exactly 400% still qualifies ("does not exceed")', W.applicablePercentage(4.0) > 0);
+  ok('a hair over the cliff has no credit', W.applicablePercentage(4.0001) === null);
+  // the floor: §36B(c)(1)(A) below 100% FPL, §36B(c)(2)(B) Medicaid-eligible
+  const gap = W.marketplaceCost({ income:30000, size:4, ages:[40,40,10,8], bkey:'48113' });   // TX, 93%
+  ok('below the poverty line there is no credit (TX, 93%)', gap.belowFloor && gap.noCredit && gap.subsidy === 0
+     && gap.applicablePercentage === null && !gap.overCliff, `$${Math.round(gap.subsidy)} subsidy`);
+  ok('the household then bears the full benchmark', Math.abs(gap.net - gap.benchmark) < 0.01);
+  const txLow = W.marketplaceCost({ income:16000, size:1, ages:[40], bkey:'48113' });          // TX, 102%
+  ok('just over 100% in a non-expansion state gets the credit', !txLow.noCredit && txLow.subsidy > 0);
+  const ctMed = W.marketplaceCost({ income:20000, size:1, ages:[40], bkey:'09003' });          // CT, 128%
+  ok('under 138% in an expansion state is Medicaid, no credit', ctMed.medicaidLikely && ctMed.noCredit && ctMed.subsidy === 0
+     && !ctMed.belowFloor);
+  const ctMkt = W.marketplaceCost({ income:22000, size:1, ages:[40], bkey:'09003' });          // CT, 141%
+  ok('over 138% in an expansion state gets the credit', !ctMkt.noCredit && ctMkt.subsidy > 0);
+  const dc = W.marketplaceCost({ income:30000, size:1, ages:[40], bkey:'11001' });             // DC, 192%
+  ok('DC covers adults to 215%, so 192% is Medicaid there', dc.medicaidLikely && dc.medicaidCeiling === 2.15);
+  const dcMkt = W.marketplaceCost({ income:34000, size:1, ages:[40], bkey:'11001' });          // DC, 217%
+  ok('over 215% in DC gets the credit', !dcMkt.noCredit && dcMkt.subsidy > 0);
   const d = W.cliffDrop({ size:4, ages:[41,39,12,9], bkey:'09003' });
   ok('cliff drop equals the credit lost', Math.abs(d.drop - d.lostCredit) < 1,
      `$${Math.round(d.drop)} at $${Math.round(d.income)}`);
@@ -1633,6 +1649,31 @@ test('launch: share metadata, 404, crawler files, no artifact in dist', async b 
   await p4.close();
 });
 
+/* The credit's floor. A Texas family at 93% of the poverty line used to be
+ * shown a $25,108 credit labelled statutory; the statute gives it none, and
+ * every surface that carried the credit (eligibility box, bar note, letter)
+ * has to say so in the same breath. */
+test('marketplace: below the floor and in Medicaid\'s range there is no credit, and the page says why', async b => {
+  const p = await page(b, 1280, 900);
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+  await setIncome(p, 30000);
+  let t = await p.evaluate(() => ({ elig: document.getElementById('elig').innerText,
+    note: document.getElementById('mktNote').innerText, letter: document.getElementById('letterBd').innerText }));
+  ok('coverage gap: the eligibility box says no credit', /no credit at all/.test(t.elig) && /Texas has not expanded Medicaid/.test(t.elig), t.elig.slice(0, 120));
+  ok('coverage gap: the bar note says why there is no subsidy', /below the credit/.test(t.note), t.note);
+  ok('coverage gap: the letter claims no taxpayer help', /below the level where the marketplace tax credit begins/.test(t.letter) && !/taxpayer help/.test(t.letter));
+  await p.locator('#zip').fill('06106'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  await p.locator('#ages').fill('40'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(150);
+  await setIncome(p, 20000);   // a single adult at 128% of the poverty line
+  t = await p.evaluate(() => ({ elig: document.getElementById('elig').innerText, note: document.getElementById('mktNote').innerText }));
+  ok('Medicaid range: the eligibility box names the state and its ceiling', /qualify for Medicaid in Connecticut/.test(t.elig) && /138%/.test(t.elig), t.elig.slice(0, 140));
+  ok('Medicaid range: the bar note says so', /Medicaid/.test(t.note), t.note);
+  await setIncome(p, 22000);
+  t = await p.evaluate(() => document.getElementById('elig').innerText);
+  ok('just above the ceiling the credit returns', /what you qualify for today/i.test(t) && /credit of \$/.test(t), t.slice(0, 100));
+  await p.close();
+});
+
 /* The site's public copy carries no em or en dashes: the owner's standing
  * style rule (CLAUDE.md, Language). Code comments are exempt. This scans what
  * a reader can see, across every state that swaps copy in: routes, models,
@@ -1685,11 +1726,14 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   await p.locator('#recRep').click(); await p.waitForTimeout(200);
   await setIncome(p, 40000);  await scan('subsidy qualifying, with CHIP');
   await setIncome(p, 240000); await scan('over the cliff');
+  await setIncome(p, 30000);  await scan('below the credit floor, coverage gap');
   await setIncome(p, 95000);
   for (const z of ['10001', '44113', '06106']) {
     await p.locator('#zip').fill(z); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
     await scan(`zip ${z}`);
   }
+  await setIncome(p, 20000); await scan('Medicaid range in an expansion state');
+  await setIncome(p, 95000);
   await p.close();
   // the methodology is its own static document now; scan it whole
   const pm = await page(b, 1280, 900, false, 'methodology/index.html');
