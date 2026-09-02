@@ -486,7 +486,7 @@ test('slot 03: the cliff for the covered, the bad year for the uninsured', async
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(300);
   r = await view();
   ok('marketplace: the cliff speaks as their own market',
-     r.cliff && !r.bad && /^Nothing on this page is modeled/.test(r.intro), r.intro.slice(0,60));
+     r.cliff && !r.bad && /^Nothing in this section is modeled/.test(r.intro), r.intro.slice(0,60));
 
   await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(300);
   r = await view();
@@ -1970,6 +1970,96 @@ test('calc: financing models reproduce the methodology page to the dollar', asyn
   });
   ok('the methodology cites Rev. Proc. 2025-32 for the exemption', /Rev\. Proc\. 2025-32/.test(html));
   ok('no stale $29,200 exemption anywhere on the page', !/29,200/.test(html));
+});
+
+/* The prose half of the launch review: copy that had drifted behind the code.
+ * Each assertion derives its expectation from calc.js or benchmarks.js, so a
+ * data change fails here rather than shipping a sentence the data contradicts. */
+test('prose: the methodology page says what the data says', async () => {
+  const { createRequire } = await import('node:module');
+  const { readFileSync } = await import('node:fs');
+  const require = createRequire(import.meta.url);
+  const W = require('../src/calc.js'), B = require('../src/benchmarks.js');
+  W.useBenchmarks(B);
+  const html = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
+  const text = html.replace(/<[^>]*>/g, ' ').replace(/&rsquo;/g, '’').replace(/\s+/g, ' ');
+  // H2: the contribution paragraph quotes the worked household's own range and shares
+  const S = W.summary({ income:95000, size:4, ages:[41,39,12,9], bkey:'48113', model:'sanders1' });
+  const money = n => '$' + Math.round(n).toLocaleString('en-US');
+  const lo = S.universalRange.lo, hi = S.universalRange.hi, tot = S.employer.total;
+  const want = `${money(lo)} to ${money(hi)}`, pct = `${Math.round(lo / tot * 100)}% to ${Math.round(hi / tot * 100)}%`;
+  ok(`contribution paragraph quotes the model range ${want}`, text.includes(want) && text.includes(money(tot)), want);
+  ok(`and its share of today's cost, ${pct}`, text.includes(pct), pct);
+  ok('the invented 28 to 32% band is gone', !/28 to 32%|30,600/.test(text));
+  // H3: the age-curve sentence names every state that leaves the federal curve
+  const NAMES = { AL:'Alabama', MS:'Mississippi', OR:'Oregon', UT:'Utah', DC:'District of Columbia', MA:'Massachusetts', MN:'Minnesota', NY:'New York', VT:'Vermont' };
+  const para = (text.match(/Each person is priced at their own age[^.]*\.(?:[^.]*\.){0,8}/) || [''])[0];
+  ok('the age-curve paragraph is present', para.length > 200, para.slice(0, 80));
+  let fedCount = 0;
+  for (const [st, m] of Object.entries(B.states)) {
+    if (m.curve === 'fed') { fedCount++; continue; }
+    ok(`${st} leaves the federal curve and is named`, NAMES[st] && para.includes(NAMES[st]), `${st}: ${m.curve}`);
+  }
+  const WORDS = { 40:'Forty', 41:'Forty-one', 42:'Forty-two', 43:'Forty-three', 44:'Forty-four', 45:'Forty-five' };
+  ok(`the count of federal-curve states is stated (${fedCount})`, WORDS[fedCount] && para.includes(WORDS[fedCount] + ' states'), String(fedCount));
+  for (const st of Object.keys(NAMES)) if (B.states[st].curve === 'fed') ok(`${st} is not named as a departure`, !para.includes(NAMES[st]));
+  // H13, H14: provenance
+  ok('Urban is labelled with its funder', /financed by the Commonwealth Fund/.test(text));
+  ok('CBO Option 5 discloses its payment-rate assumption', /payment rates above Medicare/.test(text));
+  ok('the Yale preprint has a Sources row', /Lives saved, 114,174/.test(text) && /not peer reviewed/.test(text));
+  ok('the three-million figure names CMS', /CMS effectuated enrollment/.test(text));
+  ok('the Lancet payroll rate is the manuscript\'s 11.29%', /11\.29%/.test(text));
+});
+
+/* Objection 01 and its footnote used to argue against the employer figure and a
+ * $250,000 threshold no matter which route or household was on screen. */
+test('prose: the objection argues against this household, on its route', async b => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
+  const p = await page(b, 1440, 900);
+  const read = () => p.evaluate(() => ({
+    fig: document.querySelector('[data-fig="route.replaced"]').textContent.trim(),
+    tail: document.getElementById('objTail').textContent,
+    cross: document.getElementById('crossText').textContent,
+    wf: [...document.querySelectorAll('#wf .wcol:not(.wcol-total) .wlab')].map(e => e.textContent.replace(/[^0-9]/g, '')),
+    cards: [...document.querySelectorAll('#cards .card-i .t')].map(e => e.textContent),
+    intro: document.querySelector('#story p, .sec p') && document.body.innerText }));
+  const n = s => +s.replace(/[^0-9]/g, '');
+  const emp = await read();
+  ok('employer: the figure is what universal coverage replaces (borne less Medicare tax)',
+     n(emp.fig) === n(emp.wf[0]) + n(emp.wf[1]) + n(emp.wf[2]), `${emp.fig} vs ${emp.wf.join('+')}`);
+  ok('employer: "it replaces"', /it replaces/.test(emp.tail));
+  const staticCross = (html.match(/id="crossText">([^<]*)</) || [])[1];
+  ok('default footnote: the static text is what the page paints', staticCross === emp.cross, emp.cross);
+  ok('default family: one model crosses, the rest never do', /1 of the 6 models starts costing more than today at about \$2\d\d,000 of income, and the other 5 do not/.test(emp.cross), emp.cross);
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(300);
+  const un = await read();
+  ok('uninsured: the figure is the care it pays for, not employer premiums', n(un.fig) === n(un.wf[0]) && n(un.fig) !== n(emp.fig), `${un.fig} vs ${un.wf[0]}`);
+  ok('uninsured: the tail says care, not premiums', /care your household already pays for, at cost/.test(un.tail), un.tail);
+  ok('uninsured: the footnote says some models cost more at every income', /costs? more than today at every income/.test(un.cross), un.cross);
+  ok('uninsured card is "Care you use, at cost", never "in cash"', un.cards.some(t => /Care you use, at cost/.test(t)) && !/in cash/i.test(un.intro));
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(300);
+  const mk = await read();
+  ok('marketplace: the tail is what the household pays today', /your household pays today/.test(mk.tail), mk.tail);
+  await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(300);
+  await p.fill('#ages', '40'); await p.locator('#ages').dispatchEvent('input'); await p.locator('#ages').dispatchEvent('change'); await p.waitForTimeout(400);
+  const one = await read();
+  ok('single adult: every model crosses, far below $250,000', /6 of the 6 models start costing more than today between \$\d\d,000 and \$1\d\d,000 of income/.test(one.cross), one.cross);
+  await p.close();
+});
+
+test('prose: section 02 and the letter agree with the rest of the page', async b => {
+  const p = await page(b, 1280, 900);
+  const body = await p.evaluate(() => document.body.innerText);
+  ok('section 02: two paystub lines, the largest never shown', /Two of them appear on a paystub\. The largest never does/.test(body));
+  ok('the cliff intro claims only its section', /Nothing in this section is modeled/.test(body) && !/Nothing on this page is modeled/.test(body));
+  await p.locator('#emph .chk[data-em="nation"]').click(); await p.waitForTimeout(200);
+  const letter = await p.evaluate(() => document.getElementById('letterBd').innerText);
+  ok('the letter no longer calls Mercatus the least friendly estimate', /Even the estimate from a Koch-funded center/.test(letter) && !/least friendly/.test(letter));
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(300);
+  const un = await p.evaluate(() => document.getElementById('letterBd').innerText);
+  ok('the uninsured letter says "the care we use"', /between the care we use and the Medicare payroll tax/.test(un) && !/in cash/.test(un));
+  await p.close();
 });
 
 const b = await chromium.launch();

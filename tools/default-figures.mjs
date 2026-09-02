@@ -45,6 +45,7 @@ const F = {
   'uni.rangeLo': S.universalRange.lo, 'uni.rangeHi': S.universalRange.hi,
   'cobra.annual': S.cobra.annual, 'cliff.drop': cliff ? cliff.drop : null,
   'route.whole': R.whole, 'route.borne': R.borne,
+  'route.replaced': R.borne - ((R.parts.find(p => p.key === 'tax') || { value: 0 }).value),
   'route.onPaystub': R.onPaystub, 'route.offPaystub': R.offPaystub
 };
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
