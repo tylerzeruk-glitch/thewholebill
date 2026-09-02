@@ -122,11 +122,14 @@ first is now met, so it is ready for a decision whenever the owner wants):
    ~6% of the headline) — disclosed in "What we know is wrong" rather than modelled. Keep
    disclosing, or model it in.
 
-Whenever the owner decides — not a default:
-
-3. **Go public.** The checklist is in `docs/DEPLOY.md`: `/artifact` exclusion or acceptance,
-   the anonymity re-check, deleting the Access app AND the logo-bypass app together, then
-   verifying the gate's removal is the only change.
+~~3. Go public.~~ **Done 2026-09-02.** Both Access applications deleted; verified from
+   outside the same day: `/`, `/methodology/`, `/logo.svg` and `/card.png` return 200, the
+   old artifact paths and nonsense paths return the branded 404, every header from
+   `src/_headers` is live (CSP included; Cloudflare is not rewriting the HTML, so the script
+   hashes hold), and the calculator runs. Traffic is read from Cloudflare's zone analytics
+   (edge request counts, no script in the page); the auto-injected Web Analytics beacon was
+   being refused by the CSP and is to be switched off in the dashboard. HSTS remains a
+   dashboard item (six months, includeSubDomains, no preload).
 
 Ops hygiene (small, anytime):
 
