@@ -55,6 +55,8 @@ p{margin:0;text-wrap:pretty}
 .body{font-size:16.5px;line-height:1.68;color:var(--pb)}
 .note{font-size:12.5px;line-height:1.55;color:var(--pm)}
 .note-i{font-size:12px;line-height:1.55;color:var(--ifaint)}
+/* --ifaint on the raised ground is 4.44:1, under the text floor; the household card sits on it */
+.ctrl .note-i{color:var(--im)}
 
 .stack{display:flex;flex-direction:column}
 .row{display:flex}
@@ -91,6 +93,7 @@ p{margin:0;text-wrap:pretty}
 .zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;font-family:var(--mono);font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--pm);border-right:1px solid var(--prule)}
 .zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent}
 .zipfield .v::placeholder{color:#A79A85}
+.zipfield:focus-within{outline:2px solid var(--amber-deep);outline-offset:2px}
 .dateline b{font-weight:500;color:var(--pk)}
 .btn-dark{height:62px;padding:0 34px;background:var(--pk);color:var(--paper);border:none;border-radius:2px;font-family:var(--sans);font-size:16px;font-weight:500;cursor:pointer}
 .btn-ghost{height:50px;padding:0 24px;background:var(--paper-card);color:var(--pk);border:1px solid var(--pctrl);border-radius:2px;font-family:var(--sans);font-size:15px;cursor:pointer}
@@ -179,6 +182,7 @@ p{margin:0;text-wrap:pretty}
 .seg > div.on,.seg > button.on{background:#2C3140;border-color:#3D4457;color:var(--ik);font-weight:500}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;margin:6px 0 0;cursor:pointer;display:block}
 input[type=range]:focus{outline:none}
+input[type=range]:focus-visible{outline:2px solid var(--c2);outline-offset:6px;border-radius:2px}
 input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--ink-chip);border-radius:2px}
 input[type=range]::-moz-range-track{height:4px;background:var(--ink-chip);border-radius:2px}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--ik);border:3px solid var(--ink);margin-top:-7px}
@@ -370,7 +374,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    ran on below it. The figure belongs level with the bottom of its own text. */
 .tally{display:grid;grid-template-columns:14px auto minmax(0,1fr);gap:14px 13px;align-items:end;
        border-top:1px solid var(--prule);padding-top:18px}
-.tally .op{font-family:var(--mono);font-size:19px;color:var(--pctrl)}
+.tally .op{font-family:var(--mono);font-size:19px;color:var(--pm)}   /* --pctrl measured 3.12:1 on paper */
 .tally .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:23px;line-height:1.15;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
 .tally .d{font-size:15px;line-height:1.5;color:var(--pb);text-wrap:pretty}
 
@@ -436,7 +440,30 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
    plain Ctrl+P still prints the whole page, which is the reader's own choice.
    display:none, not visibility: the visibility version left the whole 10,000px
    document in layout and printed the letter followed by ten blank pages. */
+.skip{position:absolute;left:24px;top:8px;z-index:50;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);background:var(--paper-card);color:var(--pk);padding:10px 14px;border:1px solid var(--pk);border-radius:2px;font-size:14px;text-decoration:none}
+.skip:focus{width:auto;height:auto;overflow:visible;clip:auto;outline:2px solid var(--amber-deep);outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Row headers in the methodology tables: real <th scope="row"> for assistive tech, styled as the body cells they replaced */
+.meth th.rowh{font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;color:var(--pb);padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;line-height:1.6;font-weight:400}
+/* /methodology is its own document, so its title is an h1 there; it keeps the h2 face */
+h1.as-h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:pretty}
+/* A7: every transition and animation stops when the reader asks for reduced motion */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+}
 @media print{
+  /* Cmd+P on the whole page: browsers drop background graphics by default, so the
+     ink sections printed light grey text on white. Their palette flips to dark on
+     white here. The letter's own print path (body.print-letter) is untouched. */
+  body:not(.print-letter) .inkzone,body:not(.print-letter) section.ink,body:not(.print-letter) .sticky{
+    --ink:#fff;--ink-surface:#fff;--ink-raised:#f1f1f1;--ink-chip:#e8e8e8;--irule:#bbb;--irule-2:#aaa;--ictrl:#555;
+    --ik:#000;--ib:#222;--im:#333;--ilabel:#333;--ifaint:#444;
+    --c1:#7a4f0e;--c2:#8E6018;--c3:#6b4a20;--c4:#5a4020;--c4l:#7a5a30;--teal:#1f6f6a;--teal-l:#2a8f88;--teal-d:#1a5f5a;
+    background:#fff;color:#000}
+  body:not(.print-letter) .sticky{position:static;background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none}
+  body:not(.print-letter) #cliffChart text{fill:#333}
+  body:not(.print-letter) #cliffChart rect{fill:#fff}   /* the annotation box carries an inline ink fill */
+  .skip{display:none}
   body.print-letter :not(.pk):not(.letter):not(.letter *){display:none}
   body.print-letter .pk{display:block;padding:0;margin:0;background:none;min-height:0;height:auto;position:static;transform:none}
   body.print-letter .letter{border:none;margin:0;max-width:none}
@@ -656,9 +683,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 </style>
 
 <!-- ============ 01 HERO ============ -->
+<a class="skip" href="#main">Skip to the calculator</a>
+<main id="main" tabindex="-1">
 <section class="paper">
   <div class="wrap">
-    <div class="masthead">
+    <header class="masthead">
       <a class="brand" href="#">
         <svg width="13" height="24" viewBox="0 0 13 24" aria-hidden="true">
           <rect x="0" y="0" width="13" height="2.5" fill="#86603E"></rect>
@@ -669,7 +698,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <span class="wordmark">The Whole Bill</span>
       </a>
       <nav class="nav"><a class="q" href="#/methodology" style="color:inherit;border:none">Methodology &amp; sources</a></nav>
-    </div>
+    </header>
     <div class="hero-inner">
       <div>
       <div class="eyebrow p" style="margin-bottom:32px">A healthcare cost calculator</div>
@@ -678,11 +707,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="zipbar">
         <div class="zipfield">
           <div class="k">Zip</div>
-          <input class="v" id="zip" inputmode="numeric" maxlength="5" placeholder="75201" value="75201" aria-label="ZIP code">
+          <input class="v" id="zip" inputmode="numeric" maxlength="5" placeholder="75201" value="75201" aria-label="ZIP code" autocomplete="postal-code" aria-describedby="scope" aria-invalid="false">
         </div>
         <button class="btn-dark" id="zipGo">Show me &rarr;</button>
       </div>
-      <div class="scope" id="scope"></div>
+      <div class="scope" id="scope" role="status"></div>
       <div class="areapick" id="areapick"></div>
       </div>
 
@@ -820,8 +849,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           </div>
           <div class="note-i" id="agesNote" hidden style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this site does not price. They are counted here at the oldest marketplace rate, a 64-year-old&rsquo;s.</div>
           <div class="field">
-            <div class="lbl">How you&rsquo;re covered now</div>
-            <div class="seg" id="route"><button type="button" data-r="employer" class="on">Employer</button><button type="button" data-r="marketplace">Marketplace</button><button type="button" data-r="none">Uninsured</button></div>
+            <div class="lbl" id="routeLbl">How you&rsquo;re covered now</div>
+            <div class="seg" id="route" role="group" aria-labelledby="routeLbl"><button type="button" data-r="employer" class="on" aria-pressed="true">Employer</button><button type="button" data-r="marketplace" aria-pressed="false">Marketplace</button><button type="button" data-r="none" aria-pressed="false">Uninsured</button></div>
           </div>
           <details class="adv" id="adv">
             <summary>
@@ -873,6 +902,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="stack" style="gap:4px;padding-bottom:26px;border-bottom:1px solid var(--irule)">
             <div style="font-size:14px;color:var(--im)">What your household&rsquo;s healthcare costs, <span data-uw="per">per year</span></div>
             <div class="bignum" data-fig="route.whole">$32,171</div>
+            <div class="vh" id="liveFig" aria-live="polite" aria-atomic="true"></div>
             <div style="font-size:14px;color:var(--im);margin-top:8px" id="bigSub"></div>
           </div>
           <div class="cards" id="cards"></div>
@@ -894,8 +924,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <p style="font-size:15px;line-height:1.65;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. Two of them appear on a paystub. The largest never does; it is spent on your behalf.</p>
       </div>
 
-      <div class="wf" id="wf"></div>
-      <div class="wcaps" id="wcaps"></div>
+      <div class="wf" id="wf" role="img"></div>
+      <div class="wcaps" id="wcaps" aria-hidden="true"></div>
       <p class="note-i" id="wfNote" style="margin-top:24px"></p>
     </div>
   </section>
@@ -972,8 +1002,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       </div>
 
       <div class="stack" style="gap:14px">
-        <div class="lbl">Financing model</div>
-        <div class="pills" id="pills"></div>
+        <div class="lbl" id="modelLbl">Financing model</div>
+        <div class="pills" id="pills" role="group" aria-labelledby="modelLbl"></div>
         <select class="ctrl" id="modelPick" aria-label="Financing model"></select>
       </div>
 
@@ -1203,7 +1233,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                unforgivable failure. -->
           <div class="stack" style="gap:8px" id="repPick" hidden>
             <div class="note" style="font-size:13px" id="repPickWhy"></div>
-            <div class="row" style="gap:6px;flex-wrap:wrap" id="repPickBtns"></div>
+            <div class="row" style="gap:6px;flex-wrap:wrap" id="repPickBtns" role="group" aria-labelledby="repPickWhy"></div>
           </div>
           <div style="height:1px;background:var(--prule-soft)"></div>
           <div class="stack" style="gap:11px">
@@ -1239,11 +1269,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
 
         <div class="stack" style="gap:9px">
-          <div class="lbl p">Tone</div>
-          <div class="row" style="gap:6px" id="tone">
-            <button type="button" class="tbtn" data-tone="measured">Measured</button>
-            <button type="button" class="tbtn on" data-tone="direct">Direct</button>
-            <button type="button" class="tbtn" data-tone="personal">Personal</button>
+          <div class="lbl p" id="toneLbl">Tone</div>
+          <div class="row" style="gap:6px" id="tone" role="group" aria-labelledby="toneLbl">
+            <button type="button" class="tbtn" data-tone="measured" aria-pressed="false">Measured</button>
+            <button type="button" class="tbtn on" data-tone="direct" aria-pressed="true">Direct</button>
+            <button type="button" class="tbtn" data-tone="personal" aria-pressed="false">Personal</button>
           </div>
         </div>
       </div>
@@ -1308,17 +1338,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>Three kinds of number</h3>
       <p class="body" style="max-width:760px">Every figure the calculator produces is one of these three, and the interface says which. If a number is ours rather than someone else&rsquo;s, we would rather tell you than have you find out.</p>
-      <table style="margin-top:12px">
+      <table style="margin-top:12px"><caption class="vh">How the three kinds of number are labelled</caption>
         <tr>
-          <td style="width:130px"><span class="tag stat">Statutory</span></td>
+          <th scope="row" class="rowh" style="width:130px"><span class="tag stat">Statutory</span></th>
           <td>Fixed in law or in a published federal table. Exact, not an estimate. The poverty guidelines, the premium-credit schedule, the Medicare payroll rate, the COBRA 102% cap.</td>
         </tr>
         <tr>
-          <td><span class="tag surv">Survey</span></td>
+          <th scope="row" class="rowh"><span class="tag surv">Survey</span></th>
           <td>A real published measurement, but an average. Employer premiums come from KFF&rsquo;s annual employer survey: genuine data, though your employer is not the average employer.</td>
         </tr>
         <tr>
-          <td><span class="tag mod">Modeled</span></td>
+          <th scope="row" class="rowh"><span class="tag mod">Modeled</span></th>
           <td>Our estimate. Out-of-pocket spending, uninsured cash spending, and part of the universal figures. Labelled everywhere it appears.</td>
         </tr>
       </table>
@@ -1327,8 +1357,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>Poverty guidelines <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
       <p class="body" style="max-width:760px">2026 coverage uses the guidelines in force when open enrollment began, which are the <b>2025</b> HHS figures. Add the increment once per person beyond the first.</p>
-      <table style="margin-top:12px">
-        <tr><th>Region</th><th>First person</th><th>Each additional</th><th>Household of four</th></tr>
+      <table style="margin-top:12px"><caption class="vh">Poverty guidelines, 2025</caption>
+        <tr><th scope="col">Region</th><th scope="col">First person</th><th scope="col">Each additional</th><th scope="col">Household of four</th></tr>
         <tr><td>48 states &amp; DC</td><td class="num">$15,650</td><td class="num">$5,500</td><td class="num">$32,150</td></tr>
         <tr><td>Alaska</td><td class="num">$19,550</td><td class="num">$6,880</td><td class="num">$40,190</td></tr>
         <tr><td>Hawaii</td><td class="num">$17,990</td><td class="num">$6,330</td><td class="num">$36,980</td></tr>
@@ -1338,8 +1368,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>The premium tax credit <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
       <p class="body" style="max-width:760px">The credit is the gap between the benchmark plan&rsquo;s premium and what the law says your household is expected to contribute. That expected share comes from IRS Rev. Proc. 2025-25, and it rises <i>linearly within each band</i>, not in steps.</p>
-      <table style="margin-top:12px">
-        <tr><th>Household income</th><th>Contribution rises from</th><th>to</th></tr>
+      <table style="margin-top:12px"><caption class="vh">The premium tax credit schedule, 2026</caption>
+        <tr><th scope="col">Household income</th><th scope="col">Contribution rises from</th><th scope="col">to</th></tr>
         <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">Below 100% of the poverty line</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit</td></tr>
         <tr><td>100% to 133%</td><td class="num">2.10%</td><td class="num">2.10%</td></tr>
         <tr><td>133% to 150%</td><td class="num">3.14%</td><td class="num">4.19%</td></tr>
@@ -1356,33 +1386,33 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>The benchmark premium <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
       <p class="body" style="max-width:760px">The credit is measured against the second-lowest-cost silver plan available to your household, so that premium is the hinge of every marketplace figure here. It comes from the published 2026 federal plan files, computed per county, and here is exactly how.</p>
-      <table style="margin-top:12px">
+      <table style="margin-top:12px"><caption class="vh">How the benchmark premium is built</caption>
         <tr>
-          <td style="width:220px"><b style="font-weight:500;color:var(--pk)">The plan set</b></td>
+          <th scope="row" class="rowh" style="width:220px"><b style="font-weight:500;color:var(--pk)">The plan set</b></th>
           <td>Individual-market, on-exchange, non-dental silver plans, excluding child-only offerings. Healthcare.gov states come from the CMS Exchange PUFs (rate, plan attributes, service area); the 21 state-run exchanges come from the CMS State-based Exchange PUFs. Both are published federal tables; no key, no scraping of insurer sites.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">Why the second lowest</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Why the second lowest</b></th>
           <td>The choice is statute, not ours: 26 U.S.C. &sect;36B defines the credit as this benchmark minus your expected contribution. Congress pegged it to the <i>second</i>-lowest silver so the credit always leaves at least two plans within your expected share, and so a single cut-rate outlier cannot set the subsidy for a whole market.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">Per county, not per rating area</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Per county, not per rating area</b></th>
           <td>A rating area sets the price, but each plan&rsquo;s service area decides where it is sold, and the two disagree often: in 37% of healthcare.gov counties the county&rsquo;s true second-lowest silver differs from its rating area&rsquo;s. So we take the plans whose service area covers your county, price them at your county&rsquo;s rating area, sort, and take the second. Roughly 3,300 county figures, precomputed and shipped with the page.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">Ages</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Ages</b></th>
           <td>Each person is priced at their own age on their state&rsquo;s rate curve, which we derive from the state&rsquo;s own rate file rather than assume. Forty-two states match the federal 3-to-1 default. Alabama, Mississippi and Oregon price children lower (0.635 against the default&rsquo;s 0.765); Minnesota (0.89) and the District of Columbia (0.90) price them higher, and DC&rsquo;s adult curve is its own; Utah&rsquo;s curve is unlike anyone else&rsquo;s; Massachusetts is a 2-to-1 state whose curve tops out at 1.999. New York and Vermont do not age-rate at all and price by family tier instead. At most the three oldest children under 21 are charged, which is the ACA&rsquo;s own family rule.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">New York and Vermont</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">New York and Vermont</b></th>
           <td>Both ban age rating entirely and quote four family tiers instead: individual, couple, one adult with children, two adults with children. We use their published tier rates directly. A third adult in the household is priced as their own individual policy, which is how they would actually buy in.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">ZIPs that decide the price</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">ZIPs that decide the price</b></th>
           <td>Alaska and Massachusetts define rating areas by the first three ZIP digits, and Los Angeles County is split between two rating areas the same way, so there your ZIP picks the rate table directly. Everywhere else your ZIP resolves to a county; a ZIP spanning two rating areas asks you which county is yours rather than guessing.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">How we know it is right</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">How we know it is right</b></th>
           <td>Three independent checks, run every time the table is rebuilt: every healthcare.gov county must match the separately published QHP landscape file&rsquo;s own second-lowest silver premium to the cent; New York&rsquo;s county floors must match NY State of Health&rsquo;s published 2026 lowest-cost-silver table to the cent; and Los Angeles must match Covered California&rsquo;s published 2026 rate booklet. A build that fails any check does not ship.</td>
         </tr>
       </table>
@@ -1392,8 +1422,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>Employer coverage <span class="tag surv" style="vertical-align:middle;margin-left:8px">Survey</span></h3>
       <p class="body" style="max-width:760px">From KFF&rsquo;s 2025 Employer Health Benefits Survey. The employer share is the part this whole site is about: it is compensation, spent on a product instead of paid to you.</p>
-      <table style="margin-top:12px">
-        <tr><th>Coverage</th><th>Total premium</th><th>Worker pays</th><th>Employer pays</th></tr>
+      <table style="margin-top:12px"><caption class="vh">Employer coverage, KFF 2025</caption>
+        <tr><th scope="col">Coverage</th><th scope="col">Total premium</th><th scope="col">Worker pays</th><th scope="col">Employer pays</th></tr>
         <tr><td>Family</td><td class="num">$26,993</td><td class="num">$6,850</td><td class="num">$20,143</td></tr>
         <tr><td>Single</td><td class="num">$9,325</td><td class="num">$1,440</td><td class="num">$7,885</td></tr>
       </table>
@@ -1461,29 +1491,29 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>What a bad year costs without coverage <span class="tag mod" style="vertical-align:middle;margin-left:8px">Modeled</span></h3>
       <p class="body" style="max-width:760px">The uninsured view of section 03 prints three numbers. Two are statutory; the list-price figure is our arithmetic, so here it is in full.</p>
-      <table style="margin-top:12px">
+      <table style="margin-top:12px"><caption class="vh">What a bad year costs without coverage</caption>
         <tr>
-          <td style="width:220px"><b style="font-weight:500;color:var(--pk)">One admission, at cost</b></td>
+          <th scope="row" class="rowh" style="width:220px"><b style="font-weight:500;color:var(--pk)">One admission, at cost</b></th>
           <td>About <span class="num">$16,700</span>, derived by us from HCUP&rsquo;s published 2022 aggregates: $548.5 billion in hospital costs across 32.9 million stays (HCUP Statistical Brief #316). Excludes physician fees, so the real bill runs higher.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">The markup to list price</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">The markup to list price</b></th>
           <td>Charges average <span class="num">3.4&times;</span> cost nationally (Bai &amp; Anderson, <i>Health Affairs</i> 2015, on 2012 data; the most common ratio was 2.4). A 2020 study by National Nurses United (a union that advocates single-payer; labelled, like every source here) measures 4.2&times; by 2018. We use the older, smaller number.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">One admission, as billed</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">One admission, as billed</b></th>
           <td>&asymp;<span class="num">$57,000</span>: $16,700 &times; 3.4, our multiplication, labelled modeled where it appears. Uninsured patients are billed from list prices. Protections exist but are conditional (nonprofit hospitals&rsquo; assistance policies under IRS 501(r), good-faith estimates for scheduled care under the No Surprises Act), and none of them caps the price itself.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">The insured ceiling</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">The insured ceiling</b></th>
           <td><span class="num">$10,600</span> self-only / <span class="num">$21,200</span> family: the 2026 out-of-pocket maximum, statutory, from CMS&rsquo;s 2025 Marketplace final rule. It applies only to people with coverage. No equivalent exists in law for the uninsured.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">After one hospitalization</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">After one hospitalization</b></th>
           <td>&asymp;<span class="num">$6,000</span> in unpaid bills for an uninsured adult four years on, against &asymp;<span class="num">$300</span> insured: Dobkin, Finkelstein, Kluender &amp; Notowidigdo&rsquo;s event study of about a million California admissions matched to credit records (<i>American Economic Review</i>, 2018). A finding both camps of the bankruptcy debate below accept.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">Debt, and care skipped</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Debt, and care skipped</b></th>
           <td><span class="num">62%</span> of uninsured adults carry health-care debt, against 44% of the insured (KFF survey, 2022). Cost stopped or delayed care for <span class="num">three in four</span> uninsured adults in KFF&rsquo;s 2025 poll, or <span class="num">38.6%</span>, more than double the privately insured, by the narrower federal NHIS measure (2024). Two surveys asking two different questions; we print both.</td>
         </tr>
       </table>
@@ -1493,41 +1523,41 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3>What we know is wrong <span class="tag mod" style="vertical-align:middle;margin-left:8px">Modeled</span></h3>
       <p class="body" style="max-width:760px">Every model has soft spots. Ours are listed here rather than left for someone else to find.</p>
-      <table style="margin-top:12px">
+      <table style="margin-top:12px"><caption class="vh">What we know is wrong</caption>
         <tr>
-          <td style="width:220px"><b style="font-weight:500;color:var(--pk)">Ages the market does not price</b></td>
+          <th scope="row" class="rowh" style="width:220px"><b style="font-weight:500;color:var(--pk)">Ages the market does not price</b></th>
           <td>Anyone 65 or over is usually on Medicare, which we do not price; we charge them the 64-year-old rate, the oldest the marketplace curve has, which overstates a Medicare household&rsquo;s real premium and understates its risk. Tobacco surcharges (up to 50% in most states) are not modeled; every figure is the non-tobacco rate.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">ZIP boundaries</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">ZIP boundaries</b></th>
           <td>Our ZIP table is built from the Census 2020 ZCTA-to-county file, and ZCTAs approximate postal ZIPs rather than matching them exactly. A ZIP whose counties sit in different rating areas asks you to pick; about 140 PO-box-only ZIPs carry no homes of their own and inherit the nearest deliverable ZIP&rsquo;s county, which we note here rather than hide.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">Out-of-pocket spending</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Out-of-pocket spending</b></th>
           <td>Anchored to published average deductibles, not to measured spending. Real figures would come from the Medical Expenditure Panel Survey. Yours depends entirely on whether you got sick.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">The Medicare tax asymmetry</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">The Medicare tax asymmetry</b></th>
           <td>Today&rsquo;s total includes the 1.45% you already pay. The universal figures do not carry a continuing Medicare tax, which flatters them by roughly that amount. And if the employer&rsquo;s premium share is really your money, so is the employer&rsquo;s matching 1.45%, which we leave out, which cuts the other way.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">What the universal figure is</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">What the universal figure is</b></th>
           <td>A contribution, not a cost of care. The other two bars show what covering this household costs in full; this one shows the share of it the household would pay. Its coverage would still cost roughly what it costs now (for the worked household above, <b>$32,171</b> a year through an employer), and on the six models the household would pay <b>$9,637 to $14,976</b> of that, <b>30% to 47%</b>, the rest coming from progressive financing and the federal health spending that already exists. Read as a like-for-like total, it flatters universal coverage. Putting a number on that remainder would mean allocating national spending per household, a second modeled figure stacked on the one we already publish, so for now we say this instead.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">Mixed vintages in the allocations</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Mixed vintages in the allocations</b></th>
           <td>The four allocated models spread each source&rsquo;s own dollars (Blahous&rsquo;s 2020s decade, Urban&rsquo;s 2020, RAND&rsquo;s 2019, CBO&rsquo;s 2030 projection) over one 2025 household count. Inflating them all to one year would add false precision to numbers whose real uncertainty is the model, not the deflator; leaving them as published understates the older sources slightly. We chose the disclosure over the adjustment.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">One income number</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">One income number</b></th>
           <td>The statutes want three different ones: the subsidy runs on MAGI, the Medicare payroll tax on wages, and the Sanders premium on income above an exemption. We run all three from the single figure you enter. Close for a household whose income is mostly wages; retirement deferrals drive them apart, since Medicare wages include a 401(k) deferral and MAGI does not. We also treat any household larger than one as filing jointly.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">Uninsured spending</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Uninsured spending</b></th>
           <td>Modeled, and low for a reason worth stating plainly: uninsured households spend less because they skip care, not because care is cheaper for them. It usually is not. Our figure is the cost of the care an uninsured household <i>uses</i> in a year. Cash out of pocket runs lower still (roughly $500 to $750 in the last published MEPS breakdowns), because providers collect little of what they bill. Either way it describes a quiet year; the bad-year arithmetic has its own section above.</td>
         </tr>
         <tr>
-          <td><b style="font-weight:500;color:var(--pk)">Wage incidence</b></td>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Wage incidence</b></th>
           <td>The claim that the employer&rsquo;s premium share is really your compensation is well supported among economists but it is not a law of nature, and it plays out over years rather than on the day your premium changes.</td>
         </tr>
       </table>
@@ -1535,8 +1565,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px">
       <h3 id="sources">Sources</h3>
-      <table style="margin-top:12px">
-        <tr><th>Figure</th><th>Source</th></tr>
+      <table style="margin-top:12px"><caption class="vh">Sources</caption>
+        <tr><th scope="col">Figure</th><th scope="col">Source</th></tr>
         <tr><td>Poverty guidelines</td><td>HHS, 2025 Poverty Guidelines</td></tr>
         <tr><td>Premium credit schedule</td><td>IRS Rev. Proc. 2025-25, applicable percentage table for 2026</td></tr>
         <tr><td>Standard deduction, 2026</td><td>IRS Rev. Proc. 2025-32 (the Sanders exemption)</td></tr>
@@ -1571,6 +1601,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   </div>
 </section>
 <!-- METH:END -->
+</main>
 
 <footer>
   <div class="wrap stack" style="gap:26px">
@@ -1814,7 +1845,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       var html = "", i, k, mm;
       for (i = 0; i < r.ds.length; i++){
         k = r.ds[i]; mm = REPS.house[k];
-        html += '<button type="button" class="tbtn' + (state.district === k ? " on" : "") + '" data-d="' + k + '">' +
+        html += '<button type="button" class="tbtn' + (state.district === k ? " on" : "") + '" aria-pressed="' + (state.district === k ? "true" : "false") + '" data-d="' + k + '">' +
           k + " · " + (mm ? repLast(mm) : "vacant") + '</button>';
       }
       byId("repPickBtns").innerHTML = html;
@@ -2096,6 +2127,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("agesNote").hidden = !state.ages.some(function(a){ return a >= 65; });
     byId("incomeVal").textContent = money(state.income);
     byId("fplVal").textContent    = Math.round(S.fpl.ratio * 100) + "% of poverty line";
+    // A screen reader heard "95000" while the screen showed $95,000 and 296%.
+    byId("income").setAttribute("aria-valuetext", money(state.income) + ", " + Math.round(S.fpl.ratio * 100) + "% of the poverty line");
+    // One polite announcement of the headline figure, after the slider settles.
+    clearTimeout(liveT);
+    liveT = setTimeout(function(){ byId("liveFig").textContent = "Your household\u2019s healthcare costs " + fmt(S.breakdown.whole) + " " + WORDS.a[state.unit] + "."; }, 500);
     var a = S.marketplace.place;
     byId("placeName").textContent = countyLabel(a) + " \u00b7 " + a.state;
     byId("areaNote").textContent  =
@@ -2103,9 +2139,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       (a.exchange === "state" ? "State-run exchange" : "Healthcare.gov") +
       " \u00b7 Medicaid " + (a.expanded ? "expanded" : "not expanded");
     byId("who").textContent  = S.universal.note;
-    // Must match the sticky bar's two-row breakpoint in the stylesheet (900px).
-    // The long form plus the Year/Month switch does not fit on one row below it.
-    var tight = window.matchMedia("(max-width:900px)").matches;
+    // The short form below 1100px: at 1024 the long form truncated to "$95,0…"
+    // beside the Year/Month switch. The two-row bar itself still begins at 900px
+    // in the stylesheet; this only shortens the words.
+    var tight = window.matchMedia("(max-width:1100px)").matches;
     byId("who-line").textContent = tight
       ? state.size + " \u00b7 " + a.county + " \u00b7 $" + Math.round(state.income / 1000) + "k"
       : "Household of " + state.size + " \u00b7 " + a.county + " \u00b7 " + money(state.income);
@@ -2213,6 +2250,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     byId("wf").innerHTML = html;
     byId("wcaps").innerHTML = caps;
+    // The columns and their captions are two lists visually tied by position; for
+    // assistive tech the whole chart is one image with a spoken summary.
+    var said = [];
+    for (i = 0; i < parts.length; i++){
+      said.push(parts[i].caption.replace(/<br>/g, " ").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&") + " " + fmt(parts[i].value) +
+                (parts[i].bears ? "" : " (paid by taxpayers, not you)"));
+    }
+    byId("wf").setAttribute("aria-label", said.join(", plus ") + ". Total " + fmt(whole) + " " + WORDS.per[state.unit] + ".");
     byId("wfNote").innerHTML = 'All figures <span data-uw="per">' +
       WORDS.per[state.unit] + '</span>. ' + R.note;
   }
@@ -2346,7 +2391,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   // The cliff drawn from the same functions that drive the calculator, so the chart
   // can never disagree with the numbers beside it.
-  var crossSig = "";
+  var crossSig = "", liveT = null;
   function renderCrossover(x){
     var el = byId("crossText");
     if (!el || !x) return;
@@ -2559,6 +2604,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   function renderPills(){
     for (var i = 0; i < pills.children.length; i++){
       pills.children[i].className = "pill" + (W.MODELS[i].id === state.model ? " on" : "");
+      pills.children[i].setAttribute("aria-pressed", W.MODELS[i].id === state.model ? "true" : "false");
     }
     byId("modelPick").value = state.model;
   }
@@ -2587,6 +2633,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   function renderScope(msg){
     var scope;
+    // msg is only ever an error; the field carries the state for assistive tech
+    byId("zip").setAttribute("aria-invalid", msg ? "true" : "false");
     if (msg){
       scope = msg;
     } else if (state.bChoices){
@@ -2622,7 +2670,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           state.bkey = b.getAttribute("data-k");
           state.bChoices = null;
           paint();
-          document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
+          document.querySelector(".instr").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
         } else {
           byId("zip").value = b.getAttribute("data-z");
           submitZip();
@@ -2631,6 +2679,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     });
   }
 
+  function scrollBehavior(){ return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"; }
   function submitZip(){
     var r = W.zipResolve(byId("zip").value);
     if (r.st === "short"){ renderScope('Enter all five digits.'); return; }
@@ -2653,7 +2702,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       state.bkey = r.key;
       state.bChoices = null;
       paint();
-      document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
+      document.querySelector(".instr").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
     } else {
       // spans rating areas: EVERYTHING keeps the previous ZIP until the reader
       // picks a county -- the figures, and the rep card with them. Updating the
@@ -2766,7 +2815,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   [].forEach.call(routeEl.querySelectorAll("button"), function(b){
     b.addEventListener("click", function(){
       state.route = b.getAttribute("data-r");
-      [].forEach.call(routeEl.querySelectorAll("button"), function(x){ x.className = (x === b ? "on" : ""); });
+      [].forEach.call(routeEl.querySelectorAll("button"), function(x){ x.className = (x === b ? "on" : ""); x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
       // Picking a route resets the letter's emphasis to that route's story --
       // predictable, since a route change rewrites the letter anyway. The
       // reader's checks on top of a route survive everything BUT a route change.
@@ -2812,6 +2861,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   byId("zipGo").addEventListener("click", submitZip);
   byId("zip").addEventListener("keydown", function(e){ if (e.key === "Enter") submitZip(); });
+  byId("zip").addEventListener("input", function(){ var d = this.value.replace(/\D/g, ""); if (d !== this.value) this.value = d; });
   byId("income").addEventListener("input", function(){ state.income = +this.value; paint(); });
   function agesToField(){ byId("ages").value = state.ages.join(", "); }
   // Stepping up appends an adult until there are two, then children -- the shape
@@ -2918,7 +2968,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var btn = ev.target.closest(".tbtn"); if (!btn) return;
     state.tone = btn.getAttribute("data-tone");
     var bs = byId("tone").querySelectorAll(".tbtn");
-    for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("on", bs[i] === btn);
+    for (var i = 0; i < bs.length; i++){ bs[i].classList.toggle("on", bs[i] === btn); bs[i].setAttribute("aria-pressed", bs[i] === btn ? "true" : "false"); }
     paint();
   });
   function copyLetter(done){

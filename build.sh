@@ -86,8 +86,12 @@ meth = out[ms:me]
 meth = meth.replace('<div id="methBack" hidden ', '<div id="methBack" ', 1)
 meth = meth.replace('<section class="paper view" id="methodology" hidden>',
                     '<section class="paper view" id="methodology">', 1)
+# its own document, so its title is the h1 (the artifact keeps the h2 under the hero's h1)
+if meth.count('<h2>Check our work.</h2>') != 1:
+    raise SystemExit('build: the methodology title moved')
+meth = meth.replace('<h2>Check our work.</h2>', '<h1 class="as-h2">Check our work.</h1>', 1)
 foot = out[out.index('\n<footer>'):out.index('</footer>') + len('</footer>')]
-body = meth + '\n' + foot
+body = '<main id="main">\n' + meth + '\n</main>\n' + foot
 body = body.replace('href="#/methodology"', 'href="/methodology"')
 body = body.replace('href="#"', 'href="/"')
 if '<script' in body:

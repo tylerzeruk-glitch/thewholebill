@@ -2062,6 +2062,127 @@ test('prose: section 02 and the letter agree with the rest of the page', async b
   await p.close();
 });
 
+/* Accessibility floors from the launch review (A1 to A10). Where the review
+ * measured a pixel or a ratio, the test measures the same thing. */
+const lum = rgb => { const c = rgb.match(/\d+(\.\d+)?/g).slice(0, 3).map(v => { v = v / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+const contrast = (a, b) => { const l1 = lum(a), l2 = lum(b); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
+
+test('accessibility: focus, state, announcements and contrast', async b => {
+  const p = await page(b, 1280, 900);
+  // A1: the ZIP field and the slider show focus
+  await p.focus('#zip');
+  const zf = await p.evaluate(() => getComputedStyle(document.querySelector('.zipfield')).outlineStyle);
+  ok('ZIP field shows a focus ring (focus-within)', zf !== 'none', zf);
+  await p.keyboard.press('Tab'); await p.keyboard.press('Tab');
+  await p.focus('#income'); await p.keyboard.press('ArrowRight'); await p.keyboard.press('ArrowLeft');
+  const sf = await p.evaluate(() => ({ el: document.activeElement.id, o: getComputedStyle(document.activeElement).outlineStyle, w: getComputedStyle(document.activeElement).outlineWidth }));
+  ok('slider shows a focus ring on keyboard focus', sf.el === 'income' && sf.o !== 'none' && parseFloat(sf.w) >= 2, JSON.stringify(sf));
+  // A2: pressed state and grouping on the four toggle groups
+  const groups = await p.evaluate(() => ['#route', '#pills', '#tone', '#repPickBtns'].map(sel => {
+    const g = document.querySelector(sel), lbl = document.getElementById(g.getAttribute('aria-labelledby') || '');
+    const bs = [...g.querySelectorAll('button')];
+    return { sel, role: g.getAttribute('role'), label: lbl ? lbl.textContent.trim() : null, n: bs.length,
+             pressed: bs.filter(x => x.getAttribute('aria-pressed') === 'true').length,
+             unlabelled: bs.filter(x => !x.hasAttribute('aria-pressed')).length,
+             onMatches: bs.every(x => x.classList.contains('on') === (x.getAttribute('aria-pressed') === 'true')) };
+  }));
+  for (const g of groups) {
+    if (g.n) ok(`${g.sel}: role=group with a real label`, g.role === 'group' && g.label && g.label.length > 2, JSON.stringify(g));
+    if (g.n) ok(`${g.sel}: aria-pressed mirrors .on on every button`, g.unlabelled === 0 && g.pressed === 1 && g.onMatches, JSON.stringify(g));
+  }
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(150);
+  await p.locator('.pills .pill').nth(3).click(); await p.waitForTimeout(150);
+  await p.locator('#tone .tbtn[data-tone="personal"]').click(); await p.waitForTimeout(150);
+  const after = await p.evaluate(() => ['#route', '#pills', '#tone'].map(sel => [...document.querySelectorAll(sel + ' button')].map(x => x.getAttribute('aria-pressed') === 'true' ? 1 : 0).join('')));
+  ok('pressed state follows the click on route, model and tone', after.join('|') === '010|000100|001', after.join('|'));
+  await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(150);
+  await p.fill('#zip', '30165'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);   // a district-split ZIP (Rome, GA) shows the chooser
+  await p.locator('#areapick button[data-k]').first().click(); await p.waitForTimeout(400);          // once the rating area is picked
+  const rp = await p.evaluate(() => { const g = document.getElementById('repPickBtns'); const bs = [...g.querySelectorAll('button')];
+    return { hidden: g.closest('[hidden]') !== null, n: bs.length, label: (document.getElementById(g.getAttribute('aria-labelledby')) || {}).textContent, pressed: bs.map(x => x.getAttribute('aria-pressed')) }; });
+  ok('district chooser: labelled group, every button carries aria-pressed', !rp.hidden && rp.n >= 2 && rp.label && rp.label.length > 10 && rp.pressed.every(v => v === 'true' || v === 'false'), JSON.stringify(rp));
+  await p.fill('#zip', '75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(300);
+  // A3: ZIP errors are announced and the field only takes digits
+  const zipA = await p.evaluate(() => ({ role: document.getElementById('scope').getAttribute('role'), desc: document.getElementById('zip').getAttribute('aria-describedby'), ac: document.getElementById('zip').getAttribute('autocomplete') }));
+  ok('scope is a status region the field points at', zipA.role === 'status' && zipA.desc === 'scope' && zipA.ac === 'postal-code', JSON.stringify(zipA));
+  await p.fill('#zip', ''); await p.type('#zip', 'ab1x23'); await p.waitForTimeout(100);
+  ok('letters are stripped as they are typed', (await p.inputValue('#zip')) === '123', await p.inputValue('#zip'));
+  await p.locator('#zipGo').click(); await p.waitForTimeout(200);
+  const inv = await p.evaluate(() => ({ inv: document.getElementById('zip').getAttribute('aria-invalid'), msg: document.getElementById('scope').textContent }));
+  ok('a short ZIP marks the field invalid and says why', inv.inv === 'true' && /all five digits/.test(inv.msg), JSON.stringify(inv));
+  await p.fill('#zip', '75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(300);
+  ok('a good ZIP clears aria-invalid', (await p.getAttribute('#zip', 'aria-invalid')) === 'false');
+  // A4: value text and one polite live region
+  const vt0 = await p.getAttribute('#income', 'aria-valuetext');
+  ok('slider value text reads money and poverty ratio', /^\$95,000, 29\d% of the poverty line$/.test(vt0), vt0);
+  await setIncome(p, 120000); await p.waitForTimeout(700);
+  const live = await p.evaluate(() => ({ vt: document.getElementById('income').getAttribute('aria-valuetext'), live: document.getElementById('liveFig').textContent,
+    n: document.querySelectorAll('[aria-live]').length, big: document.querySelector('.bignum').textContent }));
+  ok('value text follows the slider', /^\$120,000, 37\d% of the poverty line$/.test(live.vt), live.vt);
+  ok('one live region announces the headline figure', live.n === 1 && live.live.includes(live.big) && /a year\.$/.test(live.live), live.live);
+  await setIncome(p, 95000);
+  // A5: the waterfall is one image with a spoken summary
+  const wf = await p.evaluate(() => ({ role: document.getElementById('wf').getAttribute('role'), label: document.getElementById('wf').getAttribute('aria-label'), caps: document.getElementById('wcaps').getAttribute('aria-hidden'), total: document.querySelector('#wf .wcol-total .wlab').textContent }));
+  ok('waterfall reads as one image with the parts and total', wf.role === 'img' && wf.caps === 'true' && wf.label.includes(wf.total) && /plus/.test(wf.label) && /employer/i.test(wf.label), wf.label);
+  // A6: the two pairs the review measured under 4.5:1
+  const pairs = await p.evaluate(() => {
+    const cs = e => getComputedStyle(e);
+    const note = document.getElementById('placeCtrl').querySelector('.note-i'), op = [...document.querySelectorAll('#lives .op')].find(e => e.textContent.trim() === '+');
+    if (!note || !op) return { missing: [!note, !op] };
+    return { note: [cs(note).color, cs(document.getElementById('placeCtrl')).backgroundColor], op: [cs(op).color, cs(document.getElementById('lives')).backgroundColor] };
+  });
+  ok('both measured elements are present', !pairs.missing, JSON.stringify(pairs));
+  if (!pairs.missing) {
+  ok('"from your ZIP" on the raised card clears 4.5:1', contrast(pairs.note[0], pairs.note[1]) >= 4.5, contrast(pairs.note[0], pairs.note[1]).toFixed(2) + ':1');
+  ok('the "+" in the lives tally clears 4.5:1', contrast(pairs.op[0], pairs.op[1]) >= 4.5, contrast(pairs.op[0], pairs.op[1]).toFixed(2) + ':1');
+  }
+  await p.close();
+});
+
+test('accessibility: reduced motion, whole-page print, sticky at 1024, structure', async b => {
+  const p = await page(b, 1280, 900);
+  // A7: nothing moves when the reader asks for reduced motion
+  const before = await p.evaluate(() => [...document.querySelectorAll('*')].filter(e => getComputedStyle(e).transitionDuration.split(',').some(d => parseFloat(d) > 0)).length);
+  await p.emulateMedia({ reducedMotion: 'reduce' }); await p.waitForTimeout(100);
+  const moving = await p.evaluate(() => [...document.querySelectorAll('*')].filter(e => { const cs = getComputedStyle(e); return cs.transitionDuration.split(',').some(d => parseFloat(d) > 0) || (cs.animationName !== 'none' && parseFloat(cs.animationDuration) > 0); }).length);
+  ok('transitions exist normally and vanish under reduce', before > 10 && moving === 0, `${before} → ${moving}`);
+  await p.emulateMedia({ reducedMotion: 'no-preference' });
+  // A8: Cmd+P on the whole page prints the ink sections dark on white
+  await p.emulateMedia({ media: 'print' }); await p.waitForTimeout(100);
+  const pr = await p.evaluate(() => { const s = document.getElementById('cliff'), h = s.querySelector('h2'); const cs = getComputedStyle(s);
+    return { bg: cs.backgroundColor, color: getComputedStyle(h).color, letter: document.body.classList.contains('print-letter') }; });
+  ok('ink sections print dark on white', !pr.letter && lum(pr.bg) > 0.9 && lum(pr.color) < 0.2, JSON.stringify(pr));
+  await p.emulateMedia({ media: 'screen' });
+  // A10: landmarks and a skip link that is the first tab stop
+  const st = await p.evaluate(() => ({ main: !!document.querySelector('main#main'), header: !!document.querySelector('header'),
+    first: (document.querySelector('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])') || {}).className, h1: document.querySelectorAll('h1').length }));
+  ok('index: main and header landmarks, one h1, skip link first', st.main && st.header && st.h1 === 1 && st.first === 'skip', JSON.stringify(st));
+  await p.keyboard.press('Tab');
+  const skip = await p.evaluate(() => { const a = document.activeElement; const r = a.getBoundingClientRect(); return { cls: a.className, onscreen: r.left >= 0 && r.top >= 0 && r.width > 0 }; });
+  ok('the skip link appears on focus', skip.cls === 'skip' && skip.onscreen, JSON.stringify(skip));
+  await p.close();
+  // A9: the sticky context line fits at 1024
+  const q = await page(b, 1024, 900);
+  await q.evaluate(() => window.scrollTo(0, 2400)); await q.waitForTimeout(300);
+  const who = await q.evaluate(() => { const e = document.getElementById('who-line'); return { sw: e.scrollWidth, cw: e.clientWidth, t: e.textContent }; });
+  ok('sticky context line is not truncated at 1024', who.sw <= who.cw + 1 && /^4 · /.test(who.t), JSON.stringify(who));
+  await q.close();
+  // A10: the methodology document and the 404
+  const m = await page(b, 1280, 900, false, 'methodology/index.html');
+  const ms = await m.evaluate(() => ({ h1: [...document.querySelectorAll('h1')].map(h => h.textContent), main: !!document.querySelector('main'),
+    tables: document.querySelectorAll('table').length, captions: document.querySelectorAll('table > caption').length,
+    noTh: [...document.querySelectorAll('table')].filter(t => !t.querySelector('th')).length,
+    noScope: document.querySelectorAll('th:not([scope])').length,
+    rowhFace: (() => { const th = document.querySelector('th.rowh'), td = document.querySelector('th.rowh + td'); const a = getComputedStyle(th), b = getComputedStyle(td); return a.fontFamily === b.fontFamily && a.fontSize === b.fontSize && a.textTransform === b.textTransform; })() }));
+  ok('methodology: one h1 ("Check our work.") and a main', ms.h1.length === 1 && /Check our work/.test(ms.h1[0]) && ms.main, JSON.stringify(ms.h1));
+  ok('methodology: every table has a caption and headers with scope', ms.tables === 8 && ms.captions === 8 && ms.noTh === 0 && ms.noScope === 0, JSON.stringify(ms));
+  ok('row headers keep the body-cell face', ms.rowhFace);
+  await m.close();
+  const f = await page(b, 1280, 900, false, '404.html');
+  ok('404 has a main landmark', await f.evaluate(() => !!document.querySelector('main')));
+  await f.close();
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;
