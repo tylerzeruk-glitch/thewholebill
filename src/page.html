@@ -656,8 +656,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      of them. CI caught a 1px overflow here that macOS did not -- Linux sets the
      same mono a shade wider -- so this leaves several px of slack, not none. */
   .wf{gap:5px}
-  .wlab{font-size:clamp(9px,2.8vw,11px);letter-spacing:-.035em;margin-bottom:8px}
-  .wlab.big{font-size:clamp(9px,2.8vw,11.5px)}
+  .wlab{font-size:clamp(9px,2.6vw,11px);letter-spacing:-.035em;margin-bottom:8px}   /* 2.8vw overflowed a column by 1px at 390 on CI's font metrics */
+  .wlab.big{font-size:clamp(9px,2.6vw,11.5px)}
   .wlab.total{font-size:clamp(13px,4.3vw,17px);letter-spacing:-.03em}
   .wkick{font-size:9px;letter-spacing:.08em;margin-bottom:6px}
   .wcaps{flex-direction:column;gap:8px;margin-top:18px}
