@@ -11,7 +11,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%2312141A%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%225%22%20width%3D%2210%22%20height%3D%222%22%20fill%3D%22%2386603E%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%223%22%20fill%3D%22%23A87A43%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2210%22%20width%3D%2210%22%20height%3D%2212%22%20fill%3D%22%23D99A3F%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2222%22%20width%3D%2210%22%20height%3D%225%22%20fill%3D%22%23F0C98D%22%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..500&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
   --paper:#FAF7F2; --paper-card:#FFFDFA; --paper-tint:#F5F0E7;
@@ -27,10 +27,10 @@
 
   --chart-h:500px;
   --pad:clamp(24px,5vw,96px);
-  --serif:'Literata',Georgia,'Times New Roman',serif;
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;
   --sans:'Public Sans',system-ui,-apple-system,sans-serif;
-  /* Two families since 2026-09-02: Literata (display, the letter) and Public Sans (everything
-   else). --mono is kept as the name of the LABEL AND FIGURE role, but it resolves to the sans:
+  /* Two families since 2026-09-02: Newsreader (display, body copy, the letter) and Public Sans
+   (controls, labels, figures). --mono is kept as the name of the LABEL AND FIGURE role, but it resolves to the sans:
    a monospace at 86px for the headline figure and at 10px in tracked capitals read as two more
    typefaces, which was the launch feedback. Numbers rely on tabular figures instead. */
   --mono:'Public Sans',system-ui,-apple-system,sans-serif;
@@ -46,17 +46,26 @@ section.paper{background:var(--paper);background-image:repeating-linear-gradient
 .inkzone{background:var(--ink);color:var(--ik)}
 section.ink{background:var(--ink);color:var(--ik)}
 
-.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.17em;text-transform:uppercase;font-weight:500}
+/* One label style. Thirteen rules used to set their own size (10 to 11.5px), tracking
+   (.06 to .17em) and weight; readers counted the variety as extra typefaces. */
+.eyebrow,.lbl,.dateline .k,.zipfield .k,.sticky .who,.adv-k,.wkick,.src-k,.meth th,.tag,.pill-r{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.footline,.domain{font-family:var(--mono);font-size:11px;letter-spacing:.06em;font-weight:500}
+/* The one responsive exception: a pill is 110px wide at the 900px breakpoint and "the scorekeeper" needs 125px at the shared size */
+@media (max-width:1023px){.pill-r{font-size:10px;letter-spacing:.06em}}
+.eyebrow{}
 .eyebrow.p{color:var(--amber-deep)} .eyebrow.i{color:var(--teal)}
-.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ilabel);font-weight:500}
+.lbl{color:var(--ilabel)}
 .lbl.p{color:var(--plabel);font-size:11px}
 
-h1{font-family:var(--serif);font-weight:400;font-size:clamp(36px,5.2vw,72px);line-height:1.04;letter-spacing:-.02em;margin:0;text-wrap:pretty}
-h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.3vw,52px);line-height:1.08;letter-spacing:-.018em;margin:0;text-wrap:pretty}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(38px,5.6vw,80px);line-height:1.01;letter-spacing:-.023em;margin:0;text-wrap:pretty}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:pretty}
 h1 em{font-style:italic;color:var(--amber-deep)}
-p{margin:0;text-wrap:pretty}
+/* Body copy reads in the serif, so the page has one reading voice from the headline to
+   the letter; the sans is for what is operated or scanned: controls, labels, figures, notes. */
+p{margin:0;text-wrap:pretty;font-family:var(--serif)}
+.note,.note-i,.fn,.src-s,.letter .ft p,.qpop p{font-family:var(--sans)}
 .lede{font-size:clamp(17px,1.5vw,21px);line-height:1.56;color:var(--pb)}
-.body{font-size:16.5px;line-height:1.68;color:var(--pb)}
+.body{font-size:17.5px;line-height:1.65;color:var(--pb)}
 .note{font-size:12.5px;line-height:1.55;color:var(--pm)}
 .note-i{font-size:12px;line-height:1.55;color:var(--ifaint)}
 /* --ifaint on the raised ground is 4.44:1, under the text floor; the household card sits on it */
@@ -73,7 +82,7 @@ p{margin:0;text-wrap:pretty}
 footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /* 44px hit area on a 16px line */
 .brand svg{display:block;flex-shrink:0}
 .wordmark{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.012em;line-height:1;white-space:nowrap}
-.domain{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em}
+.domain{}
 .nav{display:flex;gap:clamp(16px,2.4vw,34px);font-size:13.5px;color:var(--pm)}
 .hero-inner{padding:clamp(48px,7vw,104px) 0 clamp(40px,6vw,72px);display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:clamp(28px,4vw,72px);align-items:end}
 /* The rule down its left edge is a visible edge, and so is the bottom border of
@@ -85,7 +94,7 @@ footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /
    top is then free, and lands within 1-2px of the zip field's top edge -- that is
    a coincidence of the current copy, not a rule. Do not tune the copy to keep it. */
 .dateline{border-left:2px solid var(--amber-deep);padding:2px 0 2px 20px;display:flex;flex-direction:column;gap:11px}
-.dateline .k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-deep)}
+.dateline .k{color:var(--amber-deep)}
 .dateline p{font-size:14.5px;line-height:1.6;color:var(--pb)}
 .dateline b{font-weight:500;color:var(--pk)}
 .scope{margin-top:18px;font-size:13.5px;line-height:1.6;color:var(--pm);max-width:540px}
@@ -95,14 +104,14 @@ footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /
 .areapick button:hover{background:var(--paper-tint)}
 .zipbar{display:flex;gap:12px;align-items:center;margin-top:44px;flex-wrap:wrap}
 .zipfield{display:flex;align-items:center;border:1px solid var(--pk);border-radius:2px;overflow:hidden;background:var(--paper-card)}
-.zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;font-family:var(--mono);font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--pm);border-right:1px solid var(--prule)}
+.zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;color:var(--pm);border-right:1px solid var(--prule)}
 .zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent;font-variant-numeric:tabular-nums}
 .zipfield .v::placeholder{color:#A79A85}
 .zipfield:focus-within{outline:2px solid var(--amber-deep);outline-offset:2px}
 .dateline b{font-weight:500;color:var(--pk)}
 .btn-dark{height:62px;padding:0 34px;background:var(--pk);color:var(--paper);border:none;border-radius:2px;font-family:var(--sans);font-size:16px;font-weight:500;cursor:pointer}
 .btn-ghost{height:50px;padding:0 24px;background:var(--paper-card);color:var(--pk);border:1px solid var(--pctrl);border-radius:2px;font-family:var(--sans);font-size:15px;cursor:pointer}
-.footline{display:flex;justify-content:space-between;gap:20px;padding-bottom:40px;font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;color:var(--pm);flex-wrap:wrap}
+.footline{display:flex;justify-content:space-between;gap:20px;padding-bottom:40px;color:var(--pm);flex-wrap:wrap}
 
 /* ---------- narrative ---------- */
 /* Block longhands only. The `padding` SHORTHAND here silently reset .wrap's
@@ -153,7 +162,7 @@ footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /
    overflow-x, pushing the Year/Month switch off the right edge. The row has very
    little slack between 900px and ~1100px: it fit on macOS and overflowed on Linux,
    where the same labels set a few px wider. The context line gives way instead. */
-.sticky .who{font-family:var(--mono);font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:var(--im);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sticky .who{color:var(--im);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .figs{display:flex;gap:clamp(16px,2.6vw,38px);align-items:center}
 .fig{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
@@ -209,7 +218,7 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
    column, and its wrapping set the height of the box. */
 .adv > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k x" "s s";gap:8px 16px;align-items:center;padding:15px 0;min-height:44px}
 .adv > summary::-webkit-details-marker{display:none}
-.adv-k{grid-area:k;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+.adv-k{grid-area:k;color:var(--teal)}
 .adv-opt{color:var(--im);white-space:nowrap}
 .adv-s{grid-area:s;font-size:13px;line-height:1.5;color:var(--im);min-width:0}
 .adv > summary:hover .adv-s{color:var(--ib)}
@@ -242,7 +251,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .step:active{background:var(--ictrl);color:var(--ik)}
 .step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
 .warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:3px;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
-.bignum{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(48px,7vw,86px);font-weight:500;line-height:1;letter-spacing:-.035em;color:var(--c2)}
+.bignum{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(48px,7vw,86px);font-weight:500;line-height:1;letter-spacing:-.02em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:20px 22px;display:flex;flex-direction:column;gap:7px}
 .card-i .v{font-family:var(--mono);font-size:27px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
@@ -274,7 +283,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
 /* Its column is now the same width as the others, so this label wraps where it
    used to fit on one line. balance keeps it off a one-word last line. */
-.wkick{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--c2);margin-bottom:9px;text-wrap:balance}
+.wkick{color:var(--c2);margin-bottom:9px;text-wrap:balance}
 .wdiv{width:2px;background:var(--irule-2);height:var(--chart-h);flex-shrink:0;align-self:flex-end}
 .wcaps{display:flex;gap:clamp(14px,3vw,44px);margin-top:20px}
 .wcap{flex-grow:1;flex-basis:0;display:flex;gap:9px;align-items:flex-start;min-width:0}
@@ -300,7 +309,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 /* --im, not --ifaint: at 10px this line sits right at the 4.5:1 text floor, and
    --ifaint on the raised ground measures 4.45:1 -- under it. Same reason the
    selected state reuses the pill's own dark text rather than a mid teal. */
-.pill-r{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--im);white-space:nowrap;transition:color .18s}
+.pill-r{color:var(--im);white-space:nowrap;transition:color .18s}
 .pill.on{background:var(--teal);color:#0C1F1E;border-color:var(--teal)}
 .pill.on .pill-r{color:#0C1F1E}
 #modelPick{display:none}
@@ -332,8 +341,8 @@ button.step{cursor:pointer;font-family:var(--sans)}
    green border for a saving, amber for a loss. */
 .save.neg{border-color:#4A3520}
 .save.neg .v{color:var(--c2)}
-.save .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(34px,4.4vw,52px);font-weight:500;line-height:1;letter-spacing:-.032em;color:var(--teal)}
-.save .v2{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(24px,2.8vw,34px);font-weight:500;line-height:1;letter-spacing:-.025em}
+.save .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(34px,4.4vw,52px);font-weight:500;line-height:1;letter-spacing:-.02em;color:var(--teal)}
+.save .v2{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(24px,2.8vw,34px);font-weight:500;line-height:1;letter-spacing:-.02em}
 .vsep{width:1px;align-self:stretch;background:var(--irule)}
 .cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
 .range{height:26px;background:var(--ink-raised);border-radius:1px;position:relative}
@@ -361,14 +370,14 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:3px;background:var(--ink-surface);overflow:hidden}
 .cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
 .cstat .t{font-size:13.5px;color:var(--im)}
-.cstat .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(26px,3.4vw,42px);font-weight:500;letter-spacing:-.03em;line-height:1}
+.cstat .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(26px,3.4vw,42px);font-weight:500;letter-spacing:-.02em;line-height:1}
 .cstat .s{font-size:12.5px;color:var(--ifaint)}
 .chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:22px 24px}
 .chartbox svg{display:block;width:100%;height:auto}
 
 /* ---------- lives ---------- */
 .livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
-.bigstat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,84px);font-weight:500;line-height:1;letter-spacing:-.04em;color:var(--amber-deep)}
+.bigstat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,84px);font-weight:500;line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
 .bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
 /* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
    ARE that number, split in two. Set as a sum -- operator in its own column so the
@@ -393,7 +402,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .src > summary::-webkit-details-marker{display:none}
 .src > summary:hover .src-s{color:var(--pk)}
 .src > summary:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
-.src-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--plabel);white-space:nowrap}
+.src-k{color:var(--plabel);white-space:nowrap}
 .src-s{font-size:14px;line-height:1.5;color:var(--pb);min-width:0}
 .src-x{color:var(--pctrl);flex-shrink:0;transition:transform .22s ease}
 .src[open] .src-x{transform:rotate(180deg)}
@@ -410,12 +419,12 @@ button.step{cursor:pointer;font-family:var(--sans)}
    to show. See docs/design-brief.md on provenance. */
 .card-p .fn{border-top:none;padding-top:0;margin-top:2px;padding-left:14px;border-left:1px solid var(--prule)}
 .meth table{width:100%;border-collapse:collapse;font-size:14.5px}
-.meth th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--plabel);font-weight:400;padding:0 16px 10px 0;border-bottom:1px solid var(--prule)}
+.meth th{text-align:left;color:var(--plabel);padding:0 16px 10px 0;border-bottom:1px solid var(--prule)}
 .meth td{padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;color:var(--pb);line-height:1.6}
 .meth td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--pk);white-space:nowrap}
 .meth h3{font-family:var(--serif);font-size:clamp(22px,2.2vw,27px);font-weight:400;margin:0;letter-spacing:-.01em}
 .meth .card-p{gap:14px}
-.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:2px;white-space:nowrap}
+.tag{display:inline-block;padding:4px 8px;border-radius:2px;white-space:nowrap}
 .tag.stat{background:#DDE9DF;color:#245239}
 .tag.surv{background:#E4E0EC;color:#413659}
 .tag.mod{background:#F5E7CE;color:#7A4E0C}
@@ -436,7 +445,7 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .actgrid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:36px;align-items:start}
 .letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;display:flex;flex-direction:column}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
-.letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:16.5px;line-height:1.7;color:#2A2620}
+.letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:17.5px;line-height:1.72;color:#2A2620}
 .letter .ft{display:flex;gap:10px;padding:22px 36px;border-top:1px solid var(--prule-soft);align-items:center;flex-wrap:wrap}
 .letter .bd[contenteditable]:focus-visible{outline:2px solid var(--amber-deep);outline-offset:-2px}
 .letter .bd .hint{color:var(--pm);font-style:italic}
@@ -449,9 +458,9 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .skip:focus{width:auto;height:auto;overflow:visible;clip:auto;outline:2px solid var(--amber-deep);outline-offset:2px}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Row headers in the methodology tables: real <th scope="row"> for assistive tech, styled as the body cells they replaced */
-.meth th.rowh{font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;color:var(--pb);padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;line-height:1.6;font-weight:400}
+.meth th.rowh{font-family:var(--sans);font-size:inherit;letter-spacing:0;text-transform:none;color:var(--pb);padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;line-height:1.6;font-weight:400}
 /* /methodology is its own document, so its title is an h1 there; it keeps the h2 face */
-h1.as-h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.3vw,52px);line-height:1.08;letter-spacing:-.018em;margin:0;text-wrap:pretty}
+h1.as-h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:pretty}
 /* A7: every transition and animation stops when the reader asks for reduced motion */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
@@ -560,7 +569,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .sticky-in{display:grid;grid-template-columns:minmax(0,1fr) auto;
              grid-template-areas:"who unit" "figs unit";align-items:center;
              height:auto;padding-top:9px;padding-bottom:10px;gap:6px 14px;overflow:visible}
-  .sticky .who{display:block;grid-area:who;align-self:center;font-size:10.5px;letter-spacing:.07em;
+  .sticky .who{display:block;grid-area:who;align-self:center;
                min-width:0;overflow:hidden;text-overflow:ellipsis}
   /* 44px is the touch floor, so state it rather than deriving it from label
      padding -- the padding is then free to shrink for width on a phone. */
@@ -633,10 +642,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      breakpoint with different sizes; these are the ones that were actually winning,
      kept as-is so this restructure changes no rendered size. Worth a deliberate
      second look -- the discarded pair wanted .wlab 11.5px and .wcap span 11.5px. */
-  .eyebrow{font-size:12px}
-  .lbl,.lbl.p{font-size:11.5px}
   .note,.note-i,.fn{font-size:13px}
-  .domain{font-size:12.5px}
   .meth td,.meth th{font-size:13.5px}
   .meth th{font-size:10.5px}
   .cstat{padding:18px 20px}
@@ -927,7 +933,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">02 &middot; The reveal</div>
           <h2>Here is <em style="font-style:italic;color:var(--c2)">the whole bill</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. Two of them appear on a paystub. The largest never does; it is spent on your behalf.</p>
+        <p style="font-size:16.5px;line-height:1.6;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. Two of them appear on a paystub. The largest never does; it is spent on your behalf.</p>
       </div>
 
       <div class="wf" id="wf" role="img"></div>
@@ -951,7 +957,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">03 &middot; The cliff</div>
           <h2>One dollar, <em style="font-style:italic;color:var(--c2)" data-fig="cliff.drop">$12,980</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)" id="cliffIntro">Nothing in this section is modeled. The premium tax credit does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.</p>
+        <p style="font-size:16.5px;line-height:1.6;color:var(--im)" id="cliffIntro">Nothing in this section is modeled. The premium tax credit does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.</p>
       </div>
 
       <div class="cliffstats">
@@ -971,7 +977,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">03 &middot; The bad year</div>
           <h2>Nothing caps <em style="font-style:italic;color:var(--c2)">a bad year</em>.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">The out-of-pocket maximum is the law&rsquo;s ceiling on a bad year, for people with coverage. Going without insurance means going without the ceiling: no statute anywhere limits what a hospital can bill you.</p>
+        <p style="font-size:16.5px;line-height:1.6;color:var(--im)">The out-of-pocket maximum is the law&rsquo;s ceiling on a bad year, for people with coverage. Going without insurance means going without the ceiling: no statute anywhere limits what a hospital can bill you.</p>
       </div>
 
       <div class="cliffstats">
@@ -1004,7 +1010,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="eyebrow i">04 &middot; The comparison</div>
           <h2><em style="font-style:italic;color:var(--teal)">Another way</em> to pay for the same care.</h2>
         </div>
-        <p style="font-size:15px;line-height:1.65;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust, including the one funded by its opponents.</p>
+        <p style="font-size:16.5px;line-height:1.6;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust, including the one funded by its opponents.</p>
       </div>
 
       <div class="stack" style="gap:14px">

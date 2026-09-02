@@ -40,12 +40,14 @@ calculator lives. The shift in ground signals "now we're computing your numbers.
 
 - **Two grounds, one type system.** Paper = warm off-white (not pure white). Ink = near-black
   with a slight blue cast (not #000). Same fonts, same scale, inverted.
-- **Type (as built, since 2026-09-02):** Literata for editorial display and the letter,
-  Public Sans (the US Web Design System face) for everything else, including every figure and
-  every tracked label. Two families, no monospace: the launch pairing (Newsreader, IBM Plex
-  Sans, IBM Plex Mono) drew "too many fonts" from readers, because a monospace at 86px and the
-  same monospace at 10px in tracked capitals read as two extra typefaces, and because that
-  pairing is the one AI-generated pages reach for. Deliberately not Inter/Roboto/Fraunces/Plex.
+- **Type (as built, since 2026-09-02):** Newsreader for display, body copy and the letter
+  (one reading voice from the headline down), Public Sans (the US Web Design System face) for
+  what is operated or scanned: controls, labels, figures, notes. Two families, no monospace.
+  The launch feedback was "too many fonts"; the stylesheet's real problem was treatments,
+  not families: 42 font sizes, 13 tracked-caps label rules each with its own size and
+  tracking, and IBM Plex Mono in five treatments from an 86px thin figure to 10px caps. Now
+  one label style (11px, .12em, 500), one numeral treatment (500, tabular, -.02em), and the
+  serif carries prose. Deliberately not Inter/Roboto/Fraunces/Plex.
   **Tabular numerals are non-negotiable** — numbers that shift horizontally while updating read as a toy; numbers that
   tick in place read as an instrument.
 - **Palette (as built):**
@@ -236,7 +238,7 @@ The name was already in the design before it was the name: "Here is the whole bi
 reveal headline. It now reads as a callback rather than a label, and the headline italicises the
 phrase to make the echo deliberate.
 
-**Wordmark:** "The Whole Bill" in Literata 400, 21px, `-0.012em`. No italics, no colour — the
+**Wordmark:** "The Whole Bill" in Newsreader 400, 21px, `-0.012em`. No italics, no colour — the
 mark carries the colour.
 
 **The mark encodes the chart.** Four stacked warm bands in roughly the real proportions of the

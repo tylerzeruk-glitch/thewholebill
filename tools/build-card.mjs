@@ -1,5 +1,5 @@
 // Renders src/card.png, the 1200x630 share image, from the same faces the site
-// uses (Literata, Public Sans), so the card never drifts from the page when the
+// uses (Newsreader, Public Sans), so the card never drifts from the page when the
 // typography changes. Needs playwright (npm run setup) and network for fonts.
 //   node tools/build-card.mjs
 import { chromium } from 'playwright';
@@ -7,10 +7,10 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const out = resolve(dirname(fileURLToPath(import.meta.url)), '../src/card.png');
 const html = `<!doctype html><meta charset="utf-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;1,7..72,400&family=Public+Sans:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Public+Sans:wght@500&display=swap">
 <style>
 *{margin:0;box-sizing:border-box}
-body{width:1200px;height:630px;background:#12141A;color:#E8E6E1;font-family:'Literata',Georgia,serif;position:relative;overflow:hidden}
+body{width:1200px;height:630px;background:#12141A;color:#E8E6E1;font-family:'Newsreader',Georgia,serif;position:relative;overflow:hidden}
 .brand{position:absolute;left:84px;top:72px;display:flex;align-items:center;gap:14px;font-size:27px;letter-spacing:-.012em}
 h1{position:absolute;left:84px;top:186px;width:720px;font-weight:400;font-size:84px;line-height:1.0;letter-spacing:-.02em;color:#EDEBE6;text-wrap:balance}
 h1 em{font-style:italic;color:#D99A3F}
@@ -32,7 +32,7 @@ const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
 await p.setContent(html); await p.waitForTimeout(1500); await p.evaluate(() => document.fonts.ready);
 const loaded = await p.evaluate(() => [...document.fonts].filter(f => f.status === 'loaded').map(f => f.family));
-if (!loaded.some(f => /Literata/.test(f)) || !loaded.some(f => /Public Sans/.test(f))) throw new Error('build-card: fonts did not load: ' + loaded.join(', '));
+if (!loaded.some(f => /Newsreader/.test(f)) || !loaded.some(f => /Public Sans/.test(f))) throw new Error('build-card: fonts did not load: ' + loaded.join(', '));
 await p.screenshot({ path: out, type: 'png' });
 await b.close();
 console.log('wrote src/card.png with', [...new Set(loaded)].join(', '));
