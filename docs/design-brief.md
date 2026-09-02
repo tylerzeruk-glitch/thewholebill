@@ -40,9 +40,15 @@ calculator lives. The shift in ground signals "now we're computing your numbers.
 
 - **Two grounds, one type system.** Paper = warm off-white (not pure white). Ink = near-black
   with a slight blue cast (not #000). Same fonts, same scale, inverted.
-- **Type (as built):** Newsreader for editorial display, IBM Plex Sans for UI, IBM Plex Mono
-  for every figure. Deliberately not Inter/Roboto/Fraunces. **Tabular numerals are
-  non-negotiable** — numbers that shift horizontally while updating read as a toy; numbers that
+- **Type (as built, since 2026-09-02):** Newsreader for display, body copy and the letter
+  (one reading voice from the headline down), Public Sans (the US Web Design System face) for
+  what is operated or scanned: controls, labels, figures, notes. Two families, no monospace.
+  The launch feedback was "too many fonts"; the stylesheet's real problem was treatments,
+  not families: 42 font sizes, 13 tracked-caps label rules each with its own size and
+  tracking, and IBM Plex Mono in five treatments from an 86px thin figure to 10px caps. Now
+  one label style (11px, .12em, 500), one numeral treatment (500, tabular, -.02em), and the
+  serif carries prose. Deliberately not Inter/Roboto/Fraunces/Plex.
+  **Tabular numerals are non-negotiable** — numbers that shift horizontally while updating read as a toy; numbers that
   tick in place read as an instrument.
 - **Palette (as built):**
   - Paper `#FAF7F2`, paper text `#1A1815`, rule `#E3DDD2`
