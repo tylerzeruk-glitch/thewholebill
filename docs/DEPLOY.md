@@ -9,21 +9,30 @@ Three surfaces exist and this is how each stays current:
 | the Claude artifact | manually republished after each merge | review + comments |
 | local `dist/index.html` | `npm run build` | development |
 
-## Hosting: Cloudflare Pages
+## Hosting: Cloudflare Workers (static assets), via Workers Builds
 
-The Pages project is connected to the GitHub repo. Settings that matter:
+Settled 2026-09-02: the site is a **Worker named `thewholebill`** serving static
+assets with no script, not a Pages project. (This file said Pages until then; the
+tell was a 404 with an empty body, which is the Workers default, while Pages
+serves a root `404.html` on its own.) The Worker is connected to the GitHub repo
+through Workers Builds. Settings that matter:
 
-- Framework preset: **None** · Build command: **`npm run build`** · Output directory: **`dist`**
-- Production branch: `main`. Every push to it deploys. Branch builds are OFF, so PRs carry only the GitHub CI check.
-- The Pages build does **not** run the test suite — GitHub CI remains the gate on PRs.
-  Keep it that way: Playwright in the Pages image would slow every deploy for a
+- Build command: **`npm run build`**. Assets and serving behaviour come from
+  `wrangler.jsonc` in the repo root: `assets.directory` is `dist/`,
+  `not_found_handling` is `404-page` (the branded 404), `html_handling` is
+  `auto-trailing-slash` (`/methodology` redirects to `/methodology/`).
+- The deploy command in Settings, Build should be plain `npx wrangler deploy`.
+  If it carries an `--assets` flag from before the config file existed, remove
+  the flag; the config file is the single source for the assets directory.
+- Production branch: `main`. Every push to it deploys. There are no branch
+  builds, so PRs carry only the GitHub CI check.
+- The build does **not** run the test suite; GitHub CI remains the gate on PRs.
+  Keep it that way: Playwright in the build image would slow every deploy for a
   check that already ran.
 - `build.sh` is POSIX sh + python3 on purpose. Do not add macOS-only tools
-  (BSD `sed -i ''` and friends) or the Pages build breaks.
-- `dist/artifact.html` (the skeleton-less artifact build) deploys alongside
-  `index.html` and is reachable at `/artifact`. Harmless while gated; before going
-  public, either exclude it from the deploy or accept that it serves a bare
-  fragment.
+  (BSD `sed -i ''` and friends) or the build breaks.
+- The artifact build lives in `preview/`, outside `dist/`, so it never deploys;
+  `/artifact` and `/artifact.html` return the branded 404.
 
 ## The gate: Cloudflare Access
 
@@ -122,12 +131,11 @@ Each of these before deleting the Access application:
    site-wide app first, then the bypass, so the site is never "logo gated, site
    open". Access sets `no-store` on its 302s, so no stale redirect is cached.
    Then delete the One-Time-PIN allowlist (the reviewers' emails).
-8a. **Confirm which product hosts the site before that.** This file says Pages
-   and CLAUDE.md says Workers Builds; the dashboard is the authority. A Pages
-   project always has a `*.pages.dev` hostname that can be gated but not
-   disabled, and a Worker may have a `workers.dev` route; after the apps are
-   deleted, `curl -sI` whichever side-door hostname exists and confirm it does
-   not answer `200` for the site.
+8a. **Which product hosts the site: settled, Workers** (see Hosting above). The
+   side door for a Worker is the `workers.dev` route; it was disabled on
+   2026-08-31. Re-check after any dashboard change: `curl -sI` the
+   `thewholebill.<account>.workers.dev` hostname and confirm it does not answer
+   `200` for the site.
 8b. **Headers and zone settings, launch day.** `src/_headers` now ships
    `Permissions-Policy`, `Cross-Origin-Opener-Policy` and a Content Security
    Policy: `/methodology` runs with no scripts at all, and `/` names each of

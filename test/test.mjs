@@ -2272,6 +2272,20 @@ test('letter buttons: copy never claims success it did not have, mailto never tr
   await p.close();
 });
 
+/* The Worker config decides whether unknown paths get the branded 404 or an
+ * empty body; the site went public with the empty body because the file did
+ * not exist. Keep the three settings the site depends on pinned. */
+test('hosting: wrangler.jsonc names the worker and serves the branded 404', async () => {
+  const { readFileSync, existsSync } = await import('node:fs');
+  const raw = readFileSync(resolve(HERE, '../wrangler.jsonc'), 'utf8');
+  const cfg = JSON.parse(raw.replace(/^\s*\/\/.*$/gm, ''));
+  ok('worker is named thewholebill', cfg.name === 'thewholebill', cfg.name);
+  ok('assets come from dist/', /^\.\/dist\/?$/.test(cfg.assets && cfg.assets.directory), cfg.assets && cfg.assets.directory);
+  ok('unknown paths serve 404.html with a 404', cfg.assets && cfg.assets.not_found_handling === '404-page');
+  ok('html handling stays auto-trailing-slash (/methodology/)', cfg.assets && cfg.assets.html_handling === 'auto-trailing-slash');
+  ok('dist/404.html exists for it to serve', existsSync(resolve(HERE, '../dist/404.html')));
+});
+
 test('reps data: every member has a house.gov or senate.gov URL and a plain-text name', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync(resolve(HERE, '../src/reps.js'), 'utf8');

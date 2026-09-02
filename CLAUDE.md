@@ -136,7 +136,9 @@ Ops hygiene (small, anytime):
 4. GitHub Actions v4→v5 bump; branch protection on `main`.
 5. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
    hard-confirm the `workers.dev` route and Preview URLs are dead — currently verified only
-   from outside.
+   from outside. Hosting is settled (2026-09-02): a Worker named `thewholebill`, static assets
+   only, configured by `wrangler.jsonc` in the repo root (the branded 404 depends on its
+   `not_found_handling`).
 6. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
     membership, vacancies (FL-20 today) and cosponsorships all change. The snapshot's as-of
     date shows on the rep card.
