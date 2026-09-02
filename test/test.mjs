@@ -109,7 +109,16 @@ test('calc: loads and computes in node, outside any browser', async () => {
   ok('poverty line for a household of 4', Math.round(s.fpl.line) === 32150, `$${Math.round(s.fpl.line)}`);
   ok('employer total is the sum of its parts',
      Math.abs(s.employer.total - (s.employer.worker + s.employer.employer + s.employer.oop + s.employer.medicareTax)) < 0.01);
-  ok('exactly 400% still qualifies ("does not exceed")', W.applicablePercentage(4.0) > 0);
+  ok('exactly 400% still qualifies ("does not exceed"), at the top band\'s 9.96%', W.applicablePercentage(4.0) === 0.0996, String(W.applicablePercentage(4.0)));
+  // the curve must climb to the cliff and jump, never dip first: the sample
+  // that lands exactly on 400% once fell through every band to 2.10%
+  const curve = W.cliffCurve({ size:4, adults:2, ages:[41,39,12,9], bkey:'48113' }, 200).points;
+  let dips = 0;
+  for (let i = 1; i < curve.length; i++) if (curve[i].ratio <= 4.0 && curve[i].household < curve[i - 1].household - 1) dips++;
+  ok('the cliff curve never falls before the cliff', dips === 0, dips + ' dips');
+  const atLine = curve.find(q => Math.abs(q.ratio - 4.0) < 1e-9);
+  ok('the sample on the 400% line is priced like its neighbour under it', !atLine || Math.abs(atLine.household - curve[curve.indexOf(atLine) - 1].household) < 300,
+     atLine ? `$${Math.round(atLine.household)} vs $${Math.round(curve[curve.indexOf(atLine) - 1].household)}` : 'no sample on the line');
   ok('a hair over the cliff has no credit', W.applicablePercentage(4.0001) === null);
   // the floor: §36B(c)(1)(A) below 100% FPL, §36B(c)(2)(B) Medicaid-eligible
   const gap = W.marketplaceCost({ income:30000, size:4, ages:[40,40,10,8], bkey:'48113' });   // TX, 93%

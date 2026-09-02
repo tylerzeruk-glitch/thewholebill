@@ -195,7 +195,12 @@
     if (ratio > CLIFF) return null;
     for (var i = 0; i < APPLICABLE.length; i++) {
       var b = APPLICABLE[i];
-      if (ratio >= b.lo && ratio < b.hi) {
+      // Bands are half-open, except the last one, which must own the 400%
+      // line itself: a household exactly at the cliff fell through every
+      // band and was priced at the 2.10% floor, a dip in the curve right
+      // before the jump.
+      var inBand = ratio >= b.lo && (ratio < b.hi || (ratio === b.hi && b.hi === CLIFF));
+      if (inBand) {
         if (b.from === b.to) return b.from;
         return b.from + (b.to - b.from) * ((ratio - b.lo) / (b.hi - b.lo));
       }
