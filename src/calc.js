@@ -389,7 +389,8 @@
    * published household-level formula: a 5% household income tax above a
    * $29,000 exemption (the paper's stated threshold, "as stipulated by Sanders
    * and colleagues") plus a 10% employer payroll tax replacing employer
-   * premiums (12.29% is the paper's break-even upper bound). The paper leaves
+   * premiums (the authors' manuscript gives 11.29% as the break-even upper
+   * bound; some summaries quote 12.29%). The paper leaves
    * ~$507 average out-of-pocket, which — like every model here — we exclude
    * for comparability; the methodology page says so. The single-filer
    * exemption is halved by us, mirroring sandersOne; the paper states only
@@ -456,6 +457,8 @@
       note: 'Congressional Budget Office, 2020: five illustrative options; CBO never scored the ' +
             'bill itself. We use the option shaped most like the bill (long-term care covered, no ' +
             'cost sharing), which RAISES national spending $290 billion in 2030, the least ' +
+            'friendly of the five; it also assumes provider payment rates above Medicare\u2019s, ' +
+            'which the bill does not. It is the least ' +
             'friendly of the five. CBO\u2019s four options without long-term care all LOWER national ' +
             'spending. The per-household allocation is ours, like Blahous.',
       compute: sandersPlus('cboGap', CBO_ADDER)
@@ -477,7 +480,8 @@
       id: 'urban',
       chip: 'Urban \u00b7 the priciest',
       basis: 'published estimate + our allocation',
-      note: 'Urban Institute, 2019: a left-leaning institute\u2019s \u201cSingle-Payer Enhanced\u201d, and ' +
+      note: 'Urban Institute, 2019, in a report financed by the Commonwealth Fund: a left-leaning ' +
+            'institute\u2019s \u201cSingle-Payer Enhanced\u201d, and ' +
             'the most expensive estimate anyone has published: national spending rising $720 ' +
             'billion a year, covering long-term care, dental, zero cost sharing and every ' +
             'resident. We include it so the range\u2019s top end is the hardest number on offer. If ' +
@@ -535,7 +539,7 @@
       var cash = UNINSURED.perAdult * adults + UNINSURED.perChild * kids;
       parts = [
         { key:'cash', tone:1, bears:true, onPaystub:false,
-          label:'Care you pay for in cash', caption:'Care you pay for<br>in cash', value:cash },
+          label:'Care you use, at cost', caption:'Care you use,<br>at cost', value:cash },
         { key:'tax', tone:4, bears:true, onPaystub:true,
           label:'Medicare payroll tax', caption:'Medicare payroll tax<br>(1.45%)', value:tax }
       ];
@@ -623,6 +627,34 @@
     return { borne: borne, universal: uni.total, delta: borne - uni.total };
   }
 
+  /* Where each model stops saving this household money: the lowest income at
+   * which its universal contribution reaches what the household bears today
+   * on its route. Scanned in $1,000 steps across the slider's range rather
+   * than bisected, because on the marketplace route what the household bears
+   * jumps at the cliff and a bisection could land on the wrong crossing. The
+   * employer premium is the survey average (or the reader's override), so
+   * only income moves. Feeds the objection footnote, which used to say
+   * "above roughly $250,000" for every household; for a single adult every
+   * model is over well before that. */
+  function crossovers(route, o, lo, hi) {
+    lo = lo || 12000; hi = hi || 260000;
+    var out = { models: MODELS.length, over: 0, never: 0, cross: [] };
+    var q = {}; for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) q[k] = o[k];
+    for (var i = 0; i < MODELS.length; i++) {
+      q.model = MODELS[i].id;
+      q.income = lo;
+      if (savingsFor(route, q).delta <= 0) { out.over++; continue; }
+      var found = null;
+      for (var inc = lo + 1000; inc <= hi; inc += 1000) {
+        q.income = inc;
+        if (savingsFor(route, q).delta <= 0) { found = inc; break; }
+      }
+      if (found == null) out.never++; else out.cross.push(found);
+    }
+    out.cross.sort(function (a, b) { return a - b; });
+    return out;
+  }
+
   function summary(o) {
     var opts = {
       income: o.income, size: o.size, adults: o.adults, ages: o.ages,
@@ -665,6 +697,7 @@
     cliffCurve: cliffCurve, cliffDrop: cliffDrop,
     BLAHOUS: BLAHOUS, BLAHOUS_ADDER: BLAHOUS_ADDER,
     RAND_ADDER: RAND_ADDER, CBO_ADDER: CBO_ADDER, URBAN_ADDER: URBAN_ADDER,
-    universalCost: universalCost, cobra: cobra, summary: summary, savingsFor: savingsFor
+    universalCost: universalCost, cobra: cobra, summary: summary, savingsFor: savingsFor,
+    crossovers: crossovers
   };
 }));
