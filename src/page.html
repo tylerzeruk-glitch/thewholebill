@@ -11,7 +11,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%2312141A%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%225%22%20width%3D%2210%22%20height%3D%222%22%20fill%3D%22%2386603E%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%223%22%20fill%3D%22%23A87A43%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2210%22%20width%3D%2210%22%20height%3D%2212%22%20fill%3D%22%23D99A3F%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2222%22%20width%3D%2210%22%20height%3D%225%22%20fill%3D%22%23F0C98D%22%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..500&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
   --paper:#FAF7F2; --paper-card:#FFFDFA; --paper-tint:#F5F0E7;
@@ -27,28 +27,32 @@
 
   --chart-h:500px;
   --pad:clamp(24px,5vw,96px);
-  --serif:'Newsreader',Georgia,'Times New Roman',serif;
-  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --serif:'Literata',Georgia,'Times New Roman',serif;
+  --sans:'Public Sans',system-ui,-apple-system,sans-serif;
+  /* Two families since 2026-09-02: Literata (display, the letter) and Public Sans (everything
+   else). --mono is kept as the name of the LABEL AND FIGURE role, but it resolves to the sans:
+   a monospace at 86px for the headline figure and at 10px in tracked capitals read as two more
+   typefaces, which was the launch feedback. Numbers rely on tabular figures instead. */
+  --mono:'Public Sans',system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{overflow-x:clip}
 body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--pk);-webkit-font-smoothing:antialiased}
 img{max-width:100%}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;font-weight:500}
 .wrap{max-width:1248px;margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
 
 section.paper{background:var(--paper);background-image:repeating-linear-gradient(to bottom,rgba(26,24,21,.030) 0 1px,transparent 1px 34px);color:var(--pk)}
 .inkzone{background:var(--ink);color:var(--ik)}
 section.ink{background:var(--ink);color:var(--ik)}
 
-.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.17em;text-transform:uppercase}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.17em;text-transform:uppercase;font-weight:500}
 .eyebrow.p{color:var(--amber-deep)} .eyebrow.i{color:var(--teal)}
-.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ilabel)}
+.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ilabel);font-weight:500}
 .lbl.p{color:var(--plabel);font-size:11px}
 
-h1{font-family:var(--serif);font-weight:400;font-size:clamp(38px,5.6vw,80px);line-height:1.01;letter-spacing:-.023em;margin:0;text-wrap:pretty}
-h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:pretty}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(36px,5.2vw,72px);line-height:1.04;letter-spacing:-.02em;margin:0;text-wrap:pretty}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.3vw,52px);line-height:1.08;letter-spacing:-.018em;margin:0;text-wrap:pretty}
 h1 em{font-style:italic;color:var(--amber-deep)}
 p{margin:0;text-wrap:pretty}
 .lede{font-size:clamp(17px,1.5vw,21px);line-height:1.56;color:var(--pb)}
@@ -92,7 +96,7 @@ footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /
 .zipbar{display:flex;gap:12px;align-items:center;margin-top:44px;flex-wrap:wrap}
 .zipfield{display:flex;align-items:center;border:1px solid var(--pk);border-radius:2px;overflow:hidden;background:var(--paper-card)}
 .zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;font-family:var(--mono);font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--pm);border-right:1px solid var(--prule)}
-.zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent}
+.zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent;font-variant-numeric:tabular-nums}
 .zipfield .v::placeholder{color:#A79A85}
 .zipfield:focus-within{outline:2px solid var(--amber-deep);outline-offset:2px}
 .dateline b{font-weight:500;color:var(--pk)}
@@ -120,7 +124,7 @@ footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /
 .cmp{display:flex;flex-direction:column;gap:34px;margin-top:56px}
 .cmp-row{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center}
 .cmp-lab{text-align:right;display:flex;flex-direction:column;gap:5px}
-.cmp-bars{display:flex;align-items:center;min-width:0;padding-right:146px}
+.cmp-bars{display:flex;align-items:center;min-width:0;padding-right:156px}   /* the longest figure (135px in Public Sans 500 at 30px) plus its 16px margin, with slack */
 /* These two bars are a comparison, so both dimensions have to be honest.
    ONE height for both: unequal thickness makes the taller bar read larger by
    area than its value, and thickness carries no meaning here -- length is the
@@ -153,7 +157,7 @@ footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /
 .figs{display:flex;gap:clamp(16px,2.6vw,38px);align-items:center}
 .fig{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.fig .n{font-family:var(--mono);font-size:15px}
+.fig .n{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums}
 .fig .t{font-size:13px;color:var(--im)}
 .unit{position:relative;display:inline-flex;align-items:center;padding:3px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);cursor:pointer;flex-shrink:0;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
 .unit:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
@@ -238,10 +242,10 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .step:active{background:var(--ictrl);color:var(--ik)}
 .step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
 .warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:3px;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
-.bignum{font-family:var(--mono);font-size:clamp(48px,7vw,86px);font-weight:300;line-height:1;letter-spacing:-.035em;color:var(--c2)}
+.bignum{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(48px,7vw,86px);font-weight:500;line-height:1;letter-spacing:-.035em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:20px 22px;display:flex;flex-direction:column;gap:7px}
-.card-i .v{font-family:var(--mono);font-size:27px;letter-spacing:-.02em}
+.card-i .v{font-family:var(--mono);font-size:27px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .card-i.hi{border-color:#34302A} .card-i.hi .v,.card-i.hi .t{color:var(--c2)}
 .card-i .t{font-size:13px;color:var(--im)}
 .callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:3px;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
@@ -265,7 +269,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    text, so it can only start at the left. Two rows describing the same columns
    disagreeing about which edge they hang from is worse than either choice. Left
    is the edge both rows can share: figure, bar and swatch now all begin together. */
-.wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap}
+.wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
 .wlab.big{font-size:clamp(18px,2.1vw,30px)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
 /* Its column is now the same width as the others, so this label wraps where it
@@ -320,7 +324,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    two segments cannot be read as one length. */
 .bar-ghost{height:100%;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
 .bar-fill{height:100%;flex-shrink:0;border-radius:1px;transition:width .35s cubic-bezier(.4,0,.2,1)}
-.bar-v{width:112px;flex-shrink:0;font-family:var(--mono);font-size:clamp(18px,2vw,24px);letter-spacing:-.02em;text-align:right}
+.bar-v{width:112px;flex-shrink:0;font-family:var(--mono);font-size:clamp(18px,2vw,24px);letter-spacing:-.02em;text-align:right;font-variant-numeric:tabular-nums}
 .summary{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px}
 .save{background:var(--ink-surface);border:1px solid #24382F;border-radius:3px;padding:24px 26px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
 /* Uninsured households come out BEHIND under every model here, because they are
@@ -328,8 +332,8 @@ button.step{cursor:pointer;font-family:var(--sans)}
    green border for a saving, amber for a loss. */
 .save.neg{border-color:#4A3520}
 .save.neg .v{color:var(--c2)}
-.save .v{font-family:var(--mono);font-size:clamp(34px,4.4vw,52px);font-weight:300;line-height:1;letter-spacing:-.032em;color:var(--teal)}
-.save .v2{font-family:var(--mono);font-size:clamp(24px,2.8vw,34px);font-weight:300;line-height:1;letter-spacing:-.025em}
+.save .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(34px,4.4vw,52px);font-weight:500;line-height:1;letter-spacing:-.032em;color:var(--teal)}
+.save .v2{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(24px,2.8vw,34px);font-weight:500;line-height:1;letter-spacing:-.025em}
 .vsep{width:1px;align-self:stretch;background:var(--irule)}
 .cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
 .range{height:26px;background:var(--ink-raised);border-radius:1px;position:relative}
@@ -357,14 +361,14 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:3px;background:var(--ink-surface);overflow:hidden}
 .cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
 .cstat .t{font-size:13.5px;color:var(--im)}
-.cstat .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(26px,3.4vw,42px);font-weight:300;letter-spacing:-.03em;line-height:1}
+.cstat .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(26px,3.4vw,42px);font-weight:500;letter-spacing:-.03em;line-height:1}
 .cstat .s{font-size:12.5px;color:var(--ifaint)}
 .chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:22px 24px}
 .chartbox svg{display:block;width:100%;height:auto}
 
 /* ---------- lives ---------- */
 .livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
-.bigstat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,84px);font-weight:300;line-height:1;letter-spacing:-.04em;color:var(--amber-deep)}
+.bigstat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,84px);font-weight:500;line-height:1;letter-spacing:-.04em;color:var(--amber-deep)}
 .bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
 /* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
    ARE that number, split in two. Set as a sum -- operator in its own column so the
@@ -432,7 +436,7 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .actgrid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:36px;align-items:start}
 .letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;display:flex;flex-direction:column}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
-.letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:17.5px;line-height:1.72;color:#2A2620}
+.letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:16.5px;line-height:1.7;color:#2A2620}
 .letter .ft{display:flex;gap:10px;padding:22px 36px;border-top:1px solid var(--prule-soft);align-items:center;flex-wrap:wrap}
 .letter .bd[contenteditable]:focus-visible{outline:2px solid var(--amber-deep);outline-offset:-2px}
 .letter .bd .hint{color:var(--pm);font-style:italic}
@@ -447,7 +451,7 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 /* Row headers in the methodology tables: real <th scope="row"> for assistive tech, styled as the body cells they replaced */
 .meth th.rowh{font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;color:var(--pb);padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;line-height:1.6;font-weight:400}
 /* /methodology is its own document, so its title is an h1 there; it keeps the h2 face */
-h1.as-h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:pretty}
+h1.as-h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.3vw,52px);line-height:1.08;letter-spacing:-.018em;margin:0;text-wrap:pretty}
 /* A7: every transition and animation stops when the reader asks for reduced motion */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
@@ -2477,7 +2481,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       g += '<line x1="' + mL + '" y1="' + y.toFixed(1) + '" x2="' + (Wd - mR) + '" y2="' + y.toFixed(1) +
            '" stroke="#1F2330" stroke-width="1"/>';
       g += '<text x="' + (mL - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" fill="#7C8395" ' +
-           'font-family="IBM Plex Mono, monospace" font-size="' + fA + '">' + (state.unit === "y"
+           'font-family="Public Sans, system-ui, sans-serif" font-size="' + fA + '">' + (state.unit === "y"
              ? "$" + Math.round(v / 1000) + "k" : money(Math.round(v / 12 / 100) * 100)) + '</text>';
     }
     // % of poverty line along the bottom
@@ -2485,10 +2489,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       var inc = c.povertyLine * i;
       if (inc < lo || inc > hi) continue;
       g += '<text x="' + X(inc).toFixed(1) + '" y="' + (Ht - 34) + '" text-anchor="middle" fill="#7C8395" ' +
-           'font-family="IBM Plex Mono, monospace" font-size="' + fA + '">' + (i * 100) + '%</text>';
+           'font-family="Public Sans, system-ui, sans-serif" font-size="' + fA + '">' + (i * 100) + '%</text>';
     }
     g += '<text x="' + ((mL + Wd - mR) / 2).toFixed(1) + '" y="' + (Ht - 10) + '" text-anchor="middle" fill="#5E6472" ' +
-         'font-family="IBM Plex Mono, monospace" font-size="' + (narrow ? 10.5 : 10.5) + '" letter-spacing="1.2">' +
+         'font-family="Public Sans, system-ui, sans-serif" font-size="' + (narrow ? 10.5 : 10.5) + '" letter-spacing="1.2">' +
          (narrow ? "% OF THE POVERTY LINE" : "HOUSEHOLD INCOME, AS A SHARE OF THE POVERTY LINE") + '</text>';
 
     var xc = X(c.cliffIncome), yUnder = Y(pre[pre.length - 1].household), yOver = Y(post[0].household);
@@ -2514,21 +2518,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var aLabelY = yOver + fA + 10;
     var aNumY   = aLabelY + fB * 1.03 + fA * 0.28 + 5;
     var aLabelTxt = "THE CREDIT STOPS", aNumTxt = "+" + fmt(d.drop);
-    // IBM Plex Mono advances 0.6em per character; the label adds its letter-spacing.
-    var aW   = Math.max(aLabelTxt.length * (fA * 0.6 + 1.3), aNumTxt.length * fB * 0.6) + 12;
+    // A first estimate of the box width from character counts; the real width is
+    // measured from the rendered text after the SVG is in the DOM (see below), so
+    // the box fits whatever face the label is set in.
+    var aW   = Math.max(aLabelTxt.length * (fA * 0.68 + 1.3), aNumTxt.length * fB * 0.62) + 12;
     var aTop = aLabelY - fA * 1.03 - 6, aBot = aNumY + fB * 0.28 + 6;
     // Built here but appended LAST, over an opaque backing in the chart's own surface
     // colour. The "you" guide spans the full plot height, so it otherwise runs straight
     // through this text for every income that puts the marker beside the cliff — about
     // $131k-$150k for a family of four. The label is the more important mark, so it wins.
     var annot =
-      '<rect x="' + (aAnchor === "end" ? aX - aW + 6 : aX - 6).toFixed(1) + '" y="' + aTop.toFixed(1) +
+      '<rect id="cliffAnnotBox" x="' + (aAnchor === "end" ? aX - aW + 6 : aX - 6).toFixed(1) + '" y="' + aTop.toFixed(1) +
       '" width="' + aW.toFixed(1) + '" height="' + (aBot - aTop).toFixed(1) + '" fill="#171A22"/>' +
-      '<text x="' + aX.toFixed(1) + '" y="' + aLabelY.toFixed(1) + '" text-anchor="' + aAnchor +
-      '" fill="#D99A3F" font-family="IBM Plex Mono, monospace" font-size="' + fA +
+      '<text class="cliffAnnotTxt" x="' + aX.toFixed(1) + '" y="' + aLabelY.toFixed(1) + '" text-anchor="' + aAnchor +
+      '" fill="#D99A3F" font-family="Public Sans, system-ui, sans-serif" font-size="' + fA +
       '" letter-spacing="1.3">' + aLabelTxt + '</text>' +
-      '<text x="' + aX.toFixed(1) + '" y="' + aNumY.toFixed(1) + '" text-anchor="' + aAnchor +
-      '" fill="#E8E6E1" font-family="IBM Plex Mono, monospace" font-size="' + fB + '">' + aNumTxt + '</text>';
+      '<text class="cliffAnnotTxt" x="' + aX.toFixed(1) + '" y="' + aNumY.toFixed(1) + '" text-anchor="' + aAnchor +
+      '" fill="#E8E6E1" font-family="Public Sans, system-ui, sans-serif" font-size="' + fB + '">' + aNumTxt + '</text>';
 
     // where this household currently sits
     var you = null, youY = Ht - mB - 10;
@@ -2548,7 +2554,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       // it sits next to the income axis the marker actually refers to.
       var anchor = xy > Wd - 60 ? "end" : (xy < mL + 60 ? "start" : "middle");
       g += '<text x="' + xy.toFixed(1) + '" y="' + youY.toFixed(1) + '" text-anchor="' + anchor +
-           '" fill="#3FB5AE" font-family="IBM Plex Mono, monospace" font-size="' + fA + '">you</text>';
+           '" fill="#3FB5AE" font-family="Public Sans, system-ui, sans-serif" font-size="' + fA + '">you</text>';
     }
 
     g += annot;
@@ -2556,6 +2562,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("cliffChart").innerHTML =
       '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" role="img" aria-label="What a household bears on a benchmark marketplace plan across income, showing the 400% subsidy cliff">' +
       g + '</svg>';
+    // The annotation's backing is sized from the rendered text, not from a
+    // per-character guess: the guess assumed a monospace and went stale the day
+    // the label changed face. Measured here, it fits any font that loads.
+    var box = byId("cliffAnnotBox");
+    if (box && box.getBBox){
+      var txts = byId("cliffChart").querySelectorAll(".cliffAnnotTxt"), maxW = 0, ti;
+      for (ti = 0; ti < txts.length; ti++){ try { maxW = Math.max(maxW, txts[ti].getBBox().width); } catch (e) {} }
+      if (maxW > 0){
+        var bw = maxW + 12, tEnd = txts[0].getAttribute("text-anchor") === "end", tx = parseFloat(txts[0].getAttribute("x"));
+        box.setAttribute("width", bw.toFixed(1));
+        box.setAttribute("x", (tEnd ? tx - bw + 6 : tx - 6).toFixed(1));
+      }
+    }
   }
 
   function renderElig(){

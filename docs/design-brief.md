@@ -40,9 +40,13 @@ calculator lives. The shift in ground signals "now we're computing your numbers.
 
 - **Two grounds, one type system.** Paper = warm off-white (not pure white). Ink = near-black
   with a slight blue cast (not #000). Same fonts, same scale, inverted.
-- **Type (as built):** Newsreader for editorial display, IBM Plex Sans for UI, IBM Plex Mono
-  for every figure. Deliberately not Inter/Roboto/Fraunces. **Tabular numerals are
-  non-negotiable** — numbers that shift horizontally while updating read as a toy; numbers that
+- **Type (as built, since 2026-09-02):** Literata for editorial display and the letter,
+  Public Sans (the US Web Design System face) for everything else, including every figure and
+  every tracked label. Two families, no monospace: the launch pairing (Newsreader, IBM Plex
+  Sans, IBM Plex Mono) drew "too many fonts" from readers, because a monospace at 86px and the
+  same monospace at 10px in tracked capitals read as two extra typefaces, and because that
+  pairing is the one AI-generated pages reach for. Deliberately not Inter/Roboto/Fraunces/Plex.
+  **Tabular numerals are non-negotiable** — numbers that shift horizontally while updating read as a toy; numbers that
   tick in place read as an instrument.
 - **Palette (as built):**
   - Paper `#FAF7F2`, paper text `#1A1815`, rule `#E3DDD2`
@@ -232,7 +236,7 @@ The name was already in the design before it was the name: "Here is the whole bi
 reveal headline. It now reads as a callback rather than a label, and the headline italicises the
 phrase to make the echo deliberate.
 
-**Wordmark:** "The Whole Bill" in Newsreader 400, 21px, `-0.012em`. No italics, no colour — the
+**Wordmark:** "The Whole Bill" in Literata 400, 21px, `-0.012em`. No italics, no colour — the
 mark carries the colour.
 
 **The mark encodes the chart.** Four stacked warm bands in roughly the real proportions of the
