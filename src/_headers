@@ -1,6 +1,21 @@
-# Served by Cloudflare Pages-style static hosting. Modest hardening only:
-# a CSP is deliberately absent (the page runs inline scripts by design).
+# Served by Cloudflare static hosting (_headers syntax). build.sh copies this
+# file and fills in __INDEX_SCRIPT_HASHES__ with the sha256 of every inline
+# script in dist/index.html, so the calculator runs under a CSP that names its
+# own scripts and nothing else. connect-src 'none' makes "nothing leaves this
+# page" machine-checkable: the only outbound requests are the fonts and the
+# member portraits, both listed. HSTS is a zone setting, not a header here.
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+
+/
+  Content-Security-Policy: default-src 'none'; script-src __INDEX_SCRIPT_HASHES__; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://unitedstates.github.io; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'
+
+/methodology
+  Content-Security-Policy: default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'
+
+/methodology/
+  Content-Security-Policy: default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'

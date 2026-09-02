@@ -1469,7 +1469,7 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
     shown: !document.getElementById('repAsOf').hidden,
     txt: document.getElementById('repAsOf').textContent,
     oneLine: document.getElementById('repPos').getBoundingClientRect().height < 22 }));
-  ok('the as-of date rides its own line', asOf.shown && /as of \d{4}-\d{2}-\d{2}\./.test(asOf.txt), asOf.txt);
+  ok('the as-of date rides its own line', asOf.shown && /as of \d{1,2} [A-Z][a-z]+ \d{4}\./.test(asOf.txt), asOf.txt);   // long date, like every other date on the page
   ok('and the position row stays on one line', asOf.oneLine);
 
   // the portrait: src keyed by the member's bioguide id, silhouette on failure
@@ -2117,7 +2117,7 @@ test('accessibility: focus, state, announcements and contrast', async b => {
   ok('slider value text reads money and poverty ratio', /^\$95,000, 29\d% of the poverty line$/.test(vt0), vt0);
   await setIncome(p, 120000); await p.waitForTimeout(700);
   const live = await p.evaluate(() => ({ vt: document.getElementById('income').getAttribute('aria-valuetext'), live: document.getElementById('liveFig').textContent,
-    n: document.querySelectorAll('[aria-live]').length, big: document.querySelector('.bignum').textContent }));
+    n: document.querySelectorAll('[aria-live]:not(#agesNote)').length, big: document.querySelector('.bignum').textContent }));   // agesNote is the other live region, by design
   ok('value text follows the slider', /^\$120,000, 37\d% of the poverty line$/.test(live.vt), live.vt);
   ok('one live region announces the headline figure', live.n === 1 && live.live.includes(live.big) && /a year\.$/.test(live.live), live.live);
   await setIncome(p, 95000);
@@ -2181,6 +2181,181 @@ test('accessibility: reduced motion, whole-page print, sticky at 1024, structure
   const f = await page(b, 1280, 900, false, '404.html');
   ok('404 has a main landmark', await f.evaluate(() => !!document.querySelector('main')));
   await f.close();
+});
+
+/* Launch furniture: the headers the site ships with, and the two letter
+ * buttons that could tell a reader something false. The CSP is verified by
+ * serving dist/ with the built headers and watching for refusals. */
+test('headers: the built CSP names every inline script and nothing is refused', async b => {
+  const { readFileSync } = await import('node:fs');
+  const { createHash } = await import('node:crypto');
+  const http = await import('node:http');
+  const hdrTxt = readFileSync(resolve(HERE, '../dist/_headers'), 'utf8');
+  const html = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+  const want = scripts.map(x => `'sha256-${createHash('sha256').update(x, 'utf8').digest('base64')}'`);
+  const rootCsp = (hdrTxt.match(/\n\/\n\s+Content-Security-Policy: ([^\n]+)/) || [])[1] || '';
+  ok('index has inline scripts and no src= or on*= handlers', scripts.length >= 1 && !/<script[^>]+src=/.test(html) && !/\son[a-z]+=/.test(html), scripts.length + ' scripts');
+  ok('every inline script hash is in the / policy', want.every(h => rootCsp.includes(h)) && !/__INDEX_SCRIPT_HASHES__/.test(hdrTxt), rootCsp.slice(0, 120));
+  ok('the policy closes the network: connect-src none, only fonts and portraits', /connect-src 'none'/.test(rootCsp) && /img-src [^;]*unitedstates\.github\.io/.test(rootCsp) && /font-src https:\/\/fonts\.gstatic\.com/.test(rootCsp));
+  ok('Permissions-Policy and COOP ship for every path', /Permissions-Policy: camera=\(\)/.test(hdrTxt) && /Cross-Origin-Opener-Policy: same-origin/.test(hdrTxt));
+  // parse _headers: "/*" applies to all, exact paths add theirs
+  const rules = []; let cur = null;
+  for (const line of hdrTxt.split('\n')) {
+    if (/^\S/.test(line) && !line.startsWith('#')) { cur = { path: line.trim(), h: {} }; rules.push(cur); }
+    else if (cur && /^\s+\S/.test(line)) { const i = line.indexOf(':'); cur.h[line.slice(0, i).trim()] = line.slice(i + 1).trim(); }
+  }
+  const headersFor = p => Object.assign({}, ...rules.filter(r => r.path === '/*' || r.path === p || r.path === p.replace(/\/$/, '')).map(r => r.h));
+  const root = resolve(HERE, '../dist');
+  const srv = http.createServer((req, res) => {
+    let p = req.url.split('?')[0];
+    let file = p === '/' ? '/index.html' : p === '/methodology' || p === '/methodology/' ? '/methodology/index.html' : p;
+    let body; try { body = readFileSync(root + file); } catch (e) { res.writeHead(404); res.end(); return; }
+    const type = /\.html$/.test(file) ? 'text/html; charset=utf-8' : /\.svg$/.test(file) ? 'image/svg+xml' : /\.png$/.test(file) ? 'image/png' : 'application/octet-stream';
+    res.writeHead(200, Object.assign({ 'Content-Type': type }, headersFor(p)));
+    res.end(body);
+  });
+  await new Promise(r => srv.listen(0, '127.0.0.1', r));
+  const port = srv.address().port;
+  for (const path of ['/', '/methodology/']) {
+    const p = await b.newPage({ viewport: { width: 1280, height: 900 } });
+    const refused = [];
+    p.on('console', m => { if (/Content Security Policy|Refused to/.test(m.text())) refused.push(m.text().slice(0, 160)); });
+    const resp = await p.goto(`http://127.0.0.1:${port}${path}`); await p.waitForTimeout(1500);
+    const csp = (resp.headers()['content-security-policy'] || '');
+    ok(`${path}: served with a CSP`, csp && csp.length > 40, csp ? csp.slice(0, 60) : 'none');
+    ok(`${path}: nothing refused under the policy`, refused.length === 0, refused.join(' | '));
+    if (path === '/') {
+      const ran = await p.evaluate(() => ({ vt: document.getElementById('income').getAttribute('aria-valuetext'), big: document.querySelector('.bignum').textContent, fig: document.getElementById('cliffDrop').textContent }));
+      ok('/: the calculator ran under the policy', /\$95,000/.test(ran.vt) && /\$/.test(ran.fig), JSON.stringify(ran));
+    }
+    await p.close();
+  }
+  srv.close();
+});
+
+test('letter buttons: copy never claims success it did not have, mailto never truncates', async b => {
+  const p = await page(b, 1280, 900);
+  // C7: the default mailto carries the body; with every emphasis on it is too long for Windows mail apps
+  const h0 = await p.getAttribute('#sendBtn', 'href');
+  ok('default mailto carries the letter body under the Windows limit', /&body=/.test(h0) && h0.length < 1900, h0.length + ' chars');
+  for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
+  const h1 = await p.getAttribute('#sendBtn', 'href');
+  const long = await p.evaluate(() => ({ note: !document.getElementById('ftLong').hidden, text: document.getElementById('ftNote').innerText }));
+  ok('all emphasis on: subject-only mailto, and the note says the letter rides the clipboard', !/&body=/.test(h1) && h1.length < 300 && long.note && /copies it and opens a blank message/.test(long.text), h1.length + ' chars');
+  await p.evaluate(() => { window.__copied = []; navigator.clipboard.writeText = t => { window.__copied.push(t.length); return Promise.resolve(); }; });
+  await p.evaluate(() => { document.getElementById('sendBtn').addEventListener('click', ev => ev.preventDefault(), true); });   // keep the test in the page
+  await p.locator('#sendBtn').click(); await p.waitForTimeout(200);
+  ok('the long-letter mail button copies the letter on the way out', (await p.evaluate(() => window.__copied.length)) === 1);
+  for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
+  // C6: failure paths report failure; the site opens only after a successful copy
+  await p.evaluate(() => {
+    navigator.clipboard.writeText = () => Promise.reject(new Error('Document is not focused'));
+    document.execCommand = () => false;
+    window.__opened = []; window.open = (u) => { window.__opened.push(u); return {}; };
+  });
+  await p.locator('#copyBtn').click(); await p.waitForTimeout(200);
+  ok('Copy text reports the failure', /Copy failed/.test(await p.textContent('#copyBtn')), await p.textContent('#copyBtn'));
+  await p.locator('#formBtn').click(); await p.waitForTimeout(200);
+  const f1 = await p.evaluate(() => ({ label: document.getElementById('formBtn').textContent, opened: window.__opened.length, here: location.href }));
+  ok('the dark button does not open the site when the copy failed', /Copy failed/.test(f1.label) && f1.opened === 0 && /index\.html/.test(f1.here), JSON.stringify(f1));
+  await p.waitForTimeout(3300);
+  await p.evaluate(() => { navigator.clipboard.writeText = () => Promise.resolve(); });
+  await p.locator('#formBtn').click(); await p.waitForTimeout(300);
+  const f2 = await p.evaluate(() => ({ label: document.getElementById('formBtn').textContent, opened: window.__opened, href: document.getElementById('formBtn').getAttribute('href') }));
+  ok('after a successful copy it opens the member\'s site from inside the resolved copy', /Copied/.test(f2.label) && f2.opened.length === 1 && f2.opened[0] === f2.href && /house\.gov/.test(f2.href), JSON.stringify(f2));
+  // C8: a member with no site on file gets the honest note, not a greyed button under a promise
+  await p.evaluate(() => { REPS.house[Object.keys(REPS.house).find(k => /Crockett/.test(REPS.house[k].n))].u = ''; });
+  await setIncome(p, 96000);
+  const ns = await p.evaluate(() => ({ dis: document.getElementById('formBtn').getAttribute('aria-disabled'), site: document.getElementById('ftNoteSite').hidden, nosite: document.getElementById('ftNoteNoSite').hidden, text: document.getElementById('ftNote').innerText }));
+  ok('no site on file: the note swaps to say so', ns.dis === 'true' && ns.site && !ns.nosite && /dark button is off/.test(ns.text), JSON.stringify(ns));
+  await p.close();
+});
+
+test('reps data: every member has a house.gov or senate.gov URL and a plain-text name', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(resolve(HERE, '../src/reps.js'), 'utf8');
+  const REPS = new Function(src + '; return REPS;')();
+  const all = [...Object.values(REPS.house), ...Object.values(REPS.senate).flat()];
+  const badUrl = all.filter(m => !/^https:\/\/[a-z0-9.-]+\.(house|senate)\.gov\/?[a-z0-9\/._-]*$/i.test(m.u));
+  const badName = all.filter(m => /[<>&]/.test(m.n));   // nicknames carry quotes; the card sets names as text nodes, only markup characters matter
+  ok('every member has a congressional URL (CA-1 shipped empty)', badUrl.length === 0, badUrl.map(m => m.n + ':' + JSON.stringify(m.u)).slice(0, 3).join(', '));
+  ok('no name needs HTML escaping', badName.length === 0, badName.map(m => m.n).join(', '));
+  ok('CA-1 resolves to the house.gov convention', /gallagher\.house\.gov/.test(REPS.house['CA-1'].u), REPS.house['CA-1'].u);
+});
+
+test('hygiene: the minor list from the launch review', async b => {
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const W = require('../src/calc.js'); W.useBenchmarks(require('../src/benchmarks.js'));
+  // a single parent files head of household: the $200,000 threshold, not $250,000
+  const sp = W.employerCost({ income: 230000, size: 2, adults: 1, ages: [40, 8], bkey: '48113' });
+  const cp = W.employerCost({ income: 230000, size: 2, adults: 2, ages: [40, 38], bkey: '48113' });
+  ok('single parent at $230k pays the additional Medicare tax above $200k', Math.abs(sp.medicareTax - (230000 * 0.0145 + 30000 * 0.009)) < 0.01, `$${sp.medicareTax.toFixed(2)}`);
+  ok('a couple at $230k does not (joint threshold $250k)', Math.abs(cp.medicareTax - 230000 * 0.0145) < 0.01, `$${cp.medicareTax.toFixed(2)}`);
+  const p = await page(b, 1280, 900);
+  const body = () => p.evaluate(() => document.body.innerText);
+  const t0 = await body();
+  ok('footer no longer hedges with "live preview", and names what leaves the page', !/live preview|still being built/i.test(t0) && /nothing else leaves this page/.test(t0));
+  ok('American spellings', !/labelled|modelled|modelling|maths/.test(t0));
+  ok('"try a city", not "try a sample"', /try a city/.test(t0) && !/try a sample/.test(t0));
+  ok('the rep card date reads as a long date', /Cosponsor status as of \d{1,2} [A-Z][a-z]+ 20\d\d/.test(t0), (t0.match(/Cosponsor status as of [^.]*/) || [''])[0]);
+  ok('no motive attribution for Mercatus beyond its funding', !/built to be damning|written to show|written to make it look bad|written to argue/.test(t0));
+  ok('no "anyone has published" on the calculator', !/anyone has published/.test(t0));
+  // ages: "40, 12.5" must not become three people
+  await p.fill('#ages', '40, 12.5'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(200);
+  ok('"40, 12.5" leaves the household as it was', (await p.evaluate(() => document.querySelector('.letterHh').textContent)) === 'family of four');
+  await p.fill('#ages', '41, 39'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(200);
+  ok('a household of two is "household of two" in the letter', /my household of two/.test(await p.evaluate(() => document.getElementById('letterBd').innerText)));
+  await p.fill('#ages', '41, 39, 12, 9'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(200);
+  // negative override is refused, not flipped
+  await p.locator('#adv summary').click(); await p.waitForTimeout(150);
+  await p.fill('#deduct', '-50'); await p.waitForTimeout(250);
+  const ov = await p.evaluate(() => document.getElementById('deductOvk').classList.contains('on'));
+  ok('"-50" in the drawer sets no override', ov === false);
+  await p.fill('#deduct', ''); await p.waitForTimeout(200);
+  ok('drawer fields show thousands separators', /^\$\d{1,3}(,\d{3})*\.\d\d$/.test(await p.inputValue('#totPrem')) , await p.inputValue('#totPrem'));
+  // an uncovered ZIP typed while a county chooser is up clears the chooser
+  await p.fill('#zip', '10537'); await p.locator('#zipGo').click(); await p.waitForTimeout(300);
+  ok('a split ZIP shows county buttons', (await p.locator('#areapick button[data-k]').count()) >= 2);
+  await p.fill('#zip', '00001'); await p.locator('#zipGo').click(); await p.waitForTimeout(300);
+  ok('an uncovered ZIP clears them (the sample cities take their place)', (await p.locator('#areapick button[data-k]').count()) === 0 && (await p.locator('#areapick button[data-z]').count()) >= 2 && /not a residential US ZIP/.test(await p.textContent('#scope')));
+  await p.fill('#zip', '75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(300);
+  // month view: cliff axis labels carry separators
+  await p.locator('#unit').click(); await p.waitForTimeout(400);
+  const axis = await p.evaluate(() => [...document.querySelectorAll('#cliffChart text')].map(t => t.textContent).filter(t => /^\$\d/.test(t)));
+  ok('month-view cliff axis prints "$1,200" not "$1200"', axis.length > 2 && axis.every(t => /^\$\d{1,3}(,\d{3})*$/.test(t)), axis.join(' '));
+  await p.locator('#unit').click(); await p.waitForTimeout(200);
+  // a11y polish
+  const pol = await p.evaluate(() => {
+    const cs = e => getComputedStyle(e);
+    const off = document.querySelector('#route button:not(.on)'), on = document.querySelector('#route button.on');
+    return { border: cs(off).borderColor, bg: cs(off).backgroundColor, onBorder: cs(on).borderColor,
+      textbox: document.getElementById('letterBd').getAttribute('role') === 'textbox' && document.getElementById('letterBd').getAttribute('aria-multiline') === 'true',
+      unit: document.getElementById('unit').getAttribute('aria-label'),
+      boxSvgs: [...document.querySelectorAll('.box svg')].every(s => s.getAttribute('aria-hidden') === 'true'),
+      pop: document.getElementById('incomeQPop').getAttribute('role'),
+      brand: document.querySelector('.brand').getBoundingClientRect().height,
+      foot: [...document.querySelectorAll('footer a.q')].map(a => a.getBoundingClientRect().height) };
+  });
+  ok('route button boundary clears 3:1 on the raised ground', contrast(pol.border, pol.bg) >= 3, contrast(pol.border, pol.bg).toFixed(2) + ':1');
+  ok('the selected route has a stronger boundary than the others', contrast(pol.onBorder, pol.bg) > contrast(pol.border, pol.bg) + 1);
+  ok('letter is a multiline textbox, unit switch names its checked state, decorative SVGs hidden, popover has a role',
+     pol.textbox && /monthly/i.test(pol.unit) && pol.boxSvgs && pol.pop === 'tooltip', JSON.stringify([pol.unit, pol.pop]));
+  ok('brand and footer links reach 44px', pol.brand >= 44 && pol.foot.every(h => h >= 44), JSON.stringify([pol.brand, pol.foot]));
+  await p.close();
+  const q = await page(b, 390, 844, true);
+  await q.locator('#zip').fill('10001'); await q.locator('#zipGo').click(); await q.waitForTimeout(400);
+  const sen = await q.evaluate(() => [...document.querySelectorAll('.sen-n')].map(e => ({ t: e.textContent, over: e.scrollWidth > e.clientWidth + 1 })));
+  ok('senator names wrap instead of ellipsizing on a phone', sen.length === 2 && sen.every(s => !s.over), JSON.stringify(sen));
+  const wl = await q.evaluate(() => Math.min(...[...document.querySelectorAll('#wf .wlab')].map(e => parseFloat(getComputedStyle(e).fontSize))));
+  ok('waterfall labels are at least 10px on a phone', wl >= 10, wl + 'px');
+  await q.close();
+  const m = await page(b, 1280, 900, false, 'methodology/index.html');
+  const mt = await m.evaluate(() => document.body.innerText);
+  ok('methodology: tag chips are at least 10px', (await m.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.tag')).fontSize))) >= 10);
+  ok('methodology: "the most expensive estimate we know of", American spellings, HealthCare.gov', /most expensive (one|estimate) we know of/.test(mt) && !/anyone has published|labelled|modelled|modelling/.test(mt) && /HealthCare\.gov/.test(mt) && !/healthcare\.gov|Healthcare\.gov/.test(mt));
+  await m.close();
 });
 
 const b = await chromium.launch();

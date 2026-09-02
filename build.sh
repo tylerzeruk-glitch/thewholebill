@@ -100,7 +100,20 @@ io.open('dist/methodology/index.html', 'w', encoding='utf-8').write(
     head + meth_head + '\n</head>\n<body>\n' + body + '\n</body>\n</html>\n')
 PY
 cp src/logo.svg dist/logo.svg
-cp src/card.png src/404.html src/robots.txt src/sitemap.txt src/_headers dist/
+cp src/card.png src/404.html src/robots.txt src/sitemap.txt dist/
+# _headers: the index CSP names each inline script by hash (see src/_headers)
+python3 - <<'PY2'
+import io, re, hashlib, base64
+html = io.open('dist/index.html', encoding='utf-8').read()
+scripts = re.findall(r'<script>([\s\S]*?)</script>', html)
+if len(scripts) < 1 or re.search(r'<script[^>]+src=', html) or re.search(r'\son[a-z]+=', html):
+    raise SystemExit('build: the CSP assumes inline <script> blocks only, no src= and no on*= handlers')
+hashes = ' '.join("'sha256-%s'" % base64.b64encode(hashlib.sha256(x.encode('utf-8')).digest()).decode() for x in scripts)
+hdr = io.open('src/_headers', encoding='utf-8').read()
+if '__INDEX_SCRIPT_HASHES__' not in hdr:
+    raise SystemExit('build: src/_headers lost its hash placeholder')
+io.open('dist/_headers', 'w', encoding='utf-8').write(hdr.replace('__INDEX_SCRIPT_HASHES__', hashes))
+PY2
 # the artifact moved to preview/; a stale copy in dist would deploy publicly
 rm -f dist/artifact.html
 echo "built dist/ (index, methodology, 404, launch furniture) and preview/artifact.html; placeholders generated from the default household"

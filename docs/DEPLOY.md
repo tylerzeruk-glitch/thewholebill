@@ -73,7 +73,12 @@ Each of these before deleting the Access application:
    "we never see your letter." Consistent options: no analytics, or
    Cloudflare Web Analytics (cookieless). Nothing heavier — a reader
    checking the network tab and finding a tracker spends that against us.
-6. **Branch protection on `main`** before public attention.
+6. **Branch protection on `main`** before public attention. GitHub refuses it
+   on a free private repository ("Upgrade to GitHub Pro or make this
+   repository public"), and making the repo public contradicts item 7. Either
+   GitHub Pro (about $4 a month) or accept single-maintainer discipline: CI is
+   advisory, nothing stops a direct push to `main`, and every push to `main`
+   deploys. Decide which, and write the answer here.
 7. **Anonymity re-check.** As of 2026-08-31 the owner's name is not reachable
    from the site, and launch is when that's worth re-verifying:
    - Shipped pages and headers carry no name, email, or repo link. Re-check:
@@ -93,13 +98,39 @@ Each of these before deleting the Access application:
      is a fresh-history push from a new account, not a visibility flip.
 8. **Delete the logo-bypass application too.** The `/logo.svg` bypass app only
    exists to serve the login page's mark; with the gate gone it is a leftover
-   exception with nothing to except. Remove both Access applications together.
+   exception with nothing to except. Remove both Access applications together,
+   site-wide app first, then the bypass, so the site is never "logo gated, site
+   open". Access sets `no-store` on its 302s, so no stale redirect is cached.
+   Then delete the One-Time-PIN allowlist (the reviewers' emails).
+8a. **Confirm which product hosts the site before that.** This file says Pages
+   and CLAUDE.md says Workers Builds; the dashboard is the authority. A Pages
+   project always has a `*.pages.dev` hostname that can be gated but not
+   disabled, and a Worker may have a `workers.dev` route; after the apps are
+   deleted, `curl -sI` whichever side-door hostname exists and confirm it does
+   not answer `200` for the site.
+8b. **Headers and zone settings, launch day.** `src/_headers` now ships
+   `Permissions-Policy`, `Cross-Origin-Opener-Policy` and a Content Security
+   Policy: `/methodology` runs with no scripts at all, and `/` names each of
+   its inline scripts by sha256 (build.sh computes them into `dist/_headers`;
+   the suite serves `dist/` with those headers and asserts nothing is
+   refused). Two consequences:
+   - Any Cloudflare feature that rewrites HTML breaks the hash: **Rocket
+     Loader, Auto Minify and Email Address Obfuscation must be off** for the
+     zone (Speed and Scrape Shield). Check before launch and after any zone
+     change; the symptom is a page that loads but does not calculate.
+   - HSTS is a zone setting, not a header: SSL/TLS, Edge Certificates, enable
+     with max-age six months and includeSubDomains on; leave preload off for
+     now.
+   Also set `SKIP_DEPENDENCY_INSTALL=1` in the build settings: build.sh needs
+   nothing from node_modules, and npm is the deploy's only dependency chain.
 9. **Verify the launch, not just the gate:** immediately after deleting the
    Access apps, from a machine not signed in:
    - `/`, `/methodology` and `/logo.svg` return `200`; `/artifact` and a
      nonsense path return the branded 404.
    - Paste the URL into a LinkedIn/Bluesky draft (do not post) and confirm
-     the share card unfurls: title, description, and the card image.
+     the share card unfurls: title, description, and the card image. Run
+     LinkedIn's Post Inspector on the URL first: it cached the card while the
+     URL 302'd to the login page. Bluesky re-fetches on paste.
    - Nothing else about the site should differ from the gated version.
 10. **Then the announcement posts** — the LinkedIn and Bluesky threads that
     recruited reviewers are the natural place for the "it is open now"

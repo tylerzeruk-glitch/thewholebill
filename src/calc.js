@@ -7,7 +7,7 @@
  * Every returned figure carries a `basis`:
  *   'statutory' — fixed in law or an IRS/HHS table. Exact.
  *   'survey'    — a published survey average (KFF). Real, but an average.
- *   'modeled'   — our estimate. Must be labelled as such wherever it is shown.
+ *   'modeled'   — our estimate. Must be labeled as such wherever it is shown.
  * The UI is expected to surface anything that is not 'statutory' or 'survey'.
  *
  * SOURCES
@@ -208,6 +208,13 @@
     return APPLICABLE[0].from;
   }
 
+  // Filing status for the additional Medicare tax threshold: joint needs two
+  // adults. A single parent files head of household, whose threshold is the
+  // single one ($200,000), so household size alone was the wrong test.
+  function filingFor(o) {
+    var adults = o.adults == null ? Math.min(2, o.size) : o.adults;
+    return adults >= 2 ? 'joint' : 'single';
+  }
   function medicareTax(income, filing) {
     var base = income * MEDICARE_RATE;
     var thr = ADDL_MEDICARE_THRESHOLD[filing === 'joint' ? 'joint' : 'single'];
@@ -233,7 +240,7 @@
             : o.oop != null ? o.oop
             : (tier === 'single' ? OOP.employerSingle
                : Math.max(OOP.employerFamilyFloor, OOP.employerPerPerson * o.size));
-    var tax = medicareTax(o.income, o.size > 1 ? 'joint' : 'single');
+    var tax = medicareTax(o.income, filingFor(o));
     return {
       worker: worker, employer: employer, oop: oop, medicareTax: tax,
       total: worker + employer + oop + tax,
@@ -287,7 +294,7 @@
     // $15,909 in the waterfall, which builds its own total from routeBreakdown.
     // One page, one household, two numbers -- and the gap ran in the direction
     // that flattered this site's conclusion.
-    var tax = medicareTax(o.income, o.size > 1 ? 'joint' : 'single');
+    var tax = medicareTax(o.income, filingFor(o));
     var kids = 0, i;
     for (i = 0; i < ages.length; i++) if (ages[i] < 21) kids++;
 
@@ -413,7 +420,7 @@
 
   /* Ordered friendliest formula to most hostile allocation, so the pill row
    * reads as a spectrum. Chips name the source; notes carry the provenance,
-   * friendly and hostile labelled to the same standard. */
+   * friendly and hostile labeled to the same standard. */
   var MODELS = [
     {
       id: 'sanders1',
@@ -443,7 +450,7 @@
       id: 'rand',
       chip: 'RAND \u00b7 nonpartisan',
       basis: 'published estimate + our allocation',
-      note: 'RAND Corporation, 2019: nonpartisan, modelling the bill WITH long-term care. It ' +
+      note: 'RAND Corporation, 2019: nonpartisan, modeling the bill WITH long-term care. It ' +
             'found national health spending rising 1.8%, about $69 billion a year; we spread that ' +
             'across 134.79 million households and add it to the Sanders formula, the same ' +
             'allocation we apply to Blahous. RAND assumed supply constraints absorb half of new ' +
@@ -468,7 +475,7 @@
       chip: 'Mercatus \u00b7 the opposition',
       basis: 'published formula + our allocation',
       note: 'Mercatus Center, 2018: Koch-funded and written to show single-payer was ' +
-            'unaffordable. Blahous modelled two scenarios; his main one has national spending ' +
+            'unaffordable. Blahous modeled two scenarios; his main one has national spending ' +
             'FALLING $2.05 trillion over a decade. We use his other one, where it rises $3.25 ' +
             'trillion, so this site never leans on the friendly reading of an unfriendly study. ' +
             'He published no household figure: we spread that $3.25 trillion evenly across ten ' +
@@ -482,7 +489,7 @@
       basis: 'published estimate + our allocation',
       note: 'Urban Institute, 2019, in a report financed by the Commonwealth Fund: a left-leaning ' +
             'institute\u2019s \u201cSingle-Payer Enhanced\u201d, and ' +
-            'the most expensive estimate anyone has published: national spending rising $720 ' +
+            'the most expensive estimate we know of: national spending rising $720 ' +
             'billion a year, covering long-term care, dental, zero cost sharing and every ' +
             'resident. We include it so the range\u2019s top end is the hardest number on offer. If ' +
             'the argument survives this one, it survives. The per-household allocation is ours, ' +
@@ -515,7 +522,7 @@
   var UNINSURED = { perAdult: 1900, perChild: 850 };
 
   function routeBreakdown(route, o) {
-    var tax = medicareTax(o.income, o.size > 1 ? 'joint' : 'single');
+    var tax = medicareTax(o.income, filingFor(o));
     var adults = Math.max(1, o.adults == null ? Math.min(2, o.size) : o.adults);
     var kids = Math.max(0, o.size - adults);
     var parts, note;
