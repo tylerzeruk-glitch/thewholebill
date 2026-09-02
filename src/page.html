@@ -42,7 +42,10 @@ img{max-width:100%}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;font-weight:500}
 .wrap{max-width:1248px;margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
 
-section.paper{background:var(--paper);background-image:repeating-linear-gradient(to bottom,rgba(26,24,21,.030) 0 1px,transparent 1px 34px);color:var(--pk)}
+/* Paper grain, not ruled lines: the 34px rules read as lined paper and readers found
+   them distracting. A faint fractal-noise tile keeps the printed-stock feel with nothing
+   for the eye to track. It is a data URI, so img-src data: in the CSP covers it. */
+section.paper{background:var(--paper);background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .10 0 0 0 0 .09 0 0 0 0 .08 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");background-size:240px 240px;color:var(--pk)}
 .inkzone{background:var(--ink);color:var(--ik)}
 section.ink{background:var(--ink);color:var(--ik)}
 
