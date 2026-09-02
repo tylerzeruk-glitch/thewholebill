@@ -346,6 +346,9 @@ button.step{cursor:pointer;font-family:var(--sans)}
    and with it both views rendered at once. */
 #cliffView,#badYear{display:flex;flex-direction:column;gap:32px}
 #cliffView[hidden],#badYear[hidden]{display:none}
+/* Same trap, same fix: both rep-card blocks are .stack (display:flex), which beat
+   [hidden]. A Georgia split ZIP kept Texas's senators on screen under it. */
+#repPick[hidden],#senBlock[hidden]{display:none}
 .cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:3px;background:var(--ink-surface);overflow:hidden}
 .cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
 .cstat .t{font-size:13.5px;color:var(--im)}
@@ -428,16 +431,15 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .letter .ft{display:flex;gap:10px;padding:22px 36px;border-top:1px solid var(--prule-soft);align-items:center;flex-wrap:wrap}
 .letter .bd[contenteditable]:focus-visible{outline:2px solid var(--amber-deep);outline-offset:-2px}
 .letter .bd .hint{color:var(--pm);font-style:italic}
-/* Print = the letter and nothing else. The .print-letter class is set by the
-   Print button (and removed on afterprint); a plain Ctrl+P still prints the
-   whole page, which is the reader's own choice. visibility, not display, so the
-   letter keeps its layout; absolute position pulls it to page one; height:0 on
-   body keeps the invisible remainder from emitting blank pages. */
+/* Print = the letter and nothing else. The Print button marks the letter's
+   ancestors .pk and sets .print-letter on body (both removed on afterprint); a
+   plain Ctrl+P still prints the whole page, which is the reader's own choice.
+   display:none, not visibility: the visibility version left the whole 10,000px
+   document in layout and printed the letter followed by ten blank pages. */
 @media print{
-  body.print-letter{height:0;overflow:visible}
-  body.print-letter *{visibility:hidden}
-  body.print-letter .letter,body.print-letter .letter *{visibility:visible}
-  body.print-letter .letter{position:absolute;top:0;left:0;right:0;border:none}
+  body.print-letter :not(.pk):not(.letter):not(.letter *){display:none}
+  body.print-letter .pk{display:block;padding:0;margin:0;background:none;min-height:0;height:auto;position:static;transform:none}
+  body.print-letter .letter{border:none;margin:0;max-width:none}
   body.print-letter .letter .hd,body.print-letter .letter .ft{display:none}
 }
 mark{background:#F7EDDC;color:inherit;padding:1px 4px}
@@ -1928,6 +1930,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     }
     if (state.oopOwn != null) opts.employerOop = state.oopOwn;
     S = W.summary(opts);
+    if (!S.marketplace){
+      // The benchmark table failed to load or has no entry for this key. Say so
+      // rather than throw and leave the hardcoded placeholders on screen.
+      byId("scope").innerHTML = '<b>The plan tables did not load.</b> Reload the page; if it keeps happening, tell us at contact@thewholebill.org.';
+      return;
+    }
     S.breakdown = W.routeBreakdown(state.route, opts);
     S.routeMax = Math.max(
       W.routeBreakdown("employer", opts).whole,
@@ -1950,7 +1958,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // span refreshed every paint rather than in the rebuild-on-signature body --
     // and it is conditional because "every one of them is less" is only
     // sometimes true, and this letter does not get to lie for effect.
-    byId("letterCmp").textContent = S.breakdown.borne > S.universalRange.hi
+    // These three spans live inside the editable letter, so a reader who rewrites
+    // a paragraph can remove them; a missing one must not stop the paint.
+    var cmpEl = byId("letterCmp");
+    if (cmpEl) cmpEl.textContent = S.breakdown.borne > S.universalRange.hi
       ? "Every one of them is less than what healthcare costs us now."
       : S.universalRange.lo > S.breakdown.borne
         ? "All of them are more than my household bears today; I am writing in support even so."
@@ -1989,7 +2000,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     renderCards();
 
     // comparison bars
-    var max = Math.max(S.employer.total, S.marketplace.total, S.universal.total);
+    // The range band is drawn on this scale too; leaving its top out let the band
+    // run 338px past the strip for a single high earner.
+    var max = Math.max(S.employer.total, S.marketplace.total, S.universal.total, S.universalRange.hi);
     drawSegments("empBar", "empSub", W.routeBreakdown("employer", opts).parts, max);
     drawSegments("mktBar", "mktSub", W.routeBreakdown("marketplace", opts).parts, max);
     byId("mktNote").innerHTML = S.marketplace.overCliff
@@ -2062,11 +2075,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("who-line").textContent = tight
       ? state.size + " \u00b7 " + a.county + " \u00b7 $" + Math.round(state.income / 1000) + "k"
       : "Household of " + state.size + " \u00b7 " + a.county + " \u00b7 " + money(state.income);
-    byId("letterPlace").textContent = countyLabel(a);
+    var plEl = byId("letterPlace"), blEl = byId("letterBill");
+    if (plEl) plEl.textContent = countyLabel(a);
     renderRep();
     byId("repBill").textContent = BILL.house + " (" + BILL.congress + ")";
     byId("senBillLbl").textContent = BILL.senate;
-    byId("letterBill").textContent = recipient().bill;
+    if (blEl) blEl.textContent = recipient().bill;
     // A class, not an id: the household phrase appears in whichever persona
     // blocks are checked, which can be none of them or several.
     var hhTxt = state.size === 1 ? "household" :
@@ -2297,6 +2311,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     var opts = { size: state.size, adults: adultsOf(state.ages),
                  ages: state.ages, bkey: state.bkey };
     var d = W.cliffDrop(opts), c = W.cliffCurve(opts, 200);
+    if (!d || !c) return;   // no benchmark entry: nothing honest to draw
     byId("cliffUnder").textContent = fmt(d.under);
     byId("cliffOver").textContent  = fmt(d.over);
     byId("cliffDrop").textContent  = fmt(d.drop);
@@ -2499,8 +2514,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   function countyLabel(a){
     var n = a.county || a;
-    return /(city|City|Parish|Borough|Municipality|Municipio|Area|Region|Columbia|Island|Islands)$/.test(n)
-      ? n : n + " County";
+    // The table strips " County" from every county, so the label puts it back
+    // unless the name is already a complete place. Case matters: Census writes
+    // independent cities as "Richmond city"; Carson City and the District are
+    // the only capitalised full names. Columbia, Island, James City, Charles
+    // City and Rock Island ARE counties; an earlier regex matched their last
+    // word and rendered them bare.
+    if (n === "Carson City" || n === "District of Columbia") return n;
+    return /(city|Parish|Borough|Municipality|Municipio|Area)$/.test(n) ? n : n + " County";
   }
 
   function renderScope(msg){
@@ -2536,6 +2557,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     [].forEach.call(byId("areapick").querySelectorAll("button"), function(b){
       b.addEventListener("click", function(){
         if (b.hasAttribute("data-k")){
+          if (state.bChoices && state.bChoices.rep) applyRep(state.bChoices.rep);
           state.bkey = b.getAttribute("data-k");
           state.bChoices = null;
           paint();
@@ -2557,25 +2579,33 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       return;
     }
     // The full five digits also resolve the district -- automatically only
-    // when the ZIP sits in exactly one; a split ZIP asks instead.
-    state.zip5 = r.zip;
+    // when the ZIP sits in exactly one; a split ZIP asks instead. A new ZIP can
+    // mean new senators, and carrying a senator INDEX across states would
+    // silently swap who the letter addresses, so the recipient goes back to
+    // the rep.
     var ds = repDistricts(r.zip) || [];
-    state.district = ds.length === 1 ? ds[0]
-      : ds.indexOf(state.district) > -1 ? state.district : null;
-    // A new ZIP can mean new senators; carrying a senator INDEX across states
-    // would silently swap who the letter addresses. Back to the rep.
-    state.recipient = "rep";
+    var rep = { zip5: r.zip, recipient: "rep",
+                district: ds.length === 1 ? ds[0]
+                  : ds.indexOf(state.district) > -1 ? state.district : null };
     if (r.st === "covered"){
+      applyRep(rep);
       state.bkey = r.key;
       state.bChoices = null;
       paint();
       document.querySelector(".instr").scrollIntoView({ behavior:"smooth", block:"start" });
     } else {
-      // spans rating areas: the figures keep the previous county until the
-      // reader picks; guessing a price is the same failure as guessing a rep
+      // spans rating areas: EVERYTHING keeps the previous ZIP until the reader
+      // picks a county -- the figures, and the rep card with them. Updating the
+      // card early addressed the letter to the new representative while its
+      // opening line still named the old county. Guessing a price is the same
+      // failure as guessing a rep.
+      r.rep = rep;
       state.bChoices = r;
       paint();
     }
+  }
+  function applyRep(rep){
+    state.zip5 = rep.zip5; state.district = rep.district; state.recipient = rep.recipient;
   }
 
 
@@ -2866,12 +2896,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     state.district = b.getAttribute("data-d");
     paint();
   });
-  byId("printBtn").addEventListener("click", function(){
+  function preparePrint(){
+    var el = document.querySelector(".letter"), n;
+    for (n = el && el.parentElement; n && n !== document.documentElement; n = n.parentElement) n.classList.add("pk");
     document.body.classList.add("print-letter");
+  }
+  byId("printBtn").addEventListener("click", function(){
+    preparePrint();
     window.print();
   });
   window.addEventListener("afterprint", function(){
     document.body.classList.remove("print-letter");
+    var ks = document.querySelectorAll(".pk"), i;
+    for (i = 0; i < ks.length; i++) ks[i].classList.remove("pk");
   });
 
   var unitEl = byId("unit");

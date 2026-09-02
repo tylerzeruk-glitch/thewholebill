@@ -571,6 +571,7 @@
       var income = lo + (hi - lo) * (i / n);
       var m = marketplaceCost({ income: income, size: o.size, adults: o.adults,
                                 ages: o.ages, bkey: o.bkey, region: region });
+      if (!m) return null;
       out.push({ income: income, ratio: income / line,
                  household: m.household, subsidy: m.subsidy, overCliff: m.overCliff });
     }
@@ -586,6 +587,7 @@
                                   ages: o.ages, bkey: o.bkey, region: region });
     var over = marketplaceCost({ income: at + 1, size: o.size, adults: o.adults,
                                  ages: o.ages, bkey: o.bkey, region: region });
+    if (!under || !over) return null;
     return { income: at, under: under.household, over: over.household,
              drop: over.household - under.household, lostCredit: under.subsidy };
   }
