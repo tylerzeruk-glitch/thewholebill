@@ -51,6 +51,14 @@ six-digit code.
 
 ## Go-public checklist
 
+**The site went public on 2026-09-02.** The list is kept as the record of what
+was checked, and as the checklist for any future re-gating. Launch-day
+verification from outside: `/`, `/methodology/`, `/logo.svg`, `/card.png` 200;
+`/artifact`, `/artifact.html` and a nonsense path 404; every `src/_headers`
+header live; no HTML rewriting (script hashes hold, four inline scripts); the
+calculator runs and the ZIP lookup resolves. Outstanding from the list: HSTS
+(item 8b) and the analytics beacon switch (item 5).
+
 Each of these before deleting the Access application:
 
 1. **artifact.html stays out of the deploy** — the build now writes it to
@@ -71,8 +79,20 @@ Each of these before deleting the Access application:
    Benchmarks are frozen by CMS until the next plan year; nothing to do.
 5. **Analytics is a values decision; make it on purpose.** The site promises
    "we never see your letter." Consistent options: no analytics, or
-   Cloudflare Web Analytics (cookieless). Nothing heavier — a reader
+   Cloudflare Web Analytics (cookieless). Nothing heavier: a reader
    checking the network tab and finding a tracker spends that against us.
+   **Decided 2026-09-02: zone analytics only** (Analytics & Logs, Traffic:
+   edge request counts, approximate uniques, top paths, countries). Nothing
+   runs in the reader's browser and the footer's "nothing else leaves this
+   page" stays literally true. The Web Analytics beacon that Cloudflare
+   auto-injects is blocked by the CSP anyway, so it must be OFF (Analytics &
+   Logs, Web Analytics, disable automatic setup or remove the site); left on,
+   it collects nothing and prints a refusal in every reader's console.
+   Verify: `curl -s https://thewholebill.org/ | grep -c cloudflareinsights`
+   should print 0. If page-level data is ever wanted, the cost is one CSP
+   line (`static.cloudflareinsights.com` in script-src,
+   `cloudflareinsights.com` in connect-src) and one footer sentence
+   disclosing the beacon.
 6. **Branch protection on `main`** before public attention. GitHub refuses it
    on a free private repository ("Upgrade to GitHub Pro or make this
    repository public"), and making the repo public contradicts item 7. Either
