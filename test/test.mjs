@@ -1818,6 +1818,10 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   }
   await setIncome(p, 20000); await scan('Medicaid range in an expansion state');
   await setIncome(p, 95000);
+  await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(250);   // the drawer belongs to the employer route
+  await p.locator('#adv summary').click(); await p.waitForTimeout(150);
+  await p.fill('#deduct', '1000'); await p.waitForTimeout(250); await scan('letter with a heavy paystub deduction');
+  await p.fill('#deduct', ''); await p.waitForTimeout(150);
   await p.close();
   // the methodology is its own static document now; scan it whole
   const pm = await page(b, 1280, 900, false, 'methodology/index.html');
@@ -1827,6 +1831,136 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   });
   ok('no dashes: the methodology document', mHits.length === 0, mHits.join(' | '));
   await pm.close();
+});
+
+/* Every static figure in the HTML (what crawlers, reader mode and the share
+ * unfurl see) is generated at build time from the default household, so it
+ * must equal what the page paints a moment later. Two figures for one
+ * household on one page is the failure mode CLAUDE.md names. The letter is
+ * excluded because its figures are deliberately rounded. */
+test('placeholders: the static figures equal the first paint', async b => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
+  const stat = [...html.matchAll(/<[^>]*\bdata-fig="([^"]+)"[^>]*>(\$[\d,]+)</g)].map(m => [m[1], m[2]]);
+  // the script also builds data-uw spans from strings; only real markup (plain words, no quotes or concatenation) counts
+  const words = [...html.matchAll(/<[^>]*\bdata-uw="([^"]+)"[^>]*>([^<]+)</g)].map(m => [m[1], m[2]]).filter(([, v]) => /^[a-z\/ ]+$/.test(v));
+  ok('the markup carries placeholder figures', stat.length >= 15, stat.length + ' figures, ' + words.length + ' unit words');
+  ok('no hand-typed figure survived the build', !/8,278|31,578|23,300|27,200|30,200|nine thousand/.test(html));
+  const p = await page(b, 1280, 900);
+  const live = await p.evaluate(() => {
+    const out = { fig: {}, uw: {} };
+    document.querySelectorAll('[data-fig]').forEach(e => {
+      if (e.closest('#letterBd')) return;
+      const k = e.getAttribute('data-fig'), v = e.textContent.trim();
+      (out.fig[k] = out.fig[k] || []).includes(v) || out.fig[k].push(v);
+    });
+    document.querySelectorAll('[data-uw]').forEach(e => {
+      if (e.closest('#letterBd')) return;
+      const k = e.getAttribute('data-uw'), v = e.textContent.trim();
+      (out.uw[k] = out.uw[k] || []).includes(v) || out.uw[k].push(v);
+    });
+    out.h2 = document.querySelector('#cliffView h2').textContent.replace(/\s+/g, ' ').trim();
+    out.drop = document.getElementById('cliffDrop').textContent.trim();
+    return out;
+  });
+  const seen = new Set();
+  for (const [k, v] of stat) {
+    if (seen.has(k)) continue; seen.add(k);
+    const l = live.fig[k] || [];
+    ok(`${k}: static ${v} is what the page paints`, l.length === 1 && l[0] === v, l.join(' / '));
+  }
+  for (const [k, v] of words) {
+    const l = live.uw[k] || [];
+    ok(`unit word ${k}: static "${v}" is what the page paints`, l.length === 1 && l[0] === v, l.join(' / '));
+  }
+  ok('the cliff heading prints the stat card\'s own drop', live.h2 === `One dollar, ${live.drop}.`, live.h2);
+  await p.close();
+});
+
+/* The section 03 heading used to read "One dollar, nine thousand dollars"
+ * above a stat card that said $12,980. It is bound to the household's own drop
+ * now, and follows the household to another county and into the month view. */
+test('cliff: the heading follows the household\'s own drop', async b => {
+  const p = await page(b, 1280, 900);
+  const read = () => p.evaluate(() => ({
+    h2: document.querySelector('#cliffView h2').textContent.replace(/\s+/g, ' ').trim(),
+    drop: document.getElementById('cliffDrop').textContent.trim() }));
+  const dal = await read();
+  ok('Dallas: heading and card agree', dal.h2 === `One dollar, ${dal.drop}.`, dal.h2);
+  ok('the old hardcoded phrase is gone', !/nine thousand/.test(dal.h2));
+  await p.locator('#zip').fill('06106'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  const hart = await read();
+  ok('Hartford: a different drop', hart.drop !== dal.drop, `${dal.drop} → ${hart.drop}`);
+  ok('Hartford: heading and card still agree', hart.h2 === `One dollar, ${hart.drop}.`, hart.h2);
+  await p.locator('#unit').click(); await p.waitForTimeout(400);
+  const mon = await read();
+  const n = s => +s.replace(/[^0-9]/g, '');
+  ok('month view: the heading divides with the card', mon.h2 === `One dollar, ${mon.drop}.` && Math.abs(n(hart.drop) / 12 - n(mon.drop)) <= 1, mon.h2);
+  await p.close();
+});
+
+/* "Less than a quarter of it shows up as the premium deduction" was true at
+ * the survey average and false the moment a reader typed their own deduction
+ * into the drawer; the sentence goes to a congressional office under their
+ * name. It is bucketed on the real share now. The same paragraph also broke
+ * the site's spends/costs rule. */
+test('letter: the paystub share sentence follows the drawer', async b => {
+  const p = await page(b, 1440, 900);
+  const txt = () => p.evaluate(() => document.getElementById('letterBd').innerText);
+  const t0 = await txt();
+  ok('opens on what healthcare costs, not what the household spends',
+     /what healthcare actually costs my household/.test(t0) && !/actually spends/.test(t0));
+  ok('survey average: less than a quarter', /Less than a quarter of it shows up as the premium deduction/.test(t0));
+  await p.locator('#adv summary').click(); await p.waitForTimeout(150);
+  await p.fill('#deduct', '500'); await p.waitForTimeout(250);         // $13,000 a year: 34%
+  ok('$500 biweekly: about a third', /Only about a third of it shows up/.test(await txt()));
+  await p.fill('#deduct', '1000'); await p.waitForTimeout(250);        // $26,000 a year: 51%
+  ok('$1,000 biweekly: about half', /About half of it shows up/.test(await txt()));
+  await p.fill('#deduct', '2000'); await p.waitForTimeout(250);        // $52,000 a year: 67%
+  ok('$2,000 biweekly: most of it', /Most of it shows up/.test(await txt()));
+  await p.fill('#deduct', ''); await p.waitForTimeout(250);
+  ok('cleared: back to less than a quarter', /Less than a quarter of it/.test(await txt()));
+  await p.close();
+});
+
+/* The methodology page prints the six financing derivations and invites the
+ * reader to redo the arithmetic, so the printed figures must be exactly what
+ * calc.js computes: the allocations are rounded to the dollar once, in
+ * calc.js, and the Sanders exemption is the 2026 standard deduction. */
+test('calc: financing models reproduce the methodology page to the dollar', async () => {
+  const { createRequire } = await import('node:module');
+  const { readFileSync } = await import('node:fs');
+  const require = createRequire(import.meta.url);
+  const W = require('../src/calc.js');
+  W.useBenchmarks(require('../src/benchmarks.js'));
+  const fam = W.universalCost('sanders1', 95000, 4), one = W.universalCost('sanders1', 95000, 1);
+  ok('Sanders exempts the 2026 joint standard deduction, $32,200', fam.parts.premium === 0.04 * (95000 - 32200), `$${fam.parts.premium}`);
+  ok('and the single one, $16,100', one.parts.premium === 0.04 * (95000 - 16100), `$${one.parts.premium}`);
+  ok('the default family pays $9,637 under Sanders', fam.total === 9637, `$${fam.total}`);
+  const ids = ['sanders1', 'galvani', 'rand', 'cbo5', 'blahous', 'urban'];
+  const adders = { rand: 510, cbo5: 2151, blahous: 2413, urban: 5339 };
+  for (const id of Object.keys(adders)) {
+    const u = W.universalCost(id, 95000, 4), k = Object.keys(u.parts).find(x => /Gap$/.test(x));
+    ok(`${id}: allocation is a whole-dollar $${adders[id]}`, u.parts[k] === adders[id], `$${u.parts[k]}`);
+    ok(`${id}: total is the integer sum`, Number.isInteger(u.total) && u.total === 9637 + adders[id], `$${u.total}`);
+  }
+  const html = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
+  const sec = html.slice(html.indexOf('What universal coverage would cost you'), html.indexOf('What a bad year costs without coverage'));
+  const boxes = [...sec.matchAll(/<p class="body" style="font-family:var\(--mono\)[^"]*">([\s\S]*?)<\/p>/g)].map(m => m[1]);
+  ok('six derivation boxes on the methodology page', boxes.length === 6, boxes.length + ' boxes');
+  const n = s => +s.replace(/[^0-9]/g, '');
+  boxes.forEach((bx, i) => {
+    const bolds = [...bx.matchAll(/<b>([^<]*)<\/b>/g)].map(m => m[1]);
+    const total = n(bolds[bolds.length - 1]);
+    const u = W.universalCost(ids[i], 95000, 4);
+    ok(`methodology ${ids[i]}: printed total $${total.toLocaleString('en-US')} is what calc.js computes`, total === u.total, `calc $${u.total}`);
+    if (adders[ids[i]]) {
+      const per = /= <b>\$([\d,]+)<\/b> per household/.exec(bx);
+      ok(`methodology ${ids[i]}: printed allocation matches`, per && n(per[1]) === adders[ids[i]], per && per[1]);
+    }
+  });
+  ok('the methodology cites Rev. Proc. 2025-32 for the exemption', /Rev\. Proc\. 2025-32/.test(html));
+  ok('no stale $29,200 exemption anywhere on the page', !/29,200/.test(html));
 });
 
 const b = await chromium.launch();

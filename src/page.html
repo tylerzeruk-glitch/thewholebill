@@ -913,7 +913,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">03 &middot; The cliff</div>
-          <h2>One dollar, <em style="font-style:italic;color:var(--c2)">nine thousand dollars</em>.</h2>
+          <h2>One dollar, <em style="font-style:italic;color:var(--c2)" data-fig="cliff.drop">$12,980</em>.</h2>
         </div>
         <p style="font-size:15px;line-height:1.65;color:var(--im)" id="cliffIntro">Nothing on this page is modeled. The premium tax credit does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.</p>
       </div>
@@ -1032,7 +1032,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="lbl" style="color:var(--c2)">If you lost your job tomorrow</div>
           <div class="row" style="align-items:baseline;gap:10px">
             <div class="num" style="font-size:32px;letter-spacing:-.025em;color:var(--c2)" data-fig="cobra.annual">$2,244</div>
-            <div style="font-size:13.5px;color:var(--im)"><span data-uw="slash">/ month</span>, COBRA</div>
+            <div style="font-size:13.5px;color:var(--im)"><span data-uw="slash">/ year</span>, COBRA</div>
           </div>
           <div class="note-i">The employer share does not disappear. It moves onto your card.</div>
         </div>
@@ -1409,8 +1409,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="lbl p">Model one <span class="tag stat" style="margin-left:6px">Published formula</span></div>
           <div class="quote" style="font-size:23px">Sanders &middot; bill&rsquo;s authors</div>
           <p class="body">From the financing options published by Sen. Sanders&rsquo; office in 2019 (its &ldquo;Option 1&rdquo;), the first of the two household-level formulas in this debate that anyone actually wrote down.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">4% &times; (income &minus; $29,200)<br>+ 7.5% &times; income<br><br>= 4% &times; $65,800 &nbsp;=&nbsp; $2,632<br>+ 7.5% &times; $95,000 &nbsp;=&nbsp; $7,125<br><b>= $9,757 a year</b></p>
-          <p class="fn">Our one liberty: the 2019 list presents the income premium and the payroll tax as <i>separate</i> options. We pair them. Say so out loud rather than let someone discover it.</p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">4% &times; (income &minus; $32,200)<br>+ 7.5% &times; income<br><br>= 4% &times; $62,800 &nbsp;=&nbsp; $2,512<br>+ 7.5% &times; $95,000 &nbsp;=&nbsp; $7,125<br><b>= $9,637 a year</b></p>
+          <p class="fn">The exemption is the standard deduction, as the 2019 list stipulates; its own worked example used $29,000 for a family of four, the figure of its day. A 2026 calculator uses the 2026 deduction: $32,200 for a joint return, $16,100 for a single filer (IRS Rev. Proc. 2025-32). The Lancet formula below keeps its paper&rsquo;s literal $29,000, because that is what the paper wrote down.</p>
+          <p class="fn">Two liberties, both ours. The 2019 list presents the income premium and the payroll tax as <i>separate</i> options; we pair them. It also exempts an employer&rsquo;s first $2 million of payroll from the 7.5% levy; a household cannot know where its employer&rsquo;s payroll stands, so we apply the levy to all wages, which if anything overstates the cost. Say both out loud rather than let someone discover them.</p>
         </div>
 
         <div class="card-p">
@@ -1425,7 +1426,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="lbl p">Model three <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">RAND &middot; nonpartisan</div>
           <p class="body">Liu &amp; Eibner, RAND Corporation, 2019: nonpartisan, modelling the bill <i>with</i> long-term care at payment rates around 109% of Medicare. National health spending rises 1.8%, from $3,823 billion to $3,892 billion.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$68.8B &divide; 134,790,000 households<br>= <b>$510</b> per household per year<br><br>$9,757 + $510 = <b>$10,267</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$68.8B &divide; 134,790,000 households<br>= <b>$510</b> per household per year<br><br>$9,637 + $510 = <b>$10,147</b></p>
           <p class="fn">RAND assumed supply constraints absorb half of new demand; without that assumption its increase is 9.8%. RAND published no household figure. The allocation is ours, same convention as Blahous.</p>
         </div>
 
@@ -1433,7 +1434,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="lbl p">Model four <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">CBO &middot; the scorekeeper</div>
           <p class="body">Congressional Budget Office, December 2020: five illustrative options for 2030; CBO has never scored the bill itself. We use Option 5, the one shaped most like the bill (long-term care covered, no cost sharing), which <b>raises</b> national spending $290 billion, the least friendly of the five. CBO&rsquo;s four options <i>without</i> long-term care all <b>lower</b> national spending, by $42 to $743 billion.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$290B &divide; 134,790,000 households<br>= <b>$2,151</b> per household per year<br><br>$9,757 + $2,151 = <b>$11,908</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$290B &divide; 134,790,000 households<br>= <b>$2,151</b> per household per year<br><br>$9,637 + $2,151 = <b>$11,788</b></p>
           <p class="fn">CBO published no household figure. The allocation is ours, same convention as Blahous. Its $290 billion is a 2030 projection against CBO&rsquo;s own $6,631 billion baseline; we spread the source&rsquo;s dollars as published rather than false-precision adjust them to a common year.</p>
         </div>
 
@@ -1442,7 +1443,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="quote" style="font-size:23px">Mercatus &middot; the opposition</div>
           <p class="body">Charles Blahous, Mercatus Center, 2018: Koch-funded and written to show single-payer was unaffordable. He modelled two scenarios. His <i>main</i> one has national health spending <b>falling $2.05 trillion</b> over a decade against current law. His alternative, where provider payments do not fall to Medicare rates, has it <b>rising $3.25 trillion</b>.</p>
           <p class="body">We use the alternative, so this site never rests on the friendly reading of an unfriendly study.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">$3.252T &divide; 10 years<br>&divide; 134,790,000 households<br>= <b>$2,413</b> per household per year<br><br>$9,757 + $2,413 = <b>$12,170</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">$3.252T &divide; 10 years<br>&divide; 134,790,000 households<br>= <b>$2,413</b> per household per year<br><br>$9,637 + $2,413 = <b>$12,050</b></p>
           <p class="fn">Blahous published no household figure, so that allocation is ours. Spreading it flat across all households is a simplification: real financing would be progressive, which would move this number down for most households and up for high earners.</p>
         </div>
 
@@ -1451,7 +1452,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="quote" style="font-size:23px">Urban &middot; the priciest</div>
           <p class="body">Blumberg, Holahan and colleagues, Urban Institute, October 2019: a left-leaning institute&rsquo;s &ldquo;Single-Payer Enhanced&rdquo;, and the most expensive estimate anyone has published: national spending rising <b>$719.7 billion a year (+20.6%)</b>, covering long-term care, dental, zero cost sharing and every US resident.</p>
           <p class="body">We include it so the top of the range is the hardest number on offer. If the argument survives this one, it survives.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$719.7B &divide; 134,790,000 households<br>= <b>$5,340</b> per household per year<br><br>$9,757 + $5,340 = <b>$15,097</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$719.7B &divide; 134,790,000 households<br>= <b>$5,339</b> per household per year<br><br>$9,637 + $5,339 = <b>$14,976</b></p>
           <p class="fn">Urban published no household figure. The allocation is ours, same convention as Blahous. Its &ldquo;Single-Payer Lite&rdquo; option, without long-term care and with income-scaled cost sharing, <i>cuts</i> national spending 6.0%. We use the expensive one.</p>
         </div>
       </div>
@@ -1538,6 +1539,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><th>Figure</th><th>Source</th></tr>
         <tr><td>Poverty guidelines</td><td>HHS, 2025 Poverty Guidelines</td></tr>
         <tr><td>Premium credit schedule</td><td>IRS Rev. Proc. 2025-25, applicable percentage table for 2026</td></tr>
+        <tr><td>Standard deduction, 2026</td><td>IRS Rev. Proc. 2025-32 (the Sanders exemption)</td></tr>
         <tr><td>Employer premiums</td><td>KFF Employer Health Benefits Survey, 2025</td></tr>
         <tr><td>2026 marketplace changes</td><td>KFF, 2026 Marketplace enrollment, premiums and deductibles</td></tr>
         <tr><td>Single-payer financing</td><td>Office of Sen. Bernie Sanders, financing options, 2019</td></tr>
@@ -1655,7 +1657,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       "mkt.benchmark": m.benchmark,
       "uni.total": u.total, "uni.savings": S.savings, "uni.decade": S.decade,
       "uni.rangeLo": S.universalRange.lo, "uni.rangeHi": S.universalRange.hi,
-      "cobra.annual": S.cobra.annual,
+      "cobra.annual": S.cobra.annual, "cliff.drop": S.cliffDrop,
       "route.whole": R.whole, "route.borne": R.borne,
       "route.onPaystub": R.onPaystub, "route.offPaystub": R.offPaystub
     };
@@ -1851,7 +1853,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // have to agree or the hedge is a lie. The data-round attribute carries the
     // direction into the fig loop.
     if (e.emp)
-      P.push('I added up what my household actually spends on healthcare, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span class="letterHh"></span>&rsquo;s healthcare costs more than <mark data-fig="emp.total" data-round="down"></mark> <span data-uw="a"></span>. Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before.');
+      P.push('I added up what healthcare actually costs my household, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span class="letterHh"></span>&rsquo;s healthcare costs more than <mark data-fig="emp.total" data-round="down"></mark> <span data-uw="a"></span>. <span id="letterShare"></span>');
     if (e.mkt)
       P.push(m.overCliff
         ? 'I buy my own coverage through the marketplace. I am my own employer, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
@@ -1937,6 +1939,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       return;
     }
     S.breakdown = W.routeBreakdown(state.route, opts);
+    // The section 03 heading prints this household's own drop, the same figure
+    // the stat card below it shows, so the two can never disagree.
+    var cd = W.cliffDrop({ size: state.size, adults: opts.adults, ages: state.ages, bkey: state.bkey });
+    S.cliffDrop = cd ? cd.drop : null;
     S.routeMax = Math.max(
       W.routeBreakdown("employer", opts).whole,
       W.routeBreakdown("marketplace", opts).whole,
@@ -1960,6 +1966,21 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // sometimes true, and this letter does not get to lie for effect.
     // These three spans live inside the editable letter, so a reader who rewrites
     // a paragraph can remove them; a missing one must not stop the paint.
+    // The paystub share moves with the drawer: at the survey average the
+    // deduction is about a fifth of the whole, but a reader who types a $1,000
+    // biweekly deduction is at half. A fixed "less than a quarter" would have
+    // gone to a congressional office under their name.
+    var shEl = byId("letterShare");
+    if (shEl){
+      var sh = S.employer.total > 0 ? S.employer.worker / S.employer.total : 0;
+      shEl.textContent = sh < 0.25
+        ? "Less than a quarter of it shows up as the premium deduction on my paystub, which is precisely why I had never added it up before."
+        : sh < 0.4
+          ? "Only about a third of it shows up as the premium deduction on my paystub. The rest I had never added up before."
+          : sh < 0.6
+            ? "About half of it shows up as the premium deduction on my paystub. The other half I had never added up before."
+            : "Most of it shows up as the premium deduction on my paystub, but the rest I had never added up before.";
+    }
     var cmpEl = byId("letterCmp");
     if (cmpEl) cmpEl.textContent = S.breakdown.borne > S.universalRange.hi
       ? "Every one of them is less than what healthcare costs us now."
