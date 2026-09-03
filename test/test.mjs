@@ -1920,6 +1920,9 @@ test('letter: the paystub share sentence follows the drawer', async b => {
   ok('opens on what healthcare costs, not what the household spends',
      /what healthcare actually costs my household/.test(t0) && !/actually spends/.test(t0));
   ok('survey average: less than a quarter', /Less than a quarter of it shows up as the premium deduction/.test(t0));
+  await setIncome(p, 30000);   // TX family at 93% FPL: the floor, with no exception offered
+  ok('the floor copy offers no immigrant exception', !/exception; they can take the credit/.test(await p.evaluate(() => document.body.innerText)));
+  await setIncome(p, 95000);
   await p.locator('#adv summary').click(); await p.waitForTimeout(150);
   await p.fill('#deduct', '500'); await p.waitForTimeout(250);         // $13,000 a year: 34%
   ok('$500 biweekly: about a third', /Only about a third of it shows up/.test(await txt()));
@@ -2009,6 +2012,9 @@ test('prose: the methodology page says what the data says', async () => {
   ok('the Yale preprint has a Sources row', /Lives saved, 114,174/.test(text) && /not peer reviewed/.test(text));
   ok('the three-million figure names CMS', /CMS effectuated enrollment/.test(text));
   ok('the Lancet payroll rate is the manuscript\'s 11.29%', /11\.29%/.test(text));
+  // the reconciliation law of July 2025: no immigrant exception to the floor, no repayment cap
+  ok('the immigrant exception to the floor is gone, with the law named', !/they can take the credit/.test(text) && /Public Law 119-21/.test(text));
+  ok('repayment of excess credit is disclosed', /no cap on repaying excess advance credit/.test(text) && /from 2028 every enrollee must re-verify/.test(text));
 });
 
 /* Objection 01 and its footnote used to argue against the employer figure and a
