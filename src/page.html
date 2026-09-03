@@ -1395,7 +1395,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">400% and above</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit at all</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
-      <p class="fn">The first row is the floor, and it matters most in the ten states that have not expanded Medicaid (Alabama, Florida, Georgia, Kansas, Mississippi, South Carolina, Tennessee, Texas, Wisconsin and Wyoming). An adult there below the poverty line is too poor for the credit and, unless a parent with very low income, ineligible for Medicaid as well: the coverage gap. In the states that expanded Medicaid, adults under 138% of the poverty line (215% in the District of Columbia) qualify for Medicaid, and the law gives no marketplace credit to anyone eligible for Medicaid, so the calculator shows no credit there either and says why. The 100% to 133% row applies only to lawfully present immigrants whom Medicaid excludes; they can take the credit. The calculator cannot know who they are, so it shows the common case and labels the exception.</p>
+      <p class="fn">The first row is the floor, and it matters most in the ten states that have not expanded Medicaid (Alabama, Florida, Georgia, Kansas, Mississippi, South Carolina, Tennessee, Texas, Wisconsin and Wyoming). An adult there below the poverty line is too poor for the credit and, unless a parent with very low income, ineligible for Medicaid as well: the coverage gap. In the states that expanded Medicaid, adults under 138% of the poverty line (215% in the District of Columbia) qualify for Medicaid, and the law gives no marketplace credit to anyone eligible for Medicaid, so the calculator shows no credit there either and says why. The 100% to 133% row used to serve lawfully present immigrants whom Medicaid excludes: they could take the credit below the poverty line and, in expansion states, below the Medicaid ceiling. The July 2025 reconciliation law (Public Law 119-21) removed that credit for plan years from 2026, and from 2027 refugees, asylees and people with temporary protected status lose it as well. The row is empty in practice now, and the floor is a floor for everyone.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
@@ -1570,6 +1570,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Uninsured spending</b></th>
           <td>Modeled, and low for a reason worth stating plainly: uninsured households spend less because they skip care, not because care is cheaper for them. It usually is not. Our figure is the cost of the care an uninsured household <i>uses</i> in a year. Cash out of pocket runs lower still (roughly $500 to $750 in the last published MEPS breakdowns), because providers collect little of what they bill. Either way it describes a quiet year; the bad-year arithmetic has its own section above.</td>
+        </tr>
+        <tr>
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Repaying the credit</b></th>
+          <td>The credit shown is the advance credit for a household whose income comes in as entered. Since tax year 2026 there is no cap on repaying excess advance credit (Public Law 119-21): a household that earns more than it projected repays the whole difference at filing, and one that crosses the 400% line repays every dollar of it. The page prices the year as entered and does not model repayment; section 03 shows what crossing the line costs. Two later changes narrow who can claim the credit rather than what it pays: from 2027 refugees, asylees and people with temporary protected status are excluded, and from 2028 every enrollee must re-verify eligibility before each year&rsquo;s coverage instead of being re-enrolled automatically.</td>
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Wage incidence</b></th>
@@ -2619,8 +2623,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         (m.place.expanded
           ? stn + ' has expanded Medicaid, so adults at this income qualify for Medicaid rather than a marketplace plan, and children for Medicaid or CHIP.'
           : stn + ' has not expanded Medicaid, so adults here usually fall in the coverage gap: too poor for the credit, and over the state\u2019s Medicaid limit for parents. Children may still qualify for Medicaid or CHIP.') +
-        ' The marketplace figure above is the benchmark plan at full price, which is what the marketplace would charge, not what this household is expected to pay. ' +
-        '(Lawfully present immigrants whom Medicaid excludes are the exception; they can take the credit.)</div></div>';
+        ' The marketplace figure above is the benchmark plan at full price, which is what the marketplace would charge, not what this household is expected to pay.</div></div>';
     } else if (m.medicaidLikely){
       var stn2 = STATE_NAMES[m.place.state] || m.place.state;
       html = '<div class="warn"><div class="lbl" style="color:var(--c2)">In Medicaid\u2019s range, not the marketplace\u2019s</div>' +
@@ -2628,8 +2631,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         'poverty line, adults in this household qualify for Medicaid in ' + stn2 + ', which covers adults to ' +
         Math.round(m.medicaidCeiling * 100) + '% of the poverty line. The law gives <b>no marketplace credit</b> to anyone ' +
         'eligible for Medicaid, so the marketplace figure above is the benchmark plan at full price. Medicaid itself ' +
-        'would cost far less; this calculator does not model it. (Lawfully present immigrants whom Medicaid excludes ' +
-        'are the exception; they can take the credit.)</div></div>';
+        'would cost far less; this calculator does not model it.</div></div>';
     } else {
       html = '<div class="callout-i"><div class="lbl" style="color:var(--teal)">What you qualify for today</div>' +
         '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +

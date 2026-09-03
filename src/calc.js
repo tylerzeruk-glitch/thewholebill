@@ -272,12 +272,12 @@
     // The floor. Below 100% of the poverty line there is no credit at all; in a
     // state that has not expanded Medicaid, adults there are in the coverage gap.
     // In an expansion state, adults under the Medicaid ceiling are Medicaid's,
-    // not the marketplace's, and the law gives them no credit. The one exception
-    // is lawfully present immigrants whom Medicaid excludes: they can take the
-    // credit, and they are the entire reason the IRS table has an "under 133%"
-    // row. We cannot know who they are, so these flags are the common case and
-    // the copy says so. An earlier build skipped this floor and showed a
-    // $25,108 credit to a Texas family at 93% of the poverty line.
+    // not the marketplace's, and the law gives them no credit. The IRS table's
+    // "under 133%" row existed for lawfully present immigrants whom Medicaid
+    // excludes; Public Law 119-21 (July 2025) removed their credit for plan
+    // years from 2026, so the floor is a floor for everyone and no exception is
+    // carried here or in the copy. An earlier build skipped this floor and
+    // showed a $25,108 credit to a Texas family at 93% of the poverty line.
     var belowFloor = ratio < 1.00;
     var medicaidCeiling = MEDICAID_ADULT_BY_STATE[bp.state] || MEDICAID_ADULT;
     var medicaidLikely = !belowFloor && !!bp.expanded && ratio < medicaidCeiling;
