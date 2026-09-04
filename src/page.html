@@ -194,6 +194,16 @@ footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /
    the control is drawn with, so the whole thing is one object. */
 .step{width:40px;align-self:stretch;background:none;border:0;border-left:1px solid var(--ictrl);display:flex;align-items:center;justify-content:center;color:var(--im);font-size:17px;line-height:1;transition:background .15s,color .15s}
 .steps{display:flex;align-self:stretch}
+.step:disabled{opacity:.38;cursor:not-allowed}
+.step:disabled:hover{background:none;color:var(--im)}
+/* The age boxes: a grid that fills the row with equal boxes of at least 64px, so the width
+   decides how many sit per row (four on a phone, five in the desktop panel) and the count
+   decides the rows. Eight people is two rows on a phone. */
+.ages{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.age{display:flex;flex-direction:column;gap:5px;min-width:0}
+.age input{height:46px;width:100%;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;color:var(--ik);font-family:var(--mono);font-size:16px;text-align:center;padding:0;font-variant-numeric:tabular-nums;outline:none;-webkit-appearance:none;appearance:none}
+.age input:focus-visible{border-color:var(--c2)}
+.age-k{font-size:10.5px;color:var(--im);text-align:center;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .seg{display:flex;gap:6px}
 .seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
 .seg > div.on,.seg > button.on{background:#2C3140;border-color:var(--ib);color:var(--ik);font-weight:500}
@@ -849,15 +859,18 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <div class="ctrl" id="placeCtrl" style="cursor:default"><span id="placeName"></span><span class="note-i" style="font-size:11px">from your ZIP</span></div>
             <div class="note-i" id="areaNote"></div>
           </div>
-          <div class="row" style="gap:14px">
-            <div class="field grow">
-              <div class="lbl">Household</div>
-              <div class="ctrl" style="padding-right:0;overflow:hidden"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="steps"><button type="button" class="step" id="sizeDown" aria-label="Fewer people">&minus;</button><button type="button" class="step" id="sizeUp" aria-label="More people">+</button></span></div>
-            </div>
-            <div class="field grow">
-              <div class="lbl" for="ages">Ages</div>
-              <input class="ctrl mono" id="ages" value="41, 39, 12, 9" inputmode="numeric" autocomplete="off" spellcheck="false" aria-label="Ages of everyone in the household, separated by commas" style="letter-spacing:.04em">
-            </div>
+          <div class="field" style="max-width:220px">
+            <div class="lbl">Household</div>
+            <div class="ctrl" style="padding-right:0;overflow:hidden"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="steps"><button type="button" class="step" id="sizeDown" aria-label="Fewer people">&minus;</button><button type="button" class="step" id="sizeUp" aria-label="More people">+</button></span></div>
+          </div>
+          <div class="field">
+            <div class="lbl" id="agesLbl">Ages</div>
+            <!-- One box per person, built by the script from state.ages. The stepper is the
+                 only control that changes how many; the phone keypad is the right keyboard
+                 for each box, which a comma-separated field could never say. Its own row,
+                 so eight boxes get the whole panel width: four per row on a phone. -->
+            <div class="ages" id="agesBoxes" role="group" aria-labelledby="agesLbl"></div>
+            <div class="note-i" id="sizeMax" hidden>Eight is the most this calculator prices.</div>
           </div>
           <div class="field" style="position:relative">
             <div class="row" style="justify-content:space-between;align-items:baseline">
@@ -2942,7 +2955,33 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   byId("zip").addEventListener("keydown", function(e){ if (e.key === "Enter") submitZip(); });
   byId("zip").addEventListener("input", function(){ var d = this.value.replace(/\D/g, ""); if (d !== this.value) this.value = d; });
   byId("income").addEventListener("input", function(){ state.income = +this.value; paint(); });
-  function agesToField(){ byId("ages").value = state.ages.join(", "); }
+  // One box per person. The stepper is the only thing that changes the count;
+  // typing in a box never does, so the two cannot disagree. Boxes are rebuilt only
+  // when the count changes, so a keystroke never rebuilds the input under the caret.
+  var agesEl = byId("agesBoxes");
+  function ageWord(a){ return a >= 65 ? "65 or over" : a >= 21 ? "adult" : "child"; }
+  function renderAges(){
+    var n = state.ages.length, i;
+    if (agesEl.children.length !== n){
+      agesEl.innerHTML = "";
+      for (i = 0; i < n; i++){
+        var lab = document.createElement("label"); lab.className = "age";
+        lab.innerHTML = '<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off"><span class="age-k"></span>';
+        agesEl.appendChild(lab);
+      }
+    }
+    for (i = 0; i < n; i++){
+      var inp = agesEl.children[i].firstChild, k = agesEl.children[i].lastChild;
+      if (document.activeElement !== inp) inp.value = state.ages[i];
+      inp.setAttribute("aria-label", "Age of person " + (i + 1) + " of " + n);
+      inp.setAttribute("enterkeyhint", i === n - 1 ? "done" : "next");
+      k.textContent = ageWord(state.ages[i]);
+    }
+    byId("sizeUp").disabled = n >= 8;
+    byId("sizeDown").disabled = n <= 1;
+    byId("sizeMax").hidden = n < 8;
+  }
+  function agesToField(){ renderAges(); }
   // Stepping up appends an adult until there are two, then children -- the shape
   // of the default household, and of most real ones. Stepping down drops the last.
   byId("sizeUp").addEventListener("click", function(){
@@ -2961,19 +3000,30 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   // field is only rewritten on blur, never mid-keystroke: reformatting under the
   // caret is how inputs eat their own text. A half-typed entry (trailing comma,
   // stray letter) leaves the last good list in force.
-  byId("ages").addEventListener("input", function(){
-    // Split on commas and spaces only, and take whole years only: "40, 12.5"
-    // used to become three people (40, 12 and 5). A token that is not an
-    // integer age leaves the last good list in force.
-    var raw = this.value.split(/[,\s]+/).filter(Boolean);
-    if (raw.some(function(t){ return !/^\d{1,3}$/.test(t); })) return;
-    var tokens = raw.map(Number).filter(function(n){ return n >= 0 && n <= 120; });
-    if (tokens.length !== raw.length || tokens.length < 1 || tokens.length > 8) return;
-    state.ages = tokens;
-    state.size = tokens.length;
+  // Live while typing; an empty or impossible box leaves the last good age in
+  // force and is restored on blur, so a half-typed number never blanks the figures.
+  agesEl.addEventListener("input", function(ev){
+    var inp = ev.target; if (inp.tagName !== "INPUT") return;
+    var d = inp.value.replace(/\D/g, ""); if (d !== inp.value) inp.value = d;
+    if (d === "" || +d > 120) return;
+    var i = [].indexOf.call(agesEl.children, inp.parentNode);
+    state.ages[i] = +d;
+    inp.nextSibling.textContent = ageWord(+d);
     paint();
   });
-  byId("ages").addEventListener("change", agesToField);
+  agesEl.addEventListener("focusin", function(ev){ if (ev.target.tagName === "INPUT") ev.target.select(); });
+  agesEl.addEventListener("focusout", function(ev){
+    var inp = ev.target; if (inp.tagName !== "INPUT") return;
+    var i = [].indexOf.call(agesEl.children, inp.parentNode);
+    if (inp.value === "" || +inp.value > 120) inp.value = state.ages[i];
+  });
+  agesEl.addEventListener("keydown", function(ev){
+    if (ev.key !== "Enter" || ev.target.tagName !== "INPUT") return;
+    ev.preventDefault();
+    var next = ev.target.parentNode.nextElementSibling;
+    if (next) next.firstChild.focus(); else ev.target.blur();
+  });
+  renderAges();
 
   byId("deduct").addEventListener("input", function(){
     if (state.route !== "employer") return;

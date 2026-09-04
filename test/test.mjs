@@ -28,6 +28,14 @@ const page = async (browser, w, h, mobile=false, doc='index.html') => {
   await p.goto(pathToFileURL(resolve(HERE, base + doc)).href); await p.waitForTimeout(1200);
   return p;
 };
+// The age boxes: the stepper sets the count, then each box takes its age.
+const setAges = async (p, ages) => {
+  for (let i = 0; i < 8; i++) { if ((await p.locator('#agesBoxes input').count()) <= ages.length) break; await p.locator('#sizeDown').click(); }
+  for (let i = 0; i < 8; i++) { if ((await p.locator('#agesBoxes input').count()) >= ages.length) break; await p.locator('#sizeUp').click(); }
+  for (let i = 0; i < ages.length; i++) await p.locator('#agesBoxes input').nth(i).fill(String(ages[i]));
+  await p.locator('#agesBoxes input').last().blur();
+  await p.waitForTimeout(200);
+};
 const setIncome = async (p, v) => { await p.locator('#income').fill(String(v)); await p.locator('#income').dispatchEvent('input'); await p.waitForTimeout(120); };
 
 /* The benchmark table is generated data, so the suite re-verifies the
@@ -734,50 +742,56 @@ test('eligibility box: only where subsidies apply', async b => {
  * boundary), 21+ an adult, 65+ flagged but still priced as an adult. Ages are the
  * source of truth and household size is their count, so the two controls cannot
  * disagree. Age-RATING is deliberately absent until the Stage 2 CMS files. */
-test('ages: the field drives the split, and size follows it', async b => {
+test('ages: one box per person, the stepper sets the count', async b => {
   const p = await page(b,1440,900);
   const read = () => p.evaluate(()=>({
     size:document.getElementById('sizeVal').textContent,
-    ages:document.getElementById('ages').value,
+    ages:[...document.querySelectorAll('#agesBoxes input')].map(i=>i.value).join(', '),
+    words:[...document.querySelectorAll('#agesBoxes .age-k')].map(k=>k.textContent).join(' '),
     whole:+document.querySelector('[data-fig="route.whole"]').textContent.replace(/[^0-9]/g,''),
-    note:!document.getElementById('agesNote').hidden }));
+    note:!document.getElementById('agesNote').hidden, max:!document.getElementById('sizeMax').hidden,
+    upOff:document.getElementById('sizeUp').disabled, downOff:document.getElementById('sizeDown').disabled }));
   await p.locator('#route button[data-r="marketplace"]').click();
   await p.waitForTimeout(250);
-
-  const two = await read();
-  await p.fill('#ages', '41, 39, 30, 9');       // third person becomes an adult
-  await p.waitForTimeout(250);
+  const four = await read();
+  ok('four boxes for the default household, labelled adult and child', four.ages === '41, 39, 12, 9' && four.words === 'adult adult child child', four.words);
+  ok('every box is a numeric keypad field with a per-person name', await p.evaluate(() => [...document.querySelectorAll('#agesBoxes input')].every((i, n) => i.getAttribute('inputmode') === 'numeric' && i.getAttribute('aria-label') === `Age of person ${n + 1} of 4`)));
+  await p.locator('#agesBoxes input').nth(2).fill('30'); await p.waitForTimeout(250);   // third person becomes an adult
   const three = await read();
-  ok('an extra adult changes the marketplace bill', three.whole > two.whole,
-     `$${two.whole.toLocaleString()} -> $${three.whole.toLocaleString()}`);
-
-  await p.fill('#ages', '41, 39');
-  await p.waitForTimeout(250);
-  ok('the count of ages is the household size', (await read()).size === '2');
-
-  await p.locator('#sizeUp').click();
-  await p.waitForTimeout(200);
+  ok('an extra adult changes the marketplace bill', three.whole > four.whole, `$${four.whole.toLocaleString()} -> $${three.whole.toLocaleString()}`);
+  ok('and the word under the box follows', three.words === 'adult adult adult child', three.words);
+  await setAges(p, [41, 39]);
+  ok('the stepper down removes the last box and the size follows', (await read()).size === '2' && (await read()).ages === '41, 39');
+  await p.locator('#sizeUp').click(); await p.waitForTimeout(200);
   const stepped = await read();
-  ok('stepping size grows the ages list', stepped.ages === '41, 39, 10' && stepped.size === '3', stepped.ages);
-
-  await p.fill('#ages', '70, 39');
-  await p.waitForTimeout(250);
-  ok('65+ raises the Medicare note', (await read()).note);
-  await p.fill('#ages', '41, 39');
-  await p.waitForTimeout(250);
+  ok('stepping up appends a child of 10 with the default household shape', stepped.ages === '41, 39, 10' && stepped.size === '3', stepped.ages);
+  await p.locator('#agesBoxes input').first().fill('70'); await p.waitForTimeout(250);
+  ok('65+ raises the Medicare note and the box says so', (await read()).note && /65 or over/.test((await read()).words));
+  await p.locator('#agesBoxes input').first().fill('41'); await p.waitForTimeout(250);
   ok('and it clears again', !(await read()).note);
-
-  // Junk mid-keystroke must never blank the model or the figures.
-  await p.fill('#ages', 'x,,');
-  await p.waitForTimeout(200);
+  // junk mid-keystroke must never blank the figures; an empty box restores on blur
+  await p.locator('#agesBoxes input').first().fill('x'); await p.waitForTimeout(150);
   const junk = await read();
-  ok('junk input leaves the last good state in force', +junk.size >= 1 && junk.whole > 0,
-     `size ${junk.size}, whole ${junk.whole}`);
-  await p.fill('#ages', '8 22 45');
-  await p.locator('#ages').blur();
+  ok('a letter is refused and the last good age stays in force', junk.whole > 0 && junk.size === '3', `size ${junk.size}, whole ${junk.whole}`);
+  await p.locator('#agesBoxes input').first().fill('125'); await p.locator('#agesBoxes input').first().blur(); await p.waitForTimeout(150);
+  ok('an impossible age is restored on blur', (await read()).ages === '41, 39, 10', (await read()).ages);
+  await p.locator('#agesBoxes input').first().focus(); await p.keyboard.press('Enter');
+  ok('Enter moves to the next box', await p.evaluate(() => document.activeElement === document.querySelectorAll('#agesBoxes input')[1]));
+  for (let i = 0; i < 5; i++) { await p.locator('#sizeUp').click(); }   // 3 -> 8; a sixth click would wait on a disabled button
   await p.waitForTimeout(200);
-  ok('blur normalises the separators', (await read()).ages === '8, 22, 45', (await read()).ages);
+  const eight = await read();
+  ok('eight is the cap: plus disables and the note appears', eight.size === '8' && eight.upOff && eight.max && !eight.downOff);
   await p.close();
+  // phone: eight boxes wrap into two rows of four; four fit on one row
+  const q = await page(b, 390, 844, true);
+  const rows = async () => q.evaluate(() => { const tops = [...document.querySelectorAll('#agesBoxes input')].map(i => Math.round(i.getBoundingClientRect().top)); const uniq = [...new Set(tops)]; return { rows: uniq.length, perRow: uniq.map(t => tops.filter(x => x === t).length), narrowest: Math.min(...[...document.querySelectorAll('#agesBoxes input')].map(i => i.getBoundingClientRect().width)) }; });
+  const r4 = await rows();
+  ok('phone: four people on one row, boxes at least 64px', r4.rows === 1 && r4.narrowest >= 64, JSON.stringify(r4));
+  for (let i = 0; i < 4; i++) await q.locator('#sizeUp').click();
+  await q.waitForTimeout(200);
+  const r8 = await rows();
+  ok('phone: eight people wrap into two rows of four', r8.rows === 2 && r8.perRow.join(',') === '4,4', JSON.stringify(r8));
+  await q.close();
 });
 
 /* The deduction box is an override, and an OPTIONAL one: empty means the KFF
@@ -1675,7 +1689,7 @@ test('marketplace: below the floor and in Medicaid\'s range there is no credit, 
   ok('coverage gap: the bar note says why there is no subsidy', /below the credit/.test(t.note), t.note);
   ok('coverage gap: the letter claims no taxpayer help', /below the level where the marketplace tax credit begins/.test(t.letter) && !/taxpayer help/.test(t.letter));
   await p.locator('#zip').fill('06106'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
-  await p.locator('#ages').fill('40'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(150);
+  await setAges(p, [40]);
   await setIncome(p, 20000);   // a single adult at 128% of the poverty line
   t = await p.evaluate(() => ({ elig: document.getElementById('elig').innerText, note: document.getElementById('mktNote').innerText }));
   ok('Medicaid range: the eligibility box names the state and its ceiling', /qualify for Medicaid in Connecticut/.test(t.elig) && /138%/.test(t.elig), t.elig.slice(0, 140));
@@ -1757,7 +1771,7 @@ test('scope: county names that end in City, Columbia or Island keep their "Count
 
 test('range strip: the band stays inside the strip', async b => {
   const p = await page(b, 1440, 900);
-  await p.locator('#ages').fill('40'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(150);
+  await setAges(p, [40]);
   await setIncome(p, 260000);
   const g = await p.evaluate(() => { const band = document.getElementById('rangeBand').getBoundingClientRect(),
     strip = document.querySelector('.range').getBoundingClientRect(), mk = document.getElementById('mk').getBoundingClientRect();
@@ -2048,7 +2062,7 @@ test('prose: the objection argues against this household, on its route', async b
   const mk = await read();
   ok('marketplace: the tail is what the household pays today', /your household pays today/.test(mk.tail), mk.tail);
   await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(300);
-  await p.fill('#ages', '40'); await p.locator('#ages').dispatchEvent('input'); await p.locator('#ages').dispatchEvent('change'); await p.waitForTimeout(400);
+  await setAges(p, [40]); await p.waitForTimeout(300);
   const one = await read();
   ok('single adult: every model crosses, far below $250,000', /6 of the 6 models start costing more than today between \$\d\d,000 and \$1\d\d,000 of income/.test(one.cross), one.cross);
   await p.close();
@@ -2323,11 +2337,12 @@ test('hygiene: the minor list from the launch review', async b => {
   ok('no motive attribution for Mercatus beyond its funding', !/built to be damning|written to show|written to make it look bad|written to argue/.test(t0));
   ok('no "anyone has published" on the calculator', !/anyone has published/.test(t0));
   // ages: "40, 12.5" must not become three people
-  await p.fill('#ages', '40, 12.5'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(200);
-  ok('"40, 12.5" leaves the household as it was', (await p.evaluate(() => document.querySelector('.letterHh').textContent)) === 'family of four');
-  await p.fill('#ages', '41, 39'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(200);
+  await p.locator('#agesBoxes input').nth(2).fill('12.5'); await p.waitForTimeout(200);   // digits only: "125" is impossible, so nothing moves
+  ok('"12.5" in a box leaves the household as it was', (await p.evaluate(() => document.querySelector('.letterHh').textContent)) === 'family of four');
+  await p.locator('#agesBoxes input').nth(2).blur(); await p.waitForTimeout(100);
+  await setAges(p, [41, 39]);
   ok('a household of two is "household of two" in the letter', /my household of two/.test(await p.evaluate(() => document.getElementById('letterBd').innerText)));
-  await p.fill('#ages', '41, 39, 12, 9'); await p.locator('#ages').dispatchEvent('input'); await p.waitForTimeout(200);
+  await setAges(p, [41, 39, 12, 9]);
   // negative override is refused, not flipped
   await p.locator('#adv summary').click(); await p.waitForTimeout(150);
   await p.fill('#deduct', '-50'); await p.waitForTimeout(250);
