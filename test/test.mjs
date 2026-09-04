@@ -2447,6 +2447,30 @@ test('sources: every row links to a primary document', async () => {
   ok('the calculator itself gained no external links', ![...readFileSync(resolve(HERE, '../dist/index.html'), 'utf8').matchAll(/<a class="srclink"/g)].length);   // the class is srclink; <details class="src"> is the lives fold
 });
 
+/* TRICARE, Medicare and VA households: a pointer under the route control so they do
+ * not read the employer figure as theirs, a methodology row that says what is
+ * different, and an objection card that uses those programs as the existence proof. */
+test('other coverage: the pointer, the objection and the methodology row agree', async b => {
+  const { readFileSync } = await import('node:fs');
+  const doc = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
+  ok('methodology row exists with the sourced figures', /id="other-coverage"/.test(doc) && /9\.4 million/.test(doc) && /\$6,800/.test(doc) && /69\.7 million/.test(doc) && /9\.1 million/.test(doc));
+  ok('the two new Sources rows link to CRS, TRICARE, CMS and the VA', /crs-product\/IF13108/.test(doc) && /tricare\.mil\/Costs/.test(doc) && /medicare-monthly-enrollment/.test(doc) && /va\.gov\/health/.test(doc));
+  const p = await page(b, 1280, 900);
+  const r = await p.evaluate(() => {
+    const cov = document.getElementById('otherCov'), a = cov.querySelector('a.term');
+    const cards = [...document.querySelectorAll('#objections .card-p')];
+    const grid = document.querySelector('#objections .grid2').getBoundingClientRect();
+    const last = cards[cards.length - 1].getBoundingClientRect();
+    return { covText: cov.textContent, href: a.getAttribute('href'), n: cards.length,
+      lastQuote: cards[cards.length - 1].querySelector('.quote').textContent, lastSpans: Math.abs(last.width - grid.width) < 2,
+      figs: /69\.7 million/.test(cards[cards.length - 1].textContent) && /9\.4 million/.test(cards[cards.length - 1].textContent) && /\$6,800/.test(cards[cards.length - 1].textContent) };
+  });
+  ok('the pointer sits under the route control and links to the row', /TRICARE, Medicare or VA care/.test(r.covText) && r.href === '/methodology/#other-coverage', r.href);
+  ok('five objections, the fifth on government-run coverage, spanning the row', r.n === 5 && /cannot work here/.test(r.lastQuote) && r.lastSpans, JSON.stringify([r.n, r.lastQuote, r.lastSpans]));
+  ok('the card carries the same figures as the methodology row', r.figs);
+  await p.close();
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;
