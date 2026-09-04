@@ -2378,6 +2378,43 @@ test('hygiene: the minor list from the launch review', async b => {
   await m.close();
 });
 
+/* Explains-links: a curated set of phrases on the calculator link to the
+ * methodology section that defines or derives them. Every one must land on a
+ * real anchor, in all three documents, and none may sit in a figure, a
+ * heading, the letter or the sticky bar. */
+test('links: every explains-link lands on a methodology anchor, in all three documents', async b => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(resolve(HERE, '../src/page.html'), 'utf8');
+  const meth = src.slice(src.indexOf('METH:START'), src.indexOf('METH:END'));
+  const calc = src.slice(src.indexOf('01 HERO'), src.indexOf('METH:START')) + src.slice(src.indexOf('METH:END'));
+  const ids = new Set([...meth.matchAll(/\bid="([\w-]+)"/g)].map(m => m[1]));
+  const targets = [...src.matchAll(/href="#\/methodology\/([\w-]+)"/g)].map(m => m[1]);
+  const missing = targets.filter(t => !ids.has(t));
+  ok('every deep link names an existing methodology id', targets.length >= 20 && missing.length === 0, missing.join(', ') || targets.length + ' links');
+  const termCount = (calc.match(/class="term"/g) || []).length;
+  ok('a curated number of explains-links on the calculator, not a carpet', termCount >= 12 && termCount <= 24, termCount + ' term links');
+  const index = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
+  const doc = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
+  ok('index: deep links point at the real page with a fragment', !/href="#\/methodology/.test(index) && /href="\/methodology\/#credit"/.test(index));
+  ok('methodology page: on-page links are plain anchors that exist', !/href="#\/methodology/.test(doc) && /href="#credit"/.test(doc) && /id="credit"/.test(doc) && /id="model-blahous"/.test(doc) && /id="src-congress"/.test(doc));
+  const p = await page(b, 1280, 900);
+  const placed = await p.evaluate(() => [...document.querySelectorAll('a.term')].map(a => ({ t: a.textContent, bad: !!a.closest('.letter, .sticky, h1, h2, .num, .bignum, .v') })));
+  ok('no explains-link inside a figure, heading, the letter or the sticky bar', placed.every(x => !x.bad), placed.filter(x => x.bad).map(x => x.t).join(', '));
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(300);
+  await setIncome(p, 30000); await p.waitForTimeout(200);
+  const dyn = await p.evaluate(() => [...document.querySelectorAll('a.term')].map(a => a.getAttribute('href')));
+  ok('script-built copy carries its links too (crossover note, eligibility box, cliff intro)', dyn.some(h => /universal/.test(h)) && dyn.some(h => /credit-floor|credit\b/.test(h)), dyn.join(' '));
+  await p.close();
+  const a = await page(b, 1280, 900, false, 'artifact.html');
+  await a.evaluate(() => document.querySelector('a.term[href="#/methodology/credit"]').click()); await a.waitForTimeout(500);
+  const land = await a.evaluate(() => ({ hash: location.hash, shown: !document.getElementById('methodology').hidden, top: document.getElementById('credit').getBoundingClientRect().top }));
+  ok('artifact: the deep link opens the methodology and scrolls to the section', land.hash === '#/methodology/credit' && land.shown && land.top >= 0 && land.top < 160, JSON.stringify(land));
+  await a.evaluate(() => document.querySelector('.onpage a[href="#/methodology/sources"]').click()); await a.waitForTimeout(400);
+  const land2 = await a.evaluate(() => document.getElementById('sources').getBoundingClientRect().top);
+  ok('artifact: the on-page list scrolls within the view', land2 >= 0 && land2 < 160, String(land2));
+  await a.close();
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;
