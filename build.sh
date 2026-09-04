@@ -64,6 +64,7 @@ head = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
 ms = out.index('<!-- METH:START')
 me = out.index('<!-- METH:END -->') + len('<!-- METH:END -->')
 web = out[:ms] + out[me:]
+web = web.replace('href="#/methodology/', 'href="/methodology/#')   # deep links land on a section
 web = web.replace('href="#/methodology"', 'href="/methodology"')
 i = web.index(HERO)
 io.open('dist/index.html', 'w', encoding='utf-8').write(
@@ -92,6 +93,7 @@ if meth.count('<h2>Check our work.</h2>') != 1:
 meth = meth.replace('<h2>Check our work.</h2>', '<h1 class="as-h2">Check our work.</h1>', 1)
 foot = out[out.index('\n<footer>'):out.index('</footer>') + len('</footer>')]
 body = '<main id="main">\n' + meth + '\n</main>\n' + foot
+body = body.replace('href="#/methodology/', 'href="#')   # on its own page, a plain anchor
 body = body.replace('href="#/methodology"', 'href="/methodology"')
 body = body.replace('href="#"', 'href="/"')
 if '<script' in body:
