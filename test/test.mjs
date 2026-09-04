@@ -2427,9 +2427,9 @@ test('sources: every row links to a primary document', async () => {
   ok('every row carries an https link to its source', unlinked.length === 0, unlinked.join(', '));
   const hrefs = [...table.matchAll(/href="([^"]+)"/g)].map(m => m[1]);
   ok('no plain-http or summary-site links', hrefs.every(h => /^https:\/\//.test(h)) && !hrefs.some(h => /wikipedia|scribd|researchgate|acasignups|substack/.test(h)), hrefs.filter(h => !/^https:\/\//.test(h)).join(' '));
-  ok('links open without leaking a window handle', [...table.matchAll(/<a class="src"[^>]*>/g)].every(a => /rel="noopener"/.test(a[0])));
+  ok('links open without leaking a window handle', [...table.matchAll(/<a class="srclink"[^>]*>/g)].every(a => /rel="noopener"/.test(a[0])));
   ok('the retrieved-on sentence is present', /retrieved and checked on \d{1,2} [A-Z][a-z]+ 20\d\d/.test(doc));
-  ok('the calculator itself gained no external links', ![...readFileSync(resolve(HERE, '../dist/index.html'), 'utf8').matchAll(/<a class="src"/g)].length);   // <details class="src"> is the lives fold, not a link
+  ok('the calculator itself gained no external links', ![...readFileSync(resolve(HERE, '../dist/index.html'), 'utf8').matchAll(/<a class="srclink"/g)].length);   // the class is srclink; <details class="src"> is the lives fold
 });
 
 const b = await chromium.launch();
