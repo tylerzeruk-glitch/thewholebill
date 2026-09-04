@@ -423,6 +423,8 @@ button.step{cursor:pointer;font-family:var(--sans)}
 
 /* ---------- critics / act ---------- */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
+#objections .grid2 > .card-p:nth-child(5){grid-column:1/-1}   /* five objections: the last takes the row */
+#objections .grid2 > .card-p:nth-child(5) .body,#objections .grid2 > .card-p:nth-child(5) .fn{max-width:72ch}   /* a full-width card keeps a reading measure */
 .card-p{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;padding:34px 36px;display:flex;flex-direction:column;gap:16px}
 /* Inside a card the note is an aside, not a second paragraph. Four cards each
    drawing a full-width rule put four horizontal lines through one grid; a short
@@ -891,6 +893,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="field">
             <div class="lbl" id="routeLbl">How you&rsquo;re covered now</div>
             <div class="seg" id="route" role="group" aria-labelledby="routeLbl"><button type="button" data-r="employer" class="on" aria-pressed="true">Employer</button><button type="button" data-r="marketplace" aria-pressed="false">Marketplace</button><button type="button" data-r="none" aria-pressed="false">Uninsured</button></div>
+            <div class="note-i" id="otherCov">On TRICARE, Medicare or VA care? This calculator prices employer, marketplace and uninsured households. <a class="term" href="#/methodology/other-coverage">What is different for yours</a>.</div>
           </div>
           <details class="adv" id="adv">
             <summary>
@@ -1225,6 +1228,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="quote">&ldquo;The country simply cannot afford it.&rdquo;</div>
         <p class="body">The headline figure is enormous: on the order of $30 to $40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.<sup class="fnr">*</sup></p>
         <p class="fn"><span class="fnm">*</span>The <a class="term" href="#/methodology/model-blahous">Mercatus study</a> is the useful one here. Funded by opponents of the policy, it still showed lower national spending than the status quo. But that result depends on the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
+      </div>
+      <div class="card-p">
+        <div class="lbl p">Objection 05</div>
+        <div class="quote">&ldquo;Government-run coverage cannot work here.&rdquo;</div>
+        <p class="body">It already does, for about a third of the country. Medicare covers 69.7 million people. The <a class="term" href="#/methodology/other-coverage">Military Health System</a> covers 9.4 million service members, families and retirees through TRICARE, at about $6,800 a person a year, with no enrollment fee for active-duty families and a yearly cap on what any family pays. The VA treats 9.1 million enrolled veterans. Nobody in this debate proposes taking any of it away. The question is whether the rest of the country joins a version of it, not whether such a thing can exist here.<sup class="fnr">*</sup></p>
+        <p class="fn"><span class="fnm">*</span>TRICARE is not free: retirees pay $375 to $1,191 a year in enrollment fees, with cost shares up to a cap of $3,000 to $4,635 by plan and group, and the $64 billion budget includes military hospitals and medical readiness, so the per-person figure is a budget divided by a headcount, not a premium. Figures and sources are on the methodology page.</p>
       </div>
     </div>
 
@@ -1597,6 +1606,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Uninsured spending</b></th>
           <td>Modeled, and low for a reason worth stating plainly: uninsured households spend less because they skip care, not because care is cheaper for them. It usually is not. Our figure is the cost of the care an uninsured household <i>uses</i> in a year. Cash out of pocket runs lower still (roughly $500 to $750 in the last published MEPS breakdowns), because providers collect little of what they bill. Either way it describes a quiet year; the bad-year arithmetic has its own section above.</td>
         </tr>
+        <tr id="other-coverage">
+          <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Households the calculator does not price</b></th>
+          <td>Three kinds of coverage are not on the route control, so their households should not read the employer figure as theirs. <b style="font-weight:500;color:var(--pk)">TRICARE:</b> the Military Health System covers 9.4 million service members, families and retirees on a FY2026 request of $64 billion, about $6,800 a person, a figure that includes military hospitals and medical readiness. Active-duty families pay no enrollment fee and a catastrophic cap of $1,000 (Group A) or $1,324 (Group B); retirees pay $375 to $1,191 a year in fees with caps of $3,000 to $4,635, by plan and group. <b style="font-weight:500;color:var(--pk)">Medicare:</b> 69.7 million people, financed partly by the payroll tax this site counts and partly by premiums it does not model. <b style="font-weight:500;color:var(--pk)">VA care:</b> 9.1 million enrolled veterans, mostly free at the point of use. For all three the employer-share argument does not apply, and under the financing models here most such households would pay more than they do today. The site says so rather than price them.</td>
+        </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Repaying the credit</b></th>
           <td>The credit shown is the advance credit for a household whose income comes in as entered. Since tax year 2026 there is no cap on repaying excess advance credit (Public Law 119-21): a household that earns more than it projected repays the whole difference at filing, and one that crosses the 400% line repays every dollar of it. The page prices the year as entered and does not model repayment; section 03 shows what crossing the line costs. Two later changes narrow who can claim the credit rather than what it pays: from 2027 refugees, asylees and people with temporary protected status are excluded, and from 2028 every enrollee must re-verify eligibility before each year&rsquo;s coverage instead of being re-enrolled automatically.</td>
@@ -1640,6 +1653,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Rating area definitions</td><td><a class="srclink" href="https://www.cms.gov/cciio/programs-and-initiatives/health-insurance-market-reforms/state-gra" rel="noopener">CMS, State Specific Geographic Rating Areas</a></td></tr>
         <tr><td>ZIP to county</td><td><a class="srclink" href="https://www.census.gov/geographies/reference-files/time-series/geo/relationship-files.html" rel="noopener">Census 2020 ZCTA-county relationship file</a>; <a class="srclink" href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0) for PO-box-only ZIPs</td></tr>
         <tr><td>Medicaid expansion &amp; CHIP limits</td><td><a class="srclink" href="https://www.medicaid.gov/medicaid/national-medicaid-chip-program-information/medicaid-childrens-health-insurance-program-basic-health-program-eligibility-levels" rel="noopener">Medicaid.gov, Medicaid and CHIP eligibility levels</a></td></tr>
+        <tr><td>Military Health System</td><td>CRS, <a class="srclink" href="https://www.congress.gov/crs-product/IF13108" rel="noopener"><i>FY2026 Budget Request for the Military Health System</i></a>, In Focus IF13108; <a class="srclink" href="https://tricare.mil/Costs/Compare" rel="noopener">TRICARE, 2026 health plan costs</a></td></tr>
+        <tr><td>Medicare and VA enrollment</td><td><a class="srclink" href="https://data.cms.gov/summary-statistics-on-beneficiary-enrollment/medicare-and-medicaid-reports/medicare-monthly-enrollment" rel="noopener">CMS, Medicare Monthly Enrollment</a>, November 2025; <a class="srclink" href="https://www.va.gov/health/aboutvha.asp" rel="noopener">Veterans Health Administration, About VHA</a></td></tr>
         <tr id="src-congress"><td>Members and cosponsors</td><td><a class="srclink" href="https://github.com/unitedstates/congress-legislators" rel="noopener">unitedstates/congress-legislators</a> (every current member, keyed by bioguide id); <a class="srclink" href="https://www.govinfo.gov/bulkdata/BILLSTATUS/119/hr" rel="noopener">govinfo BILLSTATUS</a> for H.R. 3069 and S. 1506 (cosponsors); the <a class="srclink" href="https://github.com/OpenSourceActivismTech/us-zipcodes-congress" rel="noopener">OpenSourceActivismTech ZIP-to-district crosswalk</a>. Rebuilt by hand when Congress moves; the retrieval date shows on the card.</td></tr>
         <tr><td>Member portraits</td><td>The <a class="srclink" href="https://github.com/unitedstates/images" rel="noopener">@unitedstates images collection</a> (official congressional photos, public domain), loaded per member from unitedstates.github.io</td></tr>
       </table>
