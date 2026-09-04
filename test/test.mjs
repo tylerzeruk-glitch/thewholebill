@@ -2415,6 +2415,23 @@ test('links: every explains-link lands on a methodology anchor, in all three doc
   await a.close();
 });
 
+/* Sources: a row that cannot be followed is a claim; every row links to its
+ * primary document over https, with no summary domains standing in. */
+test('sources: every row links to a primary document', async () => {
+  const { readFileSync } = await import('node:fs');
+  const doc = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
+  const table = doc.slice(doc.indexOf('<caption class="vh">Sources</caption>'), doc.indexOf('</table>', doc.indexOf('<caption class="vh">Sources</caption>')));
+  const rows = [...table.matchAll(/<tr(?: id="[\w-]+")?><td>([^<]+)<\/td><td>([\s\S]*?)<\/td><\/tr>/g)];
+  ok('the table has its rows', rows.length >= 28, rows.length + ' rows');
+  const unlinked = rows.filter(r => !/href="https:\/\//.test(r[2])).map(r => r[1]);
+  ok('every row carries an https link to its source', unlinked.length === 0, unlinked.join(', '));
+  const hrefs = [...table.matchAll(/href="([^"]+)"/g)].map(m => m[1]);
+  ok('no plain-http or summary-site links', hrefs.every(h => /^https:\/\//.test(h)) && !hrefs.some(h => /wikipedia|scribd|researchgate|acasignups|substack/.test(h)), hrefs.filter(h => !/^https:\/\//.test(h)).join(' '));
+  ok('links open without leaking a window handle', [...table.matchAll(/<a class="src"[^>]*>/g)].every(a => /rel="noopener"/.test(a[0])));
+  ok('the retrieved-on sentence is present', /retrieved and checked on \d{1,2} [A-Z][a-z]+ 20\d\d/.test(doc));
+  ok('the calculator itself gained no external links', ![...readFileSync(resolve(HERE, '../dist/index.html'), 'utf8').matchAll(/<a class="src"/g)].length);   // <details class="src"> is the lives fold, not a link
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;

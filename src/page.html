@@ -437,6 +437,9 @@ a.q{color:var(--amber-deep);text-decoration:none;border-bottom:1px solid rgba(14
    amber .q links stay the ones that do something. One per term per section, never in a figure. */
 a.term{color:inherit;text-decoration:underline dotted;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:currentColor}
 a.term:hover,a.term:focus-visible{text-decoration-style:solid;color:var(--amber-deep)}
+/* Sources: the citation is the link. Same dotted style, so the table reads as it did. */
+.meth a.src{color:inherit;text-decoration:underline dotted;text-decoration-thickness:1px;text-underline-offset:3px}
+.meth a.src:hover,.meth a.src:focus-visible{text-decoration-style:solid;color:var(--amber-deep)}
 .ink a.term:hover,.inkzone a.term:hover,.ink a.term:focus-visible,.inkzone a.term:focus-visible{color:var(--c2)}
 #methodology [id]{scroll-margin-top:28px}
 .onpage{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;line-height:1.5;margin-top:4px}
@@ -1593,37 +1596,38 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px">
       <h3 id="sources">Sources</h3>
+      <p class="note" style="font-size:13.5px;line-height:1.6">Each link goes to the primary document, not a summary of it. Every one was retrieved and checked on 4 September 2026; if a link has since moved, the citation still stands on its own.</p>
       <table style="margin-top:12px"><caption class="vh">Sources</caption>
         <tr><th scope="col">Figure</th><th scope="col">Source</th></tr>
-        <tr><td>Poverty guidelines</td><td>HHS, 2025 Poverty Guidelines</td></tr>
-        <tr><td>Premium credit schedule</td><td>IRS Rev. Proc. 2025-25, applicable percentage table for 2026</td></tr>
-        <tr><td>Standard deduction, 2026</td><td>IRS Rev. Proc. 2025-32 (the Sanders exemption)</td></tr>
-        <tr><td>Employer premiums</td><td>KFF Employer Health Benefits Survey, 2025</td></tr>
-        <tr><td>2026 marketplace changes</td><td>KFF, 2026 Marketplace enrollment, premiums and deductibles</td></tr>
-        <tr><td>Single-payer financing</td><td>Office of Sen. Bernie Sanders, financing options, 2019</td></tr>
-        <tr><td>Single-payer, peer-reviewed</td><td>Galvani et al., <i>Improving the prognosis of health care in the USA</i>, The Lancet 395:524-533, 2020</td></tr>
-        <tr><td>Single-payer national cost</td><td>Blahous, <i>The Costs of a National Single-Payer Healthcare System</i>, Mercatus Center, 2018</td></tr>
-        <tr><td>Single-payer, nonpartisan</td><td>Liu &amp; Eibner, <i>National Health Spending Estimates Under Medicare for All</i>, RAND RR-3106, 2019</td></tr>
-        <tr><td>Single-payer, five options</td><td>CBO, <i>How CBO Analyzes the Costs of Proposals for Single-Payer Health Care Systems</i>, Working Paper 2020-08, December 2020</td></tr>
-        <tr><td>Single-payer, most expensive</td><td>Blumberg, Holahan et al., <i>From Incremental to Comprehensive Health Insurance Reform</i>, Urban Institute, October 2019 (financed by the Commonwealth Fund)</td></tr>
-        <tr id="src-lives"><td>Lives saved, 114,174</td><td>Pandey, Wells, Ye, Fitzpatrick &amp; Galvani, <i>Projected economic gains and lives saved under universal healthcare in the United States</i>, Yale School of Public Health preprint, July 2026 (not peer reviewed; the two components on the page, 62,863 and 51,311, are the paper&rsquo;s own and sum exactly)</td></tr>
-        <tr><td>Marketplace enrollment decline</td><td>KFF analysis of 2026 Marketplace enrollment; CMS effectuated enrollment data, 2026, for the &ldquo;nearly three million&rdquo;</td></tr>
-        <tr><td>Household count</td><td>US Census Bureau, Total Households, 2025</td></tr>
-        <tr><td>Hospital stay costs</td><td>HCUP Statistical Brief #316, AHRQ, February 2026 (2022 data)</td></tr>
-        <tr><td>Hospital markups</td><td>Bai &amp; Anderson, <i>Extreme Markup</i>, Health Affairs, 2015; National Nurses United, <i>Fleecing Patients</i>, 2020 (union-funded)</td></tr>
-        <tr><td>2026 out-of-pocket maximum</td><td>CMS, Marketplace Integrity and Affordability final rule, June 2025</td></tr>
-        <tr><td>Hospitalization aftermath</td><td>Dobkin, Finkelstein, Kluender &amp; Notowidigdo, American Economic Review, 2018</td></tr>
-        <tr><td>Health-care debt</td><td>KFF Health Care Debt Survey, 2022</td></tr>
-        <tr><td>Care skipped over cost</td><td>KFF Health Tracking Poll, May 2025; National Health Interview Survey, 2024</td></tr>
-        <tr><td>Medical bankruptcy, both sides</td><td>Himmelstein et al., AJPH, 2019 (PNHP-affiliated authors); Dobkin et al., NEJM, 2018</td></tr>
-        <tr><td>Benchmark premiums, HealthCare.gov states</td><td>CMS Exchange PUFs (rate, plan attributes, service area) and the QHP Landscape file, plan year 2026</td></tr>
-        <tr><td>Benchmark premiums, state exchanges</td><td>CMS State-based Exchange QHP PUFs, plan year 2026 (data as of June 2026)</td></tr>
-        <tr><td>Benchmark cross-checks</td><td>NY State of Health, 2026 Lowest Cost Silver Plan by County; Covered California, 2026 QHP Rates by County</td></tr>
-        <tr><td>Rating area definitions</td><td>CMS, State Specific Geographic Rating Areas</td></tr>
-        <tr><td>ZIP to county</td><td>Census 2020 ZCTA-county relationship file; GeoNames (CC BY 4.0) for PO-box-only ZIPs</td></tr>
-        <tr><td>Medicaid expansion &amp; CHIP limits</td><td>Medicaid.gov, Medicaid and CHIP eligibility levels</td></tr>
-        <tr id="src-congress"><td>Members and cosponsors</td><td>unitedstates/congress-legislators (every current member, keyed by bioguide id); govinfo BILLSTATUS for H.R. 3069 and S. 1506 (cosponsors); the OpenSourceActivismTech ZIP-to-district crosswalk. Rebuilt by hand when Congress moves; the retrieval date shows on the card.</td></tr>
-        <tr><td>Member portraits</td><td>The @unitedstates images collection (official congressional photos, public domain), loaded per member from unitedstates.github.io</td></tr>
+        <tr><td>Poverty guidelines</td><td><a class="src" href="https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines" rel="noopener">HHS, 2025 Poverty Guidelines</a></td></tr>
+        <tr><td>Premium credit schedule</td><td><a class="src" href="https://www.irs.gov/pub/irs-drop/rp-25-25.pdf" rel="noopener">IRS Rev. Proc. 2025-25</a>, applicable percentage table for 2026</td></tr>
+        <tr><td>Standard deduction, 2026</td><td><a class="src" href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" rel="noopener">IRS Rev. Proc. 2025-32</a> (the Sanders exemption)</td></tr>
+        <tr><td>Employer premiums</td><td><a class="src" href="https://www.kff.org/health-costs/2025-employer-health-benefits-survey/" rel="noopener">KFF Employer Health Benefits Survey, 2025</a></td></tr>
+        <tr><td>2026 marketplace changes</td><td><a class="src" href="https://www.kff.org/affordable-care-act/what-we-know-so-far-about-2026-aca-marketplace-enrollment-premiums-and-deductibles/" rel="noopener">KFF, 2026 Marketplace enrollment, premiums and deductibles</a></td></tr>
+        <tr><td>Single-payer financing</td><td><a class="src" href="https://www.sanders.senate.gov/wp-content/uploads/options-to-finance-medicare-for-all.pdf" rel="noopener">Office of Sen. Bernie Sanders, financing options, 2019</a></td></tr>
+        <tr><td>Single-payer, peer-reviewed</td><td>Galvani et al., <a class="src" href="https://doi.org/10.1016/S0140-6736(19)33019-3" rel="noopener"><i>Improving the prognosis of health care in the USA</i></a>, The Lancet 395:524-533, 2020; the authors&rsquo; <a class="src" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8572548/" rel="noopener">open manuscript</a> on PubMed Central</td></tr>
+        <tr><td>Single-payer national cost</td><td>Blahous, <a class="src" href="https://www.mercatus.org/research/working-papers/costs-national-single-payer-healthcare-system" rel="noopener"><i>The Costs of a National Single-Payer Healthcare System</i></a>, Mercatus Center, 2018</td></tr>
+        <tr><td>Single-payer, nonpartisan</td><td>Liu &amp; Eibner, <a class="src" href="https://www.rand.org/pubs/research_reports/RR3106.html" rel="noopener"><i>National Health Spending Estimates Under Medicare for All</i></a>, RAND RR-3106, 2019</td></tr>
+        <tr><td>Single-payer, five options</td><td>CBO, <a class="src" href="https://www.cbo.gov/publication/56811" rel="noopener"><i>How CBO Analyzes the Costs of Proposals for Single-Payer Health Care Systems</i></a>, Working Paper 2020-08, December 2020</td></tr>
+        <tr><td>Single-payer, most expensive</td><td>Blumberg, Holahan et al., <a class="src" href="https://www.urban.org/research/publication/incremental-comprehensive-health-reform-how-various-reform-options-compare-coverage-and-costs" rel="noopener"><i>From Incremental to Comprehensive Health Insurance Reform</i></a>, Urban Institute, October 2019 (financed by the Commonwealth Fund)</td></tr>
+        <tr id="src-lives"><td>Lives saved, 114,174</td><td>Pandey, Wells, Ye, Fitzpatrick &amp; Galvani, <a class="src" href="https://www.medrxiv.org/content/10.64898/2026.07.22.26358689v1" rel="noopener"><i>Projected economic gains and lives saved under universal healthcare in the United States</i></a>, Yale School of Public Health preprint on medRxiv, July 2026 (not peer reviewed; the two components on the page, 62,863 and 51,311, are the paper&rsquo;s own and sum exactly)</td></tr>
+        <tr><td>Marketplace enrollment decline</td><td><a class="src" href="https://www.kff.org/affordable-care-act/what-we-know-so-far-about-2026-aca-marketplace-enrollment-premiums-and-deductibles/" rel="noopener">KFF analysis of 2026 Marketplace enrollment</a>; <a class="src" href="https://www.cms.gov/data-research/statistics-trends-and-reports/marketplace-products" rel="noopener">CMS effectuated enrollment reports</a>, February 2026 against February 2025, for the &ldquo;nearly three million&rdquo;</td></tr>
+        <tr><td>Household count</td><td><a class="src" href="https://www.census.gov/data/tables/time-series/demo/families/households.html" rel="noopener">US Census Bureau, Total Households, 2025</a></td></tr>
+        <tr><td>Hospital stay costs</td><td><a class="src" href="https://hcup-us.ahrq.gov/reports/statbriefs/sb316-most-expensive-conditions-by-payer-2022.pdf" rel="noopener">HCUP Statistical Brief #316</a>, AHRQ, February 2026 (2022 data)</td></tr>
+        <tr><td>Hospital markups</td><td>Bai &amp; Anderson, <a class="src" href="https://doi.org/10.1377/hlthaff.2014.1414" rel="noopener"><i>Extreme Markup</i></a>, Health Affairs, 2015; National Nurses United, <a class="src" href="https://www.nationalnursesunited.org/sites/default/files/nnu/documents/1120_CostChargeRatios_Report_FINAL_PP.pdf" rel="noopener"><i>Fleecing Patients</i></a>, 2020 (union-funded)</td></tr>
+        <tr><td>2026 out-of-pocket maximum</td><td><a class="src" href="https://www.federalregister.gov/documents/2025/06/25/2025-11606/patient-protection-and-affordable-care-act-marketplace-integrity-and-affordability" rel="noopener">CMS, Marketplace Integrity and Affordability final rule</a>, June 2025</td></tr>
+        <tr><td>Hospitalization aftermath</td><td>Dobkin, Finkelstein, Kluender &amp; Notowidigdo, <a class="src" href="https://doi.org/10.1257/aer.20161038" rel="noopener">American Economic Review, 2018</a></td></tr>
+        <tr><td>Health-care debt</td><td><a class="src" href="https://www.kff.org/health-costs/kff-health-care-debt-survey/" rel="noopener">KFF Health Care Debt Survey, 2022</a></td></tr>
+        <tr><td>Care skipped over cost</td><td><a class="src" href="https://www.kff.org/health-costs/americans-challenges-with-health-care-costs/" rel="noopener">KFF Health Tracking Poll, May 2025</a>; <a class="src" href="https://www.cdc.gov/nchs/nhis/" rel="noopener">National Health Interview Survey, 2024</a></td></tr>
+        <tr><td>Medical bankruptcy, both sides</td><td>Himmelstein et al., <a class="src" href="https://doi.org/10.2105/AJPH.2018.304901" rel="noopener">AJPH, 2019</a> (PNHP-affiliated authors); Dobkin et al., <a class="src" href="https://doi.org/10.1056/NEJMp1716604" rel="noopener">NEJM, 2018</a></td></tr>
+        <tr><td>Benchmark premiums, HealthCare.gov states</td><td><a class="src" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS Exchange PUFs</a> (rate, plan attributes, service area) and the <a class="src" href="https://www.healthcare.gov/plan-data/" rel="noopener">QHP Landscape file</a>, plan year 2026</td></tr>
+        <tr><td>Benchmark premiums, state exchanges</td><td><a class="src" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS State-based Exchange QHP PUFs</a>, plan year 2026 (data as of June 2026)</td></tr>
+        <tr><td>Benchmark cross-checks</td><td><a class="src" href="https://info.nystateofhealth.ny.gov/sites/default/files/2026%20Lowest%20Cost%20SIlver%20Plan%20by%20County.pdf" rel="noopener">NY State of Health, 2026 Lowest Cost Silver Plan by County</a>; <a class="src" href="https://hbex.coveredca.com/toolkit/downloads/CCA_26_QHP_Plan_Rates_by_County.pdf" rel="noopener">Covered California, 2026 QHP Rates by County</a></td></tr>
+        <tr><td>Rating area definitions</td><td><a class="src" href="https://www.cms.gov/cciio/programs-and-initiatives/health-insurance-market-reforms/state-gra" rel="noopener">CMS, State Specific Geographic Rating Areas</a></td></tr>
+        <tr><td>ZIP to county</td><td><a class="src" href="https://www.census.gov/geographies/reference-files/time-series/geo/relationship-files.html" rel="noopener">Census 2020 ZCTA-county relationship file</a>; <a class="src" href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0) for PO-box-only ZIPs</td></tr>
+        <tr><td>Medicaid expansion &amp; CHIP limits</td><td><a class="src" href="https://www.medicaid.gov/medicaid/national-medicaid-chip-program-information/medicaid-childrens-health-insurance-program-basic-health-program-eligibility-levels" rel="noopener">Medicaid.gov, Medicaid and CHIP eligibility levels</a></td></tr>
+        <tr id="src-congress"><td>Members and cosponsors</td><td><a class="src" href="https://github.com/unitedstates/congress-legislators" rel="noopener">unitedstates/congress-legislators</a> (every current member, keyed by bioguide id); <a class="src" href="https://www.govinfo.gov/bulkdata/BILLSTATUS/119/hr" rel="noopener">govinfo BILLSTATUS</a> for H.R. 3069 and S. 1506 (cosponsors); the <a class="src" href="https://github.com/OpenSourceActivismTech/us-zipcodes-congress" rel="noopener">OpenSourceActivismTech ZIP-to-district crosswalk</a>. Rebuilt by hand when Congress moves; the retrieval date shows on the card.</td></tr>
+        <tr><td>Member portraits</td><td>The <a class="src" href="https://github.com/unitedstates/images" rel="noopener">@unitedstates images collection</a> (official congressional photos, public domain), loaded per member from unitedstates.github.io</td></tr>
       </table>
       <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Found an error? That is the most useful thing you could send us: <a class="q" href="mailto:contact@thewholebill.org">contact@thewholebill.org</a>. The calculation layer is a single file with no dependencies, and every constant on this page appears in it by name.</p>
     </div>
