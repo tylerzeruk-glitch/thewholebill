@@ -52,11 +52,32 @@ var UPDATES = [
     see: { id: 'universal', text: 'Universal coverage, six models' }
   },
   {
-    id: 'kff-2026-marketplace', date: '2026-05-19', kind: 'world', pin: true,
+    id: 'kff-2027-rates', date: '2026-08-03', kind: 'world', pin: true,
+    title: 'Insurers propose a median <b>15%</b> premium increase for 2027, the second double-digit year in a row.',
+    body: 'KFF&rsquo;s read of preliminary rate filings across all 50 states and DC: a median proposed increase of 15% for 2027, after 2026 finalized at 20%. Insurers cite rising prices for care, inflation and labor shortages, and two things specific to this market: the enhanced credits&rsquo; expiry and the sicker risk pool it left behind. Final 2027 rates arrive in the fall, when the benchmark table on this site is rebuilt from CMS&rsquo;s files.',
+    source: { title: 'KFF, How much and why ACA Marketplace premiums are going up in 2027', url: 'https://www.kff.org/affordable-care-act/how-much-and-why-aca-marketplace-premiums-are-going-up-in-2027/' },
+    see: { id: 'benchmark', text: 'The benchmark premium' }
+  },
+  {
+    id: 'irs-2027-schedule', date: '2026-07-21', kind: 'world',
+    title: 'The IRS set the 2027 credit schedule: the expected contribution rises in every band, and the top band goes from 9.96% to 10.22%.',
+    body: 'Rev. Proc. 2026-26 gives the applicable percentage table for taxable years beginning in 2027: 2.15% of income below 133% of the poverty line, rising through the bands to 10.22% from 300% to 400%, against 2.10% to 9.96% in 2026. The required contribution percentage, which decides whether an employer offer counts as affordable, is also 10.22%. The calculator uses the 2026 table until open enrollment for 2027 begins on 1 November; the 2027 table is on this site&rsquo;s list.',
+    source: { title: 'IRS Rev. Proc. 2026-26, applicable percentage table for 2027 (Internal Revenue Bulletin 2026-31)', url: 'https://www.irs.gov/pub/irs-drop/rp-26-26.pdf' },
+    see: { id: 'credit', text: 'The premium tax credit' }
+  },
+  {
+    id: 'kff-2026-marketplace', date: '2026-05-19', kind: 'world',
     title: 'KFF measured the first plan year without the enhanced credits: net premiums up <b>58%</b>, a record <b>$3,786</b> average deductible, and roughly <b>five million fewer enrollees</b>.',
     body: 'The average premium a marketplace enrollee pays after the credit rose 58%, from $113 to $178 a month. The average deductible reached $3,786. KFF projects average monthly enrollment falling from 22.3 million in 2025 to about 17.5 million in 2026; early CMS effectuated-enrollment data already count nearly three million gone.',
     source: { title: 'KFF, What we know so far about 2026 ACA Marketplace enrollment, premiums and deductibles', url: 'https://www.kff.org/affordable-care-act/what-we-know-so-far-about-2026-aca-marketplace-enrollment-premiums-and-deductibles/' },
     see: { id: 'credit', text: 'The premium tax credit' }
+  },
+  {
+    id: 'poverty-guidelines-2026', date: '2026-01-15', kind: 'world',
+    title: 'HHS published the 2026 poverty guidelines: $33,000 for a family of four in the 48 contiguous states, up from $32,150.',
+    body: 'The guidelines took effect on 13 January 2026 and reflect a 2.63% price increase. The credit for a plan year uses the guidelines in force when its open enrollment began, so plan year 2026 still runs on the 2025 figures the calculator uses today; these are the figures the 2027 credit will use.',
+    source: { title: 'Federal Register, Annual Update of the HHS Poverty Guidelines, 15 January 2026', url: 'https://www.federalregister.gov/documents/2026/01/15/2026-00755/annual-update-of-the-hhs-poverty-guidelines' },
+    see: { id: 'poverty', text: 'Poverty guidelines' }
   },
   {
     id: 'enhanced-credits-expired', date: '2025-12-31', kind: 'world', pin: true,

@@ -2464,6 +2464,9 @@ test('updates: the log renders the hero box, its own page and the feed', async b
   const dashed = U.filter(e => /[–—]/.test([e.title, e.body, e.source && e.source.title, e.see && e.see.text].join(' ')));
   ok('no em or en dash in any entry', dashed.length === 0, dashed.map(e => e.id).join(', '));
   ok('at most three pinned entries', U.filter(e => e.pin).length <= 3);
+  const { execFileSync } = await import('node:child_process');
+  let parses = true; try { execFileSync('node', ['--check', resolve(HERE, '../tools/watch-sources.mjs')]); } catch (e) { parses = false; }
+  ok('the source watcher parses (it is not run here: network)', parses);
 
   // the three outputs
   const index = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');

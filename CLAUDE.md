@@ -131,6 +131,14 @@ first is now met, so it is ready for a decision whenever the owner wants):
    being refused by the CSP and is to be switched off in the dashboard. HSTS remains a
    dashboard item (six months, includeSubDomains, no preload).
 
+3a. **Plan year 2027 (before open enrollment, 1 November 2026).** IRS Rev. Proc. 2026-26
+    sets the 2027 applicable percentages (2.15% to 10.22%; the top band was 9.96%) and the
+    2027 credit uses the 2026 poverty guidelines ($33,000 for four, contiguous states). Both
+    are logged as world entries. The decision is the switch: a plan-year control, or 2027
+    replacing 2026 on 1 November with the 2026 table kept for the methodology. Whichever,
+    every dated figure and the CMS benchmark rebuild (ritual 7) move together, with a site
+    entry in the log.
+
 Ops hygiene (small, anytime):
 
 4. GitHub Actions v4→v5 bump; branch protection on `main`.
@@ -143,7 +151,9 @@ Ops hygiene (small, anytime):
     membership, vacancies (FL-20 today) and cosponsorships all change. The snapshot's as-of
     date shows on the rep card.
 7a. Standing ritual, not a task: when a number, a source or a piece of copy changes, or the
-    law or data under it moves, add an entry to `src/updates.js`. It renders the hero's
+    law or data under it moves, add an entry to `src/updates.js` (the rules, the source
+    calendar and the watcher: `docs/WHAT-CHANGED.md`; `node tools/watch-sources.mjs` prints
+    the leads). It renders the hero's
     "What changed" box (pins plus the newest, three in all), `/updates` and `/updates.xml`;
     the suite holds entries to the site's rules (world entries need a primary source, no
     dashes, anchors must exist). A log that goes quiet reads as abandonment, so a benchmark
