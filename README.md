@@ -17,13 +17,14 @@ Then open `dist/index.html`. No server needed; the page is self-contained.
 
     src/page.html     source of truth: styles, markup, app script
     src/calc.js       calculation layer, no dependencies, runs in node or a browser
+    src/updates.js    the dated log: the hero's What changed box, /updates and the RSS feed
     build.sh          inlines calc.js, emits dist/
     test/test.mjs     the whole suite (`node test/test.mjs cliff` filters by name)
     docs/             design brief, and the numbers/copy traps worth reading first
     dist/             generated, never edit
 
-`dist/index.html` is the calculator and `dist/methodology/index.html` the methodology, both
-standalone. `preview/artifact.html` is the whole page without the document skeleton, for the
+`dist/index.html` is the calculator, `dist/methodology/index.html` the methodology and
+`dist/updates/index.html` the dated log (with `dist/updates.xml` as its feed), all standalone. `preview/artifact.html` is the whole page without the document skeleton, for the
 Artifact host, and lives outside `dist/` so it never deploys.
 
 ## What is real and what is not
