@@ -1636,7 +1636,7 @@ test('launch: share metadata, 404, crawler files, no artifact in dist', async b 
   ok('the artifact builds outside it', existsSync(resolve(HERE, '../preview/artifact.html')));
   for (const f of ['card.png', '404.html', 'robots.txt', 'sitemap.txt', '_headers'])
     ok(f + ' ships', existsSync(resolve(HERE, '../dist/' + f)));
-  ok('the sitemap lists both pages', /thewholebill\.org\/\n.*thewholebill\.org\/methodology/s.test(rf(resolve(HERE, '../dist/sitemap.txt'), 'utf-8')));
+  ok('the sitemap lists all three pages', /thewholebill\.org\/\n.*thewholebill\.org\/methodology\n.*thewholebill\.org\/updates/s.test(rf(resolve(HERE, '../dist/sitemap.txt'), 'utf-8')));
 
   const p = await page(b, 1280, 900);
   const m = await p.evaluate(() => ({
@@ -1854,6 +1854,13 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   });
   ok('no dashes: the methodology document', mHits.length === 0, mHits.join(' | '));
   await pm.close();
+  const pu = await page(b, 1280, 900, false, 'updates/index.html');
+  const uHits = await pu.evaluate(() => {
+    const t = document.body.textContent + ' ' + document.title;
+    return (t.match(/[^\n]{0,25}[–—][^\n]{0,25}/g) || []).slice(0, 3);
+  });
+  ok('no dashes: the updates document', uHits.length === 0, uHits.join(' | '));
+  await pu.close();
 });
 
 /* Every static figure in the HTML (what crawlers, reader mode and the share
@@ -2229,7 +2236,7 @@ test('headers: the built CSP names every inline script and nothing is refused', 
   const root = resolve(HERE, '../dist');
   const srv = http.createServer((req, res) => {
     let p = req.url.split('?')[0];
-    let file = p === '/' ? '/index.html' : p === '/methodology' || p === '/methodology/' ? '/methodology/index.html' : p;
+    let file = p === '/' ? '/index.html' : p === '/methodology' || p === '/methodology/' ? '/methodology/index.html' : p === '/updates' || p === '/updates/' ? '/updates/index.html' : p;
     let body; try { body = readFileSync(root + file); } catch (e) { res.writeHead(404); res.end(); return; }
     const type = /\.html$/.test(file) ? 'text/html; charset=utf-8' : /\.svg$/.test(file) ? 'image/svg+xml' : /\.png$/.test(file) ? 'image/png' : 'application/octet-stream';
     res.writeHead(200, Object.assign({ 'Content-Type': type }, headersFor(p)));
@@ -2237,7 +2244,7 @@ test('headers: the built CSP names every inline script and nothing is refused', 
   });
   await new Promise(r => srv.listen(0, '127.0.0.1', r));
   const port = srv.address().port;
-  for (const path of ['/', '/methodology/']) {
+  for (const path of ['/', '/methodology/', '/updates/']) {
     const p = await b.newPage({ viewport: { width: 1280, height: 900 } });
     const refused = [];
     p.on('console', m => { if (/Content Security Policy|Refused to/.test(m.text())) refused.push(m.text().slice(0, 160)); });
@@ -2412,6 +2419,8 @@ test('links: every explains-link lands on a methodology anchor, in all three doc
   const doc = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
   ok('index: deep links point at the real page with a fragment', !/href="#\/methodology/.test(index) && /href="\/methodology\/#credit"/.test(index));
   ok('methodology page: on-page links are plain anchors that exist', !/href="#\/methodology/.test(doc) && /href="#credit"/.test(doc) && /id="credit"/.test(doc) && /id="model-blahous"/.test(doc) && /id="src-congress"/.test(doc));
+  const updDoc = readFileSync(resolve(HERE, '../dist/updates/index.html'), 'utf8');
+  ok('updates page: methodology links point at the real page, its own anchors are plain', !/href="#\/(methodology|updates)/.test(updDoc) && /href="\/methodology\/#credit"/.test(updDoc) && /href="#u-[\w-]+"/.test(updDoc));
   const p = await page(b, 1280, 900);
   const placed = await p.evaluate(() => [...document.querySelectorAll('a.term')].map(a => ({ t: a.textContent, bad: !!a.closest('.letter, .sticky, h1, h2, .num, .bignum, .v') })));
   ok('no explains-link inside a figure, heading, the letter or the sticky bar', placed.every(x => !x.bad), placed.filter(x => x.bad).map(x => x.t).join(', '));
@@ -2427,6 +2436,81 @@ test('links: every explains-link lands on a methodology anchor, in all three doc
   await a.evaluate(() => document.querySelector('.onpage a[href="#/methodology/sources"]').click()); await a.waitForTimeout(400);
   const land2 = await a.evaluate(() => document.getElementById('sources').getBoundingClientRect().top);
   ok('artifact: the on-page list scrolls within the view', land2 >= 0 && land2 < 160, String(land2));
+  await a.close();
+});
+
+/* What changed: one hand-written log (src/updates.js) renders the hero box,
+ * the /updates document and the RSS feed. The suite holds the log to the
+ * site's rules (dates, kinds, primary sources, methodology anchors that
+ * exist, no dashes) and checks that all three outputs agree with it. */
+test('updates: the log renders the hero box, its own page and the feed', async b => {
+  const { readFileSync, existsSync } = await import('node:fs');
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const U = require('../src/updates.js');
+  const src = readFileSync(resolve(HERE, '../src/page.html'), 'utf8');
+  const meth = src.slice(src.indexOf('METH:START'), src.indexOf('METH:END'));
+  const ids = new Set([...meth.matchAll(/\bid="([\w-]+)"/g)].map(m => m[1]));
+  const today = new Date().toISOString().slice(0, 10);
+  ok('the log has entries', U.length >= 5, U.length + ' entries');
+  ok('newest first', U.every((e, i) => i === 0 || U[i - 1].date >= e.date));
+  ok('every entry has an ISO date, no later than today', U.every(e => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && !isNaN(Date.parse(e.date)) && e.date <= today), U.filter(e => e.date > today).map(e => e.id).join(', '));
+  ok('ids are slugs and unique', new Set(U.map(e => e.id)).size === U.length && U.every(e => /^[a-z0-9-]+$/.test(e.id)));
+  ok('every entry is world or site with a title and a body', U.every(e => ['world', 'site'].includes(e.kind) && e.title && e.body));
+  const noSrc = U.filter(e => e.kind === 'world' && !(e.source && /^https:\/\//.test(e.source.url) && e.source.title));
+  ok('every world entry carries a primary source over https', noSrc.length === 0, noSrc.map(e => e.id).join(', '));
+  const badSee = U.filter(e => e.see && !(ids.has(e.see.id) && e.see.text));
+  ok('every methodology pointer names a section that exists', badSee.length === 0, badSee.map(e => e.id + ':' + e.see.id).join(', '));
+  const dashed = U.filter(e => /[–—]/.test([e.title, e.body, e.source && e.source.title, e.see && e.see.text].join(' ')));
+  ok('no em or en dash in any entry', dashed.length === 0, dashed.map(e => e.id).join(', '));
+  ok('at most three pinned entries', U.filter(e => e.pin).length <= 3);
+
+  // the three outputs
+  const index = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
+  const doc = readFileSync(resolve(HERE, '../dist/updates/index.html'), 'utf8');
+  const rss = readFileSync(resolve(HERE, '../dist/updates.xml'), 'utf8');
+  ok('the updates document builds without scripts', existsSync(resolve(HERE, '../dist/updates/index.html')) && !/<script/.test(doc));
+  ok('it lists every entry once, newest first', (doc.match(/<article class="upd"/g) || []).length === U.length && doc.indexOf('id="u-' + U[0].id + '"') < doc.indexOf('id="u-' + U[U.length - 1].id + '"'));
+  ok('its title is the h1 and its canonical URL is /updates', /<h1 class="as-h2">What changed\.<\/h1>/.test(doc) && /rel="canonical" href="https:\/\/thewholebill\.org\/updates"/.test(doc) && /<title>What changed · The Whole Bill<\/title>/.test(doc));
+  ok('every source link on it is https with noopener', [...doc.matchAll(/<a class="srclink" href="([^"]+)"([^>]*)>/g)].every(m => /^https:\/\//.test(m[1]) && /rel="noopener"/.test(m[2])));
+  ok('the feed is RSS 2.0 with a self link and one item per entry', /<rss version="2\.0"/.test(rss) && /atom:link href="https:\/\/thewholebill\.org\/updates\.xml" rel="self"/.test(rss) && (rss.match(/<item>/g) || []).length === U.length);
+  ok('every feed item has a permalink guid, a parsable date and a title', [...rss.matchAll(/<item>([\s\S]*?)<\/item>/g)].every(m => /<guid isPermaLink="true">https:\/\/thewholebill\.org\/updates\/#u-[\w-]+<\/guid>/.test(m[1]) && !isNaN(Date.parse((m[1].match(/<pubDate>([^<]+)/) || [])[1])) && /<title>[^<]{10,}<\/title>/.test(m[1])));
+  ok('the feed carries no raw markup or dashes in its titles', [...rss.matchAll(/<title>([^<]*)<\/title>/g)].every(m => !/[<>–—]|&lt;/.test(m[1])));
+  ok('every document advertises the feed', [index, doc, readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8')].every(h => /rel="alternate" type="application\/rss\+xml"/.test(h)));
+  ok('the headers file types the feed and keeps /updates scriptless', /\n\/updates\.xml\n\s+Content-Type: application\/rss\+xml/.test(readFileSync(resolve(HERE, '../dist/_headers'), 'utf8')) && /\n\/updates\/\n\s+Content-Security-Policy: default-src 'none'; style-src/.test(readFileSync(resolve(HERE, '../dist/_headers'), 'utf8')));
+
+  // the hero box: pins plus the newest, three in all, each a real entry, in date order
+  const sorted = U.slice().sort((a, b2) => b2.date.localeCompare(a.date));
+  const want = sorted.filter(e => e.pin).concat(sorted.filter(e => !e.pin)).slice(0, 3).sort((a, b2) => b2.date.localeCompare(a.date)).map(e => e.id);
+  const p = await page(b, 1280, 900);
+  const box = await p.evaluate(() => ({
+    k: document.querySelector('.dateline .k').textContent,
+    ids: [...document.querySelectorAll('.dateline .upd-when')].map(a => a.getAttribute('href')),
+    more: (document.querySelector('.dateline .more') || {}).getAttribute?.('href'),
+    nav: [...document.querySelectorAll('.nav a')].map(a => a.getAttribute('href')),
+    foot: [...document.querySelectorAll('footer a')].map(a => a.getAttribute('href')) }));
+  ok('the hero box is titled What changed and shows the pins plus the newest', box.k === 'What changed' && JSON.stringify(box.ids) === JSON.stringify(want.map(id => '/updates/#u-' + id)), JSON.stringify(box.ids));
+  ok('it links to the full log, as do the header and footer', box.more === '/updates' && box.nav.includes('/updates') && box.foot.includes('/updates') && box.foot.includes('/updates.xml'), JSON.stringify([box.more, box.nav, box.foot]));
+  await p.close();
+  const m = await page(b, 390, 800, true);
+  const g = await m.evaluate(() => { const d = document.querySelector('.dateline'); return { sw: d.scrollWidth, cw: d.clientWidth, pw: document.documentElement.scrollWidth, vw: window.innerWidth }; });
+  ok('phone: the box does not overflow', g.sw <= g.cw && g.pw <= g.vw, JSON.stringify(g));
+  await m.close();
+
+  // the artifact: the hash router shows the view and lands deep links
+  const a = await page(b, 1280, 900, false, 'artifact.html');
+  await a.evaluate(() => document.querySelector('.nav a[href="#/updates"]').click()); await a.waitForTimeout(400);
+  const v = await a.evaluate(() => ({ shown: !document.getElementById('updates').hidden, back: !document.getElementById('updBack').hidden, meth: document.getElementById('methodology').hidden, hero: document.querySelector('section:not(.view)').hidden, title: document.title }));
+  ok('artifact: #/updates shows the log alone', v.shown && v.back && v.meth && v.hero && v.title === 'What changed · The Whole Bill', JSON.stringify(v));
+  const mid = sorted[Math.floor(sorted.length / 2)].id;   // not the last: the document ends too soon after it to scroll it to the top
+  await a.evaluate(id => { location.hash = '#/updates/u-' + id; }, mid); await a.waitForTimeout(400);
+  const top = await a.evaluate(id => document.getElementById('u-' + id).getBoundingClientRect().top, mid);
+  ok('artifact: a deep link scrolls to the entry', top >= 0 && top < 160, String(top));
+  await a.evaluate(() => document.querySelector('.upd .term').click()); await a.waitForTimeout(400);
+  const cross = await a.evaluate(() => ({ meth: !document.getElementById('methodology').hidden, upd: document.getElementById('updates').hidden, hash: location.hash }));
+  ok('artifact: an entry\'s methodology pointer crosses to the methodology view', cross.meth && cross.upd && /^#\/methodology\//.test(cross.hash), JSON.stringify(cross));
+  await a.evaluate(() => document.querySelector('#methBack a.q[href="#"]').click()); await a.waitForTimeout(400);
+  ok('artifact: back returns to the calculator', await a.evaluate(() => document.getElementById('methodology').hidden && document.getElementById('updates').hidden && !document.querySelector('section:not(.view)').hidden));
   await a.close();
 });
 

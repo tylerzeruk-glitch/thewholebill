@@ -20,7 +20,8 @@ through Workers Builds. Settings that matter:
 - Build command: **`npm run build`**. Assets and serving behaviour come from
   `wrangler.jsonc` in the repo root: `assets.directory` is `dist/`,
   `not_found_handling` is `404-page` (the branded 404), `html_handling` is
-  `auto-trailing-slash` (`/methodology` redirects to `/methodology/`).
+  `auto-trailing-slash` (`/methodology` redirects to `/methodology/`, `/updates` to
+  `/updates/`; `/updates.xml` is the RSS feed, typed by `_headers`).
 - The deploy command in Settings, Build should be plain `npx wrangler deploy`.
   If it carries an `--assets` flag from before the config file existed, remove
   the flag; the config file is the single source for the assets directory.

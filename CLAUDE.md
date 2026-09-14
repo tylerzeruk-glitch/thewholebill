@@ -142,6 +142,12 @@ Ops hygiene (small, anytime):
 6. Standing ritual, not a task: rerun `node tools/build-reps.mjs` when Congress moves —
     membership, vacancies (FL-20 today) and cosponsorships all change. The snapshot's as-of
     date shows on the rep card.
+7a. Standing ritual, not a task: when a number, a source or a piece of copy changes, or the
+    law or data under it moves, add an entry to `src/updates.js`. It renders the hero's
+    "What changed" box (pins plus the newest, three in all), `/updates` and `/updates.xml`;
+    the suite holds entries to the site's rules (world entries need a primary source, no
+    dashes, anchors must exist). A log that goes quiet reads as abandonment, so a benchmark
+    or reps regeneration is an entry too. Never edit the hero box by hand.
 7. Standing ritual, not a task: rerun `node tools/build-benchmarks.mjs` when CMS publishes a
     new plan year's files (each fall) — it re-downloads everything, re-runs every validation
     (landscape cross-check to the cent, NY and CA published numbers, curve uniformity) and
@@ -172,6 +178,10 @@ The methodology page shows all six derivations and discloses the mixed vintages.
 ~~Route-adaptive slot 03~~ **Done 2026-08-31**: the cliff for marketplace readers, the same
 cliff reframed for employer readers, the bad year (uninsured risk arithmetic, both bankruptcy
 sides printed or neither) for uninsured readers. The slot is constant so numbering never gaps.
+~~What changed~~ **Done 2026-09-14**: a fourth document from the same source. `src/updates.js`
+is a hand-written log (world entries: law and data moved; site entries: a number, source or
+copy here changed) rendered by `tools/build-updates.mjs` into the hero box, `/updates` and an
+RSS feed; the artifact routes `#/updates` and `#/updates/<id>`. Static on purpose: no ticker.
 ~~Real routing~~ **Done 2026-09-01**: three documents from one source. `/methodology` is its
 own fully static page (METH markers in src/page.html; build.sh strips it from index.html,
 whose links become real paths and whose router only redirects old hash links); the artifact
