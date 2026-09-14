@@ -64,3 +64,25 @@ A weekly cloud routine can run the watcher and open a draft pull request that pr
 entries, each with its primary link, for a person to accept, edit or reject. It must never
 merge, never edit anything but `src/updates.js`, and must leave out anything it could not
 cite. Its configuration lives at https://claude.ai/code/routines.
+
+The routine's cloud environment must be able to reach the sources. The Default environment's
+**Trusted** network level allows package registries and GitHub only, and the first run
+(14 September 2026) found every source refused by the egress proxy and correctly opened
+nothing. Set the environment's **Network access** to **Custom**, tick "Also include default
+list of common package managers", and list:
+
+    *.kff.org
+    *.cbo.gov
+    *.cms.gov
+    *.federalregister.gov
+    *.govinfo.gov
+    *.hhs.gov
+    *.irs.gov
+    *.census.gov
+    *.congress.gov
+    *.healthaffairs.org
+    *.nysenate.gov
+
+The selector is the cloud icon in the routine editor or the environment dialog at
+https://claude.ai/code. The last three are for reading primary documents by hand in a
+cloud session; the watcher itself does not need them.
