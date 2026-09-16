@@ -164,6 +164,9 @@ Ops hygiene (small, anytime):
     refuses to write a table that fails any of them. Update the hardcoded validation values
     for the new year first; they live at the top of the tool with their sources.
 
+Reader feedback, done and tabled, with the assessment of each ask: `docs/FEEDBACK.md`. Add to
+it whenever feedback arrives, including the asks that get a no.
+
 Possibly dropped with the resolved comment threads — confirm with the owner before doing:
 the methodology page's `.body` measure still runs ~93 characters per line, and the rep card
 could link each member's house.gov site (the URL is already in `reps.js`).
