@@ -1012,6 +1012,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="chartbox"><div id="cliffChart"></div></div>
 
       <p class="note-i" id="cliffNote">The enhanced credits enacted in 2021 capped contributions at 8.5% of income and flattened this edge entirely. They expired on <b style="color:var(--ib);font-weight:400">31 December 2025</b>. The poverty guidelines and IRS applicable-percentage table behind these figures are <a class="q" href="#/methodology/credit" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>.</p>
+      <p class="note-i" id="cliffAge" hidden></p>
     </div>
 
     <div class="wrap sec" id="badYear" hidden>
@@ -1324,6 +1325,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <button type="button" class="chk on" data-em="emp" aria-pressed="true"><span class="box on"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What my employer coverage really costs</button>
             <button type="button" class="chk on" data-em="loss" aria-pressed="true"><span class="box on"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Losing coverage when a job ends</button>
             <button type="button" class="chk off" data-em="mkt" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Self-employed, buying on the exchange</button>
+            <button type="button" class="chk off" data-em="ret" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Retired before Medicare, buying on the exchange</button>
             <button type="button" class="chk off" data-em="nation" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What the country would save</button>
             <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
           </div>
@@ -1667,6 +1669,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Medicaid expansion &amp; CHIP limits</td><td><a class="srclink" href="https://www.medicaid.gov/medicaid/national-medicaid-chip-program-information/medicaid-childrens-health-insurance-program-basic-health-program-eligibility-levels" rel="noopener">Medicaid.gov, Medicaid and CHIP eligibility levels</a></td></tr>
         <tr><td>Military Health System</td><td>CRS, <a class="srclink" href="https://www.congress.gov/crs-product/IF13108" rel="noopener"><i>FY2026 Budget Request for the Military Health System</i></a>, In Focus IF13108; <a class="srclink" href="https://tricare.mil/Costs/Compare" rel="noopener">TRICARE, 2026 health plan costs</a></td></tr>
         <tr><td>Medicare and VA enrollment</td><td><a class="srclink" href="https://data.cms.gov/summary-statistics-on-beneficiary-enrollment/medicare-and-medicaid-reports/medicare-monthly-enrollment" rel="noopener">CMS, Medicare Monthly Enrollment</a>, November 2025; <a class="srclink" href="https://www.va.gov/health/aboutvha.asp" rel="noopener">Veterans Health Administration, About VHA</a></td></tr>
+        <tr><td>Early retirement</td><td><a class="srclink" href="https://www.ebri.org/media/press-releases/content/2026-retirement-confidence-survey-finds-americans-less-confident-about-retirement-as-worries-grow-over-social-security--medicare-and-rising-costs" rel="noopener">EBRI, 2026 Retirement Confidence Survey</a> (press release, 21 April 2026): nearly half of retirees retired earlier than planned; the median retirement age is 62. Retrieved 18 September 2026.</td></tr>
         <tr id="src-congress"><td>Members and cosponsors</td><td><a class="srclink" href="https://github.com/unitedstates/congress-legislators" rel="noopener">unitedstates/congress-legislators</a> (every current member, keyed by bioguide id); <a class="srclink" href="https://www.govinfo.gov/bulkdata/BILLSTATUS/119/hr" rel="noopener">govinfo BILLSTATUS</a> for H.R. 3069 and S. 1506 (cosponsors); the <a class="srclink" href="https://github.com/OpenSourceActivismTech/us-zipcodes-congress" rel="noopener">OpenSourceActivismTech ZIP-to-district crosswalk</a>. Rebuilt by hand when Congress moves; the retrieval date shows on the card.</td></tr>
         <tr><td>Member portraits</td><td>The <a class="srclink" href="https://github.com/unitedstates/images" rel="noopener">@unitedstates images collection</a> (official congressional photos, public domain), loaded per member from unitedstates.github.io</td></tr>
       </table>
@@ -1767,7 +1770,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
      of a ZIP that spans rating areas until the reader picks one -- ask, never
      guess, same rule as the rep card. */
   var state = { bkey:"48113", bChoices:null, size:4, ages:[41,39,12,9], income:95000, model:"sanders1", unit:"y", period:26, route:"employer", deductPer:null, totPrem:null, oopOwn:null,
-                tone:"direct", emph:{ emp:true, mkt:false, loss:true, nation:false, story:false },
+                tone:"direct", emph:{ emp:true, mkt:false, ret:false, loss:true, nation:false, story:false },
                 recipient:"rep", zip5:"75201", district:"TX-30" };
   function adultsOf(ages){
     var n = 0, i;
@@ -2002,12 +2005,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // direction into the fig loop.
     if (e.emp)
       P.push('I added up what healthcare actually costs my household, including the part that never reaches my paycheck. Between my payroll deduction, the share my employer pays on my behalf, our deductible and out-of-pocket spending, and the Medicare payroll tax, my <span class="letterHh"></span>&rsquo;s healthcare costs more than <mark data-fig="emp.total" data-round="down"></mark> <span data-uw="a"></span>. <span id="letterShare"></span>');
-    if (e.mkt)
+    // The self-employed and the early retiree buy the same coverage; only the
+    // closing sentence, who else in the district carries this, differs.
+    var who = e.ret
+      ? 'I retired before I was old enough for Medicare, so until I turn 65 the marketplace is the only place I can buy coverage, and the premium is set by my age. Surveys find nearly half of retirees stop working earlier than they planned, and the median retirement age is 62, three years short of Medicare. Every one of them in this ' + seat + ' faces this same bill.'
+      : 'Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.';
+    if (e.mkt || e.ret)
       P.push(m.overCliff
-        ? 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
+        ? 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me, and my income sits past the cliff where the tax credit ends: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. ' + who + ''
         : m.noCredit
-        ? 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me, and my income sits below the level where the marketplace tax credit begins: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.'
-        : 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. Every sole proprietor and five-person firm in this ' + seat + ' carries this cost in a way their larger competitors do not.');
+        ? 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me, and my income sits below the level where the marketplace tax credit begins: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. ' + who + ''
+        : 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. ' + who + '');
     P.push('Under the financing models I looked at, including one produced by opponents of the policy, my household would pay between roughly <mark data-fig="uni.rangeLo" data-round="down"></mark> and <mark data-fig="uni.rangeHi" data-round="up"></mark>. <span id="letterCmp"></span>');
     if (e.loss){
       if (r === "none")
@@ -2031,7 +2039,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   }
   function renderLetter(){
     var rec = recipient();
-    var sig = [state.route, state.tone, state.emph.emp, state.emph.mkt,
+    var sig = [state.route, state.tone, state.emph.emp, state.emph.mkt, state.emph.ret,
                state.emph.loss, state.emph.nation, state.emph.story,
                S.marketplace.overCliff, S.marketplace.noCredit, rec.kind, rec.m ? rec.m.n + rec.m.co : ""].join("|");
     if (sig === letterSig) return;
@@ -2545,6 +2553,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                  ages: state.ages, bkey: state.bkey };
     var d = W.cliffDrop(opts), c = W.cliffCurve(opts, 200);
     if (!d || !c) return;   // no benchmark entry: nothing honest to draw
+    // A household past the chart's right edge (550% of the poverty line: $84,600 is
+    // 400% for a couple, so a comfortable early retiree sat off the chart) widens
+    // it, up to 10x. The curve is flat there, so nothing is distorted.
+    var ratio = state.income / c.povertyLine;
+    if (ratio > 5.5) c = W.cliffCurve(opts, 200, ratio + 0.4) || c;
+    renderCliffAge();
     byId("cliffUnder").textContent = fmt(d.under);
     byId("cliffOver").textContent  = fmt(d.over);
     byId("cliffDrop").textContent  = fmt(d.drop);
@@ -2591,8 +2605,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
            'font-family="Public Sans, system-ui, sans-serif" font-size="' + fA + '">' + (state.unit === "y"
              ? "$" + Math.round(v / 1000) + "k" : money(Math.round(v / 12 / 100) * 100)) + '</text>';
     }
-    // % of poverty line along the bottom
-    for (i = 2; i <= 5; i++){
+    // % of poverty line along the bottom; every 200% once the chart is wide
+    var xStep = hi / c.povertyLine > 7 ? 2 : 1;
+    for (i = 2; i <= 10; i += xStep){
       var inc = c.povertyLine * i;
       if (inc < lo || inc > hi) continue;
       g += '<text x="' + X(inc).toFixed(1) + '" y="' + (Ht - 34) + '" text-anchor="middle" fill="#7C8395" ' +
@@ -2621,7 +2636,6 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // that line. It also now labels the flat run, which is what it was describing.
     // The baseline gap is derived from the type sizes (number ascent + label descent
     // + 5) instead of hand-set, so it cannot silently go tight if a size changes.
-    var aX = narrow ? xc - 10 : xc + 14, aAnchor = narrow ? "end" : "start";
     var aLabelY = yOver + fA + 10;
     var aNumY   = aLabelY + fB * 1.03 + fA * 0.28 + 5;
     var aLabelTxt = "THE CREDIT STOPS", aNumTxt = "+" + fmt(d.drop);
@@ -2629,6 +2643,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     // measured from the rendered text after the SVG is in the DOM (see below), so
     // the box fits whatever face the label is set in.
     var aW   = Math.max(aLabelTxt.length * (fA * 0.68 + 1.3), aNumTxt.length * fB * 0.62) + 12;
+    // Narrow screens hang the annotation beside the cliff on whichever side has
+    // room: left by preference (it stopped at 550%, so the cliff sat right of
+    // centre and the left fit), right once the widened chart pulls the cliff left
+    // and the box would cover the money labels on the axis. If neither side can
+    // hold the full label the word THE goes, and the box is never drawn past the
+    // plot edge (see the measured pass below).
+    var roomL = xc - 10 - (mL + 4), roomR = (Wd - mR) - (xc + 10);
+    if (narrow && aW > Math.max(roomL, roomR)){
+      aLabelTxt = "CREDIT STOPS";
+      aW = Math.max(aLabelTxt.length * (fA * 0.68 + 1.3), aNumTxt.length * fB * 0.62) + 12;
+    }
+    var aLeft = narrow && (roomL >= aW || roomL >= roomR);
+    var aX = aLeft ? xc - 10 : (narrow ? xc + 10 : xc + 14), aAnchor = aLeft ? "end" : "start";
     var aTop = aLabelY - fA * 1.03 - 6, aBot = aNumY + fB * 0.28 + 6;
     // Built here but appended LAST, over an opaque backing in the chart's own surface
     // colour. The "you" guide spans the full plot height, so it otherwise runs straight
@@ -2644,10 +2671,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       '" fill="#E8E6E1" font-family="Public Sans, system-ui, sans-serif" font-size="' + fB + '">' + aNumTxt + '</text>';
 
     // where this household currently sits
+    // Off either edge (under 150%, or past the 10x cap) the guide pins to that
+    // edge at the curve's end value, so the reader is never simply missing.
     var you = null, youY = Ht - mB - 10;
     for (i = 0; i < pts.length; i++) if (pts[i].income >= state.income){ you = pts[i]; break; }
-    if (you && state.income >= lo && state.income <= hi){
-      var xy = X(state.income), yy = Y(you.household);
+    if (!you) you = pts[pts.length - 1];
+    var youInc = Math.min(Math.max(state.income, lo), hi);
+    if (you){
+      var xy = X(youInc), yy = Y(you.household);
       // The label below is centred ON this guide, so a full-height line ran straight
       // through the middle of the word at every income. It stops just above the cap
       // height instead, which reads as the guide terminating in its own caption and
@@ -2678,12 +2709,36 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       for (ti = 0; ti < txts.length; ti++){ try { maxW = Math.max(maxW, txts[ti].getBBox().width); } catch (e) {} }
       if (maxW > 0){
         var bw = maxW + 12, tEnd = txts[0].getAttribute("text-anchor") === "end", tx = parseFloat(txts[0].getAttribute("x"));
+        // keep the measured box inside the plot: shift the texts with it
+        var over = tEnd ? (mL - (tx - bw + 6)) : ((tx - 6 + bw) - (Wd - mR));
+        if (over > 0){
+          tx = tEnd ? tx + over : tx - over;
+          for (ti = 0; ti < txts.length; ti++) txts[ti].setAttribute("x", tx.toFixed(1));
+        }
         box.setAttribute("width", bw.toFixed(1));
         box.setAttribute("x", (tEnd ? tx - bw + 6 : tx - 6).toFixed(1));
       }
     }
   }
 
+  // Under the cliff: a household with an adult of 55 to 64 sits near the top of
+  // the age curve, and the cliff is measured against that higher premium. The
+  // factor is read from the state's own curve (the one the benchmark uses), so
+  // it is exact; tier states (NY, VT) do not rate by age and get the other line.
+  function renderCliffAge(){
+    var el = byId("cliffAge"), oldest = 0, i, B = window.WholeBillBench, mk = S.marketplace;
+    for (i = 0; i < state.ages.length; i++) if (state.ages[i] >= 55 && state.ages[i] < 65 && state.ages[i] > oldest) oldest = state.ages[i];
+    if (!oldest || !mk || !mk.place || !B){ el.hidden = true; return; }
+    var meta = B.states[mk.place.state], stn = STATE_NAMES[mk.place.state] || mk.place.state, lead;
+    if (!meta || meta.tiers){
+      lead = 'The oldest adult here is ' + oldest + '. ' + stn + ' does not rate marketplace premiums by <a class="term" href="#/methodology/benchmark">age</a>, so that changes nothing about the premium.';
+    } else {
+      var cv = B.curves[meta.curve], f = cv[Math.min(oldest, 64)] / cv[21];
+      lead = 'The oldest adult here is ' + oldest + '. Marketplace premiums are <a class="term" href="#/methodology/benchmark">rated by age</a>: at ' + oldest + ', ' + stn + '\u2019s curve charges about ' + f.toFixed(1) + ' times what a 21-year-old pays for the same plan, so this household sits near the top of the curve and the cliff is measured against that higher premium.';
+    }
+    el.innerHTML = lead + ' Retirement income counts toward the line: a pension, withdrawals from an IRA or 401(k), and capital gains all go into the income the credit is figured on, so a household living off savings can be over the cliff with no paycheck at all.';
+    el.hidden = false;
+  }
   function renderElig(){
     var m = S.marketplace, pct = Math.round(S.fpl.ratio * 100), html;
     // Subsidies are a marketplace mechanism, so on the employer route this box
@@ -2980,10 +3035,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       // predictable, since a route change rewrites the letter anyway. The
       // reader's checks on top of a route survive everything BUT a route change.
       state.emph = state.route === "marketplace"
-        ? { emp:false, mkt:true,  loss:false, nation:false, story:false }
+        ? { emp:false, mkt:true,  ret:false, loss:false, nation:false, story:false }
         : state.route === "none"
-          ? { emp:false, mkt:false, loss:true, nation:false, story:false }
-          : { emp:true,  mkt:false, loss:true, nation:false, story:false };
+          ? { emp:false, mkt:false, ret:false, loss:true, nation:false, story:false }
+          : { emp:true,  mkt:false, ret:false, loss:true, nation:false, story:false };
       syncEmph();
       paint();
     });
@@ -3135,7 +3190,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   // and the self-employed story are different people, and the self-employed
   // person's coverage is not tied to a job. Conflicts grey out rather than
   // silently unchecking something the reader chose.
-  var EMPH_CONFLICTS = { emp:["mkt"], loss:["mkt"], mkt:["emp","loss"], nation:[], story:[] };
+  // The two marketplace personas (self-employed, retired before Medicare) are the
+  // same paragraph with a different last sentence, so they exclude each other too.
+  var EMPH_CONFLICTS = { emp:["mkt","ret"], loss:["mkt","ret"], mkt:["emp","loss","ret"], ret:["emp","loss","mkt"], nation:[], story:[] };
   function syncEmph(){
     [].forEach.call(byId("emph").querySelectorAll(".chk"), function(btn){
       var k = btn.getAttribute("data-em"), on = !!state.emph[k];

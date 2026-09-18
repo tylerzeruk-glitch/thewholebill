@@ -593,10 +593,15 @@
     var st = BENCH && o.bkey ? benchState(o.bkey) : null;
     return o.region || (st ? fplRegion(st) : 'contiguous');
   }
-  function cliffCurve(o, steps) {
+  // hiRatio widens the right edge (default 5.5x the poverty line) so a household
+  // past it still appears on the chart; capped at 10x so a very high income cannot
+  // squash the cliff into the left margin. The curve is flat past 400%, so widening
+  // distorts nothing.
+  function cliffCurve(o, steps, hiRatio) {
     var region = cliffRegion(o);
     var line = povertyLine(o.size, region);
-    var lo = line * 1.5, hi = line * 5.5, n = steps || 120, out = [], i;
+    var hiX = Math.min(Math.max(hiRatio || 5.5, 5.5), 10);
+    var lo = line * 1.5, hi = line * hiX, n = steps || 120, out = [], i;
     for (i = 0; i <= n; i++) {
       var income = lo + (hi - lo) * (i / n);
       var m = marketplaceCost({ income: income, size: o.size, adults: o.adults,
