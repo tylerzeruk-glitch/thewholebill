@@ -533,6 +533,8 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
 .box.on{background:var(--amber-deep);display:flex;align-items:center;justify-content:center}
 .box.off{border:1px solid var(--pctrl)}
 .box.off svg{display:none}
+.box.round{border-radius:50%}
+#persona[hidden],.chk[hidden]{display:none}
 /* The member's official portrait, when the @unitedstates images collection has
    one. 4:5 like the congressional pictorial directory, so nobody's head gets
    cropped by a square. The silhouette sits underneath as the fallback for
@@ -1317,19 +1319,23 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
 
         <div class="card-p" style="padding:28px 30px;gap:16px">
-          <div class="lbl p">What to emphasize</div>
-          <!-- Persona blocks, not abstractions: each is a story a real reader
-               owns. Picking a route sets sensible defaults; the reader can
-               check any combination on top of that. -->
-          <div class="stack" style="gap:9px" id="emph">
-            <button type="button" class="chk on" data-em="emp" aria-pressed="true"><span class="box on"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What my employer coverage really costs</button>
+          <!-- Two groups, because the six stories were never independent: three of
+               them are WHO is writing (one at a time; the route sets the default) and
+               three are what else to mention. As one checkbox list, the personas had
+               to grey each other out, and a greyed box with no explanation read as
+               broken. -->
+          <div class="lbl p" id="whoLbl">Writing as</div>
+          <div class="stack" style="gap:9px" id="persona" role="radiogroup" aria-labelledby="whoLbl">
+            <button type="button" class="chk on" role="radio" data-who="emp" aria-checked="true" tabindex="0"><span class="box round on"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A household with employer coverage</button>
+            <button type="button" class="chk off" role="radio" data-who="mkt" aria-checked="false" tabindex="-1"><span class="box round off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Self-employed, buying on the exchange</button>
+            <button type="button" class="chk off" role="radio" data-who="ret" aria-checked="false" tabindex="-1"><span class="box round off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Retired before Medicare, buying on the exchange</button>
+          </div>
+          <div class="lbl p" id="emphLbl" style="margin-top:6px">Also mention</div>
+          <div class="stack" style="gap:9px" id="emph" role="group" aria-labelledby="emphLbl">
             <button type="button" class="chk on" data-em="loss" aria-pressed="true"><span class="box on"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Losing coverage when a job ends</button>
-            <button type="button" class="chk off" data-em="mkt" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Self-employed, buying on the exchange</button>
-            <button type="button" class="chk off" data-em="ret" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Retired before Medicare, buying on the exchange</button>
             <button type="button" class="chk off" data-em="nation" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What the country would save</button>
             <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
           </div>
-          <p class="note" id="emphNote" hidden style="margin-top:2px">A greyed story is about a different household than the ones checked, so the two cannot share a letter. Uncheck the checked stories to choose it.</p>
         </div>
 
         <div class="stack" style="gap:9px">
@@ -2018,14 +2024,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         ? 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me, and my income sits below the level where the marketplace tax credit begins: no subsidy, full price. Premiums, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>. ' + who + ''
         : 'I buy my own coverage through the marketplace, so nothing about this cost is hidden from me. Premiums after the tax credit, deductible and out-of-pocket spending, and the Medicare payroll tax together run roughly <mark data-fig="mkt.household" data-round="near"></mark> <span data-uw="a"></span> for my <span class="letterHh"></span>, and that is with roughly <mark data-fig="mkt.subsidy" data-round="near"></mark> <span data-uw="a"></span> of taxpayer help underneath it. ' + who + '');
     P.push('Under the financing models I looked at, including one produced by opponents of the policy, my household would pay between roughly <mark data-fig="uni.rangeLo" data-round="down"></mark> and <mark data-fig="uni.rangeHi" data-round="up"></mark>. <span id="letterCmp"></span>');
-    if (e.loss){
-      if (r === "none")
-        P.push('My household is uninsured today. Even now, between the care we use and the Medicare payroll tax we still pay, we are out roughly <mark data-fig="route.borne" data-round="near"></mark> <span data-uw="a"></span> with no emergency at all, and one hospital stay could undo years of saving.');
-      else if (r === "marketplace")
-        P.push('Part of why we buy our own coverage is that the employer kind can vanish with a job. Keeping a lost plan through COBRA runs more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. Access to a doctor should not depend on anyone&rsquo;s payroll status.');
-      else
-        P.push('I also want to be plain about the part that worries me most: if I lost my job tomorrow, keeping this coverage through COBRA would cost more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. My family&rsquo;s access to a doctor should not depend on my employer&rsquo;s procurement decisions.');
-    }
+    if (r === "none")
+      P.push('My household is uninsured today. Even now, between the care we use and the Medicare payroll tax we still pay, we are out roughly <mark data-fig="route.borne" data-round="near"></mark> <span data-uw="a"></span> with no emergency at all, and one hospital stay could undo years of saving.');
+    else if (e.loss && r === "employer")
+      P.push('I also want to be plain about the part that worries me most: if I lost my job tomorrow, keeping this coverage through COBRA would cost more than <span data-fig="cobra.annual" data-round="down"></span> <span data-uw="a"></span>. My family&rsquo;s access to a doctor should not depend on my employer&rsquo;s procurement decisions.');
     if (e.nation)
       P.push('This is not only my household&rsquo;s arithmetic. Even the estimate from a Koch-funded center, produced by opponents of the policy to argue it is unaffordable, found national health spending about $2 trillion lower over a decade in its main scenario, and a peer-reviewed study in <i>The Lancet</i> put the saving at roughly $450 billion a year. I am not asking you to take the friendliest number; even the hostile one, on its own main assumptions, comes out ahead.');
     if (e.story)
@@ -3187,31 +3189,52 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     letterEdited = true;
     updateLetterMeta();
   });
-  // Contradictory personas cannot share a letter: the employer-coverage story
-  // and the self-employed story are different people, and the self-employed
-  // person's coverage is not tied to a job. Conflicts grey out rather than
-  // silently unchecking something the reader chose.
-  // The two marketplace personas (self-employed, retired before Medicare) are the
-  // same paragraph with a different last sentence, so they exclude each other too.
-  var EMPH_CONFLICTS = { emp:["mkt","ret"], loss:["mkt","ret"], mkt:["emp","loss","ret"], ret:["emp","loss","mkt"], nation:[], story:[] };
+  // Who is writing is one choice; the additions are any. The route sets the
+  // persona (see the route handler) and decides whether the job-loss addition
+  // applies at all: it is an employer household's worry.
+  var WHO = ["emp", "mkt", "ret"];
   function syncEmph(){
-    var anyGreyed = false;
-    [].forEach.call(byId("emph").querySelectorAll(".chk"), function(btn){
-      var k = btn.getAttribute("data-em"), on = !!state.emph[k];
-      var dis = !on && EMPH_CONFLICTS[k].some(function(c){ return state.emph[c]; });
-      if (dis) anyGreyed = true;
+    var who = byId("persona");
+    who.hidden = state.route === "none";
+    [].forEach.call(who.querySelectorAll(".chk"), function(btn){
+      var on = !!state.emph[btn.getAttribute("data-who")];
       btn.classList.toggle("on", on); btn.classList.toggle("off", !on);
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-      btn.disabled = dis;
+      btn.setAttribute("aria-checked", on ? "true" : "false");
+      btn.tabIndex = on ? 0 : -1;   // one tab stop; arrows move within the group
       var box = btn.querySelector(".box");
       box.classList.toggle("on", on); box.classList.toggle("off", !on);
     });
-    // A greyed box with no explanation read as "never selectable" to the owner.
-    byId("emphNote").hidden = !anyGreyed;
+    [].forEach.call(byId("emph").querySelectorAll(".chk"), function(btn){
+      var k = btn.getAttribute("data-em"), on = !!state.emph[k];
+      btn.hidden = k === "loss" && state.route !== "employer";
+      btn.classList.toggle("on", on); btn.classList.toggle("off", !on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      var box = btn.querySelector(".box");
+      box.classList.toggle("on", on); box.classList.toggle("off", !on);
+    });
+  }
+  function pickWho(k){
+    for (var i = 0; i < WHO.length; i++) state.emph[WHO[i]] = WHO[i] === k;
+    syncEmph();
+    paint();
   }
   syncEmph();
+  byId("persona").addEventListener("click", function(ev){
+    var btn = ev.target.closest(".chk"); if (!btn) return;
+    pickWho(btn.getAttribute("data-who"));
+  });
+  byId("persona").addEventListener("keydown", function(ev){
+    var d = ev.key === "ArrowDown" || ev.key === "ArrowRight" ? 1 : ev.key === "ArrowUp" || ev.key === "ArrowLeft" ? -1 : 0;
+    if (!d) return;
+    ev.preventDefault();
+    var cur = 0, i;
+    for (i = 0; i < WHO.length; i++) if (state.emph[WHO[i]]) cur = i;
+    var next = WHO[(cur + d + WHO.length) % WHO.length];
+    pickWho(next);
+    byId("persona").querySelector('[data-who="' + next + '"]').focus();
+  });
   byId("emph").addEventListener("click", function(ev){
-    var btn = ev.target.closest(".chk"); if (!btn || btn.disabled) return;
+    var btn = ev.target.closest(".chk"); if (!btn || btn.hidden) return;
     var k = btn.getAttribute("data-em");
     state.emph[k] = !state.emph[k];
     syncEmph();

@@ -1445,37 +1445,40 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   // asking them to consider their own bill
   ok('measured tone stays polite', /keep pressing for it/.test(await txt()));
 
-  const before = await count();
-  await p.locator('#emph button[data-em="emp"]').click(); await p.waitForTimeout(250);
-  const after = await count();
-  ok('dropping an emphasis drops its paragraph',
-     after < before && !/payroll deduction/.test(await txt()), `${before} -> ${after}`);
+  // Who is writing is one choice: switching persona swaps the paragraph
+  const checked = () => p.evaluate(() => [...document.querySelectorAll('#persona .chk')].filter(b => b.getAttribute('aria-checked') === 'true').map(b => b.getAttribute('data-who')));
+  ok('the employer household is the persona on the employer route', JSON.stringify(await checked()) === '["emp"]', JSON.stringify(await checked()));
+  await p.locator('#persona button[data-who="mkt"]').click(); await p.waitForTimeout(250);
+  ok('picking self-employed swaps the paragraph in, and the employer one out',
+     /buy my own coverage through the marketplace/.test(await txt()) && !/payroll deduction/.test(await txt()));
+  ok('self-employed closes on the sole proprietor', /sole proprietor/.test(await txt()) && !/old enough for Medicare/.test(await txt()));
+  ok('exactly one persona is checked, and nothing is greyed', JSON.stringify(await checked()) === '["mkt"]' && await p.evaluate(() => ![...document.querySelectorAll('#persona .chk, #emph .chk')].some(b => b.disabled)));
+  await p.locator('#persona button[data-who="ret"]').click(); await p.waitForTimeout(250);
+  ok('retired before Medicare: same marketplace paragraph, its own closing, no sole proprietor',
+     /buy my own coverage through the marketplace/.test(await txt()) && /old enough for Medicare/.test(await txt()) && /median retirement age is 62/.test(await txt()) && !/sole proprietor/.test(await txt()));
+  ok('roving tabindex: only the checked radio is a tab stop', await p.evaluate(() => [...document.querySelectorAll('#persona .chk')].map(b => b.tabIndex).join(',') === '-1,-1,0'));
+  await p.locator('#persona button[data-who="ret"]').focus(); await p.keyboard.press('ArrowUp'); await p.waitForTimeout(250);
+  ok('arrow keys move within the group', JSON.stringify(await checked()) === '["mkt"]' && await p.evaluate(() => document.activeElement.getAttribute('data-who') === 'mkt'));
+  await p.locator('#persona button[data-who="emp"]').click(); await p.waitForTimeout(250);
   await p.locator('#emph button[data-em="nation"]').click(); await p.waitForTimeout(250);
   ok('the national block quotes both sides with their labels on',
      /Koch-funded/.test(await txt()) && /Lancet/.test(await txt()));
   await p.locator('#emph button[data-em="story"]').click(); await p.waitForTimeout(250);
   ok('the story toggle inserts the writing prompt',
      await p.evaluate(()=>!!document.querySelector('#letterBd .hint')));
-
-  // Contradictory personas exclude each other, greyed rather than unchecked.
-  const dis = k => p.evaluate(k=>document.querySelector(`#emph [data-em="${k}"]`).disabled, k);
-  ok('self-employed is greyed while the job-loss story is checked', await dis('mkt'));
-  ok('and the hint under the list says why', await p.evaluate(() => !document.getElementById('emphNote').hidden && /cannot share a letter/.test(document.getElementById('emphNote').textContent)));
-  await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(150);
-  ok('freeing both conflicts frees self-employed', !(await dis('mkt')));
-  ok('and the hint goes away once nothing is greyed', await p.evaluate(() => document.getElementById('emphNote').hidden));
-  await p.locator('#emph button[data-em="mkt"]').click(); await p.waitForTimeout(250);
-  ok('and self-employed greys the employer and job-loss stories',
-     (await dis('emp')) && (await dis('loss')));
-  ok('and the early-retiree persona, which shares its paragraph', await dis('ret'));
-  ok('self-employed closes on the sole proprietor', /sole proprietor/.test(await txt()) && !/old enough for Medicare/.test(await txt()));
-  await p.locator('#emph button[data-em="mkt"]').click(); await p.waitForTimeout(150);
-  await p.locator('#emph button[data-em="ret"]').click(); await p.waitForTimeout(250);
-  ok('retired before Medicare: same marketplace paragraph, its own closing, no sole proprietor',
-     /buy my own coverage through the marketplace/.test(await txt()) && /old enough for Medicare/.test(await txt()) && /median retirement age is 62/.test(await txt()) && !/sole proprietor/.test(await txt()));
-  ok('and it greys the employer, job-loss and self-employed stories', (await dis('emp')) && (await dis('loss')) && (await dis('mkt')));
-  await p.locator('#emph button[data-em="ret"]').click(); await p.waitForTimeout(150);
-  await p.locator('#emph button[data-em="mkt"]').click(); await p.waitForTimeout(250);
+  const before = await count();
+  await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(250);
+  ok('dropping the job-loss addition drops its paragraph', (await count()) < before && !/keeping this coverage through COBRA/.test(await txt()));
+  await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(250);
+  // the additions follow the route: job loss is an employer worry, the persona group is not for the uninsured
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+  ok('marketplace route: the job-loss addition is hidden and self-employed is the persona',
+     await p.evaluate(() => document.querySelector('#emph [data-em="loss"]').hidden && !document.getElementById('persona').hidden) && JSON.stringify(await checked()) === '["mkt"]');
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
+  ok('uninsured route: no persona group, and the letter still tells the household\'s story',
+     await p.evaluate(() => document.getElementById('persona').hidden && getComputedStyle(document.getElementById('persona')).display === 'none') && /uninsured today/.test(await txt()));
+  await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(250);
+  ok('back on the employer route the group returns with the employer persona', JSON.stringify(await checked()) === '["emp"]' && await p.evaluate(() => !document.getElementById('persona').hidden && !document.querySelector('#emph [data-em="loss"]').hidden));
 
   await p.locator('#letterBd > div').first().click();
   await p.keyboard.press('End'); await p.keyboard.type(' XEDITX');
@@ -1889,13 +1892,13 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
   await scan('every marketplace letter block');
   // the marketplace route checks the self-employed persona; the retiree replaces it
-  for (const e of ['mkt', 'ret']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
+  await p.locator('#persona .chk[data-who="ret"]').click(); await p.waitForTimeout(150);
   await setAges(p, [62, 60]); await scan('the early-retiree letter and the age note under the cliff');
   await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
   await scan('the age note in a state that does not rate by age');
   await p.locator('#zip').fill('75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
   await setAges(p, [41, 39, 12, 9]);
-  for (const e of ['ret', 'mkt']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
+  await p.locator('#persona .chk[data-who="mkt"]').click(); await p.waitForTimeout(150);
   // recipient variants: the senator letters (non-cosponsor openings in TX)
   // across every tone; the cosponsor thank-you variants are the rep default
   for (const rec of ['sen0', 'sen1']) {
