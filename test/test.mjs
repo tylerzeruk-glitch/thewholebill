@@ -1459,7 +1459,12 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   ok('roving tabindex: only the checked radio is a tab stop', await p.evaluate(() => [...document.querySelectorAll('#persona .chk')].map(b => b.tabIndex).join(',') === '-1,-1,0'));
   await p.locator('#persona button[data-who="ret"]').focus(); await p.keyboard.press('ArrowUp'); await p.waitForTimeout(250);
   ok('arrow keys move within the group', JSON.stringify(await checked()) === '["mkt"]' && await p.evaluate(() => document.activeElement.getAttribute('data-who') === 'mkt'));
+  // the job-loss addition follows the persona, not the route
+  ok('a non-employer persona drops the job-loss addition: hidden, unchecked, out of the letter',
+     await p.evaluate(() => { const b = document.querySelector('#emph [data-em="loss"]'); return b.hidden && b.getAttribute('aria-pressed') === 'false'; }) && !/keeping this coverage through COBRA/.test(await txt()));
   await p.locator('#persona button[data-who="emp"]').click(); await p.waitForTimeout(250);
+  ok('back to the employer household, it returns checked and the COBRA line is back',
+     await p.evaluate(() => { const b = document.querySelector('#emph [data-em="loss"]'); return !b.hidden && b.getAttribute('aria-pressed') === 'true'; }) && /keeping this coverage through COBRA/.test(await txt()));
   await p.locator('#emph button[data-em="nation"]').click(); await p.waitForTimeout(250);
   ok('the national block quotes both sides with their labels on',
      /Koch-funded/.test(await txt()) && /Lancet/.test(await txt()));
@@ -1472,7 +1477,7 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(250);
   // the additions follow the route: job loss is an employer worry, the persona group is not for the uninsured
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
-  ok('marketplace route: the job-loss addition is hidden and self-employed is the persona',
+  ok('marketplace route: self-employed is the persona, so the job-loss addition is hidden',
      await p.evaluate(() => document.querySelector('#emph [data-em="loss"]').hidden && !document.getElementById('persona').hidden) && JSON.stringify(await checked()) === '["mkt"]');
   await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
   ok('uninsured route: no persona group, and the letter still tells the household\'s story',
