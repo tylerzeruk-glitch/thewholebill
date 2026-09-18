@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'early-retirees', date: '2026-09-18', kind: 'site',
+    title: 'Early retirees: the letter can speak as one, the cliff explains age rating, and the chart follows a household past 550% of the poverty line.',
+    body: 'A reader who retired before Medicare found the generated letter speaking as a sole proprietor. There is now a fourth persona for the letter (retired before Medicare, buying on the exchange), with the retirement figures cited to EBRI. Under the cliff, a household with an adult of 55 to 64 sees how far up the state&rsquo;s age curve it sits, read from the same curve the benchmark uses, and is told that retirement income counts toward the line. And the cliff chart, which stopped at 550% of the poverty line and so dropped a couple at $131,000 off its right edge, now widens to keep the household on it. The letter&rsquo;s emphasis list is two lists now, who is writing (one choice) and what else to mention, so no story has to grey another out.',
+    see: { id: 'benchmark', text: 'The benchmark premium' }
+  },
+  {
     id: 'tricare-medicare-va', date: '2026-09-04', kind: 'site',
     title: 'Households on TRICARE, Medicare or VA care are now told the calculator does not price them, with the numbers behind that.',
     body: 'A note under the coverage control, a fifth objection (the three programs are the existence proof that government-run coverage already works here, for tens of millions of people) and a methodology row with the Military Health System&rsquo;s headcount, budget and fee schedule, each sourced. A full TRICARE route is under consideration. The honest result would be that many military families pay more under every financing model, and that needs its own copy before it ships.',

@@ -1179,6 +1179,49 @@ test('cliff: the "you" guide never crosses its own label', async b => {
   await p.close();
 });
 
+/* A couple at $131,000 is 619% of the poverty line; the chart stopped at 550% and
+ * the "you" guide, drawn only inside the range, simply vanished for exactly the
+ * early-retiree household the section matters most to. The chart now widens to
+ * follow the household (capped at 10x, where the guide pins to the edge). */
+test('cliff: a household past 550% stays on the chart, and the age note reads the state curve', async b => {
+  const p = await page(b, 1440, 900);
+  const youX = () => p.evaluate(() => {
+    const svg = document.querySelector('#cliffChart svg'); if (!svg) return null;
+    const you = [...svg.querySelectorAll('text')].find(t => t.textContent === 'you');
+    const w = svg.viewBox.baseVal.width;
+    const labels = [...svg.querySelectorAll('text')].map(t => t.textContent).filter(t => /^\d+%$/.test(t));
+    const cliff = [...svg.querySelectorAll('line')].find(l => l.getAttribute('stroke-dasharray') === '5 4');
+    return { x: you ? you.getBBox().x + you.getBBox().width / 2 : null, w, labels, cliffX: cliff ? +cliff.getAttribute('x1') : null,
+             note: document.getElementById('cliffAge').hidden ? null : document.getElementById('cliffAge').textContent };
+  });
+  ok('default household: no age note', (await youX()).note === null);
+  await setAges(p, [62, 60]); await setIncome(p, 131000);
+  let g = await youX();
+  ok('couple at $131,000: the guide is on the chart, right of the cliff', g.x !== null && g.cliffX !== null && g.x > g.cliffX && g.x < g.w - 20, JSON.stringify({ x: g.x, cliff: g.cliffX, w: g.w }));
+  ok('and the axis runs past 500%', g.labels.includes('600%'), g.labels.join(' '));
+  ok('the age note names the oldest adult and the state factor, and links the benchmark section',
+     /oldest adult here is 62/.test(g.note) && /about \d\.\d times/.test(g.note) && /Retirement income counts/.test(g.note) &&
+     await p.evaluate(() => !!document.querySelector('#cliffAge a.term[href="/methodology/#benchmark"]')), g.note);
+  const factor = await p.evaluate(() => { const B = window.WholeBillBench; const cv = B.curves[B.states.TX.curve]; return (cv[62] / cv[21]).toFixed(1); });
+  ok('the factor is the Texas curve at 62 over 21', g.note.includes('about ' + factor + ' times'), factor);
+  await setIncome(p, 260000);   // the slider's top; 12.3x the line for a couple, past the 10x cap
+  g = await youX();
+  ok('at $260,000 (over 10x) the guide pins to the right edge, still visible', g.x !== null && g.x > g.w * 0.9 && g.labels.includes('1000%'), JSON.stringify({ x: g.x, w: g.w, labels: g.labels }));
+  await setIncome(p, 20000);
+  g = await youX();
+  ok('under 150% the guide pins to the left edge', g.x !== null && g.x < g.w * 0.12, String(g.x));
+  await setIncome(p, 95000);
+  await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+  g = await youX();
+  ok('New York, which rates by family tier, gets the no-age-rating line', /New York does not rate marketplace premiums by/.test(g.note) && !/times what a 21-year-old/.test(g.note), g.note);
+  await setAges(p, [66, 60]);
+  g = await youX();
+  ok('a 66-year-old is Medicare; the note follows the 60-year-old', /oldest adult here is 60/.test(g.note), g.note);
+  await setAges(p, [66, 40]);
+  ok('no adult of 55 to 64: no note', (await youX()).note === null);
+  await p.close();
+});
+
 test('cliff: chart follows its container across resizes', async b => {
   const p = await page(b,1440,900);
   const read = () => p.evaluate(()=>{
@@ -1207,6 +1250,20 @@ test('cliff: chart text stays readable on a phone', async b => {
     const sizes=[...svg.querySelectorAll('text')].map(t=>+t.getAttribute('font-size')*scale);
     return { scale:+scale.toFixed(2), min:+Math.min(...sizes).toFixed(1) }; });
   ok('effective font size ≥ 9px', r.min >= 9, `${r.min}px at scale ${r.scale}`);
+  // the widened chart: a couple at $131,000 pulls the cliff left; the annotation
+  // must not cover the axis labels, and no two labels may collide
+  await p.evaluate(() => { for (let k = 0; k < 2; k++) document.getElementById('sizeDown').click(); });
+  await setIncome(p, 131000);
+  const phoneHit = await p.evaluate(() => {
+    const t = [...document.querySelectorAll('#cliffChart text')].map(e => ({ s: e.textContent.trim(), b: e.getBoundingClientRect() }));
+    const box = document.getElementById('cliffAnnotBox').getBoundingClientRect(), svgB = document.querySelector('#cliffChart svg').getBoundingClientRect();
+    if (box.left < svgB.left - 0.5 || box.right > svgB.right + 0.5) return 'annotation past the plot edge';
+    for (const a of t) if (/^\$/.test(a.s) && a.b.left < box.right && box.left < a.b.right && a.b.top < box.bottom && box.top < a.b.bottom) return 'box covers ' + a.s;
+    for (let i = 0; i < t.length; i++) for (let j = i + 1; j < t.length; j++) { const A = t[i].b, B = t[j].b;
+      if (A.left < B.right && B.left < A.right && A.top < B.bottom && B.top < A.bottom) return t[i].s + ' / ' + t[j].s; }
+    return null;
+  });
+  ok('phone, couple at $131,000: the annotation clears the axis and nothing collides', !phoneHit, phoneHit || '');
   await p.close();
 });
 
@@ -1388,26 +1445,40 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   // asking them to consider their own bill
   ok('measured tone stays polite', /keep pressing for it/.test(await txt()));
 
-  const before = await count();
-  await p.locator('#emph button[data-em="emp"]').click(); await p.waitForTimeout(250);
-  const after = await count();
-  ok('dropping an emphasis drops its paragraph',
-     after < before && !/payroll deduction/.test(await txt()), `${before} -> ${after}`);
+  // Who is writing is one choice: switching persona swaps the paragraph
+  const checked = () => p.evaluate(() => [...document.querySelectorAll('#persona .chk')].filter(b => b.getAttribute('aria-checked') === 'true').map(b => b.getAttribute('data-who')));
+  ok('the employer household is the persona on the employer route', JSON.stringify(await checked()) === '["emp"]', JSON.stringify(await checked()));
+  await p.locator('#persona button[data-who="mkt"]').click(); await p.waitForTimeout(250);
+  ok('picking self-employed swaps the paragraph in, and the employer one out',
+     /buy my own coverage through the marketplace/.test(await txt()) && !/payroll deduction/.test(await txt()));
+  ok('self-employed closes on the sole proprietor', /sole proprietor/.test(await txt()) && !/old enough for Medicare/.test(await txt()));
+  ok('exactly one persona is checked, and nothing is greyed', JSON.stringify(await checked()) === '["mkt"]' && await p.evaluate(() => ![...document.querySelectorAll('#persona .chk, #emph .chk')].some(b => b.disabled)));
+  await p.locator('#persona button[data-who="ret"]').click(); await p.waitForTimeout(250);
+  ok('retired before Medicare: same marketplace paragraph, its own closing, no sole proprietor',
+     /buy my own coverage through the marketplace/.test(await txt()) && /old enough for Medicare/.test(await txt()) && /median retirement age is 62/.test(await txt()) && !/sole proprietor/.test(await txt()));
+  ok('roving tabindex: only the checked radio is a tab stop', await p.evaluate(() => [...document.querySelectorAll('#persona .chk')].map(b => b.tabIndex).join(',') === '-1,-1,0'));
+  await p.locator('#persona button[data-who="ret"]').focus(); await p.keyboard.press('ArrowUp'); await p.waitForTimeout(250);
+  ok('arrow keys move within the group', JSON.stringify(await checked()) === '["mkt"]' && await p.evaluate(() => document.activeElement.getAttribute('data-who') === 'mkt'));
+  await p.locator('#persona button[data-who="emp"]').click(); await p.waitForTimeout(250);
   await p.locator('#emph button[data-em="nation"]').click(); await p.waitForTimeout(250);
   ok('the national block quotes both sides with their labels on',
      /Koch-funded/.test(await txt()) && /Lancet/.test(await txt()));
   await p.locator('#emph button[data-em="story"]').click(); await p.waitForTimeout(250);
   ok('the story toggle inserts the writing prompt',
      await p.evaluate(()=>!!document.querySelector('#letterBd .hint')));
-
-  // Contradictory personas exclude each other, greyed rather than unchecked.
-  const dis = k => p.evaluate(k=>document.querySelector(`#emph [data-em="${k}"]`).disabled, k);
-  ok('self-employed is greyed while the job-loss story is checked', await dis('mkt'));
-  await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(150);
-  ok('freeing both conflicts frees self-employed', !(await dis('mkt')));
-  await p.locator('#emph button[data-em="mkt"]').click(); await p.waitForTimeout(250);
-  ok('and self-employed greys the employer and job-loss stories',
-     (await dis('emp')) && (await dis('loss')));
+  const before = await count();
+  await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(250);
+  ok('dropping the job-loss addition drops its paragraph', (await count()) < before && !/keeping this coverage through COBRA/.test(await txt()));
+  await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(250);
+  // the additions follow the route: job loss is an employer worry, the persona group is not for the uninsured
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+  ok('marketplace route: the job-loss addition is hidden and self-employed is the persona',
+     await p.evaluate(() => document.querySelector('#emph [data-em="loss"]').hidden && !document.getElementById('persona').hidden) && JSON.stringify(await checked()) === '["mkt"]');
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
+  ok('uninsured route: no persona group, and the letter still tells the household\'s story',
+     await p.evaluate(() => document.getElementById('persona').hidden && getComputedStyle(document.getElementById('persona')).display === 'none') && /uninsured today/.test(await txt()));
+  await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(250);
+  ok('back on the employer route the group returns with the employer persona', JSON.stringify(await checked()) === '["emp"]' && await p.evaluate(() => !document.getElementById('persona').hidden && !document.querySelector('#emph [data-em="loss"]').hidden));
 
   await p.locator('#letterBd > div').first().click();
   await p.keyboard.press('End'); await p.keyboard.type(' XEDITX');
@@ -1820,6 +1891,14 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
   for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
   await scan('every marketplace letter block');
+  // the marketplace route checks the self-employed persona; the retiree replaces it
+  await p.locator('#persona .chk[data-who="ret"]').click(); await p.waitForTimeout(150);
+  await setAges(p, [62, 60]); await scan('the early-retiree letter and the age note under the cliff');
+  await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  await scan('the age note in a state that does not rate by age');
+  await p.locator('#zip').fill('75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  await setAges(p, [41, 39, 12, 9]);
+  await p.locator('#persona .chk[data-who="mkt"]').click(); await p.waitForTimeout(150);
   // recipient variants: the senator letters (non-cosponsor openings in TX)
   // across every tone; the cosponsor thank-you variants are the rep default
   for (const rec of ['sen0', 'sen1']) {
