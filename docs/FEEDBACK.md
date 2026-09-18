@@ -60,6 +60,14 @@ tail, which is why the insured bad year above is the piece to build.
 
 ## Done
 
+- **Early retirees are not in the letter** (16 September 2026): "the letter that is getting
+  generated assumes that it's sole-proprietors and small firms buying off the marketplace,"
+  with a pointer to the share of people who retire before they planned. A "retired before
+  Medicare" persona for the letter, an age-rating note under the cliff for households with an
+  adult of 55 to 64 (the factor read from the state's own curve), and the cliff chart widened
+  so a household past 550% of the poverty line stays on it (the owner's own catch). The
+  emphasis control became two groups, who is writing and what else to mention, after the
+  owner found the new persona "never selectable" behind the old greying. PR #72.
 - **TRICARE, Medicare and VA households** (4 September 2026): a note under the coverage
   control, objection 05, a methodology row. PR #68. A full TRICARE route stays parked.
 - **Ages field on a phone keypad** (4 September 2026): "no way to add comma for multiple
