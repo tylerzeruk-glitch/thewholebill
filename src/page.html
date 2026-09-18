@@ -1329,6 +1329,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <button type="button" class="chk off" data-em="nation" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>What the country would save</button>
             <button type="button" class="chk off" data-em="story" aria-pressed="false"><span class="box off"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFDFA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>A personal story</button>
           </div>
+          <p class="note" id="emphNote" hidden style="margin-top:2px">A greyed story is about a different household than the ones checked, so the two cannot share a letter. Uncheck the checked stories to choose it.</p>
         </div>
 
         <div class="stack" style="gap:9px">
@@ -3194,15 +3195,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   // same paragraph with a different last sentence, so they exclude each other too.
   var EMPH_CONFLICTS = { emp:["mkt","ret"], loss:["mkt","ret"], mkt:["emp","loss","ret"], ret:["emp","loss","mkt"], nation:[], story:[] };
   function syncEmph(){
+    var anyGreyed = false;
     [].forEach.call(byId("emph").querySelectorAll(".chk"), function(btn){
       var k = btn.getAttribute("data-em"), on = !!state.emph[k];
       var dis = !on && EMPH_CONFLICTS[k].some(function(c){ return state.emph[c]; });
+      if (dis) anyGreyed = true;
       btn.classList.toggle("on", on); btn.classList.toggle("off", !on);
       btn.setAttribute("aria-pressed", on ? "true" : "false");
       btn.disabled = dis;
       var box = btn.querySelector(".box");
       box.classList.toggle("on", on); box.classList.toggle("off", !on);
     });
+    // A greyed box with no explanation read as "never selectable" to the owner.
+    byId("emphNote").hidden = !anyGreyed;
   }
   syncEmph();
   byId("emph").addEventListener("click", function(ev){

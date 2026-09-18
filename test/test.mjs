@@ -1460,8 +1460,10 @@ test('letter: controls write the letter, edits survive the slider', async b => {
   // Contradictory personas exclude each other, greyed rather than unchecked.
   const dis = k => p.evaluate(k=>document.querySelector(`#emph [data-em="${k}"]`).disabled, k);
   ok('self-employed is greyed while the job-loss story is checked', await dis('mkt'));
+  ok('and the hint under the list says why', await p.evaluate(() => !document.getElementById('emphNote').hidden && /cannot share a letter/.test(document.getElementById('emphNote').textContent)));
   await p.locator('#emph button[data-em="loss"]').click(); await p.waitForTimeout(150);
   ok('freeing both conflicts frees self-employed', !(await dis('mkt')));
+  ok('and the hint goes away once nothing is greyed', await p.evaluate(() => document.getElementById('emphNote').hidden));
   await p.locator('#emph button[data-em="mkt"]').click(); await p.waitForTimeout(250);
   ok('and self-employed greys the employer and job-loss stories',
      (await dis('emp')) && (await dis('loss')));
