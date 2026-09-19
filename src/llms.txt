@@ -1,0 +1,20 @@
+# The Whole Bill
+
+> A healthcare cost calculator for United States households: what a household really pays for health insurance today, including the employer share that never appears on a paystub; what the marketplace, COBRA and going without coverage cost; and what Medicare for All (universal, single-payer coverage under H.R. 3069 / S. 1506) would cost the same household under six published financing models. Every figure carries a basis (statutory, survey or modeled) and a source.
+
+Plain facts about the site:
+- The calculator needs JavaScript; the methodology and the log are static pages.
+- Marketplace benchmark premiums are the real second-lowest-cost silver plan for every county in the 50 states and DC, from CMS plan-year 2026 files.
+- The enhanced premium tax credits expired on 31 December 2025; the 400% of poverty subsidy cliff is back and the site uses the 2026 schedule.
+- Financing models span the published spectrum, including one produced by opponents of the policy; their provenance is disclosed either way.
+- No tracking, no cookies, no analytics script.
+
+## Pages
+- [The calculator](https://thewholebill.org/): enter a ZIP, household and income.
+- [Methodology](https://thewholebill.org/methodology): every number traced to its source, with what we know is wrong.
+- [Methodology as markdown](https://thewholebill.org/methodology.md): the same document as text.
+- [What changed](https://thewholebill.org/updates): a dated log of the law, the data and the site.
+- [RSS feed](https://thewholebill.org/updates.xml)
+
+## Citing
+Cite a figure with the page it came from and the date you read it, for example: The Whole Bill, "Methodology," thewholebill.org/methodology.

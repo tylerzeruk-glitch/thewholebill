@@ -175,3 +175,18 @@ Gated: `302 https://thewholebill-preview.cloudflareaccess.com/...`
 Broken open: `200` with an empty redirect — treat that as an incident, not a
 curiosity; it happened once during setup when the Access application was created
 without attaching to the zone's domain.
+
+## Search engines and assistants
+
+Since 18 September 2026 the build writes keyword titles and descriptions per page, JSON-LD
+(WebSite, WebApplication and an FAQPage read from the objections cards), `/llms.txt`,
+`/methodology.md` and an explicit `robots.txt` that names the search and AI crawlers it
+welcomes. A public IndexNow key file ships in `dist/` and `.github/workflows/indexnow.yml`
+pings IndexNow after every push to main (no account needed).
+
+Owner's one-time items:
+- Google Search Console: verify thewholebill.org, submit `/sitemap.txt`.
+- Bing Webmaster Tools: verify the site (IndexNow pings then count), submit the sitemap.
+  ChatGPT's browsing rides on Bing's index; Claude's on Brave's, which needs nothing.
+- Keep Cloudflare's "block AI bots" setting OFF; every crawler above answered 200 on
+  18 September 2026.

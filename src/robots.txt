@@ -1,4 +1,29 @@
+# Everyone is welcome, search engines and assistants alike. The site is public
+# on purpose: its only asset is being checkable, and a crawler that reads the
+# methodology page is doing exactly what it is for.
 User-agent: *
+Allow: /
+
+# Named so a future default cannot quietly change the intent.
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: Bingbot
 Allow: /
 
 Sitemap: https://thewholebill.org/sitemap.txt
