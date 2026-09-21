@@ -24,7 +24,7 @@ var UPDATES = [
   {
     id: 'census-uninsured-2025', date: '2026-09-15', kind: 'world',
     title: 'The Census Bureau counted <b>26.7 million</b> people, <b>7.9%</b> of the country, uninsured for all of 2025, not statistically different from 2024.',
-    body: 'The Bureau&rsquo;s Current Population Survey Annual Social and Economic Supplement, released 15 September 2026, put the national uninsured rate at 7.9% for calendar year 2025, unchanged from 2024 within the survey&rsquo;s margin of error. Employment based coverage remained the most common source, covering 53.5% of the population, ahead of Medicare at 20.1% and Medicaid at 17.1%. The survey window ends before plan year 2026, so it does not yet capture the enhanced credits&rsquo; expiry or this year&rsquo;s marketplace enrollment drop; those will show up in next September&rsquo;s edition.',
+    body: 'The Bureau&rsquo;s Current Population Survey Annual Social and Economic Supplement, released 15 September 2026, put the national uninsured rate at 7.9% for calendar year 2025, unchanged from 2024 within the survey&rsquo;s margin of error. Employment-based coverage remained the most common source, covering 53.5% of the population, ahead of Medicare at 20.1% and Medicaid at 17.1%. The survey window ends before plan year 2026, so it does not yet capture the enhanced credits&rsquo; expiry or this year&rsquo;s marketplace enrollment drop; those will show up in next September&rsquo;s edition.',
     source: { title: 'U.S. Census Bureau, Health Insurance Coverage in the United States: 2025 (P60-291)', url: 'https://www.census.gov/library/publications/2026/demo/p60-291.html' },
     see: { id: 'bad-year', text: 'What a bad year costs without coverage' }
   },
