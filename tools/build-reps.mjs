@@ -78,7 +78,8 @@ for (const m of legis) {
   const t = m.terms[m.terms.length - 1];
   if (!STATES.has(t.state)) continue;
   const entry = {
-    n: m.name.official_full,
+    // official_full lags for a member sworn in this month (CA-14, September 2026 had none); fall back to the parts
+    n: m.name.official_full || [m.name.first, m.name.last, m.name.suffix].filter(Boolean).join(' '),
     p: t.party[0],
     // a member with no URL in the dataset gets the house.gov convention, so the
     // dark button is never greyed out for want of a link (CA-1 shipped that way)
@@ -99,6 +100,7 @@ for (const m of legis) {
 // house.gov / senate.gov address today; refuse to write a table where that stops
 // being true rather than trust it silently.
 for (const m of [...Object.values(house), ...Object.values(senate).flat()]) {
+  if (!m.n) throw new Error(`build-reps: member ${m.b} has no name`);   // the card would print an empty line
   if (/[<>&]/.test(m.n)) throw new Error(`build-reps: name needs escaping: ${m.n}`);   // nicknames carry quotes; names are set as text
   if (m.u && !/^https:\/\/[a-z0-9.-]+\.(house|senate)\.gov\/?[a-z0-9\/._-]*$/i.test(m.u)) throw new Error(`build-reps: unexpected URL ${m.u} for ${m.n}`);
 }
