@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'search-and-assistants', date: '2026-09-18', kind: 'site',
+    title: 'The site now introduces itself to search engines and assistants: titles that say what it is, structured data, a plain-text methodology.',
+    body: 'Nothing a reader sees changed. Each page&rsquo;s title now carries the words people search for (healthcare cost, Medicare for All, the premium tax credit), the objections section is marked up as questions and answers, the methodology is also served as markdown at /methodology.md, an llms.txt describes the site for assistants, and robots.txt names the search and AI crawlers it welcomes, which is all of them. A cite-this line joined the Sources.',
+    see: { id: 'sources', text: 'Sources' }
+  },
+  {
     id: 'early-retirees', date: '2026-09-18', kind: 'site',
     title: 'Early retirees: the letter can speak as one, the cliff explains age rating, and the chart follows a household past 550% of the poverty line.',
     body: 'A reader who retired before Medicare found the generated letter speaking as a sole proprietor. There is now a fourth persona for the letter (retired before Medicare, buying on the exchange), with the retirement figures cited to EBRI. Under the cliff, a household with an adult of 55 to 64 sees how far up the state&rsquo;s age curve it sits, read from the same curve the benchmark uses, and is told that retirement income counts toward the line. And the cliff chart, which stopped at 550% of the poverty line and so dropped a couple at $131,000 off its right edge, now widens to keep the household on it. The letter&rsquo;s emphasis list is two lists now, who is writing (one choice) and what else to mention, so no story has to grey another out.',

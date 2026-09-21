@@ -1,0 +1,19 @@
+# After a push to main deploys the site, tell IndexNow the pages changed. The
+# key file ships in dist/, so the ping needs nothing but the public site.
+name: indexnow
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Workers Builds deploys in about a minute; give it that before pointing anyone at the pages
+      - run: sleep 120
+      - run: node tools/indexnow.mjs

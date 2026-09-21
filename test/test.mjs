@@ -1302,8 +1302,8 @@ test('routing: methodology is its own page; the artifact keeps the hash', async 
     eyebrow: [...document.querySelectorAll('.eyebrow')].some(e=>/^08/.test(e.textContent.trim())),
     visible: !document.getElementById('methodology').hidden && !document.getElementById('methBack').hidden,
     back: (document.querySelector('#methBack a.q')||{}).getAttribute?.('href'),
-    scripts: document.querySelectorAll('script').length }));
-  ok('the page carries its own title', /Methodology · The Whole Bill/.test(m.title), m.title);
+    scripts: document.querySelectorAll('script:not([type="application/ld+json"])').length }));   // structured data is a data block, not a script
+  ok('the page carries its own title', /^Methodology.*· The Whole Bill$/.test(m.title), m.title);
   ok('the 08 eyebrow lives here', m.eyebrow);
   ok('nothing is hidden and the back link goes home', m.visible && m.back === '/', m.back);
   ok('the document is fully static', m.scripts === 0, m.scripts + ' scripts');
@@ -2556,9 +2556,9 @@ test('updates: the log renders the hero box, its own page and the feed', async b
   const index = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
   const doc = readFileSync(resolve(HERE, '../dist/updates/index.html'), 'utf8');
   const rss = readFileSync(resolve(HERE, '../dist/updates.xml'), 'utf8');
-  ok('the updates document builds without scripts', existsSync(resolve(HERE, '../dist/updates/index.html')) && !/<script/.test(doc));
+  ok('the updates document builds without scripts (structured data is not a script)', existsSync(resolve(HERE, '../dist/updates/index.html')) && !/<script(?![^>]*ld\+json)/.test(doc));
   ok('it lists every entry once, newest first', (doc.match(/<article class="upd"/g) || []).length === U.length && doc.indexOf('id="u-' + U[0].id + '"') < doc.indexOf('id="u-' + U[U.length - 1].id + '"'));
-  ok('its title is the h1 and its canonical URL is /updates', /<h1 class="as-h2">What changed\.<\/h1>/.test(doc) && /rel="canonical" href="https:\/\/thewholebill\.org\/updates"/.test(doc) && /<title>What changed · The Whole Bill<\/title>/.test(doc));
+  ok('its title is the h1 and its canonical URL is /updates', /<h1 class="as-h2">What changed\.<\/h1>/.test(doc) && /rel="canonical" href="https:\/\/thewholebill\.org\/updates"/.test(doc) && /<title>What changed: healthcare law and data updates · The Whole Bill<\/title>/.test(doc));
   ok('every source link on it is https with noopener', [...doc.matchAll(/<a class="srclink" href="([^"]+)"([^>]*)>/g)].every(m => /^https:\/\//.test(m[1]) && /rel="noopener"/.test(m[2])));
   ok('the feed is RSS 2.0 with a self link and one item per entry', /<rss version="2\.0"/.test(rss) && /atom:link href="https:\/\/thewholebill\.org\/updates\.xml" rel="self"/.test(rss) && (rss.match(/<item>/g) || []).length === U.length);
   ok('every feed item has a permalink guid, a parsable date and a title', [...rss.matchAll(/<item>([\s\S]*?)<\/item>/g)].every(m => /<guid isPermaLink="true">https:\/\/thewholebill\.org\/updates\/#u-[\w-]+<\/guid>/.test(m[1]) && !isNaN(Date.parse((m[1].match(/<pubDate>([^<]+)/) || [])[1])) && /<title>[^<]{10,}<\/title>/.test(m[1])));
@@ -2599,6 +2599,46 @@ test('updates: the log renders the hero box, its own page and the feed', async b
   await a.evaluate(() => document.querySelector('#methBack a.q[href="#"]').click()); await a.waitForTimeout(400);
   ok('artifact: back returns to the calculator', await a.evaluate(() => document.getElementById('methodology').hidden && document.getElementById('updates').hidden && !document.querySelector('section:not(.view)').hidden));
   await a.close();
+});
+
+/* Search engines and assistants: keyword titles per document, structured data
+ * read from the page (the FAQ block from the objections cards, so it cannot
+ * drift), an explicit robots.txt, llms.txt, the methodology as markdown, and
+ * the IndexNow key and workflow. Nothing a reader sees changed. */
+test('seo: titles, structured data, robots, llms.txt and the markdown methodology', async b => {
+  const { readFileSync, existsSync, readdirSync } = await import('node:fs');
+  const rd = f => readFileSync(resolve(HERE, '../' + f), 'utf8');
+  const index = rd('dist/index.html'), meth = rd('dist/methodology/index.html'), upd = rd('dist/updates/index.html');
+  const title = h => (h.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+  ok('index title says what the page is and keeps the name', /healthcare actually costs/.test(title(index)) && /The Whole Bill$/.test(title(index)), title(index));
+  ok('methodology and updates titles carry the words people search for', /healthcare cost calculator/.test(title(meth)) && /healthcare law and data/.test(title(upd)));
+  ok('keywords meta names the subject', /name="keywords" content="[^"]*Medicare for All[^"]*universal healthcare[^"]*single-payer/.test(index));
+  ok('each document has its own description under 170 characters', [index, meth, upd].every(h => { const d = (h.match(/name="description" content="([^"]+)"/) || [])[1] || ''; return d.length > 80 && d.length < 170; }) && /Medicare for All/.test((index.match(/name="description" content="([^"]+)"/) || [])[1]));
+  const ld = h => [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => JSON.parse(m[1]));
+  const li = ld(index), lm = ld(meth), lu = ld(upd);
+  ok('index carries WebSite, WebApplication and FAQPage', li.length === 1 && JSON.stringify(li[0]['@graph'].map(x => x['@type'])) === '["WebSite","WebApplication","FAQPage"]');
+  const faq = li[0]['@graph'][2].mainEntity;
+  const src = rd('src/page.html');
+  const obj = src.slice(src.indexOf('id="objections"')); const cards = (obj.slice(0, obj.indexOf('</section>')).match(/<div class="quote">/g) || []).length;
+  ok('the FAQ block has one question per objection card, in the cards\' own words', faq.length === cards && faq.every(q => q.name.length > 10 && q.acceptedAnswer.text.length > 80 && !/<|&[a-z]+;/.test(q.name + q.acceptedAnswer.text)), faq.length + ' of ' + cards);
+  ok('no dashes in the structured data', ![index, meth, upd].some(h => /[–—]/.test((h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || ['', ''])[1])));
+  ok('methodology and updates carry a WebPage that names the site and the subject', [lm, lu].every(l => l.length === 1 && l[0]['@type'] === 'WebPage' && l[0].isPartOf.name === 'The Whole Bill' && l[0].about.some(a => /Medicare for All/.test(a.name))));
+  ok('the artifact keeps no structured data placeholder', !/JSONLD/.test(rd('preview/artifact.html')));
+  const robots = rd('dist/robots.txt');
+  ok('robots.txt welcomes the search and AI crawlers by name', ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended', 'Bingbot'].every(u => new RegExp('User-agent: ' + u + '\\nAllow: /').test(robots)) && /Sitemap: https:\/\/thewholebill\.org\/sitemap\.txt/.test(robots));
+  const llms = rd('dist/llms.txt');
+  ok('llms.txt names the site, the subject and every page', /^# The Whole Bill/.test(llms) && /Medicare for All/.test(llms) && ['https://thewholebill.org/', '/methodology)', '/methodology.md)', '/updates)', '/updates.xml)'].every(s => llms.includes(s)));
+  const md = rd('dist/methodology.md');
+  ok('methodology.md is real markdown: a title, the sections, pipe tables with separators, no tags, no dashes', /^# Methodology/.test(md) && /\n### Sources/.test(md) && /\n\| --- \|/.test(md) && !/<[a-z]/.test(md) && !/[–—]/.test(md) && /\| 48 states & DC \| \$15,650 \|/.test(md));
+  ok('its tables have no blank lines between rows and its links are absolute', !/\|\n\n\|/.test(md) && !/\]\((?!https:\/\/)/.test(md));
+  ok('the headers file types the markdown and llms.txt', /\n\/methodology\.md\n\s+Content-Type: text\/markdown/.test(rd('dist/_headers')) && /\n\/llms\.txt\n\s+Content-Type: text\/plain/.test(rd('dist/_headers')));
+  const key = readdirSync(resolve(HERE, '../src')).find(f => /^[0-9a-f]{32}\.txt$/.test(f));
+  ok('the IndexNow key ships and matches its file', !!key && existsSync(resolve(HERE, '../dist/' + key)) && rd('dist/' + key).trim() === key.replace(/\.txt$/, ''));
+  ok('the IndexNow workflow runs the tool on pushes to main', /branches: \[main\]/.test(rd('.github/workflows/indexnow.yml')) && /node tools\/indexnow\.mjs/.test(rd('.github/workflows/indexnow.yml')));
+  const { execFileSync } = await import('node:child_process');
+  let parses = true; try { execFileSync('node', ['--check', resolve(HERE, '../tools/indexnow.mjs')]); } catch (e) { parses = false; }
+  ok('the IndexNow tool parses (not run here: network)', parses);
+  ok('the methodology page carries a cite-this line', /id="cite"[^>]*>To cite this page/.test(meth));
 });
 
 /* Sources: a row that cannot be followed is a claim; every row links to its
