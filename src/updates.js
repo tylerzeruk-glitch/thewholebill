@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'reps-2026-09-21', date: '2026-09-21', kind: 'site',
+    title: 'The representatives snapshot is refreshed as of 21 September: 115 House members now marked as sponsor or cosponsor of H.R. 3069, up from 113.',
+    body: 'The weekly watcher noticed the bill&rsquo;s status had moved after the 1 September snapshot, so the lookup was rebuilt from the same public sources. Two seats have new members since then (Georgia&rsquo;s 13th and California&rsquo;s 14th), Texas&rsquo;s 23rd is vacant alongside Florida&rsquo;s 20th, and one sitting member added her name to the bill. Senate cosponsors are unchanged. Every cosponsor claim on the card carries this new as-of date.',
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
     id: 'search-and-assistants', date: '2026-09-18', kind: 'site',
     title: 'The site now introduces itself to search engines and assistants: titles that say what it is, structured data, a plain-text methodology.',
     body: 'Nothing a reader sees changed. Each page&rsquo;s title now carries the words people search for (healthcare cost, Medicare for All, the premium tax credit), the objections section is marked up as questions and answers, the methodology is also served as markdown at /methodology.md, an llms.txt describes the site for assistants, and robots.txt names the search and AI crawlers it welcomes, which is all of them. A cite-this line joined the Sources.',
