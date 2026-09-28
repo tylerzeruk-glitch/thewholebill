@@ -16,6 +16,13 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'hr3069-cosponsors-2026-09-25', date: '2026-09-25', kind: 'world',
+    title: 'H.R. 3069 gained two cosponsors, reaching 117, as of govinfo&rsquo;s 25 September 2026 update.',
+    body: 'Govinfo&rsquo;s BILLSTATUS record for H.R. 3069 now lists 117 current cosponsors alongside the sponsor, up from the 115 marked on this site&rsquo;s 21 September snapshot. S. 1506&rsquo;s cosponsor count is unchanged at 18. Neither bill has moved out of committee; H.R. 3069&rsquo;s latest action is still the 29 April 2025 referral. The site&rsquo;s own lookup has not yet been rebuilt to this count.',
+    source: { title: 'govinfo BILLSTATUS, H.R. 3069, 119th Congress', url: 'https://www.govinfo.gov/bulkdata/BILLSTATUS/119/hr/BILLSTATUS-119hr3069.xml' },
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
     id: 'reps-2026-09-21', date: '2026-09-21', kind: 'site',
     title: 'The representatives snapshot is refreshed as of 21 September: 115 House members now marked as sponsor or cosponsor of H.R. 3069, up from 113.',
     body: 'The weekly watcher noticed the bill&rsquo;s status had moved after the 1 September snapshot, so the lookup was rebuilt from the same public sources. Two seats have new members since then (Georgia&rsquo;s 13th and California&rsquo;s 14th), Texas&rsquo;s 23rd is vacant alongside Florida&rsquo;s 20th, and one sitting member added her name to the bill. Senate cosponsors are unchanged. Every cosponsor claim on the card carries this new as-of date.',
