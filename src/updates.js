@@ -16,9 +16,22 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'reps-2026-09-28', date: '2026-09-28', kind: 'site',
+    title: 'The representatives snapshot is refreshed as of 28 September: 116 House members and 19 senators now marked as sponsor or cosponsor.',
+    body: 'Rebuilt after the weekly watcher found both bills&rsquo; cosponsor lists had moved, so the rep card now shows Rep. Aisha Wahab and Sen. Ron Wyden as cosponsors. Membership is unchanged: Florida&rsquo;s 20th and Texas&rsquo;s 23rd are still vacant. Every cosponsor claim on the card carries the new as-of date.',
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
+    id: 's1506-cosponsors-2026-09-26', date: '2026-09-26', kind: 'world',
+    title: 'S. 1506 gained a cosponsor: Sen. Ron Wyden of Oregon signed on 24 September, bringing the Senate bill to 18.',
+    body: 'Govinfo&rsquo;s BILLSTATUS record for S. 1506, updated 26 September, lists 18 cosponsors alongside the sponsor, Sen. Bernie Sanders, up from 17. The bill is still with the Finance Committee, where it was referred on 29 April 2025.',
+    source: { title: 'govinfo BILLSTATUS, S. 1506, 119th Congress', url: 'https://www.govinfo.gov/bulkdata/BILLSTATUS/119/s/BILLSTATUS-119s1506.xml' },
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
     id: 'hr3069-cosponsors-2026-09-25', date: '2026-09-25', kind: 'world',
-    title: 'H.R. 3069 gained two cosponsors, reaching 117, as of govinfo&rsquo;s 25 September 2026 update.',
-    body: 'Govinfo&rsquo;s BILLSTATUS record for H.R. 3069 now lists 117 current cosponsors alongside the sponsor, up from the 115 marked on this site&rsquo;s 21 September snapshot. S. 1506&rsquo;s cosponsor count is unchanged at 18. Neither bill has moved out of committee; H.R. 3069&rsquo;s latest action is still the 29 April 2025 referral. The site&rsquo;s own lookup has not yet been rebuilt to this count.',
+    title: 'H.R. 3069 gained a cosponsor: Rep. Aisha Wahab of California signed on 24 September, bringing the House bill to 117.',
+    body: 'Govinfo&rsquo;s BILLSTATUS record for H.R. 3069, updated 25 September, lists 117 cosponsors alongside the sponsor, up from 116. The bill has not moved out of committee; its latest action is still the 29 April 2025 referral. Corrected 28 September: this entry first said the bill gained two cosponsors and that S. 1506 was unchanged. It had compared govinfo&rsquo;s count with the members marked on this site, a number that includes the sponsor and leaves out members who have since left office. S. 1506 now has its own entry.',
     source: { title: 'govinfo BILLSTATUS, H.R. 3069, 119th Congress', url: 'https://www.govinfo.gov/bulkdata/BILLSTATUS/119/hr/BILLSTATUS-119hr3069.xml' },
     see: { id: 'src-congress', text: 'Members and cosponsors' }
   },
