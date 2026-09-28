@@ -50,10 +50,19 @@ Most of it is annual and predictable.
 
 Keyless and stateless, so it runs the same on a laptop and in a fresh cloud checkout. It
 reads KFF's ACA and health-cost feeds, CBO, the CMS newsroom, the Federal Register API (three
-searches), govinfo BILLSTATUS for both bills (and says when the status moved after the reps
-snapshot), ASPE's poverty page (against the year calc.js cites), the IRS drop listing (new
+searches), govinfo BILLSTATUS for both bills (by name: who signed or withdrew after the reps
+snapshot, and whether the rep card is stale), ASPE's poverty page (against the year calc.js cites), the IRS drop listing (new
 revenue procedures; the section 36B one lands in July) and the Census publications page. It
 prints leads in markdown. It never writes an entry: read the primary document, then write.
+
+**Cosponsor counts: compare people, never totals.** govinfo's cosponsor count and the number
+of members marked on the rep card are different quantities: the card marks the sponsor too
+and holds only current members, while govinfo keeps the line of a cosponsor who has left
+Congress. Subtracting one from the other is wrong by one or two in either direction, and the
+routine's 28 September 2026 entry did exactly that (it said H.R. 3069 gained two and S. 1506
+none; each gained one, and the entry was corrected in place). An entry states the gain the
+watcher prints ("signed after the snapshot"), names who signed and when, and reads the total
+from govinfo alone.
 
 Sources that block keyless fetches and have to be checked by hand: congress.gov itself
 (use govinfo), Health Affairs, the New York Senate bill pages.

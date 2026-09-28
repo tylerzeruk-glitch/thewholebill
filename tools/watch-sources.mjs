@@ -61,23 +61,44 @@ for (const term of FR) {
 }
 section('Federal Register', [...new Set(frLines)].sort().reverse());
 
-// --- the bills: has BILLSTATUS moved since the reps snapshot? -------------------
-// src/reps.js marks sponsor and cosponsors alike (tools/build-reps.mjs), and a
-// member who left Congress keeps their cosponsor line in the XML, so the counts
-// are not directly comparable; the signal is the XML's updateDate against the
-// snapshot's as-of date.
+// --- the bills: who has signed on since the reps snapshot? ---------------------
+// The two counts are NOT comparable: src/reps.js marks the sponsor too and only
+// holds current members, while the XML keeps the cosponsor line of a member who
+// has left Congress. So compare people, not totals: a cosponsor dated after the
+// snapshot is news; a live cosponsor (sponsor included) who is a current member
+// but not marked means the card is stale; a marked member no longer live has
+// withdrawn. The 2026-09-28 routine subtracted the totals and misreported both
+// bills; the lines below hand it the right comparison instead.
 const REPS = new Function(readFileSync(new URL('../src/reps.js', import.meta.url), 'utf8') + '; return REPS;')();
-const snap = { hr3069: Object.values(REPS.house).filter(m => m.co).length, s1506: Object.values(REPS.senate).flat().filter(m => m.co).length };
+const members = { hr3069: Object.values(REPS.house).filter(Boolean), s1506: Object.values(REPS.senate).flat().filter(Boolean) };
 const billLines = [];
 for (const [key, path, label] of [['hr3069', 'hr/BILLSTATUS-119hr3069', 'H.R. 3069'], ['s1506', 's/BILLSTATUS-119s1506', 'S. 1506']]) {
   const x = await safe(label, () => get('https://www.govinfo.gov/bulkdata/BILLSTATUS/119/' + path + '.xml'));
   if (!x) continue;
+  const tag = (t, s) => ((s.match(new RegExp('<' + t + '>([^<]*)<')) || [])[1] || '').trim();
   const block = (x.match(/<cosponsors>([\s\S]*?)<\/cosponsors>/) || ['', ''])[1];
-  const live = [...block.matchAll(/<item>([\s\S]*?)<\/item>/g)].filter(m => !/<sponsorshipWithdrawnDate>\s*\S/.test(m[1])).length;
+  const items = [...block.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(m => ({
+    id: tag('bioguideId', m[1]), name: tag('fullName', m[1]), date: tag('sponsorshipDate', m[1]), out: tag('sponsorshipWithdrawnDate', m[1]) }));
+  const live = items.filter(i => !i.out);
+  const sponsor = tag('bioguideId', (x.match(/<sponsors>([\s\S]*?)<\/sponsors>/) || ['', ''])[1]);
+  const current = new Map(members[key].map(m => [m.b, m]));
+  const marked = new Set(members[key].filter(m => m.co).map(m => m.b));
+  const liveIds = new Set([sponsor, ...live.map(i => i.id)]);
+  const who = i => `${i.name} (${i.date})`;
+  const after = live.filter(i => i.date > REPS.asOf);
+  const before = live.length - after.length;
+  const unmarked = live.filter(i => current.has(i.id) && !marked.has(i.id));
+  const departed = live.filter(i => !current.has(i.id));
+  const withdrawn = items.filter(i => i.out && i.out > REPS.asOf);
+  const dropped = [...marked].filter(b => !liveIds.has(b));
   const la = x.match(/<latestAction>[\s\S]*?<actionDate>([^<]+)<\/actionDate>[\s\S]*?<text>([^<]+)<\/text>/);
   const upd = ((x.match(/<updateDate>([^<]+)/) || [])[1] || '').slice(0, 10);
-  const moved = upd && upd > REPS.asOf;
-  billLines.push(`- ${label}: ${live} current cosponsors plus the sponsor (${snap[key]} current members marked on the site, as of ${REPS.asOf}); status updated ${upd}${moved ? ' **after the snapshot: rerun node tools/build-reps.mjs and log it**' : ''}; latest action ${la ? la[1] + ', ' + la[2].slice(0, 110) : 'unknown'}`);
+  const stale = unmarked.length || dropped.length;
+  billLines.push(`- ${label}: govinfo lists ${live.length} cosponsors plus the sponsor (status updated ${upd}; latest action ${la ? la[1] + ', ' + la[2].slice(0, 110) : 'unknown'}).`,
+    `  - Signed after the snapshot (${REPS.asOf}): ${after.length ? after.map(who).join('; ') : 'none'}. ${after.length ? `For an entry: ${before} dated on or before the snapshot, ${live.length} now, so it gained ${after.length}.` : ''}`.trimEnd(),
+    `  - Withdrawn after the snapshot: ${withdrawn.length ? withdrawn.map(i => `${i.name} (${i.out})`).join('; ') : 'none'}.`,
+    `  - On the site: ${marked.size} current members marked, sponsor included. Not the same count: ${departed.length} govinfo cosponsor${departed.length === 1 ? ' is' : 's are'} no longer serving${departed.length ? ' (' + departed.map(i => i.name).join('; ') + ')' : ''}.`,
+    `  - ${stale ? `The card is stale: ${[...unmarked.map(i => i.name + ' not marked'), ...dropped.map(b => (current.get(b) || {}).n + ' marked but not in govinfo')].join('; ')}. **Rerun node tools/build-reps.mjs and log it.**` : 'The card matches govinfo.'}`);
 }
 section('The bills (govinfo BILLSTATUS)', billLines);
 
