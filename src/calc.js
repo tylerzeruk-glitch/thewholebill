@@ -539,8 +539,17 @@
         { key:'tax', tone:4, bears:true, onPaystub:true,
           label:'Medicare payroll tax', caption:'Medicare payroll tax<br>(1.45%)', value:tax }
       ];
+      // A zero credit has four different causes, and each gets its own reason:
+      // blaming the cliff for all of them told Medicaid-eligible readers they
+      // were too rich for help (Codex review CR-003).
       note = m.overCliff
         ? 'Over the 400% cliff there is no credit at all, so the whole premium is yours.'
+        : m.belowFloor
+        ? 'Under 100% of the poverty line the law gives no credit, so this is the plan at full price.'
+        : m.medicaidLikely
+        ? 'In the Medicaid range the law gives no marketplace credit, so this is the plan at full price.'
+        : m.subsidy === 0
+        ? 'The benchmark plan here costs less than your expected share of income, so the credit works out to $0.'
         : 'The credit never touches your bank account, so most people never count it.';
     } else if (route === 'none') {
       var cash = UNINSURED.perAdult * adults + UNINSURED.perChild * kids;
