@@ -9,9 +9,15 @@ This records a read-only code review. All three findings below were reproduced b
 
 ## Findings
 
-All findings are P2 (normal-priority correctness issues). Status: open as of the reviewed commit.
+All findings are P2 (normal-priority correctness issues). Status: **fixed** on branch `fix/codex-review` (see the PR that moved this file into `docs/`), with tests that fail on the reviewed commit and pass on the fix.
+
+A fourth defect of the same kind as CR-003 was found while verifying it: the waterfall note under the marketplace chart (`routeBreakdown()` in `src/calc.js`) told every household under the cliff that "the credit never touches your bank account", including households with no credit at all. Fixed alongside CR-003.
+
+Correction to the reproduction context: when only a deduction is entered, the page holds the employer share at the survey average and moves the total, so the deduction-only case cannot produce the CR-002 conflict.
 
 ### CR-001: Zero overrides are ignored, and some negative inputs become positive
+
+**Fixed.** Both handlers keep a valid zero (`v >= 0`); `wireOverride()` now parses with `parseMoney()`, which refuses a minus sign before stripping formatting.
 
 **Location:** [src/page.html, lines 3157 to 3174](https://github.com/tylerzeruk-glitch/thewholebill/blob/e4566d1c014462e36778ea84e303f430ef434f82/src/page.html#L3157-L3174)
 
@@ -35,6 +41,8 @@ The paystub-deduction handler also rejects zero, although its `parseMoney()` fun
 
 ### CR-002: A total-premium override can leave premium components inconsistent without a warning
 
+**Fixed.** The drawer summary warns whenever the total is below the deduction in force (`S.employer.worker`), whether that deduction is the reader's or the survey average, with wording for each.
+
 **Location:** [src/page.html, lines 2493 to 2520](https://github.com/tylerzeruk-glitch/thewholebill/blob/e4566d1c014462e36778ea84e303f430ef434f82/src/page.html#L2493-L2520)  
 **Related calculation:** `employerCost()` in `src/calc.js`
 
@@ -56,6 +64,8 @@ The paystub-deduction handler also rejects zero, although its `parseMoney()` fun
 **Verification to add:** A total-only override below the effective worker contribution produces an explicit validation state. Valid total-only overrides continue to calculate correctly.
 
 ### CR-003: Marketplace headline text incorrectly attributes every zero subsidy to the 400% cliff
+
+**Fixed.** The headline and the waterfall note each branch on `overCliff`, `belowFloor`, `medicaidLikely` and a computed $0 credit, matching the eligibility box.
 
 **Location:** [src/page.html, lines 2470 to 2477](https://github.com/tylerzeruk-glitch/thewholebill/blob/e4566d1c014462e36778ea84e303f430ef434f82/src/page.html#L2470-L2477)
 

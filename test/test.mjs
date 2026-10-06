@@ -908,6 +908,79 @@ test('drawer: overrides compose, disclose, and stay in their lane', async b => {
   await p.close();
 });
 
+/* Codex review, 6 October 2026 (CR-001, CR-002). An empty field means the survey
+ * average; a zero is the reader's answer, and an employer that pays the whole
+ * premium or a year with no claims is real. Zero used to be thrown away, so the
+ * modeled $3,800 came back, and "-100" in two fields lost its minus sign and
+ * became an override of 100. A total premium below the survey-average deduction
+ * was quietly outvoted by that deduction with the summary still saying "your
+ * total premium". */
+test('drawer: zero is an answer, a minus sign is refused, an impossible total is called out', async b => {
+  const p = await page(b,1440,900);
+  const n = s => +s.replace(/[^0-9]/g,'');
+  const cards = () => p.evaluate(()=>[...document.querySelectorAll('#cards .card-i .v')].map(e=>e.textContent));
+  const whole = () => p.evaluate(()=>document.querySelector('[data-fig="route.whole"]').textContent);
+  const sum = () => p.evaluate(()=>document.getElementById('advSum').textContent.trim());
+  const on = id => p.evaluate(id=>document.getElementById(id).classList.contains('on'), id);
+  await p.locator('#adv summary').click(); await p.waitForTimeout(150);
+  const base = { c: await cards(), w: n(await whole()) };
+
+  await p.fill('#oopIn','0'); await p.waitForTimeout(250);
+  ok('a zero deductible is kept', n((await cards())[2]) === 0 && await on('oopInOvk'), (await cards())[2]);
+  ok('and comes off the whole bill', n(await whole()) === base.w - n(base.c[2]), `${base.w} -> ${await whole()}`);
+  await p.locator('#oopIn').blur(); await p.waitForTimeout(150);
+  ok('the field keeps showing the zero after it loses focus', await p.inputValue('#oopIn') === '$0.00', await p.inputValue('#oopIn'));
+
+  await p.fill('#deduct','0'); await p.waitForTimeout(250);
+  ok('a zero deduction is kept, and the employer share stays at the survey average',
+     n((await cards())[0]) === 0 && (await cards())[1] === base.c[1] && await on('deductOvk'), JSON.stringify(await cards()));
+  await p.click('#advReset'); await p.waitForTimeout(250);
+
+  for (const id of ['totPrem','oopIn','deduct']) {
+    await p.fill('#'+id,'-100'); await p.waitForTimeout(250);
+    ok(`"-100" in #${id} sets no override`, !(await on(id+'Ovk')) && JSON.stringify(await cards()) === JSON.stringify(base.c),
+       JSON.stringify(await cards()));
+    await p.fill('#'+id,''); await p.waitForTimeout(150);
+  }
+
+  await p.fill('#totPrem','5000'); await p.waitForTimeout(250);
+  ok('a total below the survey-average deduction is called out', /less than the survey average deduction/.test(await sum()), await sum());
+  await p.fill('#totPrem','30000'); await p.waitForTimeout(250);
+  ok('a workable total is not', !/less than/.test(await sum()), await sum());
+  await p.close();
+});
+
+/* Codex review CR-003. With no credit, the marketplace headline said every
+ * household was "past the 400% cliff", including ones the eligibility box had
+ * just placed in Medicaid's range or under the poverty line; the waterfall note
+ * said "the credit never touches your bank account" to households with no
+ * credit at all. Each cause of a zero credit gets its own reason, on both. */
+test('marketplace: every reason for a zero credit is named for what it is', async b => {
+  const p = await page(b, 1280, 900);
+  const read = () => p.evaluate(() => ({ sub: document.getElementById('bigSub').textContent,
+    wf: document.getElementById('wfNote').textContent }));
+  const zip = async z => { await p.locator('#zip').fill(z); await p.locator('#zipGo').click(); await p.waitForTimeout(350); };
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+
+  await setIncome(p, 40000);
+  let t = await read();
+  ok('with a credit: the taxpayer share, and the credit note', /carried by taxpayers/.test(t.sub) && /never touches your bank account/.test(t.wf), JSON.stringify(t));
+  await setIncome(p, 240000); t = await read();
+  ok('over the cliff: the cliff, on both', /400% cliff/.test(t.sub) && /400% cliff/.test(t.wf), JSON.stringify(t));
+  await setIncome(p, 30000); t = await read();   // Dallas family of four at 93%
+  ok('below the floor: the floor, never the cliff', /Under 100% of the poverty line/.test(t.sub) && /Under 100% of the poverty line/.test(t.wf)
+     && !/cliff|never touches/.test(t.sub + t.wf), JSON.stringify(t));
+  await zip('06106'); await setAges(p, [40]); await setIncome(p, 20000);   // Hartford, one adult at 128%
+  t = await read();
+  ok('Medicaid range: Medicaid, never the cliff', /Medicaid/.test(t.sub) && /Medicaid/.test(t.wf)
+     && !/cliff|never touches/.test(t.sub + t.wf), JSON.stringify(t));
+  await zip('20001'); await setAges(p, [21]); await setIncome(p, 62000);   // DC, 21, at 396%: the benchmark is under the expected share
+  t = await read();
+  ok('a credit that works out to $0: says so, never the cliff', /works out to \$0/.test(t.sub) && /works out to \$0/.test(t.wf)
+     && !/cliff|never touches/.test(t.sub + t.wf), JSON.stringify(t));
+  await p.close();
+});
+
 /* The drawer is optional input, and the word itself has to be on the summary --
  * the teal edge and the state line imply it, but implication is not a label.
  * The word is muted, not teal: it qualifies the title, it is not the title.
@@ -1924,6 +1997,9 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
     await scan(`zip ${z}`);
   }
   await setIncome(p, 20000); await scan('Medicaid range in an expansion state');
+  await p.locator('#zip').fill('20001'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  await setAges(p, [21]); await setIncome(p, 62000); await scan('a credit that works out to $0, under the cliff');
+  await setAges(p, [41, 39, 12, 9]);
   await setIncome(p, 95000);
   await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(250);   // the drawer belongs to the employer route
   await p.locator('#adv summary').click(); await p.waitForTimeout(150);

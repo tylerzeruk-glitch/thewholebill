@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'review-fixes-2026-10-06', date: '2026-10-06', kind: 'site',
+    title: 'Fixed: the plan-number fields now accept a zero, and a household with no tax credit is told the real reason.',
+    body: 'An outside code review found four defects, all now fixed. A zero typed as your deductible or premium deduction was ignored and the survey average used instead, and a minus sign in two fields was dropped, so a negative number became a positive one. A total premium below the survey average deduction was outvoted by that deduction without a word; the drawer now says so. And on the marketplace route, every household without a credit was told it was past the 400% cliff, including households under the poverty line, in Medicaid&rsquo;s range, or whose credit simply works out to $0. Each now gets its own reason, matching the eligibility box.',
+    see: { id: 'credit-floor', text: 'Who gets no credit, and why' }
+  },
+  {
     id: 'reps-2026-09-28', date: '2026-09-28', kind: 'site',
     title: 'The representatives snapshot is refreshed as of 28 September: 116 House members and 19 senators now marked as sponsor or cosponsor.',
     body: 'Rebuilt after the weekly watcher found both bills&rsquo; cosponsor lists had moved, so the rep card now shows Rep. Aisha Wahab and Sen. Ron Wyden as cosponsors. Membership is unchanged: Florida&rsquo;s 20th and Texas&rsquo;s 23rd are still vacant. Every cosponsor claim on the card carries the new as-of date.',

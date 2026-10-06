@@ -2469,12 +2469,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     // The paystub sentence is the employer-route thesis. On the marketplace the
     // buyer writes every cheque themselves, so saying it there reads wrong; the
-    // fact worth surfacing is the taxpayer share, or its absence past the cliff.
+    // fact worth surfacing is the taxpayer share, or why there is none. A zero
+    // credit has four causes, and the reason given must match the eligibility box.
+    var mk = S.marketplace;
     byId("bigSub").innerHTML = state.route === "marketplace"
       ? (R.borne < R.whole
           ? 'Nothing here hides on a paystub. <b style="color:var(--ik);font-weight:400">' +
             fmt(R.whole - R.borne) + '</b> of it is carried by taxpayers, not by you.'
-          : 'Nothing here hides on a paystub, and past the 400% cliff nobody shares it: every dollar is yours.')
+          : mk.overCliff
+          ? 'Nothing here hides on a paystub, and past the 400% cliff nobody shares it: every dollar is yours.'
+          : mk.belowFloor
+          ? 'Nothing here hides on a paystub. Under 100% of the poverty line the law gives no tax credit, so this is the plan at full price.'
+          : mk.medicaidLikely
+          ? 'Nothing here hides on a paystub. In Medicaid’s range the law gives no marketplace credit, so this is the plan at full price. Medicaid itself would cost far less.'
+          : 'Nothing here hides on a paystub. The benchmark plan here costs less than this household’s expected share of income, so the credit works out to $0 and every dollar is yours.')
       : '<b style="color:var(--ik);font-weight:400">' + fmt(R.offPaystub) +
         (R.uninsured ? '</b> of that is care; the rest is payroll tax.' : '</b> of that never appears on a paystub.') +
         (R.borne < R.whole ? ' A further ' + fmt(R.whole - R.borne) + ' is carried by taxpayers, not by you.' : '');
@@ -2515,9 +2523,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         : own.length === 3
           ? "Currently using your plan&rsquo;s numbers. Reset to use the survey averages."
           : "Currently using your " + own.join(" and ") + ", with survey averages for the rest.";
-      if (state.totPrem != null && state.deductPer != null &&
-          state.totPrem < state.deductPer * state.period)
-        sum += ' <span style="color:var(--c2)">Total premium is less than the deduction. Check the two.</span>';
+      // A total below the deduction in force is impossible, whether that deduction
+      // is the reader's or the survey average: calc.js clamps the employer share to
+      // zero and the figures run on the deduction, not the total they typed.
+      if (state.totPrem != null && state.totPrem < S.employer.worker)
+        sum += ' <span style="color:var(--c2)">' + (state.deductPer != null
+          ? 'Total premium is less than the deduction. Check the two.'
+          : 'Total premium is less than the survey average deduction. Enter your own deduction too.') + '</span>';
       byId("advSum").innerHTML = sum;
       byId("advReset").hidden = own.length === 0;
       byId("deductOvk").classList.toggle("on", state.deductPer != null);
@@ -3156,16 +3168,19 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
   byId("deduct").addEventListener("input", function(){
     if (state.route !== "employer") return;
+    // An empty field and a zero are different answers: empty means the survey
+    // average, zero means "my employer pays it all". parseMoney refuses a minus
+    // sign rather than stripping it, so "-50" can never become 50.
     var v = parseMoney(this.value);
-    state.deductPer = (v != null && v > 0 && v < 100000) ? v : null;
+    state.deductPer = (v != null && v >= 0 && v < 100000) ? v : null;
     paint();
   });
   byId("deduct").addEventListener("change", function(){ paint(); });
   function wireOverride(id, key, max){
     byId(id).addEventListener("input", function(){
       if (state.route !== "employer") return;
-      var v = parseFloat(this.value.replace(/[^0-9.]/g, ""));
-      state[key] = (isFinite(v) && v > 0 && v < max) ? v : null;
+      var v = parseMoney(this.value);
+      state[key] = (v != null && v >= 0 && v < max) ? v : null;
       paint();
     });
     byId(id).addEventListener("change", function(){ paint(); });
