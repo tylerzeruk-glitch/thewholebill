@@ -2758,6 +2758,26 @@ test('other coverage: the pointer, the objection and the methodology row agree',
   await p.close();
 });
 
+/* The footer's contact link was underlined by a border-bottom, which the 44px
+ * hit-area padding pushed 14px below the text. It is a text underline now, and
+ * every document carries the copyright line. */
+test('footer: copyright on every document, contact underline on the text', async b => {
+  for (const doc of ['index.html', 'methodology/index.html', 'updates/index.html']) {
+    const p = await page(b, 1280, 900, false, doc);
+    const f = await p.evaluate(() => {
+      const a = document.querySelector('footer a.q.mail'), cs = a && getComputedStyle(a);
+      return { copy: /© 2026 The Whole Bill/.test(document.querySelector('footer').textContent),
+        border: cs && cs.borderBottomStyle, deco: cs && cs.textDecorationLine, offset: cs && cs.textUnderlineOffset,
+        h: a && a.getBoundingClientRect().height };
+    });
+    ok(`${doc}: the copyright line`, f.copy);
+    ok(`${doc}: the contact link is underlined on its text, not 14px below it`,
+       f.border === 'none' && f.deco === 'underline' && f.offset === '4px', JSON.stringify(f));
+    ok(`${doc}: and still a 44px target`, f.h >= 44, String(f.h));
+    await p.close();
+  }
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;
