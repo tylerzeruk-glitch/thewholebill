@@ -86,6 +86,10 @@ p{margin:0;text-wrap:pretty;font-family:var(--serif)}
 .masthead{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:40px 0 22px;border-bottom:1px solid var(--prule);flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit;padding:10px 0;margin:-10px 0}   /* 44px hit area on a 24px mark */
 footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /* 44px hit area on a 16px line */
+/* That padding put a border-bottom 14px under the text, so the footer's one underlined
+   link draws a text underline instead: it sits on the letters whatever the hit area is. */
+footer a.q.mail{border-bottom:none;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;text-decoration-color:var(--irule-2)}
+footer a.q.mail:hover{text-decoration-color:currentColor}
 .brand svg{display:block;flex-shrink:0}
 .wordmark{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.012em;line-height:1;white-space:nowrap}
 .domain{}
@@ -1747,8 +1751,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     <div style="height:1px;background:var(--irule)"></div>
     <div class="row" style="justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:12.5px;color:var(--ifaint)">
       <span>The starting household is an example; every figure follows the one you set. Fonts load from Google and member portraits from a public GitHub collection; nothing else leaves this page.</span>
-      <span>Spotted something wrong? <a class="q" href="mailto:contact@thewholebill.org" style="color:inherit;border-bottom-color:var(--irule-2)">contact@thewholebill.org</a></span>
+      <span>Spotted something wrong? <a class="q mail" href="mailto:contact@thewholebill.org" style="color:inherit">contact@thewholebill.org</a></span>
     </div>
+    <div style="font-size:12.5px;color:var(--ifaint)">&copy; 2026 The Whole Bill</div>
   </div>
 </footer>
 
