@@ -1783,7 +1783,7 @@ test('launch: share metadata, 404, crawler files, no artifact in dist', async b 
   const { existsSync, readFileSync: rf } = await import('node:fs');
   ok('the artifact is not in the deploy directory', !existsSync(resolve(HERE, '../dist/artifact.html')));
   ok('the artifact builds outside it', existsSync(resolve(HERE, '../preview/artifact.html')));
-  for (const f of ['card.png', '404.html', 'robots.txt', 'sitemap.txt', '_headers'])
+  for (const f of ['card.png', 'mark.png', '404.html', 'robots.txt', 'sitemap.txt', '_headers'])
     ok(f + ' ships', existsSync(resolve(HERE, '../dist/' + f)));
   ok('the sitemap lists all three pages', /thewholebill\.org\/\n.*thewholebill\.org\/methodology\n.*thewholebill\.org\/updates/s.test(rf(resolve(HERE, '../dist/sitemap.txt'), 'utf-8')));
 

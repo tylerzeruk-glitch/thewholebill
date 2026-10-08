@@ -20,6 +20,8 @@
 #                                 one-path bypass (see docs/DEPLOY.md)
 #   dist/card.png, 404.html, robots.txt, sitemap.txt, _headers
 #                                 launch furniture, copied verbatim from src/
+#   dist/mark.png                 the logo.svg glyph as a 120px PNG, for email
+#                                 signatures (mail clients do not render SVG)
 # The source template is never modified.
 set -e
 cd "$(dirname "$0")"
@@ -287,7 +289,7 @@ io.open('dist/updates/index.html', 'w', encoding='utf-8').write(
     head + upd_head + '\n</head>\n<body>\n' + ubody + '\n</body>\n</html>\n')
 PY
 cp src/logo.svg dist/logo.svg
-cp src/card.png src/404.html src/robots.txt src/sitemap.txt src/llms.txt dist/
+cp src/card.png src/mark.png src/404.html src/robots.txt src/sitemap.txt src/llms.txt dist/
 cp src/34725d1f479122b2b08d228b2350081e.txt dist/   # the IndexNow key, public by design (it proves the host, not a secret)
 # _headers: the index CSP names each inline script by hash (see src/_headers)
 python3 - <<'PY2'
