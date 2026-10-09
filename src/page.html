@@ -100,7 +100,10 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .brand svg{display:block;flex-shrink:0}
 .wordmark{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.012em;line-height:1;white-space:nowrap}
 .domain{}
-.nav{display:flex;gap:clamp(16px,2.4vw,34px);font-size:13px;color:var(--pm);font-stretch:85%;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.nav{display:flex;gap:clamp(16px,2.4vw,34px);color:var(--pm)}
+/* One link voice for the header and footer navigation (the footer row stays visible on
+   phones, where .nav is hidden, so the type lives in its own rule). */
+.nav,.foot-nav{font-size:13px;font-stretch:85%;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
 .hero-inner{padding:clamp(28px,4vw,64px) 0 clamp(40px,6vw,72px);display:grid;grid-template-columns:minmax(0,1fr) 336px;grid-template-areas:"head head" "body side";gap:clamp(24px,3vw,44px) clamp(28px,4vw,72px);align-items:end}
 /* The ZIP field is the page's one action, so it must be on screen at load. The headline
    spans both columns (beside the dateline it set one or two words a line and pushed the
@@ -1840,7 +1843,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </a>
         <span class="domain" style="color:var(--ifaint)">thewholebill.org</span>
       </div>
-      <div class="row" style="gap:28px;font-size:13.5px;flex-wrap:wrap">
+      <div class="row foot-nav" style="gap:28px;flex-wrap:wrap">
         <a class="q" href="#/methodology" style="color:inherit;border:none">Methodology &amp; sources</a>
         <a class="q" href="#/updates" style="color:inherit;border:none">What changed</a>
         <a class="q" href="/updates.xml" style="color:inherit;border:none">RSS</a>
