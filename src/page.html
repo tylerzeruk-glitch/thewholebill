@@ -546,6 +546,8 @@ h1.as-h2{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform
   .motion .reveal:not(.in) .track,.motion .reveal:not(.in) .bar-bg{clip-path:inset(0 100% 0 0)}
   .motion .reveal:not(.in) .range{clip-path:inset(-12px 100% -12px 0)}
   .motion .reveal:not(.in) .wcol{clip-path:inset(100% 0 0 0)}
+  /* a model change replays the comparison bars' wipe: snap hidden, then release */
+  .motion .replay .bar-bg{transition:none;clip-path:inset(0 100% 0 0)}
   .motion .cmp-row:nth-child(2) .track{transition-delay:.3s}
   .motion .bar-row:nth-child(2) .bar-bg{transition-delay:.18s} .motion .bar-row:nth-child(3) .bar-bg{transition-delay:.36s}
   .motion .wcol:nth-child(2){transition-delay:.18s} .motion .wcol:nth-child(3){transition-delay:.36s}
@@ -3540,6 +3542,22 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     });
   }, { threshold: 0.18 });
   sections.forEach(function(sec){ secIO.observe(sec); });
+
+  // Picking a different financing model replays the comparison bars' wipe (pills on
+  // desktop, the select on phones). #modelPick always holds the current model, so a
+  // click on the pill already chosen replays nothing.
+  var pick = document.getElementById("modelPick"), lastModel = pick ? pick.value : "";
+  function replayBars(){
+    if (!pick || pick.value === lastModel) return;
+    lastModel = pick.value;
+    var sec = document.getElementById("empBar").closest("section");
+    if (!sec.classList.contains("in")) return;      // its first reveal will play anyway
+    sec.classList.add("replay");
+    void sec.offsetWidth;                            // commit the hidden state before releasing it
+    sec.classList.remove("replay");
+  }
+  document.addEventListener("click", function(e){ if (e.target.closest("#pills .pill")) requestAnimationFrame(replayBars); });
+  if (pick) pick.addEventListener("change", function(){ requestAnimationFrame(replayBars); });
 
   // The cliff line draws itself once.
   function drawCliff(){

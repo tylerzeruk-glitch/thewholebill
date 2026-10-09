@@ -2859,6 +2859,17 @@ test('public notice: motion settles on the same figures and leaves the letter al
   await q.waitForTimeout(900);
   ok('after an input change, the eased figures land on the new values', await q.evaluate(() =>
     document.querySelector('.save .v').textContent === document.querySelector('.band-stat.teal .band-v').textContent));
+  // a model change replays the comparison bars' wipe; the same model does not
+  const wipe = () => q.evaluate(() => getComputedStyle(document.getElementById('uBar')).clipPath);
+  await q.evaluate(() => document.getElementById('uBar').scrollIntoView({ block: 'center' })); await q.waitForTimeout(1500);
+  ok('settled, the bars are fully shown', /inset\(0(px)?\)|none/.test(await wipe()), await wipe());
+  await q.locator('#pills .pill').nth(3).click(); await q.waitForTimeout(150);
+  const mid = await wipe();
+  ok('a different model replays the wipe', mid !== 'none' && !/^inset\(0(px)?\)$/.test(mid), mid);
+  await q.waitForTimeout(1700);
+  ok('and it settles fully shown again', /inset\(0(px)?\)|none/.test(await wipe()), await wipe());
+  await q.locator('#pills .pill').nth(3).click(); await q.waitForTimeout(150);
+  ok('the same model again replays nothing', /inset\(0(px)?\)|none/.test(await wipe()), await wipe());
   await q.close();
 });
 
