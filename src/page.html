@@ -90,7 +90,7 @@ p{margin:0;text-wrap:pretty;font-family:var(--serif)}
 .rule{height:1px;background:var(--prule)}
 
 /* ---------- hero ---------- */
-.masthead{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:40px 0 22px;border-bottom:1px solid var(--prule);flex-wrap:wrap}
+.masthead{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:28px 0 20px;border-bottom:1px solid var(--prule);flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit;padding:10px 0;margin:-10px 0}   /* 44px hit area on a 24px mark */
 footer a.q,.footline a.q{display:inline-block;padding:14px 0;margin:-14px 0}   /* 44px hit area on a 16px line */
 /* That padding put a border-bottom 14px under the text, so the footer's one underlined
@@ -101,7 +101,15 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .wordmark{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.012em;line-height:1;white-space:nowrap}
 .domain{}
 .nav{display:flex;gap:clamp(16px,2.4vw,34px);font-size:13px;color:var(--pm);font-stretch:85%;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
-.hero-inner{padding:clamp(48px,7vw,104px) 0 clamp(40px,6vw,72px);display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:clamp(28px,4vw,72px);align-items:end}
+.hero-inner{padding:clamp(28px,4vw,64px) 0 clamp(40px,6vw,72px);display:grid;grid-template-columns:minmax(0,1fr) 336px;grid-template-areas:"head head" "body side";gap:clamp(24px,3vw,44px) clamp(28px,4vw,72px);align-items:end}
+/* The ZIP field is the page's one action, so it must be on screen at load. The headline
+   spans both columns (beside the dateline it set one or two words a line and pushed the
+   field below the fold at 1000x625), and its size answers to the window's height as well
+   as its width. The suite checks the field is visible on load at laptop and phone sizes. */
+.hero-head{grid-area:head;min-width:0}
+.hero-body{grid-area:body;min-width:0}
+.hero-inner .dateline{grid-area:side}
+.hero-head h1{font-size:clamp(48px,min(8.4vw,13vh),124px)}
 /* The rule down its left edge is a visible edge, and so is the bottom border of
    the area-picker buttons opposite it -- so these two align edge to edge, and the
    6px margin that used to sit here left them 6px apart. Near-miss alignment reads
@@ -122,7 +130,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .areapick{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .areapick button{font-family:var(--sans);font-size:13px;padding:8px 13px;border-radius:0;border:1px solid var(--pctrl);background:var(--paper-card);color:var(--pk);cursor:pointer}
 .areapick button:hover{background:var(--paper-tint)}
-.zipbar{display:flex;gap:12px;align-items:center;margin-top:44px;flex-wrap:wrap}
+.zipbar{display:flex;gap:12px;align-items:center;margin-top:28px;flex-wrap:wrap}
 .zipfield{display:flex;align-items:center;border:2px solid var(--pk);border-radius:0;overflow:hidden;background:var(--paper-card)}
 .zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;color:var(--pk);border-right:1px solid var(--prule)}
 .zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent;font-variant-numeric:tabular-nums}
@@ -553,9 +561,9 @@ h1.as-h2{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform
    waterfall builds column by column; widths ease when an input changes. The figures'
    count-up is the script's job. */
 @media (prefers-reduced-motion:no-preference){
-  .hero-inner > div > *,.hero-inner .dateline{animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) both}
-  .hero-inner > div > :nth-child(2){animation-delay:.08s} .hero-inner > div > :nth-child(3){animation-delay:.16s}
-  .hero-inner > div > :nth-child(n+4){animation-delay:.24s} .hero-inner .dateline{animation-delay:.32s}
+  .hero-head > *,.hero-body > *,.hero-inner .dateline{animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) both}
+  .hero-head > h1{animation-delay:.08s} .hero-body > :first-child{animation-delay:.16s}
+  .hero-body > :nth-child(n+2){animation-delay:.24s} .hero-inner .dateline{animation-delay:.32s}
   @keyframes pn-rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
   .motion .track,.motion .bar-bg{clip-path:inset(0 0 0 0);transition:clip-path 1.2s cubic-bezier(.2,.7,.2,1)}
   .motion .range{clip-path:inset(-12px 0 -12px 0);transition:clip-path 1.2s cubic-bezier(.2,.7,.2,1)}
@@ -663,7 +671,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .cliffstats{grid-template-columns:minmax(0,1fr)}
   .cstat{border-right:none;border-bottom:1px solid var(--irule)}
   .sticky-in{gap:16px}          /* still the one-row bar down to 900px */
-  .hero-inner{grid-template-columns:minmax(0,1fr);gap:36px}
+  .hero-inner{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "body" "side";gap:28px}
   .meth .grid2{gap:20px}
 }
 
@@ -727,7 +735,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .cards{grid-template-columns:minmax(0,1fr)}
   .sw{width:9px;height:9px}
   .nav{display:none}
-  .hero-inner{grid-template-columns:minmax(0,1fr)}
+  .hero-inner{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "body" "side"}
   .letter .hd,.letter .ft{padding-left:24px;padding-right:24px}
   .letter .ft p{text-align:left;max-width:none}
   .card-p{padding:26px 24px}
@@ -829,10 +837,12 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <nav class="nav"><a class="q" href="#/methodology" style="color:inherit;border:none">Methodology &amp; sources</a><a class="q" href="#/updates" style="color:inherit;border:none">What changed</a></nav>
     </header>
     <div class="hero-inner">
-      <div>
-      <div class="eyebrow p" style="margin-bottom:32px">A healthcare cost calculator</div>
+      <div class="hero-head">
+      <div class="eyebrow p" style="margin-bottom:20px">A healthcare cost calculator</div>
       <h1>What does your healthcare <em>actually</em> cost?</h1>
-      <p class="lede" style="margin-top:36px;max-width:560px">Not the number on your paystub. The whole number, including the share your employer pays on your behalf, which is your money too.</p>
+      </div>
+      <div class="hero-body">
+      <p class="lede" style="max-width:560px">Not the number on your paystub. The whole number, including the share your employer pays on your behalf, which is your money too.</p>
       <div class="zipbar">
         <div class="zipfield">
           <div class="k">Zip</div>
