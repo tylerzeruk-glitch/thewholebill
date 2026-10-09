@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'redesign-2026-10-09', date: '2026-10-09', kind: 'site',
+    title: 'The site has a new look: bolder headlines, two live stat bands, and figures that move when your numbers do.',
+    body: 'No number, source or method changed; every figure is computed exactly as before, and the letter is untouched. Headlines are set in a condensed face, the type is down from three families to two and from about 300 KB of fonts to about 140 KB, and two bands now carry the figures that matter most for your household: what never reaches your paystub, and what universal coverage would leave you. Bars and figures animate as you change your inputs, and stay still if your device asks for reduced motion. It also fixes the financing-model buttons, which had been showing in your browser&rsquo;s default font.',
+    see: { id: 'kinds', text: 'How every figure is computed' }
+  },
+  {
     id: 'review-fixes-2026-10-06', date: '2026-10-06', kind: 'site',
     title: 'Fixed: the plan-number fields now accept a zero, and a household with no tax credit is told the real reason.',
     body: 'An outside code review found four defects, all now fixed. A zero typed as your deductible or premium deduction was ignored and the survey average used instead, and a minus sign in two fields was dropped, so a negative number became a positive one. A total premium below the survey average deduction was outvoted by that deduction without a word; the drawer now says so. And on the marketplace route, every household without a credit was told it was past the 400% cliff, including households under the poverty line, in Medicaid&rsquo;s range, or whose credit simply works out to $0. Each now gets its own reason, matching the eligibility box.',
