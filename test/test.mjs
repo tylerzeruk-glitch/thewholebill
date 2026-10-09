@@ -1609,8 +1609,8 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
     sal: document.getElementById('letterBd').innerText.split('\n')[0] }));
 
   let r = await st();
-  ok('a one-district ZIP names the member', /Crockett \(D\)/.test(r.name), r.name);
-  ok('and says where the district came from', /from ZIP 75201/.test(r.dist));
+  ok('a one-district ZIP names the member', /Crockett\s\(D\)/.test(r.name), r.name);
+  ok('and says where the district came from', /from ZIP\u00a075201/.test(r.dist));
   ok('with the boundary hedge showing', r.hedge);
   ok('cosponsorship is stated', /Cosponsor of H\.R\. 3069/.test(r.pos), r.pos);
   ok('the letter greets them by name', /Dear Representative Crockett,/.test(r.sal), r.sal);
@@ -1624,7 +1624,7 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
 
   await p.locator('#repPickBtns button[data-d="NY-12"]').click(); await p.waitForTimeout(300);
   r = await st();
-  ok('picking resolves it', /Nadler \(D\)/.test(r.name) && /your pick/.test(r.dist), r.name);
+  ok('picking resolves it', /Nadler\s\(D\)/.test(r.name) && /your pick/.test(r.dist), r.name);
   ok('and the letter follows', /Dear Representative Nadler,/.test(r.sal));
 
   await p.locator('#zip').fill('33125'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
@@ -1654,7 +1654,7 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   // at-large state that must never render as a "0th district"
   await p.locator('#zip').fill('06468'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   r = await st();
-  ok('a ZIP outside the old metros resolves', /Himes \(D\)/.test(r.name), r.name);
+  ok('a ZIP outside the old metros resolves', /Himes\s\(D\)/.test(r.name), r.name);
   ok('and names the district', /Connecticut’s 4th district/.test(r.dist), r.dist);
   await p.locator('#zip').fill('99501'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   r = await st();
@@ -2813,25 +2813,32 @@ test('footer: copyright on every document, contact underline on the text', async
 /* Public Notice (2026-10). Two families only: Archivo for everything that is not
  * reading, Newsreader roman for reading. Newsreader loads without an italic, so any
  * italic left in the page would be a synthesized slant; none may render. */
-test('public notice: two font families, nothing in a synthesized italic', async b => {
+/* Newsroom type (2026-10): Newsreader for headlines and reading, with its real italic;
+ * Hanken Grotesk for figures, labels and controls, roman only. So an italic is fine in
+ * the serif and a synthesized one in the sans. Buttons do not inherit the page font,
+ * which is how the model pills once rendered in Arial: a third family fails here. */
+test('newsroom type: two font families, italic only where a real italic loads', async b => {
   const p = await page(b, 1280, 900);
   const f = await p.evaluate(async () => {
     await document.fonts.ready;
     const link = [...document.querySelectorAll('link[rel="stylesheet"]')].map(l => l.href).find(h => /fonts\.googleapis/.test(h)) || '';
-    const used = new Set(), italic = [];
+    const used = new Set(), italic = [], fake = [];
     for (const el of document.querySelectorAll('body *')) {
       if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') continue;
       if (![...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) continue;
-      const cs = getComputedStyle(el);
-      used.add(cs.fontFamily.split(',')[0].replace(/['"]/g, '').trim());
-      if (cs.fontStyle !== 'normal') italic.push(el.tagName + ' ' + el.textContent.trim().slice(0, 30));
+      const cs = getComputedStyle(el), fam = cs.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+      used.add(fam);
+      if (cs.fontStyle !== 'normal') (fam === 'Newsreader' ? italic : fake).push(el.tagName + ' ' + el.textContent.trim().slice(0, 30));
     }
-    return { link, used: [...used], italic: italic.slice(0, 5) };
+    return { link, used: [...used], italic: italic.length, fake: fake.slice(0, 5),
+             loaded: [...document.fonts].filter(x => x.status === 'loaded').map(x => x.family.replace(/['"]/g, '') + ' ' + x.style) };
   });
-  ok('one stylesheet link: Archivo plus Newsreader roman, no italic axis',
-     /family=Archivo:wdth,wght@/.test(f.link) && /family=Newsreader:wght@400\.\.500/.test(f.link) && !/ital/.test(f.link) && !/Public\+Sans/.test(f.link), f.link);
-  ok('rendered text uses only the two families', f.used.every(x => x === 'Archivo' || x === 'Newsreader'), f.used.join(', '));
-  ok('no visible text is set in italic', f.italic.length === 0, f.italic.join(' | '));
+  ok('one stylesheet link: Newsreader with its italic, Hanken Grotesk roman, nothing else',
+     /family=Newsreader:ital,opsz,wght@0,6\.\.72,400\.\.500;1,6\.\.72,400\.\.500/.test(f.link) && /family=Hanken\+Grotesk:wght@400\.\.500/.test(f.link)
+     && (f.link.match(/family=/g) || []).length === 2, f.link);
+  ok('rendered text uses only the two families', f.used.every(x => x === 'Hanken Grotesk' || x === 'Newsreader'), f.used.join(', '));
+  ok('the italics on the page are the serif\'s own', f.italic > 0 && f.loaded.some(x => x === 'Newsreader italic'), f.italic + ' italic runs; ' + [...new Set(f.loaded)].join(', '));
+  ok('nothing in the sans is set in italic (it would be synthesized)', f.fake.length === 0, f.fake.join(' | '));
   await p.close();
 });
 
@@ -2979,7 +2986,7 @@ test('letter: the dated cosponsor sentence, for every recipient case', async b =
   await p.close();
 });
 
-/* Header and footer navigation share one link voice: condensed, uppercase, tracked. */
+/* Header and footer navigation share one link voice: plain lowercase, untracked. */
 test('footer: its links match the header navigation', async b => {
   for (const [w, m] of [[1280, false], [390, true]]) {
     const p = await page(b, w, 900, m);
@@ -2988,7 +2995,7 @@ test('footer: its links match the header navigation', async b => {
       const foot = [...document.querySelectorAll('footer .foot-nav a')], head = document.querySelector('.masthead .nav a');
       return { n: foot.length, foot: [...new Set(foot.map(st))], head: st(head) };
     });
-    ok(`${w}px: footer links are uppercase and styled like the header's`, r.n >= 3 && r.foot.length === 1 && r.foot[0] === r.head && /uppercase/.test(r.foot[0]), JSON.stringify(r));
+    ok(`${w}px: footer links are lowercase and styled like the header's`, r.n >= 3 && r.foot.length === 1 && r.foot[0] === r.head && /lowercase/.test(r.foot[0]), JSON.stringify(r));
     await p.close();
   }
 });
