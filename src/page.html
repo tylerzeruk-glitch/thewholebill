@@ -514,6 +514,23 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
 .letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:17.5px;line-height:1.72;color:#2A2620}
 .letter .ft{display:flex;gap:10px;padding:22px 36px;border-top:1px solid var(--prule-soft);align-items:center;flex-wrap:wrap}
+/* The letter's buttons follow the LETTER's width, not the window's: the letter sits
+   beside the rep card on wide screens and runs full width below 1100px, so a window
+   breakpoint put "Mail app" alone on a second row at in-between sizes. The three
+   secondary actions are one group that never splits. Measured in Archivo, all four
+   need about 650px of letter (580px of buttons plus padding); below 664px the primary
+   takes its own row over three equal columns, and below 420px each takes a row. */
+.letter{container-type:inline-size}
+.ft-sec{display:flex;gap:10px}
+@container (max-width:663px){
+  .letter .ft{display:grid;grid-template-columns:minmax(0,1fr)}
+  .letter .ft #formBtn{width:100%}
+  .ft-sec{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+  .ft-sec > .btn-ghost{padding:0 8px}
+}
+@container (max-width:419px){
+  .ft-sec{grid-auto-flow:row}
+}
 .letter .bd[contenteditable]:focus-visible{outline:2px solid var(--amber-deep);outline-offset:-2px}
 .letter .bd .hint{color:var(--pm)}
 /* Print = the letter and nothing else. The Print button marks the letter's
@@ -1440,10 +1457,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                goes to the recipient's official site; the mailto survives as
                the secondary way out (mail it to yourself, forward it on). -->
           <a class="btn-dark" id="formBtn" href="#" target="_blank" rel="noopener" style="height:50px;padding:0 30px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Copy it to their site &rarr;</a>
-          <button class="btn-ghost" id="copyBtn" type="button">Copy text</button>
-          <button class="btn-ghost" id="printBtn" type="button">Print</button>
-          <a class="btn-ghost" id="sendBtn" href="#" style="height:48px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Mail app</a>
-          <div class="grow"></div>
+          <div class="ft-sec">
+            <button class="btn-ghost" id="copyBtn" type="button">Copy text</button>
+            <button class="btn-ghost" id="printBtn" type="button">Print</button>
+            <a class="btn-ghost" id="sendBtn" href="#" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Mail app</a>
+          </div>
           <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote"><span id="ftNoteSite">Congressional offices take letters through the forms on their own sites, not a public inbox. The dark button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</span><span id="ftNoteNoSite" hidden>Congressional offices take letters through the forms on their own sites, not a public inbox. We do not have this member&rsquo;s site on file, so the dark button is off: use Copy text, then paste the letter into the contact form listed on their house.gov page. We never see your letter.</span><span id="ftLong" hidden> Your letter is longer than some mail apps accept in a link, so the Mail app button copies it and opens a blank message with the subject filled in; paste the letter in.</span></p>
         </div>
       </div>

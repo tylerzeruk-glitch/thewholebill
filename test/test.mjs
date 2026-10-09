@@ -2873,6 +2873,28 @@ test('public notice: motion settles on the same figures and leaves the letter al
   await q.close();
 });
 
+/* The letter's buttons wrap by the letter's own width: one row when all four fit,
+ * the primary over three equal columns when they do not, one per row on the
+ * narrowest letters. Never a lone secondary button on a row of its own, and never
+ * a button past the edge of the letter. */
+test('letter buttons: one row, two rows or a stack, never a stray button', async b => {
+  for (const w of [1440, 1280, 1180, 1100, 1024, 900, 820, 768, 600, 480, 390, 320]) {
+    const p = await page(b, w, 900, w < 600);
+    const r = await p.evaluate(() => {
+      const ft = document.querySelector('.letter .ft').getBoundingClientRect();
+      const box = id => document.getElementById(id).getBoundingClientRect();
+      const ids = ['formBtn', 'copyBtn', 'printBtn', 'sendBtn'], bx = ids.map(box);
+      const rows = [...new Set(bx.map(x => Math.round(x.top)))].length;
+      const sec = bx.slice(1), secRows = [...new Set(sec.map(x => Math.round(x.top)))].length;
+      return { rows, secRows, inside: bx.every(x => x.left >= ft.left - 0.5 && x.right <= ft.right + 0.5),
+               equal: Math.max(...sec.map(x => x.width)) - Math.min(...sec.map(x => x.width)), letter: Math.round(ft.width) };
+    });
+    const shape = r.rows === 1 ? 'one row' : (r.rows === 2 && r.secRows === 1 && r.equal < 1) ? 'two rows' : r.rows === 4 ? 'stack' : 'broken';
+    ok(`${w}px (letter ${r.letter}px): ${shape}, inside the letter`, shape !== 'broken' && r.inside, JSON.stringify(r));
+    await p.close();
+  }
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;
