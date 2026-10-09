@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'newsroom-type-2026-10-09', date: '2026-10-09', kind: 'site',
+    title: 'New type: headlines now in a newspaper serif, figures in a plainer sans, and a cleaner read on phones.',
+    body: 'No number, source or method changed. Headlines move from condensed capitals to Newsreader, the face the page already used for reading, with their emphasis in its italic; figures, labels and buttons move to Hanken Grotesk, whose figures still line up in columns. The header and footer links are lowercase. On phones, the ZIP button no longer breaks onto two lines, five digits fit the ZIP field even on the narrowest screens, the methodology tables stack instead of squeezing their text into a sliver, and labels no longer end on a single stranded word.',
+    see: { id: 'kinds', text: 'How every figure is computed' }
+  },
+  {
     id: 'letter-cosponsors-2026-10-09', date: '2026-10-09', kind: 'site',
     title: 'The letter now tells your member of Congress where their colleagues stand, and pastes into contact forms with its paragraphs intact.',
     body: 'Its opening paragraph gains one dated sentence from the same snapshot as the rep card: how many House members or senators have signed on to the bill, and, writing to a senator, whether the other senator from your state has. It says &ldquo;signed on&rdquo; because the data does not separate a bill&rsquo;s sponsor from its cosponsors. Copied letters used to paste into contact forms as one block; paragraphs are now separated by a blank line. With the new sentence the default letter is too long for a mail link, so Mail app copies it and opens a message for you to paste into.',

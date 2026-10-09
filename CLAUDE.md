@@ -112,12 +112,15 @@ figure or copy written before that assumed the old schedule and is wrong.
 
 ## Type
 
-Two families (since the Public Notice redesign, 2026-10-09): Archivo for headlines, figures,
-labels and controls, at different widths of one variable font; Newsreader roman for reading.
-**Nothing is set in italic**: Newsreader loads without its italic, so any italic would be
-synthesized. Emphasis in prose takes weight. The suite fails on a third family or a rendered
-italic. Buttons do not inherit the page font: give every button a font-family (the model pills
-rendered in Arial until the font test caught it). Details: `docs/design-brief.md`.
+Two families (Newsroom type, since 2026-10-09): Newsreader for headlines and reading, with
+its real italic for emphasis (headlines are regular weight, sentence case, set by size);
+Hanken Grotesk for figures, labels and controls, roman only, tabular figures. **Italic only in
+the serif**: the sans loads no italic, so `i`/`em` inside sans notes and table cells are set
+roman, and the suite fails on a third family or on any italic in the sans. Buttons do not
+inherit the page font: give every button a font-family (the model pills rendered in Arial
+until the font test caught it). Phone widths are checked for odd wrapping, not only overflow:
+`body` inherits `text-wrap:pretty` so labels and notes do not end on one word. Details:
+`docs/design-brief.md`.
 
 ## Accessibility floors
 

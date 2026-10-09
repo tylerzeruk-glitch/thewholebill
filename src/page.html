@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="alternate" type="application/rss+xml" title="The Whole Bill: what changed" href="https://thewholebill.org/updates.xml">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%2312141A%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%225%22%20width%3D%2210%22%20height%3D%222%22%20fill%3D%22%2386603E%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%223%22%20fill%3D%22%23A87A43%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2210%22%20width%3D%2210%22%20height%3D%2212%22%20fill%3D%22%23D99A3F%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2222%22%20width%3D%2210%22%20height%3D%225%22%20fill%3D%22%23F0C98D%22%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,400..900&family=Newsreader:wght@400..500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..500;1,6..72,400..500&family=Hanken+Grotesk:wght@400..500&display=swap">
 <style>
 :root{
   --paper:#FAF7F2; --paper-card:#FFFDFA; --paper-tint:#F5F0E7;
@@ -31,19 +31,17 @@
   --chart-h:500px;
   --pad:clamp(24px,5vw,96px);
   --serif:'Newsreader',Georgia,'Times New Roman',serif;
-  --sans:'Archivo','Arial Narrow',system-ui,-apple-system,sans-serif;
-  /* Two families (Public Notice, 2026-10): Archivo for everything that is not reading,
-   Newsreader for reading. Archivo is one variable file with a width axis, so condensed
-   headlines (62%), heavy figures (72%), tracked labels (85%) and plain controls (100%)
-   are one family at different widths, not four typefaces. Newsreader loads roman only,
-   400 to 500, about a fifth of what the display version with italics cost: headlines no
-   longer use it, and nothing on the page is set in italic. --mono is kept as the name of
-   the LABEL AND FIGURE role; it resolves to the sans. Numbers rely on tabular figures. */
-  --mono:'Archivo','Arial Narrow',system-ui,-apple-system,sans-serif;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
+  /* Two families (Newsroom type, 2026-10): Newsreader for headlines and reading, with
+   its italic for emphasis; Hanken Grotesk for everything operated or scanned: figures,
+   labels, controls, notes. Both load 400 to 500 only. Hanken's tabular figures keep a
+   narrow comma (Schibsted Grotesk's tabular comma is a full digit wide: "$23 , 943").
+   --mono is kept as the name of the LABEL AND FIGURE role; it resolves to the sans. */
+  --mono:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{overflow-x:clip}
-body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--pk);-webkit-font-smoothing:antialiased}
+body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--pk);-webkit-font-smoothing:antialiased;text-wrap:pretty}   /* inherited: no one-word last lines in labels, notes and captions either; headlines override with balance */
 img{max-width:100%}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;font-weight:500}
 .wrap{max-width:1248px;margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
@@ -61,18 +59,19 @@ section.ink{background:var(--ink);color:var(--ik)}
 .footline,.domain{font-family:var(--mono);font-size:11px;letter-spacing:.06em;font-weight:500}
 /* The one responsive exception: a pill is 110px wide at the 900px breakpoint and "the scorekeeper" needs 125px at the shared size */
 @media (max-width:1023px){.pill-r{font-size:10px;letter-spacing:.06em}}
-.eyebrow{font-stretch:85%;font-weight:700;font-size:12.5px;letter-spacing:.16em}
+.eyebrow{font-weight:500;font-size:11.5px;letter-spacing:.14em}
 .eyebrow.p{color:var(--amber-deep)} .eyebrow.i{color:var(--teal)}
-.lbl{color:var(--ilabel)}
+.lbl{color:var(--ilabel);text-wrap:balance}
 .lbl.p{color:var(--plabel);font-size:11px}
 
-h1{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform:uppercase;font-size:clamp(54px,8.4vw,124px);line-height:.86;letter-spacing:-.004em;margin:0;text-wrap:balance}
-h2{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform:uppercase;font-size:clamp(44px,6.2vw,88px);line-height:.86;letter-spacing:-.004em;margin:0;text-wrap:balance}
-h1 em,h2 em{font-style:normal}
+h1{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:0;text-wrap:balance;font-size:clamp(40px,6.6vw,92px);line-height:1}
+h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:0;text-wrap:balance;font-size:clamp(34px,4.6vw,58px);line-height:1.03}
+h1 em,h2 em{font-style:italic}
 h1 em{color:var(--amber-deep)}
-/* Roman only: an italic would be synthesized. Emphasis in prose takes weight instead. */
-i,em{font-style:normal}
-p em,li em{font-weight:500}
+/* Newsreader loads its real italic; the sans has none, so italic stays in the serif:
+   a title cited in a sans note or table cell is set roman, as it was before. */
+i,em{font-style:italic}
+:is(.note,.note-i,.fn,.src-s,.meth td,.meth th,.letter .ft p,.qpop p,.lbl,.tag) :is(i,em){font-style:normal}
 /* Body copy reads in the serif, so the page has one reading voice from the headline to
    the letter; the sans is for what is operated or scanned: controls, labels, figures, notes. */
 p{margin:0;text-wrap:pretty;font-family:var(--serif)}
@@ -103,7 +102,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .nav{display:flex;gap:clamp(16px,2.4vw,34px);color:var(--pm)}
 /* One link voice for the header and footer navigation (the footer row stays visible on
    phones, where .nav is hidden, so the type lives in its own rule). */
-.nav,.foot-nav{font-size:13px;font-stretch:85%;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.nav,.foot-nav{font-size:14px;font-weight:500;text-transform:lowercase;letter-spacing:0}
 .hero-inner{padding:clamp(28px,4vw,64px) 0 clamp(40px,6vw,72px);display:grid;grid-template-columns:minmax(0,1fr) 336px;grid-template-areas:"head head" "body side";gap:clamp(24px,3vw,44px) clamp(28px,4vw,72px);align-items:end}
 /* The ZIP field is the page's one action, so it must be on screen at load. The headline
    spans both columns (beside the dateline it set one or two words a line and pushed the
@@ -112,7 +111,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .hero-head{grid-area:head;min-width:0}
 .hero-body{grid-area:body;min-width:0}
 .hero-inner .dateline{grid-area:side}
-.hero-head h1{font-size:clamp(48px,min(8.4vw,13vh),124px)}
+.hero-head h1{font-size:clamp(40px,min(6.6vw,11vh),92px)}
 /* The rule down its left edge is a visible edge, and so is the bottom border of
    the area-picker buttons opposite it -- so these two align edge to edge, and the
    6px margin that used to sit here left them 6px apart. Near-miss alignment reads
@@ -139,7 +138,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent;font-variant-numeric:tabular-nums}
 .zipfield .v::placeholder{color:#A79A85}
 .zipfield:focus-within{outline:2px solid var(--amber-deep);outline-offset:2px}
-.btn-dark{height:62px;padding:0 34px;background:var(--c2);color:#1E1509;border:none;border-radius:0;font-family:var(--sans);font-stretch:82%;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;cursor:pointer}
+.btn-dark{height:62px;padding:0 34px;background:var(--c2);color:#1E1509;border:none;border-radius:0;font-family:var(--sans);font-size:16px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;cursor:pointer}
 .btn-ghost{height:50px;padding:0 24px;background:var(--paper-card);color:var(--pk);border:1px solid var(--pctrl);border-radius:0;font-family:var(--sans);font-size:15px;cursor:pointer}
 .footline{display:flex;justify-content:space-between;gap:20px;padding-bottom:40px;color:var(--pm);flex-wrap:wrap}
 
@@ -179,23 +178,23 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
    stay locked together at every viewport. .cmp-bars reserves the room the longest
    figure needs on the right, which is what keeps both tracks identical. */
 .cmp-plot{position:relative;flex-grow:1;min-width:0}
-.cmp-bars .num{font-family:var(--sans);font-stretch:72%;font-weight:800;position:absolute;top:50%;transform:translateY(-50%);margin-left:16px;white-space:nowrap}
+.cmp-bars .num{font-family:var(--sans);font-weight:500;position:absolute;top:50%;transform:translateY(-50%);margin-left:16px;white-space:nowrap}
 .track{display:flex;border-radius:1px;overflow:hidden;flex-grow:1;min-width:0}
 .callout{margin-top:40px;border-left:4px solid var(--amber-deep);padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:4px}
-.callout-v{font-family:var(--sans);font-stretch:70%;font-weight:850;font-size:clamp(40px,5vw,60px);line-height:.95;color:var(--amber-deep);font-variant-numeric:tabular-nums}
+.callout-v{font-family:var(--serif);font-weight:400;font-style:italic;font-size:clamp(30px,3.4vw,42px);line-height:1.1;color:var(--amber-deep);font-variant-numeric:tabular-nums}
 
 /* ---------- Public Notice: the strip and the stat bands ---------- */
 /* The strip says what the page is before anything else does. */
-.pn-strip{background:var(--c2);color:#1E1509;font-family:var(--sans);font-stretch:80%;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.pn-strip{background:var(--c2);color:#1E1509;font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.13em;text-transform:uppercase}
 .pn-strip .wrap{display:flex;justify-content:space-between;gap:6px 16px;flex-wrap:wrap;padding-top:9px;padding-bottom:9px}
 /* A stat band is a hard interrupt between sections: one live figure, one sentence.
    The figure is a data-fig like any other, so the calculator fills and refreshes it. */
 .band-stat{background:var(--c2);color:#1E1509}
 .band-stat.teal{background:var(--teal);color:#0C1F1E}
 .band-in{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(16px,4vw,56px);align-items:center;padding-top:clamp(30px,4.5vw,56px);padding-bottom:clamp(30px,4.5vw,56px)}
-.band-v{font-family:var(--sans);font-stretch:66%;font-weight:850;font-size:clamp(68px,11vw,156px);line-height:.84;color:var(--ink);letter-spacing:-.01em;white-space:nowrap}
+.band-v{font-family:var(--sans);font-weight:500;font-size:clamp(60px,9vw,128px);line-height:.9;color:var(--ink);letter-spacing:-.03em;white-space:nowrap}
 .band-in p{font-size:clamp(17px,2vw,25px);line-height:1.38;max-width:30ch}
-.band-k{display:block;font-family:var(--sans);font-stretch:85%;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
+.band-k{display:block;font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:10px}
 
 /* ---------- sticky results ---------- */
 .sticky{position:sticky;top:0;z-index:20;background:rgba(26,29,38,.92);backdrop-filter:saturate(1.2) blur(8px);-webkit-backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--irule-2)}
@@ -210,7 +209,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .figs{display:flex;gap:clamp(16px,2.6vw,38px);align-items:center}
 .fig{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.fig .n{font-family:var(--sans);font-stretch:72%;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.fig .n{font-family:var(--sans);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
 .fig .t{font-size:13px;color:var(--im)}
 .unit{position:relative;display:inline-flex;align-items:center;padding:3px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);cursor:pointer;flex-shrink:0;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
 .unit:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
@@ -287,7 +286,7 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
    so the check is aria-hidden. */
 .ovk{display:none;align-items:center;color:var(--c2)}
 .ovk.on{display:flex}
-.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--c2);border-radius:0;color:var(--c2);font-family:var(--sans);font-stretch:82%;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:13px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--c2);border-radius:0;color:var(--c2);font-family:var(--sans);font-weight:500;text-transform:uppercase;letter-spacing:.07em;font-size:13px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
 .adv-reset:hover{color:var(--ink);background:var(--c2)}
 .adv-reset:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
 input.ctrl:focus-visible{border-color:var(--c2)}
@@ -305,10 +304,10 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .step:active{background:var(--ictrl);color:var(--ik)}
 .step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
 .warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:0;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
-.bignum{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(64px,9vw,118px);line-height:.88;letter-spacing:-.02em;color:var(--c2)}
+.bignum{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(56px,7.4vw,100px);line-height:.95;letter-spacing:-.02em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:20px 22px;display:flex;flex-direction:column;gap:7px}
-.card-i .v{font-family:var(--sans);font-stretch:72%;font-weight:800;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.card-i .v{font-family:var(--sans);font-weight:500;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .card-i.hi{border-color:#34302A} .card-i.hi .v,.card-i.hi .t{color:var(--c2)}
 .card-i .t{font-size:13px;color:var(--im)}
 .callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:0;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
@@ -332,7 +331,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    text, so it can only start at the left. Two rows describing the same columns
    disagreeing about which edge they hang from is worse than either choice. Left
    is the edge both rows can share: figure, bar and swatch now all begin together. */
-.wlab{font-family:var(--sans);font-stretch:72%;font-weight:800;font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.wlab{font-family:var(--sans);font-weight:500;font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
 .wlab.big{font-size:clamp(18px,2.1vw,30px)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
 /* Its column is now the same width as the others, so this label wraps where it
@@ -359,7 +358,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    Below 760px six columns cannot hold the labels -- a native select takes over
    (see the media block), because a six-high pill stack is a page, not a control. */
 .pill{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 8px;border-radius:0;cursor:pointer;font-family:var(--sans);background:var(--ink-raised);color:var(--im);border:1px solid var(--ictrl);transition:background .18s,color .18s,border-color .18s}
-.pill-n{font-size:15px;font-stretch:85%;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.pill-n{font-size:13.5px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 /* --im, not --ifaint: at 10px this line sits right at the 4.5:1 text floor, and
    --ifaint on the raised ground measures 4.45:1 -- under it. Same reason the
    selected state reuses the pill's own dark text rather than a mid teal. */
@@ -387,7 +386,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    two segments cannot be read as one length. */
 .bar-ghost{height:100%;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
 .bar-fill{height:100%;flex-shrink:0;border-radius:1px;transition:width .35s cubic-bezier(.4,0,.2,1)}
-.bar-v{width:112px;flex-shrink:0;font-family:var(--sans);font-stretch:72%;font-weight:800;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.02em;text-align:right;font-variant-numeric:tabular-nums}
+.bar-v{width:112px;flex-shrink:0;font-family:var(--sans);font-weight:500;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.02em;text-align:right;font-variant-numeric:tabular-nums}
 .summary{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px}
 .save{background:var(--ink-surface);border:1px solid #24382F;border-radius:0;padding:24px 26px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
 /* Uninsured households come out BEHIND under every model here, because they are
@@ -395,11 +394,11 @@ button.step{cursor:pointer;font-family:var(--sans)}
    green border for a saving, amber for a loss. */
 .save.neg{border-color:#4A3520}
 .save.neg .v{color:var(--c2)}
-.save .v{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(48px,6vw,74px);line-height:1;letter-spacing:-.02em;color:var(--teal)}
-.save .v2{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(30px,3.4vw,42px);line-height:1;letter-spacing:-.02em}
+.save .v{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(48px,6vw,74px);line-height:1;letter-spacing:-.02em;color:var(--teal)}
+.save .v2{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(30px,3.4vw,42px);line-height:1;letter-spacing:-.02em}
 .vsep{width:1px;align-self:stretch;background:var(--irule)}
 .cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
-.cobra .num{font-family:var(--sans);font-stretch:72%;font-weight:800}
+.cobra .num{font-family:var(--sans);font-weight:500}
 .range{height:26px;background:var(--ink-raised);border-radius:1px;position:relative}
 .range .band-t{position:absolute;top:0;bottom:0;background:rgba(63,181,174,.30);border-left:2px solid var(--teal);border-right:2px solid var(--teal)}
 .range .mk{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ik);transition:left .35s cubic-bezier(.4,0,.2,1)}
@@ -425,14 +424,14 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:0;background:var(--ink-surface);overflow:hidden}
 .cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
 .cstat .t{font-size:13.5px;color:var(--im)}
-.cstat .v{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(32px,4vw,52px);letter-spacing:-.02em;line-height:1}
+.cstat .v{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(32px,4vw,52px);letter-spacing:-.02em;line-height:1}
 .cstat .s{font-size:12.5px;color:var(--ifaint)}
 .chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px}
 .chartbox svg{display:block;width:100%;height:auto}
 
 /* ---------- lives ---------- */
 .livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
-.bigstat .n{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(64px,9vw,120px);line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
+.bigstat .n{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(64px,9vw,120px);line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
 .bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
 /* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
    ARE that number, split in two. Set as a sum -- operator in its own column so the
@@ -444,7 +443,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .tally{display:grid;grid-template-columns:14px auto minmax(0,1fr);gap:14px 13px;align-items:end;
        border-top:1px solid var(--prule);padding-top:18px}
 .tally .op{font-family:var(--mono);font-size:19px;color:var(--pm)}   /* --pctrl measured 3.12:1 on paper */
-.tally .v{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:28px;line-height:1.15;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
+.tally .v{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:28px;line-height:1.15;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
 .tally .d{font-size:15px;line-height:1.5;color:var(--pb);text-wrap:pretty}
 
 /* The source note collapses, but the DISCLOSURE does not: both facts a reader
@@ -509,7 +508,7 @@ a.term:hover,a.term:focus-visible{text-decoration-style:solid;color:var(--amber-
 #methodology [id],#updates [id]{scroll-margin-top:28px}
 .onpage{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;line-height:1.5;margin-top:4px}
 a.q:hover{border-bottom-color:var(--amber-deep)}
-.quote{font-family:var(--serif);font-size:clamp(23px,2.3vw,29px);line-height:1.24}
+.quote{font-family:var(--serif);font-style:italic;text-wrap:balance;font-size:clamp(23px,2.3vw,29px);line-height:1.24}
 .fn{font-size:12.5px;line-height:1.55;color:var(--pm);border-top:1px solid var(--prule-soft);padding-top:14px}
 /* Notes take the width of what they annotate. These carried a 56ch measure cap
    for a while (the readability pass, 2026-08-30); a day of living with it showed
@@ -533,6 +532,10 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
    need about 650px of letter (580px of buttons plus padding); below 664px the primary
    takes its own row over three equal columns, and below 420px each takes a row. */
 .letter{container-type:inline-size}
+/* "Back to the calculator" beside the wordmark on /methodology and /updates: on a
+   phone it takes two even lines, right-aligned, never "calculator" alone */
+.brand + .q{text-align:right;text-wrap:balance}
+#formBtn{height:50px;padding:0 30px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .ft-sec{display:flex;gap:10px}
 @container (max-width:663px){
   .letter .ft{display:grid;grid-template-columns:minmax(0,1fr)}
@@ -544,7 +547,7 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
   .ft-sec{grid-auto-flow:row}
 }
 .letter .bd[contenteditable]:focus-visible{outline:2px solid var(--amber-deep);outline-offset:-2px}
-.letter .bd .hint{color:var(--pm)}
+.letter .bd .hint{color:var(--pm);font-style:italic}
 /* Print = the letter and nothing else. The Print button marks the letter's
    ancestors .pk and sets .print-letter on body (both removed on afterprint); a
    plain Ctrl+P still prints the whole page, which is the reader's own choice.
@@ -555,8 +558,9 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Row headers in the methodology tables: real <th scope="row"> for assistive tech, styled as the body cells they replaced */
 .meth th.rowh{font-family:var(--sans);font-size:inherit;letter-spacing:0;text-transform:none;color:var(--pb);padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;line-height:1.6;font-weight:400}
+.meth th.rowh.wide{width:220px}
 /* /methodology is its own document, so its title is an h1 there; it keeps the h2 face */
-h1.as-h2{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform:uppercase;font-size:clamp(44px,6.2vw,88px);line-height:.86;letter-spacing:-.004em;margin:0;text-wrap:balance}
+h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:0;text-wrap:balance;font-size:clamp(34px,4.6vw,58px);line-height:1.03}
 /* A7: every transition and animation stops when the reader asks for reduced motion */
 /* ---------- motion ---------- */
 /* Only when the reader has not asked for less, and only once the motion script has run
@@ -609,7 +613,7 @@ h1.as-h2{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform
   body.print-letter .letter .hd,body.print-letter .letter .ft{display:none}
 }
 mark{background:#F7EDDC;color:inherit;padding:1px 4px}
-.chk{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--prule);border-radius:0;font-size:14px;font-family:var(--sans);width:100%;text-align:left;cursor:pointer;min-height:44px;color:inherit;transition:background .15s,border-color .15s}
+.chk{display:flex;align-items:center;gap:11px;text-wrap:balance;padding:12px 14px;border:1px solid var(--prule);border-radius:0;font-size:14px;font-family:var(--sans);width:100%;text-align:left;cursor:pointer;min-height:44px;color:inherit;transition:background .15s,border-color .15s}
 .chk.on{background:var(--paper-tint)} .chk.off{background:var(--paper-card);color:var(--pm)}
 .chk:hover:not(:disabled){border-color:var(--pctrl)}
 .chk:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
@@ -765,6 +769,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .zipfield .k,.zipfield .v{height:56px}
   .zipfield .v{width:auto;flex:1;min-width:0}
   .zipbar{flex-wrap:nowrap}
+  /* "Show me" on one line: it wrapped to two at every phone width, and the field
+     is the side that can give, since five digits need about 70px */
+  .zipbar .btn-dark{padding:0 20px;white-space:nowrap;flex-shrink:0}
+  .zipfield .k{padding:0 14px}
+  .zipfield .v{padding:0 14px}
 
   /* legibility. The three waterfall values below were each declared twice at this
      breakpoint with different sizes; these are the ones that were actually winning,
@@ -805,6 +814,16 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .wcap-total{padding-left:20px}
   .wcap span{font-size:12.5px}
   .wf-gap{display:none}
+  /* the notice's first half cannot fit one line on a phone at a legible size (it
+     needs 363px at 11px; a 390px phone has 342), so it breaks as an even pair
+     rather than leaving "household" alone on a line */
+  .pn-strip{font-size:11px;letter-spacing:.1em}
+  .pn-strip span{text-wrap:balance}
+  /* methodology tables with a 220px row header: stacked on a phone, header over its
+     text, or the text ran in a 95px column at 360px */
+  .meth table:has(th.rowh.wide),.meth table:has(th.rowh.wide) :is(tbody,tr,th,td){display:block;width:auto;padding-right:0}
+  .meth table:has(th.rowh.wide) th.rowh{border-bottom:none;padding-bottom:0}
+  .meth table:has(th.rowh.wide) td{padding-top:4px}
 }
 
 /* Phone widths. Three figures plus the switch have to share one row here, so the
@@ -819,6 +838,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   .sticky .fig .t{font-size:clamp(9.5px,2.75vw,10px)}
   .sticky .fig .n{font-size:clamp(12px,3.45vw,13px)}
   .unit-l{padding:12px 11px;font-size:11.5px}
+  /* The ZIP row at 320px: five digits need about 62px of field, so the field's
+     padding and the buttons' tracking give way first. On the Archivo design the
+     digits were clipped here (109px of text in a 77px box). */
+  .zipfield .k{padding:0 10px}
+  .zipfield .v{padding:0 10px;font-size:20px;letter-spacing:.02em}
+  .zipbar .btn-dark{padding:0 14px;font-size:15px;letter-spacing:.04em}
+  #formBtn{letter-spacing:.04em;padding:0 12px}
+  .meth td,.meth th{padding-right:10px}
 }
 </style>
 
@@ -1216,9 +1243,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
         <div class="cobra">
           <div class="lbl" style="color:var(--c2)">If you lost your job tomorrow</div>
-          <div class="row" style="align-items:baseline;gap:10px">
+          <div class="row" style="align-items:baseline;gap:0 10px;flex-wrap:wrap">
             <div class="num" style="font-size:40px;letter-spacing:-.005em;color:var(--c2)" data-fig="cobra.annual">$2,244</div>
-            <div style="font-size:13.5px;color:var(--im)"><span data-uw="slash">/ year</span>, COBRA</div>
+            <div style="font-size:13.5px;color:var(--im);white-space:nowrap"><span data-uw="slash">/ year</span>, COBRA</div>
           </div>
           <div class="note-i">The employer share does not disappear. It moves onto your bill.</div>
         </div>
@@ -1470,7 +1497,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                address a mailto could honestly fill in. The primary action
                goes to the recipient's official site; the mailto survives as
                the secondary way out (mail it to yourself, forward it on). -->
-          <a class="btn-dark" id="formBtn" href="#" target="_blank" rel="noopener" style="height:50px;padding:0 30px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Copy it to their site &rarr;</a>
+          <a class="btn-dark" id="formBtn" href="#" target="_blank" rel="noopener">Copy it to their site &rarr;</a>
           <div class="ft-sec">
             <button class="btn-ghost" id="copyBtn" type="button">Copy text</button>
             <button class="btn-ghost" id="printBtn" type="button">Print</button>
@@ -1566,7 +1593,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <p class="body" style="max-width:760px">The credit is measured against the second-lowest-cost silver plan available to your household, so that premium is the hinge of every marketplace figure here. It comes from the published 2026 federal plan files, computed per county, and here is exactly how.</p>
       <table style="margin-top:12px"><caption class="vh">How the benchmark premium is built</caption>
         <tr>
-          <th scope="row" class="rowh" style="width:220px"><b style="font-weight:500;color:var(--pk)">The plan set</b></th>
+          <th scope="row" class="rowh wide"><b style="font-weight:500;color:var(--pk)">The plan set</b></th>
           <td>Individual-market, on-exchange, non-dental silver plans, excluding child-only offerings. HealthCare.gov states come from the CMS Exchange PUFs (rate, plan attributes, service area); the 21 state-run exchanges come from the CMS State-based Exchange PUFs. Both are published federal tables; no key, no scraping of insurer sites.</td>
         </tr>
         <tr>
@@ -1671,7 +1698,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <p class="body" style="max-width:760px">The uninsured view of section 03 prints three numbers. Two are statutory; the list-price figure is our arithmetic, so here it is in full.</p>
       <table style="margin-top:12px"><caption class="vh">What a bad year costs without coverage</caption>
         <tr>
-          <th scope="row" class="rowh" style="width:220px"><b style="font-weight:500;color:var(--pk)">One admission, at cost</b></th>
+          <th scope="row" class="rowh wide"><b style="font-weight:500;color:var(--pk)">One admission, at cost</b></th>
           <td>About <span class="num">$16,700</span>, derived by us from HCUP&rsquo;s published 2022 aggregates: $548.5 billion in hospital costs across 32.9 million stays (HCUP Statistical Brief #316). Excludes physician fees, so the real bill runs higher.</td>
         </tr>
         <tr>
@@ -1703,7 +1730,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <p class="body" style="max-width:760px">Every model has soft spots. Ours are listed here rather than left for someone else to find.</p>
       <table style="margin-top:12px"><caption class="vh">What we know is wrong</caption>
         <tr>
-          <th scope="row" class="rowh" style="width:220px"><b style="font-weight:500;color:var(--pk)">Ages the market does not price</b></th>
+          <th scope="row" class="rowh wide"><b style="font-weight:500;color:var(--pk)">Ages the market does not price</b></th>
           <td>Anyone 65 or over is usually on Medicare, which we do not price; we charge them the 64-year-old rate, the oldest the marketplace curve has, which overstates a Medicare household&rsquo;s real premium and understates its risk. Tobacco surcharges (up to 50% in most states) are not modeled; every figure is the non-tobacco rate.</td>
         </tr>
         <tr>
@@ -2100,9 +2127,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         dist.textContent = distPhrase(parts) + " has no current member.";
         pos.innerHTML = "-";
       } else {
-        name.textContent = m.n + " (" + m.p + ")";
+        name.textContent = m.n + "\u00a0(" + m.p + ")";   // the party never alone on a line
         dist.textContent = distPhrase(parts) + " · " +
-          (r.st === "picked" ? "your pick" : "from ZIP " + state.zip5);
+          (r.st === "picked" ? "your pick" : "from ZIP\u00a0" + state.zip5);   // never "ZIP" at a line end and the number alone below it
         pos.textContent = m.co
           ? "Cosponsor of " + BILL.house
           : "Not yet a cosponsor";
@@ -2420,7 +2447,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("areaNote").textContent  =
       "Rating area " + a.ra + " \u00b7 " +
       (a.exchange === "state" ? "State-run exchange" : "HealthCare.gov") +
-      " \u00b7 Medicaid " + (a.expanded ? "expanded" : "not expanded");
+      " \u00b7 Medicaid " + (a.expanded ? "expanded" : "not\u00a0expanded");
     byId("who").textContent  = S.universal.note;
     // The short form below 1100px: at 1024 the long form truncated to "$95,0…"
     // beside the Year/Month switch. The two-row bar itself still begins at 900px

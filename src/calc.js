@@ -537,7 +537,7 @@
         { key:'oop', tone:3, bears:true, onPaystub:false,
           label:'Deductible & out-of-pocket', caption:'Deductible, copays<br>&amp; out-of-pocket', value:m.oop },
         { key:'tax', tone:4, bears:true, onPaystub:true,
-          label:'Medicare payroll tax', caption:'Medicare payroll tax<br>(1.45%)', value:tax }
+          label:'Medicare payroll tax', caption:'Medicare payroll<br>tax (1.45%)', value:tax }
       ];
       // A zero credit has four different causes, and each gets its own reason:
       // blaming the cliff for all of them told Medicaid-eligible readers they
@@ -557,7 +557,7 @@
         { key:'cash', tone:1, bears:true, onPaystub:false,
           label:'Care you use, at cost', caption:'Care you use,<br>at cost', value:cash },
         { key:'tax', tone:4, bears:true, onPaystub:true,
-          label:'Medicare payroll tax', caption:'Medicare payroll tax<br>(1.45%)', value:tax }
+          label:'Medicare payroll tax', caption:'Medicare payroll<br>tax (1.45%)', value:tax }
       ];
       note = 'Uninsured households spend less because they go without care, not because care is ' +
              'cheaper. And there is no out-of-pocket maximum: nothing caps a bad year.';
@@ -571,7 +571,7 @@
         { key:'oop', tone:3, bears:true, onPaystub:false,
           label:'Deductible & out-of-pocket', caption:'Deductible, copays<br>&amp; out-of-pocket', value:e.oop },
         { key:'tax', tone:4, bears:true, onPaystub:true,
-          label:'Medicare payroll tax', caption:'Medicare payroll tax<br>(1.45%)', value:tax }
+          label:'Medicare payroll tax', caption:'Medicare payroll<br>tax (1.45%)', value:tax }
       ];
       note = 'Your employer\u2019s share is your compensation, spent on a product instead of paid to you.';
     }

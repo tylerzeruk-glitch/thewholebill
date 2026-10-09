@@ -40,15 +40,28 @@ calculator lives. The shift in ground signals "now we're computing your numbers.
 
 - **Two grounds, one type system.** Paper = warm off-white (not pure white). Ink = near-black
   with a slight blue cast (not #000). Same fonts, same scale, inverted.
-- **Type (as built, since 2026-10-09, the Public Notice redesign):** two families.
-  **Archivo** for everything that is not reading: condensed uppercase headlines (width 62%,
-  weight 850), heavy figures (72%, 800), tracked labels (85%, 700) and plain controls (100%).
-  It is one variable file with a width axis, so those are one family at four widths, not four
-  typefaces. **Newsreader** for reading (body copy, the lede, the letter, the objection quotes),
-  loaded roman only at 400 to 500: headlines no longer use it, so the display sizes and the
-  italic file went, about 230 KB. **No italics anywhere**: an italic would be synthesized, so
-  emphasis in prose takes weight (500) and the suite fails on any rendered italic. Fonts went
-  from about 300 KB to about 140 KB.
+- **Type (as built, since 2026-10-09, "Newsroom"):** two families, both loaded 400 to 500.
+  **Newsreader** for headlines and reading: headlines regular (400), sentence case, set by
+  size rather than weight, with their emphasis in Newsreader's real italic in amber (teal on
+  ink); body copy, the lede, the letter, the objection quotes and the paystub callout in the
+  same face. It loads with its optical-size axis, so headlines get the display cut and prose
+  the text cut from one family. **Hanken Grotesk** for everything operated or scanned:
+  figures (500, tabular), labels and the notice strip (500, tracked caps), controls, notes and
+  captions. Header and footer links are lowercase. **Italic only where a real italic loads**:
+  the serif has one, the sans does not, so a title cited inside a sans note or table cell is
+  set roman; the suite fails on a third family or on any italic in the sans. Fonts are about
+  165 KB (the Archivo design was about 90 KB; the difference is Newsreader's italic and
+  optical sizes).
+  Why: the owner liked the Public Notice layout but wanted type that said "news but also
+  bold". A Refero survey of news and civic sites led to the comparison; Newsroom was option 1,
+  and the weights came down twice on review ("too much bold, scale it back", then "lighter
+  still": headlines 640, 500, 400; figures 800, 600, 500). Faces measured and rejected for
+  figures because their digits are not tabular: Libre Franklin, Big Shoulders, Saira
+  Condensed, Oswald, Antonio, DM Serif Display; Schibsted Grotesk's tabular comma is a full
+  digit wide ("$23 , 943").
+  Before: 2026-10-09 to the Newsroom change, Public Notice set everything that is not reading
+  in Archivo at four widths (condensed uppercase headlines, heavy figures) with Newsreader roman
+  for reading and no italics at all.
   History: 2026-09-02 settled Newsreader (display and prose) plus Public Sans after the launch
   feedback "too many fonts", whose real cause was treatments, not families (42 font sizes,
   13 tracked-caps label rules, IBM Plex Mono in five treatments). The one-label-style and
@@ -245,7 +258,7 @@ The name was already in the design before it was the name: "Here is the whole bi
 reveal headline. It now reads as a callback rather than a label, and the headline italicises the
 phrase to make the echo deliberate.
 
-**Wordmark:** "The Whole Bill" in Newsreader 400, 21px, `-0.012em`. No italics, no colour — the
+**Wordmark:** "The Whole Bill" in Newsreader 400, 21px, `-0.012em`. Roman, no colour — the
 mark carries the colour.
 
 **The mark encodes the chart.** Four stacked warm bands in roughly the real proportions of the
