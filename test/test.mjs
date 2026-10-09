@@ -2923,6 +2923,21 @@ test('letter buttons: one row, two rows or a stack, never a stray button', async
   }
 });
 
+/* The ZIP field is the page's one action: on load it must be fully on screen, at the
+ * window sizes people actually have (Tyler's laptop browser was about 1000x625). */
+test('hero: the ZIP field is on screen at load', async b => {
+  for (const [w, h, m] of [[1440, 800], [1280, 720], [1000, 625], [1024, 640], [1536, 760], [390, 740, true], [375, 600, true]]) {
+    const p = await page(b, w, h, !!m);
+    const r = await p.evaluate(() => {
+      const z = document.querySelector('.zipbar').getBoundingClientRect(), h1 = document.querySelector('h1').getBoundingClientRect();
+      const lh = parseFloat(getComputedStyle(document.querySelector('h1')).lineHeight) || parseFloat(getComputedStyle(document.querySelector('h1')).fontSize) * .86;
+      return { bottom: Math.round(z.bottom), vh: innerHeight, lines: Math.round(h1.height / lh) };
+    });
+    ok(`${w}x${h}: ZIP field fully visible (bottom ${r.bottom}px of ${r.vh}), headline ${r.lines} lines`, r.bottom <= r.vh, JSON.stringify(r));
+    await p.close();
+  }
+});
+
 /* What leaves the page is plain text for a contact form, and many forms collapse a
  * single line break, so paragraphs are joined by a blank line. */
 test('letter: copied text keeps its paragraphs apart', async b => {
