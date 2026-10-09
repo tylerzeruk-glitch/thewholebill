@@ -1463,7 +1463,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <button class="btn-ghost" id="printBtn" type="button">Print</button>
             <a class="btn-ghost" id="sendBtn" href="#" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Mail app</a>
           </div>
-          <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote"><span id="ftNoteSite">Congressional offices take letters through the forms on their own sites, not a public inbox. The amber button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</span><span id="ftNoteNoSite" hidden>Congressional offices take letters through the forms on their own sites, not a public inbox. We do not have this member&rsquo;s site on file, so the amber button is off: use Copy text, then paste the letter into the contact form listed on their house.gov page. We never see your letter.</span><span id="ftLong" hidden> Your letter is longer than some mail apps accept in a link, so the Mail app button copies it and opens a blank message with the subject filled in; paste the letter in.</span></p>
+          <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote"><span id="ftNoteSite">Congressional offices take letters through the forms on their own sites, not a public inbox. The amber button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</span><span id="ftNoteNoSite" hidden>Congressional offices take letters through the forms on their own sites, not a public inbox. We do not have this member&rsquo;s site on file, so the amber button is off: use Copy text, then paste the letter into the contact form listed on their house.gov page. We never see your letter.</span><span id="ftLong" hidden> This letter is too long for a mail link, so Mail app copies it and opens a message with the subject filled in; paste it in.</span></p>
         </div>
       </div>
     </div>
@@ -1983,6 +1983,40 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   function repLast(m){ return m.n.replace(/\s+(Jr\.|Sr\.|II|III|IV)$/, "").split(" ").pop(); }
   // Who the letter is addressed to. Senators need only the state, but the
   // same resolution gate applies: an unresolved split ZIP addresses nobody.
+  // How many sitting members have signed on to the bill, from the same snapshot as
+  // the rep card. The data marks sponsors and cosponsors alike, so the letter says
+  // "signed on", which is true of both (Sanders sponsors S. 1506, Jayapal H.R. 3069).
+  function signedOn(chamber){
+    var n = 0, k, i, seats = chamber === "house" ? REPS.house : REPS.senate;
+    for (k in seats){
+      var v = seats[k], list = chamber === "house" ? [v] : (v || []);
+      for (i = 0; i < list.length; i++) if (list[i] && list[i].co) n++;
+    }
+    return n;
+  }
+  // One dated sentence for the opening paragraph: where the recipient stands among
+  // their colleagues, and for a senator, where the other senator from the state
+  // stands. It is a snapshot claim, so it carries the snapshot's date like the card.
+  function cosponsorLine(rec){
+    if (!rec.m) return "";
+    var d = longDate(REPS.asOf);
+    if (rec.kind === "rep"){
+      var h = signedOn("house");
+      return rec.m.co
+        ? "As of " + d + ", you are one of " + h + " House members who have signed on to it."
+        : "As of " + d + ", " + h + " of your House colleagues have signed on to it.";
+    }
+    var n = signedOn("senate"), r = repFor(), st = r.d.split("-")[0];
+    var pair = REPS.senate[st] || [], other = pair[state.recipient === "sen0" ? 1 : 0] || null;
+    var stn = STATE_NAMES[st] || st;
+    if (rec.m.co)
+      return "As of " + d + ", you are one of " + n + " senators who have signed on to it" +
+        (other && other.co ? ", along with Senator " + repLast(other) + ", who also represents " + stn + "." : ".");
+    if (other && other.co)
+      return "Senator " + repLast(other) + ", who also represents " + stn + ", has already signed on to it, one of " + n +
+        " senators who have as of " + d + ". You have not yet.";
+    return "As of " + d + ", " + n + " senators have signed on to it. Neither of my senators is among them yet.";
+  }
   function recipient(){
     var r = repFor();
     var resolved = r.st === "one" || r.st === "picked";
@@ -2102,6 +2136,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         : t === "personal"
           ? 'I live in <span id="letterPlace"></span>, in your ' + seat + ', and I am writing because of what healthcare has been doing to my family&rsquo;s budget. I am asking you to support the Medicare for All Act, <span id="letterBill"></span>.'
           : 'I am a constituent in <span id="letterPlace"></span>, and I am writing to ask you to support the Medicare for All Act, <span id="letterBill"></span>.'));
+    var cs = cosponsorLine(rec);
+    if (cs) P[P.length - 1] += " " + cs;
     // Rounded, hedged figures: "more than" rounds DOWN, "as much as" rounds UP,
     // "roughly" rounds to nearest -- the hedge word and the rounding direction
     // have to agree or the hedge is a lie. The data-round attribute carries the
@@ -2146,14 +2182,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("letterBd").innerHTML = letterHTML();
   }
   function updateLetterMeta(){
-    var txt = byId("letterBd").innerText.replace(/\n{2,}/g, "\n").trim();
+    var txt = letterPlain();
     var words = (txt.match(/\S+/g) || []).length;
     var rec = recipient();
     byId("letterCount").textContent =
       (letterEdited ? "Edited by you" : "Editable") + " · " + words + " words";
     var subject = "mailto:?subject=" +
       encodeURIComponent("From a constituent: my household's healthcare numbers (" + rec.bill + ")");
-    var full = subject + "&body=" + encodeURIComponent(txt.replace(/\n/g, "\n\n"));
+    var full = subject + "&body=" + encodeURIComponent(txt);
     // Windows Mail and Outlook truncate mailto URLs around 2,000 characters,
     // so a long letter arrived cut off mid-sentence. Past the limit the button
     // copies the letter and opens a subject-only message instead, and says so.
@@ -3375,8 +3411,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     for (var i = 0; i < bs.length; i++){ bs[i].classList.toggle("on", bs[i] === btn); bs[i].setAttribute("aria-pressed", bs[i] === btn ? "true" : "false"); }
     paint();
   });
+  // Contact forms are plain-text boxes, and many collapse a single line break, so
+  // a pasted letter arrived as one block. Every way the letter leaves the page
+  // (Copy text, the amber button, Mail app) joins paragraphs with a blank line.
+  function letterPlain(){
+    var bd = byId("letterBd"), parts = [], i, n, t;
+    for (i = 0; i < bd.childNodes.length; i++){
+      n = bd.childNodes[i];
+      t = (n.nodeType === 1 ? n.innerText : n.textContent || "").replace(/\u00a0/g, " ").trim();
+      if (t) parts.push(t.replace(/\n{2,}/g, "\n"));
+    }
+    return parts.join("\n\n");
+  }
   function copyLetter(done, fail){
-    var txt = byId("letterBd").innerText;
+    var txt = letterPlain();
     // execCommand fallback: headless and older browsers land here.
     function fallback(){
       var ta = document.createElement("textarea");

@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'letter-cosponsors-2026-10-09', date: '2026-10-09', kind: 'site',
+    title: 'The letter now tells your member of Congress where their colleagues stand, and pastes into contact forms with its paragraphs intact.',
+    body: 'Its opening paragraph gains one dated sentence from the same snapshot as the rep card: how many House members or senators have signed on to the bill, and, writing to a senator, whether the other senator from your state has. It says &ldquo;signed on&rdquo; because the data does not separate a bill&rsquo;s sponsor from its cosponsors. Copied letters used to paste into contact forms as one block; paragraphs are now separated by a blank line. With the new sentence the default letter is too long for a mail link, so Mail app copies it and opens a message for you to paste into.',
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
     id: 'redesign-2026-10-09', date: '2026-10-09', kind: 'site',
     title: 'The site has a new look: bolder headlines, two live stat bands, and figures that move when your numbers do.',
     body: 'No number, source or method changed; every figure is computed exactly as before, and the letter is untouched. Headlines are set in a condensed face, the type is down from three families to two and from about 300 KB of fonts to about 140 KB, and two bands now carry the figures that matter most for your household: what never reaches your paystub, and what universal coverage would leave you. Bars and figures animate as you change your inputs, and stay still if your device asks for reduced motion. It also fixes the financing-model buttons, which had been showing in your browser&rsquo;s default font.',

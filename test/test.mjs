@@ -1573,6 +1573,9 @@ test('letter: controls write the letter, edits survive the slider', async b => {
 
 test('letter: send, copy and print work without the letter leaving the browser', async b => {
   const p = await page(b,1440,900);
+  // The default letter (job-loss paragraph on, plus the dated cosponsor sentence) now
+  // runs past the mailto limit; a shorter one still rides the link as the body.
+  await p.locator('#emph .chk[data-em="loss"]').click(); await p.waitForTimeout(200);
   const href = await p.evaluate(()=>document.getElementById('sendBtn').getAttribute('href'));
   ok('send is a mailto with the letter as the body',
      href.startsWith('mailto:?subject=') && decodeURIComponent(href).includes('Dear Representative'));
@@ -1738,9 +1741,11 @@ test('letter: the privacy note sits left-aligned under the buttons', async b => 
                flush: Math.abs(tr.left - br.left) };
     });
     // the note carries the copy-and-paste flow now, so it runs longer than the
-    // old one-liner; the caps keep it from becoming a paragraph
+    // old one-liner; the caps keep it from becoming a paragraph. Since the letter
+    // gained its dated cosponsor sentence, the default letter is past the mailto
+    // limit, so the one-line "paste it in" sentence shows by default: one more line.
     ok(`${w}px: under the buttons, text flush with their left edge, ${r.lines} line${r.lines>1?'s':''}`,
-       r.under && r.flush < 1 && r.lines <= (w <= 390 ? 5 : 3), `flush Δ${r.flush.toFixed(1)}px`);
+       r.under && r.flush < 1 && r.lines <= (w <= 390 ? 7 : 4), `flush Δ${r.flush.toFixed(1)}px`);
     await p.close();
   }
 });
@@ -2428,12 +2433,15 @@ test('headers: the built CSP names every inline script and nothing is refused', 
 test('letter buttons: copy never claims success it did not have, mailto never truncates', async b => {
   const p = await page(b, 1280, 900);
   // C7: the default mailto carries the body; with every emphasis on it is too long for Windows mail apps
+  await p.locator('#emph .chk[data-em="loss"]').click(); await p.waitForTimeout(200);
   const h0 = await p.getAttribute('#sendBtn', 'href');
-  ok('default mailto carries the letter body under the Windows limit', /&body=/.test(h0) && h0.length < 1900, h0.length + ' chars');
+  ok('a shorter letter\'s mailto carries the body under the Windows limit', /&body=/.test(h0) && h0.length < 1900, h0.length + ' chars');
+  ok('and its paragraphs are separated by a blank line', /%0A%0A/.test(h0) && !/%0A%0A%0A/.test(h0));
+  await p.locator('#emph .chk[data-em="loss"]').click(); await p.waitForTimeout(200);
   for (const e of ['nation', 'story']) { await p.locator(`#emph .chk[data-em="${e}"]`).click(); await p.waitForTimeout(150); }
   const h1 = await p.getAttribute('#sendBtn', 'href');
   const long = await p.evaluate(() => ({ note: !document.getElementById('ftLong').hidden, text: document.getElementById('ftNote').innerText }));
-  ok('all emphasis on: subject-only mailto, and the note says the letter rides the clipboard', !/&body=/.test(h1) && h1.length < 300 && long.note && /copies it and opens a blank message/.test(long.text), h1.length + ' chars');
+  ok('all emphasis on: subject-only mailto, and the note says the letter rides the clipboard', !/&body=/.test(h1) && h1.length < 300 && long.note && /copies it and opens a message/.test(long.text), h1.length + ' chars');
   await p.evaluate(() => { window.__copied = []; navigator.clipboard.writeText = t => { window.__copied.push(t.length); return Promise.resolve(); }; });
   await p.evaluate(() => { document.getElementById('sendBtn').addEventListener('click', ev => ev.preventDefault(), true); });   // keep the test in the page
   await p.locator('#sendBtn').click(); await p.waitForTimeout(200);
@@ -2913,6 +2921,47 @@ test('letter buttons: one row, two rows or a stack, never a stray button', async
     ok(`${w}px (letter ${r.letter}px): ${shape}, inside the letter`, shape !== 'broken' && r.inside, JSON.stringify(r));
     await p.close();
   }
+});
+
+/* What leaves the page is plain text for a contact form, and many forms collapse a
+ * single line break, so paragraphs are joined by a blank line. */
+test('letter: copied text keeps its paragraphs apart', async b => {
+  const p = await page(b, 1280, 900);
+  await p.evaluate(() => { window.__clip = ''; navigator.clipboard.writeText = t => { window.__clip = t; return Promise.resolve(); }; });
+  await p.locator('#copyBtn').click(); await p.waitForTimeout(250);
+  const r = await p.evaluate(() => ({ clip: window.__clip, blocks: [...document.getElementById('letterBd').children].filter(e => e.innerText.trim()).length }));
+  const paras = r.clip.split('\n\n');
+  ok('one blank line between paragraphs, one paragraph per block', paras.length === r.blocks && !/\n{3,}/.test(r.clip) && paras.every(x => x.trim()), `${paras.length} vs ${r.blocks}`);
+  ok('it opens with the greeting and closes with the source line', /^Dear /.test(paras[0]) && /^Figures calculated at thewholebill\.org/.test(paras[paras.length - 1]));
+  await p.close();
+});
+
+/* The dated cosponsor sentence: the count comes from the same snapshot as the rep
+ * card, it says "signed on" (the data does not tell a sponsor from a cosponsor),
+ * and a senator hears where the other senator from the state stands. */
+test('letter: the dated cosponsor sentence, for every recipient case', async b => {
+  const p = await page(b, 1280, 900);
+  const counts = await p.evaluate(() => {
+    let h = 0, s = 0; for (const k in REPS.house) if (REPS.house[k] && REPS.house[k].co) h++;
+    for (const k in REPS.senate) for (const m of REPS.senate[k]) if (m && m.co) s++;
+    return { h, s, d: REPS.asOf };
+  });
+  const [y, mo, da] = counts.d.split('-').map(Number);
+  const date = `${da} ${['January','February','March','April','May','June','July','August','September','October','November','December'][mo - 1]} ${y}`;
+  const letter = () => p.evaluate(() => document.getElementById('letterBd').innerText);
+  const zip = async z => { await p.fill('#zip', z); await p.locator('#zipGo').click(); await p.waitForTimeout(400); };
+  const to = async rec => { await p.locator(rec === 'rep' ? '#recRep' : `#senRows .rec-hit[data-rec="${rec}"]`).click(); await p.waitForTimeout(250); };
+  let t = await letter();
+  ok('a representative who signed on: one of N House members, dated', t.includes(`As of ${date}, you are one of ${counts.h} House members who have signed on to it.`), (t.match(/As of[^\n]*/) || [''])[0]);
+  await zip('75010'); t = await letter();
+  ok('a representative who has not: N of your House colleagues', t.includes(`As of ${date}, ${counts.h} of your House colleagues have signed on to it.`), (t.match(/As of[^\n]*/) || [''])[0]);
+  await to('sen0'); t = await letter();
+  ok('Texas, neither senator: the count, and neither of my senators', t.includes(`${counts.s} senators have signed on to it. Neither of my senators is among them yet.`), (t.match(/As of[^\n]*/) || [''])[0]);
+  await zip('55011'); await to('sen0'); t = await letter();
+  ok('Minnesota, to Klobuchar: Senator Smith has, you have not yet', /Dear Senator Klobuchar/.test(t) && t.includes(`Senator Smith, who also represents Minnesota, has already signed on to it, one of ${counts.s} senators who have as of ${date}. You have not yet.`), (t.match(/Senator Smith[^\n]*/) || [''])[0]);
+  await to('sen1'); t = await letter();
+  ok('Minnesota, to Smith: one of N senators, no "along with" (Klobuchar has not)', /Dear Senator Smith/.test(t) && t.includes(`you are one of ${counts.s} senators who have signed on to it.`) && !/along with/.test(t));
+  await p.close();
 });
 
 const b = await chromium.launch();
