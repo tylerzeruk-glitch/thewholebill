@@ -2459,15 +2459,35 @@ test('letter buttons: copy never claims success it did not have, mailto never tr
   const f1 = await p.evaluate(() => ({ label: document.getElementById('formBtn').textContent, opened: window.__opened.length, here: location.href }));
   ok('the dark button does not open the site when the copy failed', /Copy failed/.test(f1.label) && f1.opened === 0 && /index\.html/.test(f1.here), JSON.stringify(f1));
   await p.waitForTimeout(3300);
-  await p.evaluate(() => { navigator.clipboard.writeText = () => Promise.resolve(); });
+  // The fake now behaves like the real thing: window.open returns null when given
+  // "noopener" even though the tab opened (the old fake returned {} and hid a bug
+  // that also sent THIS tab to the member's site). And this page must never move.
+  await p.evaluate(() => {
+    navigator.clipboard.writeText = () => Promise.resolve();
+    window.__opened = []; window.__w = { opener: 'page' };
+    window.open = (u, t, f) => { window.__opened.push(u); return /noopener/.test(f || '') ? null : window.__w; };
+  });
+  const before = p.url();
   await p.locator('#formBtn').click(); await p.waitForTimeout(300);
-  const f2 = await p.evaluate(() => ({ label: document.getElementById('formBtn').textContent, opened: window.__opened, href: document.getElementById('formBtn').getAttribute('href') }));
+  const f2 = await p.evaluate(() => ({ label: document.getElementById('formBtn').textContent, opened: window.__opened, href: document.getElementById('formBtn').getAttribute('href'), opener: window.__w.opener }));
   ok('after a successful copy it opens the member\'s site from inside the resolved copy', /Copied/.test(f2.label) && f2.opened.length === 1 && f2.opened[0] === f2.href && /house\.gov/.test(f2.href), JSON.stringify(f2));
+  ok('the new tab is cut off from this page', f2.opener === null, String(f2.opener));
+  ok('and this tab stays on The Whole Bill', p.url() === before, p.url());
+  // a blocked pop-up: the button becomes a plain new-tab link for one click, this tab still stays
+  await p.waitForTimeout(2800);
+  await p.evaluate(() => { window.open = (u) => { window.__opened.push(u); return null; }; });
+  await p.locator('#formBtn').click(); await p.waitForTimeout(300);
+  const f3 = await p.evaluate(() => ({ label: document.getElementById('formBtn').textContent, direct: document.getElementById('formBtn').getAttribute('data-direct'),
+    target: document.getElementById('formBtn').getAttribute('target'), rel: document.getElementById('formBtn').getAttribute('rel') }));
+  ok('blocked: this tab stays put and the button offers the site as a new-tab link', p.url() === before && /now open their site/.test(f3.label) && f3.direct === '1' && f3.target === '_blank' && /noopener/.test(f3.rel), JSON.stringify(f3));
   // C8: a member with no site on file gets the honest note, not a greyed button under a promise
   await p.evaluate(() => { REPS.house[Object.keys(REPS.house).find(k => /Crockett/.test(REPS.house[k].n))].u = ''; });
   await setIncome(p, 96000);
   const ns = await p.evaluate(() => ({ dis: document.getElementById('formBtn').getAttribute('aria-disabled'), site: document.getElementById('ftNoteSite').hidden, nosite: document.getElementById('ftNoteNoSite').hidden, text: document.getElementById('ftNote').innerText }));
-  ok('no site on file: the note swaps to say so', ns.dis === 'true' && ns.site && !ns.nosite && /dark button is off/.test(ns.text), JSON.stringify(ns));
+  ok('the note names the primary button by the colour it actually is', await p.evaluate(() =>
+     getComputedStyle(document.getElementById('formBtn')).backgroundColor === 'rgb(217, 154, 63)' &&
+     /amber button/.test(document.getElementById('ftNoteSite').textContent) && !/dark button/.test(document.getElementById('ftNote').textContent)));
+  ok('no site on file: the note swaps to say so', ns.dis === 'true' && ns.site && !ns.nosite && /amber button is off/.test(ns.text), JSON.stringify(ns));
   await p.close();
 });
 

@@ -388,6 +388,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .save .v2{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(30px,3.4vw,42px);line-height:1;letter-spacing:-.02em}
 .vsep{width:1px;align-self:stretch;background:var(--irule)}
 .cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
+.cobra .num{font-family:var(--sans);font-stretch:72%;font-weight:800}
 .range{height:26px;background:var(--ink-raised);border-radius:1px;position:relative}
 .range .band-t{position:absolute;top:0;bottom:0;background:rgba(63,181,174,.30);border-left:2px solid var(--teal);border-right:2px solid var(--teal)}
 .range .mk{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ik);transition:left .35s cubic-bezier(.4,0,.2,1)}
@@ -1203,7 +1204,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="cobra">
           <div class="lbl" style="color:var(--c2)">If you lost your job tomorrow</div>
           <div class="row" style="align-items:baseline;gap:10px">
-            <div class="num" style="font-size:32px;letter-spacing:-.025em;color:var(--c2)" data-fig="cobra.annual">$2,244</div>
+            <div class="num" style="font-size:40px;letter-spacing:-.005em;color:var(--c2)" data-fig="cobra.annual">$2,244</div>
             <div style="font-size:13.5px;color:var(--im)"><span data-uw="slash">/ year</span>, COBRA</div>
           </div>
           <div class="note-i">The employer share does not disappear. It moves onto your bill.</div>
@@ -1462,7 +1463,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <button class="btn-ghost" id="printBtn" type="button">Print</button>
             <a class="btn-ghost" id="sendBtn" href="#" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Mail app</a>
           </div>
-          <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote"><span id="ftNoteSite">Congressional offices take letters through the forms on their own sites, not a public inbox. The dark button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</span><span id="ftNoteNoSite" hidden>Congressional offices take letters through the forms on their own sites, not a public inbox. We do not have this member&rsquo;s site on file, so the dark button is off: use Copy text, then paste the letter into the contact form listed on their house.gov page. We never see your letter.</span><span id="ftLong" hidden> This letter is too long for a mail link, so Mail app copies it and opens a message with the subject filled in; paste it in.</span></p>
+          <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote"><span id="ftNoteSite">Congressional offices take letters through the forms on their own sites, not a public inbox. The amber button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</span><span id="ftNoteNoSite" hidden>Congressional offices take letters through the forms on their own sites, not a public inbox. We do not have this member&rsquo;s site on file, so the amber button is off: use Copy text, then paste the letter into the contact form listed on their house.gov page. We never see your letter.</span><span id="ftLong" hidden> This letter is too long for a mail link, so Mail app copies it and opens a message with the subject filled in; paste it in.</span></p>
         </div>
       </div>
     </div>
@@ -3450,23 +3451,40 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       setTimeout(function(){ btn.textContent = "Copy text"; }, 3200);
     });
   });
-  // The dark button copies on the way out, so the letter is on the clipboard
+  // The amber (primary) button copies on the way out, so the letter is on the clipboard
   // when the member's contact form opens. The tab is opened from inside the
   // resolved copy, never before it: opening first could take focus away and
   // make the clipboard write fail after the label had already said "Copied".
+  // This tab is never navigated: the reader's letter lives here. It used to call
+  // window.open with "noopener", which makes window.open return null even when the
+  // tab DID open; the null read as "blocked" and sent this page to the member's site
+  // as well. Now the opener is cut by hand, and a genuinely blocked pop-up turns the
+  // button into a plain link for one click: the copy is done, and the browser's own
+  // target="_blank" (with rel="noopener") opens the site, which no blocker stops.
+  var formTimer = 0;
+  function resetFormBtn(){ var b = byId("formBtn"); b.innerHTML = "Copy it to their site &rarr;"; b.removeAttribute("data-direct"); }
   byId("formBtn").addEventListener("click", function(ev){
-    ev.preventDefault();
     var b = byId("formBtn"), url = b.getAttribute("href");
+    if (b.getAttribute("data-direct") === "1"){ clearTimeout(formTimer); formTimer = setTimeout(resetFormBtn, 600); return; }
+    ev.preventDefault();
     if (b.getAttribute("aria-disabled") === "true" || !url || url === "#") return;
     copyLetter(function(){
-      b.textContent = "Copied ✓ paste it there";
-      setTimeout(function(){ b.innerHTML = "Copy it to their site &rarr;"; }, 2600);
       var w = null;
-      try { w = window.open(url, "_blank", "noopener"); } catch (e) { w = null; }
-      if (!w) location.href = url;
+      try { w = window.open(url, "_blank"); } catch (e) { w = null; }
+      clearTimeout(formTimer);
+      if (w){
+        try { w.opener = null; } catch (e) {}
+        b.textContent = "Copied ✓ paste it there";
+        formTimer = setTimeout(resetFormBtn, 2600);
+      } else {
+        b.textContent = "Copied ✓ now open their site \u2192";
+        b.setAttribute("data-direct", "1");
+        formTimer = setTimeout(resetFormBtn, 10000);
+      }
     }, function(){
       b.textContent = "Copy failed, use Copy text first";
-      setTimeout(function(){ b.innerHTML = "Copy it to their site &rarr;"; }, 3200);
+      clearTimeout(formTimer);
+      formTimer = setTimeout(resetFormBtn, 3200);
     });
   });
   byId("repPickBtns").addEventListener("click", function(ev){
