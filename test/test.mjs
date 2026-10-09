@@ -2979,8 +2979,8 @@ test('letter: the dated cosponsor sentence, for every recipient case', async b =
   await p.close();
 });
 
-/* Header and footer navigation share one link voice: condensed, uppercase, tracked. */
-test('footer: its links match the header navigation', async b => {
+/* Header and footer navigation share one link voice: condensed, lowercase. */
+test('footer: its links match the header navigation, in lowercase', async b => {
   for (const [w, m] of [[1280, false], [390, true]]) {
     const p = await page(b, w, 900, m);
     const r = await p.evaluate(() => {
@@ -2988,7 +2988,7 @@ test('footer: its links match the header navigation', async b => {
       const foot = [...document.querySelectorAll('footer .foot-nav a')], head = document.querySelector('.masthead .nav a');
       return { n: foot.length, foot: [...new Set(foot.map(st))], head: st(head) };
     });
-    ok(`${w}px: footer links are uppercase and styled like the header's`, r.n >= 3 && r.foot.length === 1 && r.foot[0] === r.head && /uppercase/.test(r.foot[0]), JSON.stringify(r));
+    ok(`${w}px: footer links are lowercase and styled like the header's`, r.n >= 3 && r.foot.length === 1 && r.foot[0] === r.head && /lowercase/.test(r.foot[0]), JSON.stringify(r));
     await p.close();
   }
 });
