@@ -110,6 +110,15 @@ financing models all live in `calc.js` with their sources in comments.
 **The enhanced premium tax credits expired 31 Dec 2025 and the 400% FPL cliff is back.** Any
 figure or copy written before that assumed the old schedule and is wrong.
 
+## Type
+
+Two families (since the Public Notice redesign, 2026-10-09): Archivo for headlines, figures,
+labels and controls, at different widths of one variable font; Newsreader roman for reading.
+**Nothing is set in italic**: Newsreader loads without its italic, so any italic would be
+synthesized. Emphasis in prose takes weight. The suite fails on a third family or a rendered
+italic. Buttons do not inherit the page font: give every button a font-family (the model pills
+rendered in Arial until the font test caught it). Details: `docs/design-brief.md`.
+
 ## Accessibility floors
 
 4.5:1 for text, 3:1 for graphics and control boundaries, 44px touch targets. The palette table is

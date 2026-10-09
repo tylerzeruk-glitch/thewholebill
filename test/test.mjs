@@ -21,7 +21,9 @@ const ok = (name, cond, detail='') => {
 // artifact build (which lives OUTSIDE dist so it never deploys) for
 // hash-router coverage, /methodology for its own page.
 const page = async (browser, w, h, mobile=false, doc='index.html') => {
-  const p = await browser.newPage({ viewport:{width:w,height:h}, deviceScaleFactor:1, isMobile:mobile, hasTouch:mobile });
+  // reducedMotion: the suite measures settled values and geometry, not animation frames.
+  // The motion itself has its own test, which opts back in.
+  const p = await browser.newPage({ viewport:{width:w,height:h}, deviceScaleFactor:1, isMobile:mobile, hasTouch:mobile, reducedMotion:'reduce' });
   p.on('pageerror', e => ok('no page errors', false, e.message));
   p.on('console', m => { if (m.type()==='error' && !/TUNNEL|ERR_|net::/.test(m.text())) ok('no console errors', false, m.text()); });
   const base = doc === 'artifact.html' ? '../preview/' : '../dist/';
@@ -2328,7 +2330,9 @@ test('accessibility: focus, state, announcements and contrast', async b => {
 
 test('accessibility: reduced motion, whole-page print, sticky at 1024, structure', async b => {
   const p = await page(b, 1280, 900);
-  // A7: nothing moves when the reader asks for reduced motion
+  // A7: nothing moves when the reader asks for reduced motion. page() loads under
+  // reduce, so opt back in to measure what "normally" looks like first.
+  await p.emulateMedia({ reducedMotion: 'no-preference' }); await p.waitForTimeout(100);
   const before = await p.evaluate(() => [...document.querySelectorAll('*')].filter(e => getComputedStyle(e).transitionDuration.split(',').some(d => parseFloat(d) > 0)).length);
   await p.emulateMedia({ reducedMotion: 'reduce' }); await p.waitForTimeout(100);
   const moving = await p.evaluate(() => [...document.querySelectorAll('*')].filter(e => { const cs = getComputedStyle(e); return cs.transitionDuration.split(',').some(d => parseFloat(d) > 0) || (cs.animationName !== 'none' && parseFloat(cs.animationDuration) > 0); }).length);
@@ -2774,6 +2778,119 @@ test('footer: copyright on every document, contact underline on the text', async
     ok(`${doc}: the contact link is underlined on its text, not 14px below it`,
        f.border === 'none' && f.deco === 'underline' && f.offset === '4px', JSON.stringify(f));
     ok(`${doc}: and still a 44px target`, f.h >= 44, String(f.h));
+    await p.close();
+  }
+});
+
+/* Public Notice (2026-10). Two families only: Archivo for everything that is not
+ * reading, Newsreader roman for reading. Newsreader loads without an italic, so any
+ * italic left in the page would be a synthesized slant; none may render. */
+test('public notice: two font families, nothing in a synthesized italic', async b => {
+  const p = await page(b, 1280, 900);
+  const f = await p.evaluate(async () => {
+    await document.fonts.ready;
+    const link = [...document.querySelectorAll('link[rel="stylesheet"]')].map(l => l.href).find(h => /fonts\.googleapis/.test(h)) || '';
+    const used = new Set(), italic = [];
+    for (const el of document.querySelectorAll('body *')) {
+      if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') continue;
+      if (![...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) continue;
+      const cs = getComputedStyle(el);
+      used.add(cs.fontFamily.split(',')[0].replace(/['"]/g, '').trim());
+      if (cs.fontStyle !== 'normal') italic.push(el.tagName + ' ' + el.textContent.trim().slice(0, 30));
+    }
+    return { link, used: [...used], italic: italic.slice(0, 5) };
+  });
+  ok('one stylesheet link: Archivo plus Newsreader roman, no italic axis',
+     /family=Archivo:wdth,wght@/.test(f.link) && /family=Newsreader:wght@400\.\.500/.test(f.link) && !/ital/.test(f.link) && !/Public\+Sans/.test(f.link), f.link);
+  ok('rendered text uses only the two families', f.used.every(x => x === 'Archivo' || x === 'Newsreader'), f.used.join(', '));
+  ok('no visible text is set in italic', f.italic.length === 0, f.italic.join(' | '));
+  await p.close();
+});
+
+/* The stat bands are data-figs like any other, so the app fills them. The universal
+ * band's sentence must follow the sign of the savings, as the label beside the figure
+ * does, or it would tell a household that pays more that it keeps money. */
+test('public notice: the stat bands carry the live figures and follow the savings sign', async b => {
+  const p = await page(b, 1280, 900);
+  const read = () => p.evaluate(() => ({
+    hidden: document.querySelector('.band-stat [data-fig="emp.invisible"]').textContent,
+    callout: document.querySelector('.callout [data-fig="emp.invisible"]').textContent,
+    band: document.querySelector('.band-stat.teal [data-fig="uni.savings"]').textContent,
+    save: document.getElementById('save').textContent,
+    lbl: document.getElementById('saveLbl').textContent,
+    k: document.getElementById('bandSaveK').textContent,
+    say: document.getElementById('bandSaveSay').textContent }));
+  let r = await read();
+  ok('the paystub band matches the callout', r.hidden === r.callout && /^\$\d/.test(r.hidden), JSON.stringify([r.hidden, r.callout]));
+  ok('the universal band matches the savings panel', r.band === r.save, JSON.stringify([r.band, r.save]));
+  ok('keeping money: the band says so', /keep/.test(r.lbl) && /back in your household/.test(r.say) && !/more/.test(r.k), r.say);
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
+  r = await read();
+  const pays = /pay/.test(r.lbl);
+  ok('the band follows the label when the sign flips', pays ? (/more for this household/.test(r.say) && /more/.test(r.k)) : /back in your household/.test(r.say), JSON.stringify([r.lbl, r.k, r.say]));
+  await p.locator('#unit').click(); await p.waitForTimeout(200);
+  ok('month view: the band sentence says a month', /^a month/.test((await read()).say), (await read()).say);
+  await p.close();
+});
+
+/* Motion: figures count up and bars wipe in. It may decorate, never decide: once it
+ * settles, every figure must read exactly what the reduced-motion page reads, the
+ * letter must be untouched, and an unrevealed figure must hold its real value. */
+test('public notice: motion settles on the same figures and leaves the letter alone', async b => {
+  const still = await page(b, 1280, 900);
+  const grab = q => q.evaluate(() => ({ figs: [...document.querySelectorAll('[data-fig]')].map(e => e.textContent),
+                                         letter: document.getElementById('letterBd').innerText }));
+  const want = await grab(still);
+  ok('reduced motion: no motion class', !(await still.evaluate(() => document.documentElement.classList.contains('motion'))));
+  await still.close();
+
+  const q = await b.newPage({ viewport: { width: 1280, height: 900 }, reducedMotion: 'no-preference' });
+  await q.goto(pathToFileURL(resolve(HERE, '../dist/index.html')).href); await q.waitForTimeout(1200);
+  ok('motion on: the class is set', await q.evaluate(() => document.documentElement.classList.contains('motion')));
+  const early = await q.evaluate(() => document.querySelector('.save .v').textContent);
+  ok('a figure below the fold holds its real value before it is revealed', /^\$[1-9]/.test(early), early);
+  for (let y = 0; y < 12000; y += 600) { await q.evaluate(y => window.scrollTo(0, y), y); await q.waitForTimeout(120); }
+  await q.waitForTimeout(1800);
+  const got = await grab(q);
+  ok('every figure settles exactly on the reduced-motion value', JSON.stringify(got.figs) === JSON.stringify(want.figs),
+     got.figs.map((v, i) => v === want.figs[i] ? '' : `${i}: ${v} vs ${want.figs[i]}`).filter(Boolean).join('; '));
+  ok('the letter text is identical', got.letter === want.letter);
+  await q.evaluate(() => { const i = document.getElementById('income'); i.value = '148000'; i.dispatchEvent(new Event('input', { bubbles: true })); });
+  await q.waitForTimeout(900);
+  ok('after an input change, the eased figures land on the new values', await q.evaluate(() =>
+    document.querySelector('.save .v').textContent === document.querySelector('.band-stat.teal .band-v').textContent));
+  // a model change replays the comparison bars' wipe; the same model does not
+  const wipe = () => q.evaluate(() => getComputedStyle(document.getElementById('uBar')).clipPath);
+  await q.evaluate(() => document.getElementById('uBar').scrollIntoView({ block: 'center' })); await q.waitForTimeout(1500);
+  ok('settled, the bars are fully shown', /inset\(0(px)?\)|none/.test(await wipe()), await wipe());
+  await q.locator('#pills .pill').nth(3).click(); await q.waitForTimeout(150);
+  const mid = await wipe();
+  ok('a different model replays the wipe', mid !== 'none' && !/^inset\(0(px)?\)$/.test(mid), mid);
+  await q.waitForTimeout(1700);
+  ok('and it settles fully shown again', /inset\(0(px)?\)|none/.test(await wipe()), await wipe());
+  await q.locator('#pills .pill').nth(3).click(); await q.waitForTimeout(150);
+  ok('the same model again replays nothing', /inset\(0(px)?\)|none/.test(await wipe()), await wipe());
+  await q.close();
+});
+
+/* The letter's buttons wrap by the letter's own width: one row when all four fit,
+ * the primary over three equal columns when they do not, one per row on the
+ * narrowest letters. Never a lone secondary button on a row of its own, and never
+ * a button past the edge of the letter. */
+test('letter buttons: one row, two rows or a stack, never a stray button', async b => {
+  for (const w of [1440, 1280, 1180, 1100, 1024, 900, 820, 768, 600, 480, 390, 320]) {
+    const p = await page(b, w, 900, w < 600);
+    const r = await p.evaluate(() => {
+      const ft = document.querySelector('.letter .ft').getBoundingClientRect();
+      const box = id => document.getElementById(id).getBoundingClientRect();
+      const ids = ['formBtn', 'copyBtn', 'printBtn', 'sendBtn'], bx = ids.map(box);
+      const rows = [...new Set(bx.map(x => Math.round(x.top)))].length;
+      const sec = bx.slice(1), secRows = [...new Set(sec.map(x => Math.round(x.top)))].length;
+      return { rows, secRows, inside: bx.every(x => x.left >= ft.left - 0.5 && x.right <= ft.right + 0.5),
+               equal: Math.max(...sec.map(x => x.width)) - Math.min(...sec.map(x => x.width)), letter: Math.round(ft.width) };
+    });
+    const shape = r.rows === 1 ? 'one row' : (r.rows === 2 && r.secRows === 1 && r.equal < 1) ? 'two rows' : r.rows === 4 ? 'stack' : 'broken';
+    ok(`${w}px (letter ${r.letter}px): ${shape}, inside the letter`, shape !== 'broken' && r.inside, JSON.stringify(r));
     await p.close();
   }
 });
