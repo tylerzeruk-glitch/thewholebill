@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="alternate" type="application/rss+xml" title="The Whole Bill: what changed" href="https://thewholebill.org/updates.xml">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%2312141A%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%225%22%20width%3D%2210%22%20height%3D%222%22%20fill%3D%22%2386603E%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%223%22%20fill%3D%22%23A87A43%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2210%22%20width%3D%2210%22%20height%3D%2212%22%20fill%3D%22%23D99A3F%22%2F%3E%3Crect%20x%3D%2211%22%20y%3D%2222%22%20width%3D%2210%22%20height%3D%225%22%20fill%3D%22%23F0C98D%22%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,400..900&family=Newsreader:wght@400..500&display=swap">
 <style>
 :root{
   --paper:#FAF7F2; --paper-card:#FFFDFA; --paper-tint:#F5F0E7;
@@ -31,12 +31,15 @@
   --chart-h:500px;
   --pad:clamp(24px,5vw,96px);
   --serif:'Newsreader',Georgia,'Times New Roman',serif;
-  --sans:'Public Sans',system-ui,-apple-system,sans-serif;
-  /* Two families since 2026-09-02: Newsreader (display, body copy, the letter) and Public Sans
-   (controls, labels, figures). --mono is kept as the name of the LABEL AND FIGURE role, but it resolves to the sans:
-   a monospace at 86px for the headline figure and at 10px in tracked capitals read as two more
-   typefaces, which was the launch feedback. Numbers rely on tabular figures instead. */
-  --mono:'Public Sans',system-ui,-apple-system,sans-serif;
+  --sans:'Archivo','Arial Narrow',system-ui,-apple-system,sans-serif;
+  /* Two families (Public Notice, 2026-10): Archivo for everything that is not reading,
+   Newsreader for reading. Archivo is one variable file with a width axis, so condensed
+   headlines (62%), heavy figures (72%), tracked labels (85%) and plain controls (100%)
+   are one family at different widths, not four typefaces. Newsreader loads roman only,
+   400 to 500, about a fifth of what the display version with italics cost: headlines no
+   longer use it, and nothing on the page is set in italic. --mono is kept as the name of
+   the LABEL AND FIGURE role; it resolves to the sans. Numbers rely on tabular figures. */
+  --mono:'Archivo','Arial Narrow',system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{overflow-x:clip}
@@ -58,14 +61,18 @@ section.ink{background:var(--ink);color:var(--ik)}
 .footline,.domain{font-family:var(--mono);font-size:11px;letter-spacing:.06em;font-weight:500}
 /* The one responsive exception: a pill is 110px wide at the 900px breakpoint and "the scorekeeper" needs 125px at the shared size */
 @media (max-width:1023px){.pill-r{font-size:10px;letter-spacing:.06em}}
-.eyebrow{}
+.eyebrow{font-stretch:85%;font-weight:700;font-size:12.5px;letter-spacing:.16em}
 .eyebrow.p{color:var(--amber-deep)} .eyebrow.i{color:var(--teal)}
 .lbl{color:var(--ilabel)}
 .lbl.p{color:var(--plabel);font-size:11px}
 
-h1{font-family:var(--serif);font-weight:400;font-size:clamp(38px,5.6vw,80px);line-height:1.01;letter-spacing:-.023em;margin:0;text-wrap:pretty}
-h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:pretty}
-h1 em{font-style:italic;color:var(--amber-deep)}
+h1{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform:uppercase;font-size:clamp(54px,8.4vw,124px);line-height:.86;letter-spacing:-.004em;margin:0;text-wrap:balance}
+h2{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform:uppercase;font-size:clamp(44px,6.2vw,88px);line-height:.86;letter-spacing:-.004em;margin:0;text-wrap:balance}
+h1 em,h2 em{font-style:normal}
+h1 em{color:var(--amber-deep)}
+/* Roman only: an italic would be synthesized. Emphasis in prose takes weight instead. */
+i,em{font-style:normal}
+p em,li em{font-weight:500}
 /* Body copy reads in the serif, so the page has one reading voice from the headline to
    the letter; the sans is for what is operated or scanned: controls, labels, figures, notes. */
 p{margin:0;text-wrap:pretty;font-family:var(--serif)}
@@ -93,7 +100,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .brand svg{display:block;flex-shrink:0}
 .wordmark{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.012em;line-height:1;white-space:nowrap}
 .domain{}
-.nav{display:flex;gap:clamp(16px,2.4vw,34px);font-size:13.5px;color:var(--pm)}
+.nav{display:flex;gap:clamp(16px,2.4vw,34px);font-size:13px;color:var(--pm);font-stretch:85%;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
 .hero-inner{padding:clamp(48px,7vw,104px) 0 clamp(40px,6vw,72px);display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:clamp(28px,4vw,72px);align-items:end}
 /* The rule down its left edge is a visible edge, and so is the bottom border of
    the area-picker buttons opposite it -- so these two align edge to edge, and the
@@ -113,16 +120,16 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .scope{margin-top:18px;font-size:13.5px;line-height:1.6;color:var(--pm);max-width:540px}
 .scope b{font-weight:500;color:var(--pk)}
 .areapick{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-.areapick button{font-family:var(--sans);font-size:13px;padding:8px 13px;border-radius:2px;border:1px solid var(--pctrl);background:var(--paper-card);color:var(--pk);cursor:pointer}
+.areapick button{font-family:var(--sans);font-size:13px;padding:8px 13px;border-radius:0;border:1px solid var(--pctrl);background:var(--paper-card);color:var(--pk);cursor:pointer}
 .areapick button:hover{background:var(--paper-tint)}
 .zipbar{display:flex;gap:12px;align-items:center;margin-top:44px;flex-wrap:wrap}
-.zipfield{display:flex;align-items:center;border:1px solid var(--pk);border-radius:2px;overflow:hidden;background:var(--paper-card)}
-.zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;color:var(--pm);border-right:1px solid var(--prule)}
+.zipfield{display:flex;align-items:center;border:2px solid var(--pk);border-radius:0;overflow:hidden;background:var(--paper-card)}
+.zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;color:var(--pk);border-right:1px solid var(--prule)}
 .zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent;font-variant-numeric:tabular-nums}
 .zipfield .v::placeholder{color:#A79A85}
 .zipfield:focus-within{outline:2px solid var(--amber-deep);outline-offset:2px}
-.btn-dark{height:62px;padding:0 34px;background:var(--pk);color:var(--paper);border:none;border-radius:2px;font-family:var(--sans);font-size:16px;font-weight:500;cursor:pointer}
-.btn-ghost{height:50px;padding:0 24px;background:var(--paper-card);color:var(--pk);border:1px solid var(--pctrl);border-radius:2px;font-family:var(--sans);font-size:15px;cursor:pointer}
+.btn-dark{height:62px;padding:0 34px;background:var(--c2);color:#1E1509;border:none;border-radius:0;font-family:var(--sans);font-stretch:82%;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;cursor:pointer}
+.btn-ghost{height:50px;padding:0 24px;background:var(--paper-card);color:var(--pk);border:1px solid var(--pctrl);border-radius:0;font-family:var(--sans);font-size:15px;cursor:pointer}
 .footline{display:flex;justify-content:space-between;gap:20px;padding-bottom:40px;color:var(--pm);flex-wrap:wrap}
 
 /* ---------- narrative ---------- */
@@ -161,9 +168,23 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
    stay locked together at every viewport. .cmp-bars reserves the room the longest
    figure needs on the right, which is what keeps both tracks identical. */
 .cmp-plot{position:relative;flex-grow:1;min-width:0}
-.cmp-bars .num{position:absolute;top:50%;transform:translateY(-50%);margin-left:16px;white-space:nowrap}
+.cmp-bars .num{font-family:var(--sans);font-stretch:72%;font-weight:800;position:absolute;top:50%;transform:translateY(-50%);margin-left:16px;white-space:nowrap}
 .track{display:flex;border-radius:1px;overflow:hidden;flex-grow:1;min-width:0}
-.callout{margin-top:40px;border-left:2px solid var(--amber-deep);padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:4px}
+.callout{margin-top:40px;border-left:4px solid var(--amber-deep);padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:4px}
+.callout-v{font-family:var(--sans);font-stretch:70%;font-weight:850;font-size:clamp(40px,5vw,60px);line-height:.95;color:var(--amber-deep);font-variant-numeric:tabular-nums}
+
+/* ---------- Public Notice: the strip and the stat bands ---------- */
+/* The strip says what the page is before anything else does. */
+.pn-strip{background:var(--c2);color:#1E1509;font-family:var(--sans);font-stretch:80%;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.pn-strip .wrap{display:flex;justify-content:space-between;gap:6px 16px;flex-wrap:wrap;padding-top:9px;padding-bottom:9px}
+/* A stat band is a hard interrupt between sections: one live figure, one sentence.
+   The figure is a data-fig like any other, so the calculator fills and refreshes it. */
+.band-stat{background:var(--c2);color:#1E1509}
+.band-stat.teal{background:var(--teal);color:#0C1F1E}
+.band-in{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(16px,4vw,56px);align-items:center;padding-top:clamp(30px,4.5vw,56px);padding-bottom:clamp(30px,4.5vw,56px)}
+.band-v{font-family:var(--sans);font-stretch:66%;font-weight:850;font-size:clamp(68px,11vw,156px);line-height:.84;color:var(--ink);letter-spacing:-.01em;white-space:nowrap}
+.band-in p{font-size:clamp(17px,2vw,25px);line-height:1.38;max-width:30ch}
+.band-k{display:block;font-family:var(--sans);font-stretch:85%;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
 
 /* ---------- sticky results ---------- */
 .sticky{position:sticky;top:0;z-index:20;background:rgba(26,29,38,.92);backdrop-filter:saturate(1.2) blur(8px);-webkit-backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--irule-2)}
@@ -178,7 +199,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .figs{display:flex;gap:clamp(16px,2.6vw,38px);align-items:center}
 .fig{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.fig .n{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums}
+.fig .n{font-family:var(--sans);font-stretch:72%;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
 .fig .t{font-size:13px;color:var(--im)}
 .unit{position:relative;display:inline-flex;align-items:center;padding:3px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);cursor:pointer;flex-shrink:0;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
 .unit:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
@@ -214,7 +235,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .age input:focus-visible{border-color:var(--c2)}
 .age-k{font-size:10.5px;color:var(--im);text-align:center;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .seg{display:flex;gap:6px}
-.seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
+.seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:0;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
 .seg > div.on,.seg > button.on{background:#2C3140;border-color:var(--ib);color:var(--ik);font-weight:500}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;margin:6px 0 0;cursor:pointer;display:block}
 input[type=range]:focus{outline:none}
@@ -234,7 +255,7 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
    colour of the thing you choose. Both fit a drawer of optional, user-supplied
    numbers. Chosen over a plain raised panel and a dashed boundary: the dashed
    convention belongs to other people's interfaces. */
-.adv{background:var(--ink-surface);border:1px solid var(--irule-2);border-left:2px solid var(--teal);border-radius:3px;padding:0 20px}
+.adv{background:var(--ink-surface);border:1px solid var(--irule-2);border-left:2px solid var(--teal);border-radius:0;padding:0 20px}
 /* Two rows at every width: title and chevron, then the state line with the whole
    fold to itself. Sharing a row with the title left the state line a leftover
    column, and its wrapping set the height of the box. */
@@ -255,7 +276,7 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
    so the check is aria-hidden. */
 .ovk{display:none;align-items:center;color:var(--c2)}
 .ovk.on{display:flex}
-.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--c2);border-radius:2px;color:var(--c2);font-family:var(--sans);font-size:13px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--c2);border-radius:0;color:var(--c2);font-family:var(--sans);font-stretch:82%;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:13px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
 .adv-reset:hover{color:var(--ink);background:var(--c2)}
 .adv-reset:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
 input.ctrl:focus-visible{border-color:var(--c2)}
@@ -272,14 +293,14 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .step:hover{background:var(--ink-chip);color:var(--ik)}
 .step:active{background:var(--ictrl);color:var(--ik)}
 .step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
-.warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:3px;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
-.bignum{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(48px,7vw,86px);font-weight:500;line-height:1;letter-spacing:-.02em;color:var(--c2)}
+.warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:0;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
+.bignum{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(64px,9vw,118px);line-height:.88;letter-spacing:-.02em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:20px 22px;display:flex;flex-direction:column;gap:7px}
-.card-i .v{font-family:var(--mono);font-size:27px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:20px 22px;display:flex;flex-direction:column;gap:7px}
+.card-i .v{font-family:var(--sans);font-stretch:72%;font-weight:800;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .card-i.hi{border-color:#34302A} .card-i.hi .v,.card-i.hi .t{color:var(--c2)}
 .card-i .t{font-size:13px;color:var(--im)}
-.callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:3px;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
+.callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:0;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
 
 /* ---------- waterfall ---------- */
 .wf{display:flex;align-items:flex-end;gap:clamp(14px,3vw,44px);margin-top:clamp(48px,8vw,120px);height:var(--chart-h)}
@@ -300,7 +321,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    text, so it can only start at the left. Two rows describing the same columns
    disagreeing about which edge they hang from is worse than either choice. Left
    is the edge both rows can share: figure, bar and swatch now all begin together. */
-.wlab{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.wlab{font-family:var(--sans);font-stretch:72%;font-weight:800;font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
 .wlab.big{font-size:clamp(18px,2.1vw,30px)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
 /* Its column is now the same width as the others, so this label wraps where it
@@ -326,8 +347,8 @@ button.step{cursor:pointer;font-family:var(--sans)}
    inside it, so every pill is the same size and the row reads as a spectrum.
    Below 760px six columns cannot hold the labels -- a native select takes over
    (see the media block), because a six-high pill stack is a page, not a control. */
-.pill{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 8px;border-radius:2px;cursor:pointer;background:var(--ink-raised);color:var(--im);border:1px solid var(--ictrl);transition:background .18s,color .18s,border-color .18s}
-.pill-n{font-size:14px;font-weight:500;white-space:nowrap}
+.pill{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 8px;border-radius:0;cursor:pointer;font-family:var(--sans);background:var(--ink-raised);color:var(--im);border:1px solid var(--ictrl);transition:background .18s,color .18s,border-color .18s}
+.pill-n{font-size:15px;font-stretch:85%;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
 /* --im, not --ifaint: at 10px this line sits right at the 4.5:1 text floor, and
    --ifaint on the raised ground measures 4.45:1 -- under it. Same reason the
    selected state reuses the pill's own dark text rather than a mid teal. */
@@ -335,7 +356,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .pill.on{background:var(--teal);color:#0C1F1E;border-color:var(--teal)}
 .pill.on .pill-r{color:#0C1F1E}
 #modelPick{display:none}
-.prov{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:3px;padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:44px;align-items:start}
+.prov{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:0;padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:44px;align-items:start}
 .bars{display:flex;flex-direction:column;gap:19px}
 .bar-row{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:center}
 .bar-t{display:flex;flex-direction:column;gap:3px}
@@ -355,18 +376,18 @@ button.step{cursor:pointer;font-family:var(--sans)}
    two segments cannot be read as one length. */
 .bar-ghost{height:100%;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
 .bar-fill{height:100%;flex-shrink:0;border-radius:1px;transition:width .35s cubic-bezier(.4,0,.2,1)}
-.bar-v{width:112px;flex-shrink:0;font-family:var(--mono);font-size:clamp(18px,2vw,24px);letter-spacing:-.02em;text-align:right;font-variant-numeric:tabular-nums}
+.bar-v{width:112px;flex-shrink:0;font-family:var(--sans);font-stretch:72%;font-weight:800;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.02em;text-align:right;font-variant-numeric:tabular-nums}
 .summary{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px}
-.save{background:var(--ink-surface);border:1px solid #24382F;border-radius:3px;padding:24px 26px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
+.save{background:var(--ink-surface);border:1px solid #24382F;border-radius:0;padding:24px 26px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
 /* Uninsured households come out BEHIND under every model here, because they are
    currently buying almost no care. The panel has to be able to say so: teal and a
    green border for a saving, amber for a loss. */
 .save.neg{border-color:#4A3520}
 .save.neg .v{color:var(--c2)}
-.save .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(34px,4.4vw,52px);font-weight:500;line-height:1;letter-spacing:-.02em;color:var(--teal)}
-.save .v2{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(24px,2.8vw,34px);font-weight:500;line-height:1;letter-spacing:-.02em}
+.save .v{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(48px,6vw,74px);line-height:1;letter-spacing:-.02em;color:var(--teal)}
+.save .v2{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(30px,3.4vw,42px);line-height:1;letter-spacing:-.02em}
 .vsep{width:1px;align-self:stretch;background:var(--irule)}
-.cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
+.cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
 .range{height:26px;background:var(--ink-raised);border-radius:1px;position:relative}
 .range .band-t{position:absolute;top:0;bottom:0;background:rgba(63,181,174,.30);border-left:2px solid var(--teal);border-right:2px solid var(--teal)}
 .range .mk{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ik);transition:left .35s cubic-bezier(.4,0,.2,1)}
@@ -389,17 +410,17 @@ button.step{cursor:pointer;font-family:var(--sans)}
 /* Same trap, same fix: both rep-card blocks are .stack (display:flex), which beat
    [hidden]. A Georgia split ZIP kept Texas's senators on screen under it. */
 #repPick[hidden],#senBlock[hidden]{display:none}
-.cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:3px;background:var(--ink-surface);overflow:hidden}
+.cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:0;background:var(--ink-surface);overflow:hidden}
 .cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
 .cstat .t{font-size:13.5px;color:var(--im)}
-.cstat .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(26px,3.4vw,42px);font-weight:500;letter-spacing:-.02em;line-height:1}
+.cstat .v{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(32px,4vw,52px);letter-spacing:-.02em;line-height:1}
 .cstat .s{font-size:12.5px;color:var(--ifaint)}
-.chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:3px;padding:22px 24px}
+.chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px}
 .chartbox svg{display:block;width:100%;height:auto}
 
 /* ---------- lives ---------- */
 .livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
-.bigstat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,84px);font-weight:500;line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
+.bigstat .n{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(64px,9vw,120px);line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
 .bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
 /* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
    ARE that number, split in two. Set as a sum -- operator in its own column so the
@@ -411,7 +432,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .tally{display:grid;grid-template-columns:14px auto minmax(0,1fr);gap:14px 13px;align-items:end;
        border-top:1px solid var(--prule);padding-top:18px}
 .tally .op{font-family:var(--mono);font-size:19px;color:var(--pm)}   /* --pctrl measured 3.12:1 on paper */
-.tally .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:23px;line-height:1.15;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
+.tally .v{font-family:var(--sans);font-stretch:72%;font-weight:800;font-variant-numeric:tabular-nums;font-size:28px;line-height:1.15;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
 .tally .d{font-size:15px;line-height:1.5;color:var(--pb);text-wrap:pretty}
 
 /* The source note collapses, but the DISCLOSURE does not: both facts a reader
@@ -433,7 +454,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 /* ---------- critics / act ---------- */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
 #objections .grid2 > .card-p:nth-child(5){grid-column:1/-1}   /* five objections: the last takes the row */
-.card-p{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;padding:34px 36px;display:flex;flex-direction:column;gap:16px}
+.card-p{background:var(--paper-card);border:1px solid var(--pk);border-radius:0;padding:34px 36px;display:flex;flex-direction:column;gap:16px}
 /* Inside a card the note is an aside, not a second paragraph. Four cards each
    drawing a full-width rule put four horizontal lines through one grid; a short
    left rule subordinates the note without cutting across the card. The notes
@@ -476,7 +497,7 @@ a.term:hover,a.term:focus-visible{text-decoration-style:solid;color:var(--amber-
 #methodology [id],#updates [id]{scroll-margin-top:28px}
 .onpage{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;line-height:1.5;margin-top:4px}
 a.q:hover{border-bottom-color:var(--amber-deep)}
-.quote{font-family:var(--serif);font-size:clamp(23px,2.3vw,29px);font-style:italic;line-height:1.24}
+.quote{font-family:var(--serif);font-size:clamp(23px,2.3vw,29px);line-height:1.24}
 .fn{font-size:12.5px;line-height:1.55;color:var(--pm);border-top:1px solid var(--prule-soft);padding-top:14px}
 /* Notes take the width of what they annotate. These carried a 56ch measure cap
    for a while (the readability pass, 2026-08-30); a day of living with it showed
@@ -489,12 +510,12 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .fnm{color:var(--plabel);font-weight:500;margin-right:5px}
 .fnr{font-size:.7em;line-height:0;vertical-align:super;color:var(--plabel);font-weight:500;margin-left:1px}
 .actgrid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:36px;align-items:start}
-.letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;display:flex;flex-direction:column}
+.letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:0;display:flex;flex-direction:column}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
 .letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:17.5px;line-height:1.72;color:#2A2620}
 .letter .ft{display:flex;gap:10px;padding:22px 36px;border-top:1px solid var(--prule-soft);align-items:center;flex-wrap:wrap}
 .letter .bd[contenteditable]:focus-visible{outline:2px solid var(--amber-deep);outline-offset:-2px}
-.letter .bd .hint{color:var(--pm);font-style:italic}
+.letter .bd .hint{color:var(--pm)}
 /* Print = the letter and nothing else. The Print button marks the letter's
    ancestors .pk and sets .print-letter on body (both removed on afterprint); a
    plain Ctrl+P still prints the whole page, which is the reader's own choice.
@@ -506,8 +527,35 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 /* Row headers in the methodology tables: real <th scope="row"> for assistive tech, styled as the body cells they replaced */
 .meth th.rowh{font-family:var(--sans);font-size:inherit;letter-spacing:0;text-transform:none;color:var(--pb);padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;line-height:1.6;font-weight:400}
 /* /methodology is its own document, so its title is an h1 there; it keeps the h2 face */
-h1.as-h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:pretty}
+h1.as-h2{font-family:var(--sans);font-stretch:62%;font-weight:850;text-transform:uppercase;font-size:clamp(44px,6.2vw,88px);line-height:.86;letter-spacing:-.004em;margin:0;text-wrap:balance}
 /* A7: every transition and animation stops when the reader asks for reduced motion */
+/* ---------- motion ---------- */
+/* Only when the reader has not asked for less, and only once the motion script has run
+   (html.motion): without it, nothing is ever held back. Bars wipe in as one piece (clip-
+   path, not per-segment scaling, which opened gaps between segments mid-growth); the
+   waterfall builds column by column; widths ease when an input changes. The figures'
+   count-up is the script's job. */
+@media (prefers-reduced-motion:no-preference){
+  .hero-inner > div > *,.hero-inner .dateline{animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) both}
+  .hero-inner > div > :nth-child(2){animation-delay:.08s} .hero-inner > div > :nth-child(3){animation-delay:.16s}
+  .hero-inner > div > :nth-child(n+4){animation-delay:.24s} .hero-inner .dateline{animation-delay:.32s}
+  @keyframes pn-rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+  .motion .track,.motion .bar-bg{clip-path:inset(0 0 0 0);transition:clip-path 1.2s cubic-bezier(.2,.7,.2,1)}
+  .motion .range{clip-path:inset(-12px 0 -12px 0);transition:clip-path 1.2s cubic-bezier(.2,.7,.2,1)}
+  .motion .wcol{clip-path:inset(-60px 0 0 0);transition:clip-path 1s cubic-bezier(.2,.7,.2,1)}
+  .motion .reveal:not(.in) .track,.motion .reveal:not(.in) .bar-bg{clip-path:inset(0 100% 0 0)}
+  .motion .reveal:not(.in) .range{clip-path:inset(-12px 100% -12px 0)}
+  .motion .reveal:not(.in) .wcol{clip-path:inset(100% 0 0 0)}
+  .motion .cmp-row:nth-child(2) .track{transition-delay:.3s}
+  .motion .bar-row:nth-child(2) .bar-bg{transition-delay:.18s} .motion .bar-row:nth-child(3) .bar-bg{transition-delay:.36s}
+  .motion .wcol:nth-child(2){transition-delay:.18s} .motion .wcol:nth-child(3){transition-delay:.36s}
+  .motion .wcol:nth-child(4){transition-delay:.54s} .motion .wcol-total{transition-delay:.8s}
+  .motion .track > div,.motion .bar-bg > div{transition:width .55s cubic-bezier(.4,0,.2,1)}
+  .motion .cmp-plot .num{transition:left .55s cubic-bezier(.4,0,.2,1),opacity .5s ease .7s}
+  .motion .reveal:not(.in) .cmp-plot .num{opacity:0}
+  .motion .band-v{transition:transform .9s cubic-bezier(.2,.7,.2,1),opacity .9s ease}
+  .motion .band-stat.reveal:not(.in) .band-v{transform:translateX(-24px);opacity:0}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
 }
@@ -530,7 +578,7 @@ h1.as-h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.6vw,56p
   body.print-letter .letter .hd,body.print-letter .letter .ft{display:none}
 }
 mark{background:#F7EDDC;color:inherit;padding:1px 4px}
-.chk{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--prule);border-radius:2px;font-size:14px;font-family:var(--sans);width:100%;text-align:left;cursor:pointer;min-height:44px;color:inherit;transition:background .15s,border-color .15s}
+.chk{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--prule);border-radius:0;font-size:14px;font-family:var(--sans);width:100%;text-align:left;cursor:pointer;min-height:44px;color:inherit;transition:background .15s,border-color .15s}
 .chk.on{background:var(--paper-tint)} .chk.off{background:var(--paper-card);color:var(--pm)}
 .chk:hover:not(:disabled){border-color:var(--pctrl)}
 .chk:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
@@ -649,6 +697,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 }
 
 @media (max-width:760px){
+  .band-in{grid-template-columns:minmax(0,1fr)}
   :root{--chart-h:260px}
 
   /* layout */
@@ -745,6 +794,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 <!-- ============ 01 HERO ============ -->
 <a class="skip" href="#main">Skip to the calculator</a>
 <main id="main" tabindex="-1">
+<div class="pn-strip"><div class="wrap"><span>Public notice &middot; what healthcare costs your household</span><span>Plan year 2026 &middot; every figure sourced</span></div></div>
 <section class="paper">
   <div class="wrap">
     <header class="masthead">
@@ -814,7 +864,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="cmp-bars">
           <div class="cmp-plot">
             <div class="track"><div id="narrSmall" style="width:26.2%;background:var(--c1)"></div></div>
-            <div class="num" id="narrSmallNum" style="font-size:22px;color:var(--pm);left:26.2%" data-fig="emp.visible">$8,278</div>
+            <div class="num" id="narrSmallNum" style="font-size:30px;color:var(--pm);left:26.2%" data-fig="emp.visible">$8,278</div>
           </div>
         </div>
       </div>
@@ -829,7 +879,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
               <div id="narrVis" style="width:26.2%;background:var(--c1)"></div>
               <div id="narrRest" style="width:73.8%;background:var(--c2)"></div>
             </div>
-            <div class="num" style="font-size:30px;left:100%" data-fig="emp.total">$31,578</div>
+            <div class="num" style="font-size:40px;left:100%" data-fig="emp.total">$31,578</div>
           </div>
         </div>
       </div>
@@ -837,7 +887,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="callout">
       <div class="lbl p" style="color:var(--amber-deep)">Never on a paystub</div>
-      <div style="font-family:var(--serif);font-size:30px;font-style:italic;color:var(--amber-deep)"><span data-fig="emp.invisible">$23,300</span> <span data-uw="a">a year</span></div>
+      <div class="callout-v"><span data-fig="emp.invisible">$23,300</span> <span data-uw="a">a year</span></div>
     </div>
 
     <div class="rule" style="margin:56px 0 24px"></div>
@@ -845,6 +895,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labeled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums come from the CMS 2026 plan files for your county.</p>
       <p class="note" style="max-width:360px">Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
     </div>
+  </div>
+</section>
+
+
+<!-- ============ STAT BAND: never on a paystub ============ -->
+<section class="band-stat" aria-label="Never on a paystub">
+  <div class="wrap band-in">
+    <div class="band-v num" data-fig="emp.invisible">$23,943</div>
+    <p><span class="band-k">Never on a paystub</span><span data-uw="a">a year</span> of your healthcare never shows up on your paystub. It is spent on your behalf, out of your pay.</p>
   </div>
 </section>
 
@@ -982,7 +1041,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="split tie">
         <div class="stack" style="gap:16px">
           <div class="eyebrow i">02 &middot; The reveal</div>
-          <h2>Here is <em style="font-style:italic;color:var(--c2)">the whole bill</em>.</h2>
+          <h2>Here is <em style="color:var(--c2)">the whole bill</em>.</h2>
         </div>
         <p style="font-size:16.5px;line-height:1.6;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. Two of them appear on a paystub. The largest never does; it is spent on your behalf.</p>
       </div>
@@ -1006,7 +1065,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">03 &middot; The cliff</div>
-          <h2>One dollar, <em style="font-style:italic;color:var(--c2)" data-fig="cliff.drop">$12,980</em>.</h2>
+          <h2>One dollar, <em style="color:var(--c2)" data-fig="cliff.drop">$12,980</em>.</h2>
         </div>
         <p style="font-size:16.5px;line-height:1.6;color:var(--im)" id="cliffIntro">Nothing in this section is modeled. The <a class="term" href="#/methodology/credit">premium tax credit</a> does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.</p>
       </div>
@@ -1027,7 +1086,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">03 &middot; The bad year</div>
-          <h2>Nothing caps <em style="font-style:italic;color:var(--c2)">a bad year</em>.</h2>
+          <h2>Nothing caps <em style="color:var(--c2)">a bad year</em>.</h2>
         </div>
         <p style="font-size:16.5px;line-height:1.6;color:var(--im)">The out-of-pocket maximum is the law&rsquo;s ceiling on a bad year, for people with coverage. Going without insurance means going without the ceiling: no statute anywhere limits what a hospital can bill you.</p>
       </div>
@@ -1060,7 +1119,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <div class="split tie">
         <div class="stack" style="gap:15px">
           <div class="eyebrow i">04 &middot; The comparison</div>
-          <h2><em style="font-style:italic;color:var(--teal)">Another way</em> to pay for the same care.</h2>
+          <h2><em style="color:var(--teal)">Another way</em> to pay for the same care.</h2>
         </div>
         <p style="font-size:16.5px;line-height:1.6;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust, including the one funded by its opponents.</p>
       </div>
@@ -1152,6 +1211,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   </section>
 
 </div>
+
+<!-- ============ STAT BAND: what universal coverage would leave ============ -->
+<section class="band-stat teal" aria-label="Under universal coverage">
+  <div class="wrap band-in">
+    <div class="band-v num" data-fig="uni.savings">$22,534</div>
+    <p><span class="band-k" id="bandSaveK">Under universal coverage</span><span id="bandSaveSay">a year back in your household&rsquo;s pocket under the estimate you picked. Five others, critics included, are one click away.</span></p>
+  </div>
+</section>
 
 <!-- ============ 05 IN LIVES ============ -->
 <section class="paper" id="lives">
@@ -2233,6 +2300,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("narrRest").style.width  = (100 - vis).toFixed(1) + "%";
 
     byId("saveLbl").textContent   = S.savingsNegative ? "Your household would pay" : "Your household would keep";
+    byId("bandSaveK").textContent = S.savingsNegative ? "Under universal coverage, more" : "Under universal coverage";
+    byId("bandSaveSay").textContent = WORDS.a[state.unit] + (S.savingsNegative
+      ? " more for this household under the estimate you picked. Change the model or the income and watch it move."
+      : " back in your household\u2019s pocket under the estimate you picked. Five others, critics included, are one click away.");
     byId("decadeLbl").textContent = S.savingsNegative ? "Over a decade, on top" : "Over a decade";
     document.querySelector(".save").classList.toggle("neg", S.savingsNegative);
     // "today" on the range strip is this household's route, so the marker cannot
@@ -3375,3 +3446,112 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   route();
 })();
 </script>
+<script>
+/* Motion (Public Notice). Reads and animates what the app above renders; it never
+   computes a figure. Off entirely under prefers-reduced-motion (the suite runs that
+   way, so it measures values, not animation frames).
+   - Sections gain .reveal, then .in when scrolled to: the CSS wipes bars in.
+   - Figures count up from zero when they first come into view, and ease between
+     values whenever the app repaints them. Until revealed, a figure holds its real
+     value, for screen readers and anything else reading the page; the count-up's
+     first frame is written in the same tick as the reveal, so it never flashes.
+   - Figures inside the letter are never touched: the reader edits that text, and its
+     figures are rounded hedges, not readouts. */
+(function(){
+  if (!window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!("IntersectionObserver" in window) || !("MutationObserver" in window)) return;
+  var root = document.documentElement;
+  root.classList.add("motion");
+  function all(sel){ return [].slice.call(document.querySelectorAll(sel)); }
+
+  var targets = all("[data-fig]").filter(function(el){
+    return !el.closest("#letterBd, [contenteditable], .letter") && !el.hasAttribute("data-round");
+  }).concat(all("#cliffUnder, #cliffOver, #cliffDrop, .bigstat .n, .tally .v"));
+
+  function parse(t){
+    var m = /(\d[\d,]*)(\.\d+)?/.exec(t || "");
+    return m ? { v: parseFloat((m[1] + (m[2] || "")).replace(/,/g, "")), at: m.index, len: m[0].length, dec: m[2] ? m[2].length - 1 : 0 } : null;
+  }
+  var ST = new WeakMap();
+  function st(el){
+    var s = ST.get(el);
+    if (!s){ var p = parse(el.textContent); s = { target: el.textContent, shown: p ? p.v : 0, written: null, revealed: false, active: false, raf: 0 }; ST.set(el, s); }
+    return s;
+  }
+  function write(el, s, text){ s.written = text; el.textContent = text; }
+  function tween(el, from, dur){
+    var s = st(el), text = s.target, p = parse(text);
+    cancelAnimationFrame(s.raf);
+    if (!p){ s.active = false; write(el, s, text); return; }
+    var t0 = performance.now(), to = p.v;
+    s.active = true;
+    (function step(now){
+      var k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      var v = from + (to - from) * e;
+      if (!p.dec) v = Math.round(v);
+      s.shown = v;
+      if (k < 1){
+        write(el, s, text.slice(0, p.at) + v.toLocaleString("en-US", { minimumFractionDigits: p.dec, maximumFractionDigits: p.dec }) + text.slice(p.at + p.len));
+        s.raf = requestAnimationFrame(step);
+      } else { s.active = false; write(el, s, text); s.shown = to; }
+    })(t0);
+  }
+
+  // The app rewrites every figure on each repaint. A write that is not ours is a new
+  // target; the same value repainted mid-count just keeps the count going.
+  var mo = new MutationObserver(function(list){
+    var seen = [];
+    list.forEach(function(m){
+      var el = m.target.nodeType === 3 ? m.target.parentNode : m.target;
+      while (el && targets.indexOf(el) < 0) el = el.parentNode;
+      if (el && seen.indexOf(el) < 0) seen.push(el);
+    });
+    seen.forEach(function(el){
+      var s = st(el), now = el.textContent;
+      if (now === s.written) return;
+      if (now === s.target && s.active){ el.textContent = s.written; return; }
+      s.target = now;
+      if (!s.revealed){ var p = parse(now); s.shown = p ? p.v : 0; return; }
+      tween(el, s.shown, 500);
+    });
+  });
+  targets.forEach(function(el){ st(el); mo.observe(el, { childList: true, characterData: true, subtree: true }); });
+
+  var figIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (!e.isIntersecting) return;
+      figIO.unobserve(e.target);
+      var s = st(e.target);
+      if (s.revealed) return;
+      s.revealed = true;
+      tween(e.target, 0, e.target.matches(".bignum, .band-v, .bigstat .n, .save .v") ? 1500 : 1100);
+    });
+  }, { threshold: 0.6 });
+  targets.forEach(function(el){ figIO.observe(el); });
+
+  var sections = all("main > section, .inkzone > section");
+  sections.forEach(function(sec){ sec.classList.add("reveal"); });
+  var secIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (!e.isIntersecting) return;
+      e.target.classList.add("in");
+      secIO.unobserve(e.target);
+      if (e.target.id === "cliff") drawCliff();
+    });
+  }, { threshold: 0.18 });
+  sections.forEach(function(sec){ secIO.observe(sec); });
+
+  // The cliff line draws itself once.
+  function drawCliff(){
+    try {
+      all("#cliffChart path").forEach(function(path){
+        if (getComputedStyle(path).fill !== "none") return;
+        var len = path.getTotalLength();
+        path.animate([{ strokeDasharray: len, strokeDashoffset: len }, { strokeDasharray: len, strokeDashoffset: 0 }],
+                     { duration: 1400, easing: "cubic-bezier(.2,.7,.2,1)" });
+      });
+    } catch (e) {}
+  }
+})();
+</script>
+
