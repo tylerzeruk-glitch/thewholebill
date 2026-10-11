@@ -44,3 +44,10 @@ Health and Covered California figures on every rebuild. The representative looku
 1. `CLAUDE.md`: conventions, and the traps this codebase has already fallen into
 2. `docs/numbers-and-copy-traps.md`: the ways these numbers go wrong
 3. `src/calc.js`: every constant, with its source in a comment
+4. `docs/LESSONS.md`: what has gone wrong here and the rule each time taught
+
+## License
+
+Code under MIT (`LICENSE`); the copy, methodology, docs and data tables under CC BY 4.0, with
+the third-party data terms listed in `LICENSE-CONTENT.md`. Reuse it freely, with credit:
+"Source: The Whole Bill (thewholebill.org)".
