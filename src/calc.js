@@ -11,13 +11,17 @@
  * The UI is expected to surface anything that is not 'statutory' or 'survey'.
  *
  * SOURCES
- *   FPL .................. HHS 2025 poverty guidelines (the guidelines in force
- *                          at the start of 2026 open enrollment, so these are the
- *                          ones that govern 2026 coverage).
- *   Applicable percentage  IRS Rev. Proc. 2025-25, table for taxable years
- *                          beginning in 2026. NOTE: the enhanced (ARPA/IRA)
+ *   FPL .................. HHS 2026 poverty guidelines (the guidelines in force
+ *                          at the start of 2027 open enrollment, so these are the
+ *                          ones that govern 2027 coverage).
+ *   Applicable percentage  IRS Rev. Proc. 2026-26, table for taxable years
+ *                          beginning in 2027. NOTE: the enhanced (ARPA/IRA)
  *                          schedule EXPIRED 31 Dec 2025. The 400% FPL cliff is
  *                          back — above 400% the credit is zero, not tapered.
+ *   Out-of-pocket maximum  CMS, 2027 premium adjustment percentage and maximum
+ *                          annual limitation on cost sharing (29 Jan 2026).
+ *   PRIOR ................ the plan-year 2026 tables, kept so the methodology
+ *                          page can print last year's schedule beside this one.
  *   Employer premiums .... KFF Employer Health Benefits Survey 2025.
  *   Marketplace deductible KFF, 2026 marketplace analysis.
  * ========================================================================== */
@@ -30,27 +34,62 @@
 
   /* ---------------------------------------------------------------- tables */
 
-  var YEAR = 2026;
+  /* The plan year. Every dated table below belongs to it, and the suite fails
+   * if the benchmark table (src/benchmarks.js planYear) or the Sanders
+   * exemption's standard deduction is from any other year: one plan year on
+   * the page, never a mix. */
+  var YEAR = 2027;
 
-  // HHS 2025 poverty guidelines.
+  // HHS 2026 poverty guidelines (Federal Register, 15 January 2026): $33,000
+  // for four in the 48 states and DC.
   var FPL = {
-    contiguous: { base: 15650, add: 5500 },
-    AK:         { base: 19550, add: 6880 },
-    HI:         { base: 17990, add: 6330 }
+    contiguous: { base: 15960, add: 5680 },
+    AK:         { base: 19950, add: 7100 },
+    HI:         { base: 18360, add: 6530 }
   };
 
-  // IRS Rev. Proc. 2025-25 — applicable percentage table for 2026.
+  // IRS Rev. Proc. 2026-26 — applicable percentage table for 2027.
   // Within a band the percentage rises linearly from `from` to `to`.
-  // There is no band above 400%: that is the cliff.
+  // There is no band above 400%: that is the cliff. Each figure is the 2014
+  // statutory percentage times the year's premium index, rounded to the
+  // hundredth (2.0 x 1.0758 = 2.15 ... 9.5 x 1.0758 = 10.22).
   var APPLICABLE = [
-    { lo: 0.00, hi: 1.33, from: 0.0210, to: 0.0210 },
-    { lo: 1.33, hi: 1.50, from: 0.0314, to: 0.0419 },
-    { lo: 1.50, hi: 2.00, from: 0.0419, to: 0.0660 },
-    { lo: 2.00, hi: 2.50, from: 0.0660, to: 0.0844 },
-    { lo: 2.50, hi: 3.00, from: 0.0844, to: 0.0996 },
-    { lo: 3.00, hi: 4.00, from: 0.0996, to: 0.0996 }
+    { lo: 0.00, hi: 1.33, from: 0.0215, to: 0.0215 },
+    { lo: 1.33, hi: 1.50, from: 0.0323, to: 0.0430 },
+    { lo: 1.50, hi: 2.00, from: 0.0430, to: 0.0678 },
+    { lo: 2.00, hi: 2.50, from: 0.0678, to: 0.0866 },
+    { lo: 2.50, hi: 3.00, from: 0.0866, to: 0.1022 },
+    { lo: 3.00, hi: 4.00, from: 0.1022, to: 0.1022 }
   ];
   var CLIFF = 4.00;
+
+  // The statutory out-of-pocket maximum for in-network covered care (45 CFR
+  // 156.130). Not part of any calculation: the bad-year panel and the
+  // methodology quote it, and the build fills both from here.
+  var OOP_MAX = { single: 12000, family: 24000 };
+
+  /* Plan year 2026, kept for reference only: the methodology page prints it
+   * under this year's tables and the suite holds the two to these numbers.
+   * HHS 2025 poverty guidelines; IRS Rev. Proc. 2025-25; CMS's 2025
+   * Marketplace Integrity and Affordability final rule. Nothing computes
+   * from it. */
+  var PRIOR = {
+    year: 2026,
+    FPL: {
+      contiguous: { base: 15650, add: 5500 },
+      AK:         { base: 19550, add: 6880 },
+      HI:         { base: 17990, add: 6330 }
+    },
+    APPLICABLE: [
+      { lo: 0.00, hi: 1.33, from: 0.0210, to: 0.0210 },
+      { lo: 1.33, hi: 1.50, from: 0.0314, to: 0.0419 },
+      { lo: 1.50, hi: 2.00, from: 0.0419, to: 0.0660 },
+      { lo: 2.00, hi: 2.50, from: 0.0660, to: 0.0844 },
+      { lo: 2.50, hi: 3.00, from: 0.0844, to: 0.0996 },
+      { lo: 3.00, hi: 4.00, from: 0.0996, to: 0.0996 }
+    ],
+    OOP_MAX: { single: 10600, family: 21200 }
+  };
 
   // 26 U.S.C. §36B(c)(1)(A): the credit needs household income of at least 100%
   // of the poverty line. §36B(c)(2)(B): anyone eligible for Medicaid gets no
@@ -376,14 +415,23 @@
   var URBAN_ADDER = Math.round(719.7e9 / BLAHOUS.households);
 
   /* Sanders' 2019 list exempts "the standard deduction" from the 4% premium
-   * (its worked example: $29,000 for a family of four, 2019). This is a 2026
-   * calculator, so it uses the 2026 standard deduction: $32,200 joint, $16,100
-   * single, IRS Rev. Proc. 2025-32. The list also exempts an employer's first
-   * $2M of payroll from the 7.5% levy; a household cannot know where its
-   * employer stands, so the levy is applied to all wages here, which if
-   * anything overstates the cost. Both choices are stated on the methodology
-   * page. Galvani (below) keeps its paper's literal $29,000. */
-  var SANDERS_EXEMPT = { joint: 32200, single: 16100 };
+   * (its worked example: $29,000 for a family of four, 2019). The calculator
+   * uses the standard deduction of its own plan year, so `year` must equal
+   * YEAR; the suite fails until it does.
+   *
+   * PLAN YEAR 2027: PENDING. The IRS publishes the 2027 inflation adjustments
+   * in its autumn revenue procedure (the 2026 one, Rev. Proc. 2025-32, came
+   * on 9 October 2025), and as of 11 October 2026 it has not. Until then this
+   * still holds the 2026 deduction ($32,200 joint, $16,100 single). When it
+   * lands: set the two amounts, year: 2027 and the citation, and update the
+   * methodology's Sanders footnote and Sources row (both read "PENDING").
+   *
+   * The list also exempts an employer's first $2M of payroll from the 7.5%
+   * levy; a household cannot know where its employer stands, so the levy is
+   * applied to all wages here, which if anything overstates the cost. Both
+   * choices are stated on the methodology page. Galvani (below) keeps its
+   * paper's literal $29,000. */
+  var SANDERS_EXEMPT = { year: 2026, joint: 32200, single: 16100, cite: 'Rev. Proc. 2025-32' };
   function sandersOne(income, size) {
     var exempt = size > 1 ? SANDERS_EXEMPT.joint : SANDERS_EXEMPT.single;
     var premium = 0.04 * Math.max(0, income - exempt);
@@ -428,8 +476,9 @@
       basis: 'published formula',
       note: 'Sen. Bernie Sanders\u2019 office, 2019, from its published list of financing options, ' +
             'the first of two household-level formulas anyone in this debate has published. A 4% ' +
-            'income-based premium above the standard deduction ($32,200 joint, $16,100 single in ' +
-            '2026), plus a 7.5% employer payroll tax replacing what your employer pays now. The ' +
+            'income-based premium above the standard deduction ($' + SANDERS_EXEMPT.joint.toLocaleString('en-US') +
+            ' joint, $' + SANDERS_EXEMPT.single.toLocaleString('en-US') + ' single in ' + SANDERS_EXEMPT.year +
+            '), plus a 7.5% employer payroll tax replacing what your employer pays now. The ' +
             'list presents these as separate options; pairing them is our doing. It also exempts an ' +
             'employer\u2019s first $2 million of payroll from the levy; we apply it to all wages.',
       compute: sandersOne
@@ -707,8 +756,8 @@
   }
 
   return {
-    YEAR: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, CLIFF: CLIFF,
-    EMPLOYER: EMPLOYER, MODELS: MODELS,
+    YEAR: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, CLIFF: CLIFF, OOP_MAX: OOP_MAX, PRIOR: PRIOR,
+    SANDERS_EXEMPT: SANDERS_EXEMPT, EMPLOYER: EMPLOYER, MODELS: MODELS,
     useBenchmarks: useBenchmarks, benchKey: benchKey, zipResolve: zipResolve,
     benchmarkPremium: benchmarkPremium,
     povertyLine: povertyLine, fplRatio: fplRatio,

@@ -1,19 +1,29 @@
 /* Regenerates src/benchmarks.js — the county-level benchmark (second-lowest-cost
- * silver, SLCSP) table for plan year 2026, plus the ZIP→county map and per-state
- * age curves, from the CMS public use files. Hand-run:
+ * silver, SLCSP) table for one plan year (PLAN_YEAR below), plus the ZIP→county
+ * map and per-state age curves, from the CMS public use files. Hand-run:
  *
  *     node tools/build-benchmarks.mjs
+ *
+ * A NEW PLAN YEAR (each fall, when CMS posts the files; CLAUDE.md ritual 7):
+ *   1. PLAN_YEAR must equal calc.js's YEAR (the suite fails on a mismatch).
+ *   2. Fill VALIDATION[PLAN_YEAR] from that year's published NY State of Health
+ *      LCSP PDF and Covered California booklet; the tool refuses to run without.
+ *   3. Check SBE_ZIP_NAMES against the year's CMS SBE page: the names are
+ *      irregular, and a wrong one fails the download rather than guessing.
+ *   4. Re-read NOT_EXPANDED and CHIP against Medicaid.gov for the new year.
+ * Downloads are cached per year (tools/cache/<year>/), so last year's files
+ * can never stand in for this year's.
  *
  * Inputs (all keyless, all public domain except GeoNames CC BY 4.0; downloaded
  * into tools/cache/ on first run):
  *   FFM (30 healthcare.gov states):
- *     https://download.cms.gov/marketplace-puf/2026/rate-puf.zip
- *     https://download.cms.gov/marketplace-puf/2026/plan-attributes-puf.zip
- *     https://download.cms.gov/marketplace-puf/2026/service-area-puf.zip
- *     https://data.healthcare.gov/datafile/py2026/individual_market_medical.zip
+ *     https://download.cms.gov/marketplace-puf/<year>/rate-puf.zip
+ *     https://download.cms.gov/marketplace-puf/<year>/plan-attributes-puf.zip
+ *     https://download.cms.gov/marketplace-puf/<year>/service-area-puf.zip
+ *     https://data.healthcare.gov/datafile/py<year>/individual_market_medical.zip
  *       (county→rating-area + an independent per-county SLCSP cross-check;
  *        convert to landscape_slim.csv with tools/xlsx-slim.py)
- *   SBE (21 state exchanges): https://www.cms.gov/files/zip/{state}sbepuf2026.zip
+ *   SBE (21 state exchanges): https://www.cms.gov/files/zip/{state}sbepuf<year>.zip
  *   Rating areas: https://www.cms.gov/cciio/.../{st}-gra (county or 3-digit-ZIP
  *     tables; AK and MA rate by ZIP3, Los Angeles County splits by ZIP3)
  *   ZIP→county: Census tab20_zcta520_county20_natl.txt (public domain) filled
@@ -30,24 +40,29 @@
  *   - FFM counties must match the landscape file's own per-county second-lowest
  *     age-21 silver premium to the cent (AK excepted; the landscape approximates
  *     AK by dominant rating area, we resolve ZIP3 exactly).
- *   - NY county floors match NY State of Health's published 2026 LCSP PDF.
- *   - CA Rating Area 15/16 match Covered California's published 2026 booklet.
+ *   - NY county floors match NY State of Health's published LCSP PDF for the year.
+ *   - CA Rating Area 15 matches Covered California's published booklet for the year.
  *   - Per-state age curves must be uniform across every silver plan in the
  *     state (they are, by regulation) or the build fails.
  */
 import { execFileSync } from 'node:child_process';
 import { createReadStream, existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { createInterface } from 'node:readline';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const CACHE = join(HERE, 'cache');
+const PLAN_YEAR = 2027;
+const CACHE = join(HERE, 'cache', String(PLAN_YEAR));
 const OUT = join(HERE, '..', 'src', 'benchmarks.js');
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
 const SBE_STATES = ['CA','CO','CT','DC','GA','ID','IL','KY','ME','MD','MA','MN','NV','NJ','NM','NY','PA','RI','VT','VA','WA'];
-const SBE_ZIP_NAMES = {
+// The 2026 names, with the year carried forward. CMS names these by hand
+// (California's lacks the "e", Illinois's has no year), so confirm each one
+// against the year's SBE page before a run; a wrong name fails the download.
+const SBE_ZIP_NAMES = Object.fromEntries(Object.entries({
   CA:'californiasbpuf2026', CO:'coloradosbepuf2026', CT:'connecticutsbepuf2026',
   DC:'districtofcolumbiapuf2026', GA:'georgiasbepuf2026', ID:'idahosbepuf2026',
   IL:'illinois-sbe-qhp-puf', KY:'kentuckysbepuf2026', ME:'mainesbepuf2026',
@@ -55,13 +70,30 @@ const SBE_ZIP_NAMES = {
   NV:'nevadasbepuf2026', NJ:'newjerseysbepuf2026', NM:'newmexicosbepuf2026',
   NY:'newyorksbepuf2026', PA:'pennsylvaniasbepuf2026', RI:'rhodeislandsbepuf2026',
   VT:'vermontsbepuf2026', VA:'virginiasbepuf2026', WA:'washingtonsbepuf2026'
+}).map(([st, n]) => [st, n.replace('2026', String(PLAN_YEAR))]));
+
+/* The published numbers every build must reproduce to the cent, per plan year.
+ *   ny: NY State of Health, "<year> Lowest Cost Silver Plan by County" (PDF):
+ *       the LOWEST silver individual-tier premium, cents, by county FIPS.
+ *   ca: Covered California, "<year> QHP Rates by County" booklet, Los Angeles
+ *       County Rating Area 15: lowest and second-lowest silver at age 40, cents.
+ * A year with no entry stops the build before anything is downloaded: an
+ * unvalidated table never ships. */
+const VALIDATION = {
+  2026: {
+    // Albany 680.51, Bronx 806.61, Erie 581.62, Monroe 730.00, Tompkins 1041.11
+    ny: { '36001': 68051, '36005': 80661, '36029': 58162, '36055': 73000, '36109': 104111 },
+    // R15 lowest 391.59 / 2nd 463.41 at age 40
+    ca: [39159, 46341]
+  },
+  2027: null   // fill from the 2027 NY PDF and Covered California booklet when published
 };
 const FIPS2 = { AL:'01',AK:'02',AZ:'04',AR:'05',CA:'06',CO:'08',CT:'09',DE:'10',DC:'11',FL:'12',GA:'13',HI:'15',ID:'16',IL:'17',IN:'18',IA:'19',KS:'20',KY:'21',LA:'22',ME:'23',MD:'24',MA:'25',MI:'26',MN:'27',MS:'28',MO:'29',MT:'30',NE:'31',NV:'32',NH:'33',NJ:'34',NM:'35',NY:'36',NC:'37',ND:'38',OH:'39',OK:'40',OR:'41',PA:'42',RI:'44',SC:'45',SD:'46',TN:'47',TX:'48',UT:'49',VT:'50',VA:'51',WA:'53',WV:'54',WI:'55',WY:'56' };
 const ST_OF_FIPS2 = Object.fromEntries(Object.entries(FIPS2).map(([k,v]) => [v,k]));
 // AK and MA rate by 3-digit ZIP (CMS ak-gra / ma-gra); LA County splits 15/16.
 const AK_ZIP3 = { 995:1, 996:2, 997:2, 998:3, 999:3 };
 
-// Medicaid expansion (2026: the 10 holdouts unchanged) and children's
+// Medicaid expansion (2026: the 10 holdouts unchanged; re-read for each new plan year) and children's
 // Medicaid/CHIP upper limits as %FPL, Medicaid.gov eligibility-levels table
 // (Dec 2023 convention, no 5-pt MAGI disregard) with the two verified 2024
 // updates (AZ 225 KidsCare, ND 200) and Iowa's all-ages 302 in place of its
@@ -71,6 +103,11 @@ const CHIP = { AL:312,AK:203,AZ:225,AR:211,CA:261,CO:260,CT:318,DE:212,DC:319,FL
 
 const log = m => console.log(m);
 const fail = m => { console.error('FAIL: ' + m); process.exit(1); };
+if (createRequire(import.meta.url)('../src/calc.js').YEAR !== PLAN_YEAR)
+  fail('PLAN_YEAR ' + PLAN_YEAR + ' is not calc.js\'s YEAR: the benchmarks and the credit schedule must be the same plan year');
+const CHECK = VALIDATION[PLAN_YEAR];
+if (!CHECK) fail('no published validation values for plan year ' + PLAN_YEAR +
+  ': fill VALIDATION[' + PLAN_YEAR + '] from NY State of Health\'s LCSP PDF and Covered California\'s booklet first');
 
 /* ------------------------------------------------------------ downloads */
 function fetchTo(url, dest, binary) {
@@ -85,22 +122,22 @@ function ensureInputs() {
   mkdirSync(join(CACHE, 'gra'), { recursive: true });
   mkdirSync(join(CACHE, 'sbe'), { recursive: true });
   if (!existsSync(join(CACHE, 'Rate_PUF.csv'))) {
-    fetchTo('https://download.cms.gov/marketplace-puf/2026/rate-puf.zip', 'rate-puf.zip');
+    fetchTo('https://download.cms.gov/marketplace-puf/' + PLAN_YEAR + '/rate-puf.zip', 'rate-puf.zip');
     unzipTo('rate-puf.zip', 'rate-tmp');
     execFileSync('sh', ['-c', `mv "${CACHE}/rate-tmp/"*.csv "${CACHE}/Rate_PUF.csv"`]);
   }
   if (!existsSync(join(CACHE, 'Plan_Attributes_PUF.csv'))) {
-    fetchTo('https://download.cms.gov/marketplace-puf/2026/plan-attributes-puf.zip', 'plan-attributes-puf.zip');
+    fetchTo('https://download.cms.gov/marketplace-puf/' + PLAN_YEAR + '/plan-attributes-puf.zip', 'plan-attributes-puf.zip');
     unzipTo('plan-attributes-puf.zip', 'pa-tmp');
     execFileSync('sh', ['-c', `mv "${CACHE}/pa-tmp/"*.csv "${CACHE}/Plan_Attributes_PUF.csv"`]);
   }
   if (!existsSync(join(CACHE, 'Service_Area_PUF.csv'))) {
-    fetchTo('https://download.cms.gov/marketplace-puf/2026/service-area-puf.zip', 'service-area-puf.zip');
+    fetchTo('https://download.cms.gov/marketplace-puf/' + PLAN_YEAR + '/service-area-puf.zip', 'service-area-puf.zip');
     unzipTo('service-area-puf.zip', 'sa-tmp');
     execFileSync('sh', ['-c', `mv "${CACHE}/sa-tmp/"*.csv "${CACHE}/Service_Area_PUF.csv"`]);
   }
   if (!existsSync(join(CACHE, 'landscape_slim.csv'))) {
-    fetchTo('https://data.healthcare.gov/datafile/py2026/individual_market_medical.zip', 'individual_market_medical.zip');
+    fetchTo('https://data.healthcare.gov/datafile/py' + PLAN_YEAR + '/individual_market_medical.zip', 'individual_market_medical.zip');
     unzipTo('individual_market_medical.zip', 'land-tmp');
     execFileSync('python3', [join(HERE, 'xlsx-slim.py'),
       join(CACHE, 'land-tmp', 'individual_market_medical.xlsx'), join(CACHE, 'landscape_slim.csv')]);
@@ -299,7 +336,7 @@ const saCounties = {};   // issuer|said -> Set(fips)
     else if (r[iCo]) set.add(r[iCo].padStart(5, '0'));
   }
 }
-// FFM rates: only silver scids, individual market (2026 full-year rows), all 51 ages
+// FFM rates: only silver scids, individual market (full-year rows), all 51 ages
 const rateOf = {};       // scid|ra -> Float64Array(65)
 await new Promise((resolve) => {
   const rl = createInterface({ input: createReadStream(join(CACHE, 'Rate_PUF.csv')) });
@@ -318,7 +355,7 @@ await new Promise((resolve) => {
     const r = parseCsvLine(line);
     const scid = r[iPl];
     if (!silverPlan[scid]) return;
-    if (r[iEff] !== '2026-01-01') return;
+    if (r[iEff] !== PLAN_YEAR + '-01-01') return;
     const idx = ageIndices(r[iAge]);
     if (!idx) return;
     const key = scid + '|' + parseInt(r[iRa].replace('Rating Area ', ''), 10);
@@ -492,9 +529,8 @@ function computeCounty(fips, ra, st) {
 }
 /* ---- validation 2: published state numbers ---- */
 {
-  // NY State of Health, 2026 LCSP by county (PDF): Albany 680.51, Bronx 806.61,
-  // Erie 581.62, Monroe 730.00, Tompkins 1041.11 — the LOWEST silver individual tier.
-  const ny = { '36001': 68051, '36005': 80661, '36029': 58162, '36055': 73000, '36109': 104111 };
+  // NY State of Health's LCSP by county (PDF) — the LOWEST silver individual tier.
+  const ny = CHECK.ny;
   for (const fips of Object.keys(ny)) if (!entries[fips]) fail('NY entry missing ' + fips);
   // NY is a tier state: entries hold the SECOND-lowest tier array; validate the
   // lowest separately by recomputing.
@@ -515,7 +551,7 @@ function computeCounty(fips, ra, st) {
   for (const [fips, want] of Object.entries(ny))
     if (lows[fips] !== want) fail('NY LCSP mismatch ' + fips + ': ' + lows[fips] + ' vs ' + want);
   log('validated: NY county floors match the published LCSP PDF to the cent');
-  // Covered California 2026 booklet, LA County: R15 lowest 391.59 / 2nd 463.41 at age 40.
+  // Covered California's booklet, LA County: R15 lowest and second-lowest at age 40.
   const r15 = entries['06037|15'];
   // the plan rates directly at age 40 for LA R15
   const prems40 = [];
@@ -527,8 +563,8 @@ function computeCounty(fips, ra, st) {
     if (r && r[40] > 0) prems40.push(Math.round(r[40] * 100));
   }
   prems40.sort((a, b) => a - b);
-  if (prems40[0] !== 39159 || prems40[1] !== 46341)
-    fail('CA R15 age-40 mismatch: ' + prems40.slice(0, 2) + ' vs 39159,46341');
+  if (prems40[0] !== CHECK.ca[0] || prems40[1] !== CHECK.ca[1])
+    fail('CA R15 age-40 mismatch: ' + prems40.slice(0, 2) + ' vs ' + CHECK.ca);
   log('validated: CA LA Rating Area 15 matches the Covered California booklet to the cent');
 }
 
@@ -700,7 +736,7 @@ function keyFor(fips, zip) {
 
   const today = new Date().toISOString().slice(0, 10);
   const data = {
-    asOf: today, planYear: 2026,
+    asOf: today, planYear: PLAN_YEAR,
     fips: ST_OF_FIPS2,
     zip3ra: { AK: AK_ZIP3, MA: graZip3.MA, LA: graZip3.CA_LA },
     curves: curveOut, states, counties: co, zip: zipOut
@@ -708,7 +744,7 @@ function keyFor(fips, zip) {
   const json = JSON.stringify(data);
   const out = `/* Generated by tools/build-benchmarks.mjs — DO NOT EDIT BY HAND. Regenerate with:
  *     node tools/build-benchmarks.mjs
- * Retrieved ${today}. Sources (plan year 2026, all public domain except GeoNames CC BY 4.0):
+ * Retrieved ${today}. Sources (plan year ${PLAN_YEAR}, all public domain except GeoNames CC BY 4.0):
  * CMS Exchange PUFs (rate, plan attributes, service area) and the QHP landscape
  * file for the 30 healthcare.gov states; the CMS State-based Exchange PUFs for
  * the 21 state exchanges; CMS geographic-rating-area tables (AK and MA rate by

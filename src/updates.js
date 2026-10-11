@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'plan-year-2027', date: '2026-11-01', kind: 'site', pin: true,
+    title: 'The calculator now uses plan year 2027: the 2027 credit schedule, the 2026 poverty guidelines and the CMS 2027 plan files.',
+    body: 'Open enrollment for 2027 began on 1 November, so every dated figure moved together. The share of income a household is expected to pay toward the benchmark plan rises in every band of the IRS schedule (Rev. Proc. 2026-26): 2.15% at the bottom, up from 2.10%, and 10.22% from 300% to 400% of the poverty line, up from 9.96%. The credit is now measured against the 2026 poverty guidelines, $33,000 for a family of four in the 48 states and DC, up from $32,150, so for that family the 400% cliff falls at $132,000 instead of $128,600. The statutory out-of-pocket maximum is $12,000 for one person and $24,000 for a family, up from $10,600 and $21,200. Benchmark premiums are every county&rsquo;s second-lowest-cost silver plan in CMS&rsquo;s 2027 files [PENDING 2027: what the benchmark did for the default household, from the rebuild]. The Sanders exemption uses the 2027 standard deduction [PENDING 2027: the amounts, once the IRS publishes them]. Last year&rsquo;s tables stay on the methodology page.',
+    see: { id: 'credit', text: 'The premium tax credit' }
+  },
+  {
     id: 'newsroom-type-2026-10-09', date: '2026-10-09', kind: 'site',
     title: 'New type: headlines now in a newspaper serif, figures in a plainer sans, and a cleaner read on phones.',
     body: 'No number, source or method changed. Headlines move from condensed capitals to Newsreader, the face the page already used for reading, with their emphasis in its italic; figures, labels and buttons move to Hanken Grotesk, whose figures still line up in columns. The header and footer links are lowercase. On phones, the ZIP button no longer breaks onto two lines, five digits fit the ZIP field even on the narrowest screens, the methodology tables stack instead of squeezing their text into a sliver, and labels no longer end on a single stranded word.',
@@ -121,7 +127,7 @@ var UPDATES = [
     see: { id: 'universal', text: 'Universal coverage, six models' }
   },
   {
-    id: 'kff-2027-rates', date: '2026-08-03', kind: 'world', pin: true,
+    id: 'kff-2027-rates', date: '2026-08-03', kind: 'world',
     title: 'Insurers propose a median <b>15%</b> premium increase for 2027, the second double-digit year in a row.',
     body: 'KFF&rsquo;s read of preliminary rate filings across all 50 states and DC: a median proposed increase of 15% for 2027, after 2026 finalized at 20%. Insurers cite rising prices for care, inflation and labor shortages, and two things specific to this market: the enhanced credits&rsquo; expiry and the sicker risk pool it left behind. Final 2027 rates arrive in the fall, when the benchmark table on this site is rebuilt from CMS&rsquo;s files.',
     source: { title: 'KFF, How much and why ACA Marketplace premiums are going up in 2027', url: 'https://www.kff.org/affordable-care-act/how-much-and-why-aca-marketplace-premiums-are-going-up-in-2027/' },
@@ -149,7 +155,7 @@ var UPDATES = [
     see: { id: 'poverty', text: 'Poverty guidelines' }
   },
   {
-    id: 'enhanced-credits-expired', date: '2025-12-31', kind: 'world', pin: true,
+    id: 'enhanced-credits-expired', date: '2025-12-31', kind: 'world',
     title: 'The enhanced premium tax credits expired. The 400% subsidy cliff is back for plan year 2026.',
     body: 'The 2021 enhancements (no income ceiling, a lower expected contribution at every income) ran through 2025 and were not renewed. From 1 January 2026 the schedule in IRS Rev. Proc. 2025-25 applies, and a household above 400% of the poverty line gets no credit at all. Every figure on this site uses the 2026 schedule.',
     source: { title: 'IRS Rev. Proc. 2025-25, the applicable percentage table for 2026', url: 'https://www.irs.gov/pub/irs-drop/rp-25-25.pdf' },

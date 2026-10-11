@@ -852,7 +852,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 <!-- ============ 01 HERO ============ -->
 <a class="skip" href="#main">Skip to the calculator</a>
 <main id="main" tabindex="-1">
-<div class="pn-strip"><div class="wrap"><span>Public notice &middot; what healthcare costs your household</span><span>Plan year 2026 &middot; every figure sourced</span></div></div>
+<div class="pn-strip"><div class="wrap"><span>Public notice &middot; what healthcare costs your household</span><span>Plan year 2027 &middot; every figure sourced</span></div></div>
 <section class="paper">
   <div class="wrap">
     <header class="masthead">
@@ -952,7 +952,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="rule" style="margin:56px 0 24px"></div>
     <div class="row" style="gap:56px;flex-wrap:wrap">
-      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labeled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums come from the CMS 2026 plan files for your county.</p>
+      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labeled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums come from the CMS 2027 plan files for your county.</p>
       <p class="note" style="max-width:360px">Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
     </div>
   </div>
@@ -1089,7 +1089,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           </div>
           <div class="cards" id="cards"></div>
           <div id="elig"></div>
-          <p class="note-i" id="panelNote">Employer premiums are <a class="term" href="#/methodology/employer">KFF 2025 survey averages</a>. Subsidy math follows the IRS 2026 applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan from the CMS 2026 plan files, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
+          <p class="note-i" id="panelNote">Employer premiums are <a class="term" href="#/methodology/employer">KFF 2025 survey averages</a>. Subsidy math follows the IRS 2027 applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan from the CMS 2027 plan files, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
         </div>
       </div>
     </div>
@@ -1153,7 +1153,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
       <div class="cliffstats">
         <div class="cstat"><div class="t">One average hospital stay, billed at list price</div><div class="v" style="color:var(--c2)">&asymp;$57,000</div><div class="s">$16,700 <a class="term" href="#/methodology/bad-year">average cost</a> &times; the published 3.4&times; average markup, modeled</div></div>
-        <div class="cstat"><div class="t">The most an insured person can owe in a year</div><div class="v">$10,600</div><div class="s">the 2026 <a class="term" href="#/methodology/bad-year">statutory out-of-pocket maximum</a>, per person, for covered in-network care</div></div>
+        <div class="cstat"><div class="t">The most an insured person can owe in a year</div><div class="v">$12,000</div><div class="s">the 2027 <a class="term" href="#/methodology/bad-year">statutory out-of-pocket maximum</a>, per person, for covered in-network care</div></div>
         <div class="cstat" style="border:none"><div class="t">The most an uninsured person can owe</div><div class="v" style="color:var(--c2)">No limit</div><div class="s">no ceiling exists in law</div></div>
       </div>
 
@@ -1561,8 +1561,15 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3 id="poverty">Poverty guidelines <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
-      <p class="body" style="max-width:760px">2026 coverage uses the guidelines in force when open enrollment began, which are the <b>2025</b> HHS figures. Add the increment once per person beyond the first.</p>
-      <table style="margin-top:12px"><caption class="vh">Poverty guidelines, 2025</caption>
+      <p class="body" style="max-width:760px">2027 coverage uses the guidelines in force when open enrollment began, which are the <b>2026</b> HHS figures. Add the increment once per person beyond the first.</p>
+      <table style="margin-top:12px" id="fpl-current"><caption class="vh">Poverty guidelines, 2026, used for plan year 2027</caption>
+        <tr><th scope="col">Region</th><th scope="col">First person</th><th scope="col">Each additional</th><th scope="col">Household of four</th></tr>
+        <tr><td>48 states &amp; DC</td><td class="num">$15,960</td><td class="num">$5,680</td><td class="num">$33,000</td></tr>
+        <tr><td>Alaska</td><td class="num">$19,950</td><td class="num">$7,100</td><td class="num">$41,250</td></tr>
+        <tr><td>Hawaii</td><td class="num">$18,360</td><td class="num">$6,530</td><td class="num">$37,950</td></tr>
+      </table>
+      <p class="fn" id="poverty-2026" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Plan year 2026, which this calculator used until open enrollment for 2027 began on 1 November 2026, ran on the 2025 guidelines. They are kept here so last year&rsquo;s figures can still be checked.</p>
+      <table id="fpl-prior"><caption class="vh">Poverty guidelines, 2025, used for plan year 2026</caption>
         <tr><th scope="col">Region</th><th scope="col">First person</th><th scope="col">Each additional</th><th scope="col">Household of four</th></tr>
         <tr><td>48 states &amp; DC</td><td class="num">$15,650</td><td class="num">$5,500</td><td class="num">$32,150</td></tr>
         <tr><td>Alaska</td><td class="num">$19,550</td><td class="num">$6,880</td><td class="num">$40,190</td></tr>
@@ -1572,8 +1579,22 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3 id="credit">The premium tax credit <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
-      <p class="body" style="max-width:760px">The credit is the gap between the benchmark plan&rsquo;s premium and what the law says your household is expected to contribute. That expected share comes from IRS Rev. Proc. 2025-25, and it rises <i>linearly within each band</i>, not in steps.</p>
-      <table style="margin-top:12px"><caption class="vh">The premium tax credit schedule, 2026</caption>
+      <p class="body" style="max-width:760px">The credit is the gap between the benchmark plan&rsquo;s premium and what the law says your household is expected to contribute. That expected share comes from IRS Rev. Proc. 2026-26, the table for plan year 2027, and it rises <i>linearly within each band</i>, not in steps.</p>
+      <table style="margin-top:12px" id="schedule-current"><caption class="vh">The premium tax credit schedule, 2027</caption>
+        <tr><th scope="col">Household income</th><th scope="col">Contribution rises from</th><th scope="col">to</th></tr>
+        <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">Below 100% of the poverty line</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit</td></tr>
+        <tr><td>100% to 133%</td><td class="num">2.15%</td><td class="num">2.15%</td></tr>
+        <tr><td>133% to 150%</td><td class="num">3.23%</td><td class="num">4.30%</td></tr>
+        <tr><td>150% to 200%</td><td class="num">4.30%</td><td class="num">6.78%</td></tr>
+        <tr><td>200% to 250%</td><td class="num">6.78%</td><td class="num">8.66%</td></tr>
+        <tr><td>250% to 300%</td><td class="num">8.66%</td><td class="num">10.22%</td></tr>
+        <tr><td>300% to 400%</td><td class="num">10.22%</td><td class="num">10.22%</td></tr>
+        <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">400% and above</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit at all</td></tr>
+      </table>
+      <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
+      <p class="fn" id="credit-floor">The first row is the floor, and it matters most in the ten states that have not expanded Medicaid (Alabama, Florida, Georgia, Kansas, Mississippi, South Carolina, Tennessee, Texas, Wisconsin and Wyoming). An adult there below the poverty line is too poor for the credit and, unless a parent with very low income, ineligible for Medicaid as well: the coverage gap. In the states that expanded Medicaid, adults under 138% of the poverty line (215% in the District of Columbia) qualify for Medicaid, and the law gives no marketplace credit to anyone eligible for Medicaid, so the calculator shows no credit there either and says why. The 100% to 133% row used to serve lawfully present immigrants whom Medicaid excludes: they could take the credit below the poverty line and, in expansion states, below the Medicaid ceiling. The July 2025 reconciliation law (Public Law 119-21) removed that credit for plan years from 2026, and from 2027 refugees, asylees and people with temporary protected status lose it as well. The row is empty in practice now, and the floor is a floor for everyone.</p>
+      <p class="fn" id="credit-2026" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">Every band moved up from plan year 2026, when the schedule (IRS Rev. Proc. 2025-25) ran from 2.10% to 9.96%: the IRS indexes the percentages each year to how fast premiums have grown against incomes. The 400% line itself does not move; it is written into the statute. Last year&rsquo;s table, kept so its figures can still be checked:</p>
+      <table id="schedule-prior"><caption class="vh">The premium tax credit schedule, 2026</caption>
         <tr><th scope="col">Household income</th><th scope="col">Contribution rises from</th><th scope="col">to</th></tr>
         <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">Below 100% of the poverty line</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit</td></tr>
         <tr><td>100% to 133%</td><td class="num">2.10%</td><td class="num">2.10%</td></tr>
@@ -1584,13 +1605,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>300% to 400%</td><td class="num">9.96%</td><td class="num">9.96%</td></tr>
         <tr><td style="color:var(--amber-deep)"><b style="font-weight:500">400% and above</b></td><td class="num" colspan="2" style="color:var(--amber-deep)">No credit at all</td></tr>
       </table>
-      <p class="fn" style="border-top:1px solid var(--prule-soft);padding-top:16px;margin-top:8px">That last row is the cliff, and it is the single most consequential number on this site. The enhanced credits enacted in 2021 capped contributions at 8.5% of income with no upper income limit; they expired on <b>31 December 2025</b>. Above 400% of the poverty line the credit now goes to zero rather than tapering, so one extra dollar of income can cost a household thousands.</p>
-      <p class="fn" id="credit-floor">The first row is the floor, and it matters most in the ten states that have not expanded Medicaid (Alabama, Florida, Georgia, Kansas, Mississippi, South Carolina, Tennessee, Texas, Wisconsin and Wyoming). An adult there below the poverty line is too poor for the credit and, unless a parent with very low income, ineligible for Medicaid as well: the coverage gap. In the states that expanded Medicaid, adults under 138% of the poverty line (215% in the District of Columbia) qualify for Medicaid, and the law gives no marketplace credit to anyone eligible for Medicaid, so the calculator shows no credit there either and says why. The 100% to 133% row used to serve lawfully present immigrants whom Medicaid excludes: they could take the credit below the poverty line and, in expansion states, below the Medicaid ceiling. The July 2025 reconciliation law (Public Law 119-21) removed that credit for plan years from 2026, and from 2027 refugees, asylees and people with temporary protected status lose it as well. The row is empty in practice now, and the floor is a floor for everyone.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3 id="benchmark">The benchmark premium <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
-      <p class="body" style="max-width:760px">The credit is measured against the second-lowest-cost silver plan available to your household, so that premium is the hinge of every marketplace figure here. It comes from the published 2026 federal plan files, computed per county, and here is exactly how.</p>
+      <p class="body" style="max-width:760px">The credit is measured against the second-lowest-cost silver plan available to your household, so that premium is the hinge of every marketplace figure here. It comes from the published 2027 federal plan files, computed per county, and here is exactly how.</p>
       <table style="margin-top:12px"><caption class="vh">How the benchmark premium is built</caption>
         <tr>
           <th scope="row" class="rowh wide"><b style="font-weight:500;color:var(--pk)">The plan set</b></th>
@@ -1618,7 +1637,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">How we know it is right</b></th>
-          <td>Three independent checks, run every time the table is rebuilt: every HealthCare.gov county must match the separately published QHP landscape file&rsquo;s own second-lowest silver premium to the cent; New York&rsquo;s county floors must match NY State of Health&rsquo;s published 2026 lowest-cost-silver table to the cent; and Los Angeles must match Covered California&rsquo;s published 2026 rate booklet. A build that fails any check does not ship.</td>
+          <td>Three independent checks, run every time the table is rebuilt: every HealthCare.gov county must match the separately published QHP landscape file&rsquo;s own second-lowest silver premium to the cent; New York&rsquo;s county floors must match NY State of Health&rsquo;s published 2027 lowest-cost-silver table to the cent; and Los Angeles must match Covered California&rsquo;s published 2027 rate booklet. A build that fails any check does not ship.</td>
         </tr>
       </table>
       <p class="fn">Two judgment calls to know about. &ldquo;Second lowest&rdquo; counts plans, not distinct prices, so if two plans tie for cheapest the benchmark equals that tied price; the IRS defines it the same way. And the credit legally counts only the essential-health-benefits share of the benchmark premium, typically 99% to 100% of it; the plan files publish that share only as a whole percent, so we use the full premium, which can overstate a credit by a fraction of a percent (about $7 a month on a $3,081 Connecticut benchmark, checked against the state exchange&rsquo;s own quote).</p>
@@ -1645,7 +1664,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="quote" style="font-size:23px">Sanders &middot; bill&rsquo;s authors</div>
           <p class="body">From the financing options published by Sen. Sanders&rsquo; office in 2019 (its &ldquo;Option 1&rdquo;), the first of the two household-level formulas in this debate that anyone actually wrote down.</p>
           <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">4% &times; (income &minus; $32,200)<br>+ 7.5% &times; income<br><br>= 4% &times; $62,800 &nbsp;=&nbsp; $2,512<br>+ 7.5% &times; $95,000 &nbsp;=&nbsp; $7,125<br><b>= $9,637 a year</b></p>
-          <p class="fn">The exemption is the standard deduction, as the 2019 list stipulates; its own worked example used $29,000 for a family of four, the figure of its day. A 2026 calculator uses the 2026 deduction: $32,200 for a joint return, $16,100 for a single filer (IRS Rev. Proc. 2025-32). The Lancet formula below keeps its paper&rsquo;s literal $29,000, because that is what the paper wrote down.</p>
+          <p class="fn">The exemption is the standard deduction, as the 2019 list stipulates; its own worked example used $29,000 for a family of four, the figure of its day. A 2027 calculator uses the 2027 deduction: [PENDING 2027: the IRS has not yet published the 2027 standard deduction; it was $32,200 joint and $16,100 single in 2026, IRS Rev. Proc. 2025-32]. The Lancet formula below keeps its paper&rsquo;s literal $29,000, because that is what the paper wrote down.</p>
           <p class="fn">Two liberties, both ours. The 2019 list presents the income premium and the payroll tax as <i>separate</i> options; we pair them. It also exempts an employer&rsquo;s first $2 million of payroll from the 7.5% levy; a household cannot know where its employer&rsquo;s payroll stands, so we apply the levy to all wages, which if anything overstates the cost. Say both out loud rather than let someone discover them.</p>
         </div>
 
@@ -1711,7 +1730,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">The insured ceiling</b></th>
-          <td><span class="num">$10,600</span> self-only / <span class="num">$21,200</span> family: the 2026 out-of-pocket maximum, statutory, from CMS&rsquo;s 2025 Marketplace final rule. It applies only to people with coverage. No equivalent exists in law for the uninsured.</td>
+          <td><span class="num">$12,000</span> self-only / <span class="num">$24,000</span> family: the 2027 out-of-pocket maximum, statutory, from CMS&rsquo;s payment parameters for 2027 (January 2026), up from $10,600 and $21,200 in 2026. It applies only to people with coverage. No equivalent exists in law for the uninsured.</td>
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">After one hospitalization</b></th>
@@ -1767,7 +1786,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Repaying the credit</b></th>
-          <td>The credit shown is the advance credit for a household whose income comes in as entered. Since tax year 2026 there is no cap on repaying excess advance credit (Public Law 119-21): a household that earns more than it projected repays the whole difference at filing, and one that crosses the 400% line repays every dollar of it. The page prices the year as entered and does not model repayment; section 03 shows what crossing the line costs. Two later changes narrow who can claim the credit rather than what it pays: from 2027 refugees, asylees and people with temporary protected status are excluded, and from 2028 every enrollee must re-verify eligibility before each year&rsquo;s coverage instead of being re-enrolled automatically.</td>
+          <td>The credit shown is the advance credit for a household whose income comes in as entered. Since tax year 2026 there is no cap on repaying excess advance credit (Public Law 119-21): a household that earns more than it projected repays the whole difference at filing, and one that crosses the 400% line repays every dollar of it. The page prices the year as entered and does not model repayment; section 03 shows what crossing the line costs. Two later changes narrow who can claim the credit rather than what it pays: from this plan year, 2027, refugees, asylees and people with temporary protected status are excluded, and from 2028 every enrollee must re-verify eligibility before each year&rsquo;s coverage instead of being re-enrolled automatically.</td>
         </tr>
         <tr id="wrong-wages">
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Wage incidence</b></th>
@@ -1778,13 +1797,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px">
       <h3 id="sources">Sources</h3>
-      <p class="note" style="font-size:13.5px;line-height:1.6">Each link goes to the primary document, not a summary of it. Every one was retrieved and checked on 4 September 2026; if a link has since moved, the citation still stands on its own.</p>
+      <p class="note" style="font-size:13.5px;line-height:1.6">Each link goes to the primary document, not a summary of it. Every one was retrieved and checked on [PENDING 2027: the date the new plan-year links are checked]; if a link has since moved, the citation still stands on its own.</p>
       <p class="note" style="font-size:13.5px;line-height:1.6" id="cite">To cite this page: The Whole Bill, &ldquo;Methodology,&rdquo; thewholebill.org/methodology, with the date you read it. Every figure here also carries its own source above.</p>
       <table style="margin-top:12px"><caption class="vh">Sources</caption>
         <tr><th scope="col">Figure</th><th scope="col">Source</th></tr>
-        <tr><td>Poverty guidelines</td><td><a class="srclink" href="https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines" rel="noopener">HHS, 2025 Poverty Guidelines</a></td></tr>
-        <tr><td>Premium credit schedule</td><td><a class="srclink" href="https://www.irs.gov/pub/irs-drop/rp-25-25.pdf" rel="noopener">IRS Rev. Proc. 2025-25</a>, applicable percentage table for 2026</td></tr>
-        <tr><td>Standard deduction, 2026</td><td><a class="srclink" href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" rel="noopener">IRS Rev. Proc. 2025-32</a> (the Sanders exemption)</td></tr>
+        <tr><td>Poverty guidelines</td><td><a class="srclink" href="https://www.federalregister.gov/documents/2026/01/15/2026-00755/annual-update-of-the-hhs-poverty-guidelines" rel="noopener">HHS, 2026 Poverty Guidelines</a>, Federal Register, 15 January 2026 (plan year 2027); the <a class="srclink" href="https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines" rel="noopener">2025 guidelines</a> for plan year 2026</td></tr>
+        <tr><td>Premium credit schedule</td><td><a class="srclink" href="https://www.irs.gov/pub/irs-drop/rp-26-26.pdf" rel="noopener">IRS Rev. Proc. 2026-26</a>, applicable percentage table for 2027; <a class="srclink" href="https://www.irs.gov/pub/irs-drop/rp-25-25.pdf" rel="noopener">Rev. Proc. 2025-25</a> for 2026</td></tr>
+        <tr><td>Standard deduction, 2027</td><td>[PENDING 2027: the IRS revenue procedure with the 2027 inflation adjustments] (the Sanders exemption)</td></tr>
         <tr><td>Employer premiums</td><td><a class="srclink" href="https://www.kff.org/health-costs/2025-employer-health-benefits-survey/" rel="noopener">KFF Employer Health Benefits Survey, 2025</a></td></tr>
         <tr><td>2026 marketplace changes</td><td><a class="srclink" href="https://www.kff.org/affordable-care-act/what-we-know-so-far-about-2026-aca-marketplace-enrollment-premiums-and-deductibles/" rel="noopener">KFF, 2026 Marketplace enrollment, premiums and deductibles</a></td></tr>
         <tr><td>Single-payer financing</td><td><a class="srclink" href="https://www.sanders.senate.gov/wp-content/uploads/options-to-finance-medicare-for-all.pdf" rel="noopener">Office of Sen. Bernie Sanders, financing options, 2019</a></td></tr>
@@ -1798,14 +1817,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Household count</td><td><a class="srclink" href="https://www.census.gov/data/tables/time-series/demo/families/households.html" rel="noopener">US Census Bureau, Total Households, 2025</a></td></tr>
         <tr><td>Hospital stay costs</td><td><a class="srclink" href="https://hcup-us.ahrq.gov/reports/statbriefs/sb316-most-expensive-conditions-by-payer-2022.pdf" rel="noopener">HCUP Statistical Brief #316</a>, AHRQ, February 2026 (2022 data)</td></tr>
         <tr><td>Hospital markups</td><td>Bai &amp; Anderson, <a class="srclink" href="https://doi.org/10.1377/hlthaff.2014.1414" rel="noopener"><i>Extreme Markup</i></a>, Health Affairs, 2015; National Nurses United, <a class="srclink" href="https://www.nationalnursesunited.org/sites/default/files/nnu/documents/1120_CostChargeRatios_Report_FINAL_PP.pdf" rel="noopener"><i>Fleecing Patients</i></a>, 2020 (union-funded)</td></tr>
-        <tr><td>2026 out-of-pocket maximum</td><td><a class="srclink" href="https://www.federalregister.gov/documents/2025/06/25/2025-11606/patient-protection-and-affordable-care-act-marketplace-integrity-and-affordability" rel="noopener">CMS, Marketplace Integrity and Affordability final rule</a>, June 2025</td></tr>
+        <tr><td>2027 out-of-pocket maximum</td><td><a class="srclink" href="https://www.cms.gov/files/document/2027-papi-parameters-guidance-2026-01-29.pdf" rel="noopener">CMS, Premium Adjustment Percentage, Maximum Annual Limitation on Cost Sharing and related parameters for the 2027 benefit year</a>, 29 January 2026; for 2026, the <a class="srclink" href="https://www.federalregister.gov/documents/2025/06/25/2025-11606/patient-protection-and-affordable-care-act-marketplace-integrity-and-affordability" rel="noopener">Marketplace Integrity and Affordability final rule</a>, June 2025</td></tr>
         <tr><td>Hospitalization aftermath</td><td>Dobkin, Finkelstein, Kluender &amp; Notowidigdo, <a class="srclink" href="https://doi.org/10.1257/aer.20161038" rel="noopener">American Economic Review, 2018</a></td></tr>
         <tr><td>Health-care debt</td><td><a class="srclink" href="https://www.kff.org/health-costs/kff-health-care-debt-survey/" rel="noopener">KFF Health Care Debt Survey, 2022</a></td></tr>
         <tr><td>Care skipped over cost</td><td><a class="srclink" href="https://www.kff.org/health-costs/americans-challenges-with-health-care-costs/" rel="noopener">KFF Health Tracking Poll, May 2025</a>; <a class="srclink" href="https://www.cdc.gov/nchs/nhis/" rel="noopener">National Health Interview Survey, 2024</a></td></tr>
         <tr><td>Medical bankruptcy, both sides</td><td>Himmelstein et al., <a class="srclink" href="https://doi.org/10.2105/AJPH.2018.304901" rel="noopener">AJPH, 2019</a> (PNHP-affiliated authors); Dobkin et al., <a class="srclink" href="https://doi.org/10.1056/NEJMp1716604" rel="noopener">NEJM, 2018</a></td></tr>
-        <tr><td>Benchmark premiums, HealthCare.gov states</td><td><a class="srclink" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS Exchange PUFs</a> (rate, plan attributes, service area) and the <a class="srclink" href="https://www.healthcare.gov/plan-data/" rel="noopener">QHP Landscape file</a>, plan year 2026</td></tr>
-        <tr><td>Benchmark premiums, state exchanges</td><td><a class="srclink" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS State-based Exchange QHP PUFs</a>, plan year 2026 (data as of June 2026)</td></tr>
-        <tr><td>Benchmark cross-checks</td><td><a class="srclink" href="https://info.nystateofhealth.ny.gov/sites/default/files/2026%20Lowest%20Cost%20SIlver%20Plan%20by%20County.pdf" rel="noopener">NY State of Health, 2026 Lowest Cost Silver Plan by County</a>; <a class="srclink" href="https://hbex.coveredca.com/toolkit/downloads/CCA_26_QHP_Plan_Rates_by_County.pdf" rel="noopener">Covered California, 2026 QHP Rates by County</a></td></tr>
+        <tr><td>Benchmark premiums, HealthCare.gov states</td><td><a class="srclink" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS Exchange PUFs</a> (rate, plan attributes, service area) and the <a class="srclink" href="https://www.healthcare.gov/plan-data/" rel="noopener">QHP Landscape file</a>, plan year 2027</td></tr>
+        <tr><td>Benchmark premiums, state exchanges</td><td><a class="srclink" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS State-based Exchange QHP PUFs</a>, plan year 2027 (data as of [PENDING 2027: the as-of date of the files used])</td></tr>
+        <tr><td>Benchmark cross-checks</td><td>[PENDING 2027: NY State of Health, 2027 Lowest Cost Silver Plan by County, and Covered California, 2027 QHP Rates by County, linked once published]</td></tr>
         <tr><td>Rating area definitions</td><td><a class="srclink" href="https://www.cms.gov/cciio/programs-and-initiatives/health-insurance-market-reforms/state-gra" rel="noopener">CMS, State Specific Geographic Rating Areas</a></td></tr>
         <tr><td>ZIP to county</td><td><a class="srclink" href="https://www.census.gov/geographies/reference-files/time-series/geo/relationship-files.html" rel="noopener">Census 2020 ZCTA-county relationship file</a>; <a class="srclink" href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0) for PO-box-only ZIPs</td></tr>
         <tr><td>Medicaid expansion &amp; CHIP limits</td><td><a class="srclink" href="https://www.medicaid.gov/medicaid/national-medicaid-chip-program-information/medicaid-childrens-health-insurance-program-basic-health-program-eligibility-levels" rel="noopener">Medicaid.gov, Medicaid and CHIP eligibility levels</a></td></tr>
@@ -3033,7 +3052,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       var placeTxt = stAbbr === 'DC' ? 'the District of Columbia'
         : countyLabel(e[2]) + ', ' + (STATE_NAMES[stAbbr] || stAbbr);
       scope = 'Showing <b>' + placeTxt +
-        '</b>, priced from the <a class="term" href="#/methodology/benchmark">CMS 2026 plan files</a>. Type any US ZIP, or try a city:';
+        '</b>, priced from the <a class="term" href="#/methodology/benchmark">CMS 2027 plan files</a>. Type any US ZIP, or try a city:';
     }
     byId("scope").innerHTML = scope;
     var html = "", i;

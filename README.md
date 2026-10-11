@@ -30,11 +30,11 @@ Artifact host, and lives outside `dist/` so it never deploys.
 ## What is real and what is not
 
 The subsidy arithmetic is exact and sourced: HHS poverty guidelines, the IRS applicable-percentage
-table for 2026, KFF employer premium averages, statutory Medicare and COBRA rates. Every figure
+table for 2027, KFF employer premium averages, statutory Medicare and COBRA rates. Every figure
 carries a `statutory` / `survey` / `modeled` tag and the UI shows it.
 
 Benchmark marketplace premiums are real: the second-lowest-cost silver plan for every county in
-the 50 states and DC, built from the CMS plan-year 2026 public use files by
+the 50 states and DC, built from the CMS plan-year 2027 public use files by
 `tools/build-benchmarks.mjs` and validated against the published landscape file, NY State of
 Health and Covered California figures on every rebuild. The representative lookup
 (`tools/build-reps.mjs`) is likewise keyless public data with its as-of date on the card.
