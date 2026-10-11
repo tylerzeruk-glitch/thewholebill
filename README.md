@@ -1,53 +1,72 @@
 # The Whole Bill
 
-What your healthcare actually costs, including the employer premium share that never appears on
-a paystub, what the alternatives cost, and what universal coverage would cost instead.
+**[thewholebill.org](https://thewholebill.org)** · a calculator that shows what healthcare
+actually costs your household, including the part your employer pays that never appears on a
+paystub, what the alternatives cost, and what universal coverage would cost you instead.
 
-**thewholebill.org**
+## What it does
 
-## Run it
+- **Adds up the whole bill.** Your premium deduction, your employer's share of the same premium,
+  your deductible and out-of-pocket spending, and the Medicare payroll tax, for your ZIP, your
+  household and your income.
+- **Prices the alternatives.** What the same household would pay on the marketplace (including
+  the subsidy cliff at 400% of the poverty line, back since the enhanced credits expired at the
+  end of 2025) or uninsured in a bad year.
+- **Compares universal coverage under six published estimates,** from the bill's own authors to
+  its opponents, so you can pick whose numbers you trust.
+- **Drafts a letter** to your representative and senators, built from your own figures.
 
-    npm run setup     # installs deps + the chromium the tests drive
+## Check our work
+
+This site argues a contested position, so its numbers have to survive a hostile reader. That is
+why the code is public.
+
+- **Every figure carries a basis**, shown on the page: `statutory` (fixed in law or a federal
+  table, exact), `survey` (a published average), or `modeled` (our estimate, always labelled).
+- **The methodology page shows the arithmetic** for every figure and every financing model:
+  [thewholebill.org/methodology](https://thewholebill.org/methodology).
+- **Every constant has its source beside it** in [`src/calc.js`](src/calc.js): poverty
+  guidelines, the IRS applicable-percentage table, employer premiums, the financing models.
+- **Marketplace premiums are real**, not estimated: the benchmark silver plan for every county
+  in the 50 states and DC, built from the CMS public use files by
+  [`tools/build-benchmarks.mjs`](tools/build-benchmarks.mjs) and checked to the cent against
+  published figures on every rebuild.
+- **Provenance is disclosed both ways.** The Mercatus estimate is labelled Koch-funded; the Yale
+  mortality study is labelled not peer reviewed, with its author's advisory role to Sen.
+  Sanders stated. Where a study published no household-level figure, the page says so and shows
+  how we allocated it.
+- **Changes are logged**, with dates and sources: [thewholebill.org/updates](https://thewholebill.org/updates)
+  ([RSS](https://thewholebill.org/updates.xml)).
+- **What went wrong and what we changed:** [`docs/LESSONS.md`](docs/LESSONS.md).
+
+## Found a mistake?
+
+Email **contact@thewholebill.org** or [open an issue](https://github.com/tylerzeruk-glitch/thewholebill/issues).
+Say which figure, for what inputs (ZIP, household, income), and what you think it should be and
+why. Corrections are logged on the updates page.
+
+## Privacy
+
+The calculator runs entirely in your browser. There is no analytics script, no cookies and no
+server receiving your inputs; the letter is never sent to us. The page loads fonts from Google
+and member portraits from a public GitHub collection, and nothing else.
+
+## Reuse it
+
+Campaigns, offices, journalists and anyone else may use and adapt the copy, the methodology and
+the data, with credit: *Source: The Whole Bill (thewholebill.org)*. The code is under the MIT
+License ([`LICENSE`](LICENSE)); the content and data tables are under CC BY 4.0, with each
+third-party source's terms in [`LICENSE-CONTENT.md`](LICENSE-CONTENT.md).
+
+## For developers
+
+    npm run setup     # installs dependencies and the Chromium the tests drive
     npm test          # builds, then runs the suite
-    ./build.sh        # build only -> dist/
+    ./build.sh        # build only, into dist/
 
-Then open `dist/index.html`. No server needed; the page is self-contained.
-
-## Layout
-
-    src/page.html     source of truth: styles, markup, app script
-    src/calc.js       calculation layer, no dependencies, runs in node or a browser
-    src/updates.js    the dated log: the hero's What changed box, /updates and the RSS feed
-    build.sh          inlines calc.js, emits dist/
-    test/test.mjs     the whole suite (`node test/test.mjs cliff` filters by name)
-    docs/             design brief, and the numbers/copy traps worth reading first
-    dist/             generated, never edit
-
-`dist/index.html` is the calculator, `dist/methodology/index.html` the methodology and
-`dist/updates/index.html` the dated log (with `dist/updates.xml` as its feed), all standalone. `preview/artifact.html` is the whole page without the document skeleton, for the
-Artifact host, and lives outside `dist/` so it never deploys.
-
-## What is real and what is not
-
-The subsidy arithmetic is exact and sourced: HHS poverty guidelines, the IRS applicable-percentage
-table for 2026, KFF employer premium averages, statutory Medicare and COBRA rates. Every figure
-carries a `statutory` / `survey` / `modeled` tag and the UI shows it.
-
-Benchmark marketplace premiums are real: the second-lowest-cost silver plan for every county in
-the 50 states and DC, built from the CMS plan-year 2026 public use files by
-`tools/build-benchmarks.mjs` and validated against the published landscape file, NY State of
-Health and Covered California figures on every rebuild. The representative lookup
-(`tools/build-reps.mjs`) is likewise keyless public data with its as-of date on the card.
-
-## Reading order
-
-1. `CLAUDE.md`: conventions, and the traps this codebase has already fallen into
-2. `docs/numbers-and-copy-traps.md`: the ways these numbers go wrong
-3. `src/calc.js`: every constant, with its source in a comment
-4. `docs/LESSONS.md`: what has gone wrong here and the rule each time taught
-
-## License
-
-Code under MIT (`LICENSE`); the copy, methodology, docs and data tables under CC BY 4.0, with
-the third-party data terms listed in `LICENSE-CONTENT.md`. Reuse it freely, with credit:
-"Source: The Whole Bill (thewholebill.org)".
+Then open `dist/index.html`; no server needed. `src/page.html` is the source of truth (styles,
+markup, app script), `src/calc.js` the calculation layer (no dependencies, runs in node or a
+browser), `src/updates.js` the dated log, and `test/test.mjs` the suite, which measures rendered
+geometry as well as numbers. `dist/` is generated: never edit it. Read
+[`CLAUDE.md`](CLAUDE.md) and [`docs/numbers-and-copy-traps.md`](docs/numbers-and-copy-traps.md)
+before changing anything.

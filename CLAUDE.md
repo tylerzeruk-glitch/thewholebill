@@ -160,7 +160,8 @@ first is now met, so it is ready for a decision whenever the owner wants):
 
 Ops hygiene (small, anytime):
 
-4. GitHub Actions v4→v5 bump; branch protection on `main`.
+4. GitHub Actions v4→v5 bump. (~~Branch protection on `main`~~ done 2026-10-11: ruleset "Protect
+   main", no bypass: PR required, `test` must pass, no force push or deletion.)
 5. One Cloudflare API call (the authorized MCP servers connect in a fresh session) to
    hard-confirm the `workers.dev` route and Preview URLs are dead — currently verified only
    from outside. Hosting is settled (2026-09-02): a Worker named `thewholebill`, static assets
