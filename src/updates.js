@@ -16,6 +16,14 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'kff-individual-market-2026-10',
+    date: '2026-10-14', kind: 'world',
+    title: 'KFF measured individual-market enrollment down 18% from June 2025 to June 2026, a loss of more than 4.6 million people.',
+    body: 'The market fell from about 25.2 million to 20.5 million. ACA Marketplace effectuated enrollment, measured after the May 2026 grace period, was down 12%, from 21.8 million to 19.2 million, and plan selections during the 2026 open enrollment fell 1.2 million from the year before. The decline approaches, but has not yet caught up to, the roughly 25% drop through 2026 that CBO projected once the enhanced tax credits expired.',
+    source: { title: 'KFF, Individual Market Enrollment Continues to Fall Through Mid-2026', url: 'https://www.kff.org/affordable-care-act/individual-market-enrollment-continues-to-fall-through-mid-2026/' },
+    see: { id: 'credit', text: 'The premium tax credit' }
+  },
+  {
     id: 'newsroom-type-2026-10-09', date: '2026-10-09', kind: 'site',
     title: 'New type: headlines now in a newspaper serif, figures in a plainer sans, and a cleaner read on phones.',
     body: 'No number, source or method changed. Headlines move from condensed capitals to Newsreader, the face the page already used for reading, with their emphasis in its italic; figures, labels and buttons move to Hanken Grotesk, whose figures still line up in columns. The header and footer links are lowercase. On phones, the ZIP button no longer breaks onto two lines, five digits fit the ZIP field even on the narrowest screens, the methodology tables stack instead of squeezing their text into a sliver, and labels no longer end on a single stranded word.',
