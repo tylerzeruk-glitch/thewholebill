@@ -16,6 +16,20 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'hr3069-cosponsors-2026-10-23', date: '2026-10-23', kind: 'world',
+    title: 'H.R. 3069 gained a cosponsor: Rep. Jason Crow of Colorado signed on 22 October, bringing the House bill to 118.',
+    body: 'Govinfo&rsquo;s BILLSTATUS record for H.R. 3069, updated 23 October, lists 118 cosponsors alongside the sponsor, up from 117. The bill has not moved out of committee; its latest action is still the 29 April 2025 referral.',
+    source: { title: 'govinfo BILLSTATUS, H.R. 3069, 119th Congress', url: 'https://www.govinfo.gov/bulkdata/BILLSTATUS/119/hr/BILLSTATUS-119hr3069.xml' },
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
+    id: 'kff-ehbs-2026-10-22', date: '2026-10-22', kind: 'world',
+    title: 'KFF&rsquo;s 2026 Employer Health Benefits Survey, published 22 October, puts the average family premium at $28,303, with workers paying $7,471 of it.',
+    body: 'Published 22 October, KFF&rsquo;s 2026 Employer Health Benefits Survey puts the average family premium at $28,303 (worker $7,471, employer $20,832), up from last year&rsquo;s $26,993 (worker $6,850). The worker&rsquo;s share rose faster than the total: 9 percent, or $621, against the total&rsquo;s 5 percent. Single coverage averaged $9,804 (worker $1,672, employer $8,132), up from $9,325 (worker $1,440). The site&rsquo;s employer figures still reflect the 2025 survey and have not yet been rebuilt from this one.',
+    source: { title: 'KFF, 2026 Employer Health Benefits Survey', url: 'https://www.kff.org/health-costs/2026-employer-health-benefits-survey/' },
+    see: { id: 'employer', text: 'Employer coverage' }
+  },
+  {
     id: 'newsroom-type-2026-10-09', date: '2026-10-09', kind: 'site',
     title: 'New type: headlines now in a newspaper serif, figures in a plainer sans, and a cleaner read on phones.',
     body: 'No number, source or method changed. Headlines move from condensed capitals to Newsreader, the face the page already used for reading, with their emphasis in its italic; figures, labels and buttons move to Hanken Grotesk, whose figures still line up in columns. The header and footer links are lowercase. On phones, the ZIP button no longer breaks onto two lines, five digits fit the ZIP field even on the narrowest screens, the methodology tables stack instead of squeezing their text into a sliver, and labels no longer end on a single stranded word.',
