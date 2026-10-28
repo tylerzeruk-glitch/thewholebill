@@ -16,6 +16,19 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'reps-2026-10-28', date: '2026-10-28', kind: 'site',
+    title: 'The representatives snapshot is refreshed as of 28 October: 117 House members and 19 senators now marked as sponsor or cosponsor.',
+    body: 'Rebuilt after the weekly watcher found H.R. 3069&rsquo;s cosponsor list had moved, so the rep card now shows Rep. Jason Crow as a cosponsor. Membership is unchanged: Florida&rsquo;s 20th and Texas&rsquo;s 23rd are still vacant. S. 1506 is unchanged. Every cosponsor claim on the card carries the new as-of date.',
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
+    id: 'hr3069-cosponsors-2026-10-23', date: '2026-10-23', kind: 'world',
+    title: 'H.R. 3069 gained a cosponsor: Rep. Jason Crow of Colorado signed on 22 October, bringing the House bill to 118.',
+    body: 'Govinfo&rsquo;s BILLSTATUS record for H.R. 3069, updated 23 October, lists 118 cosponsors alongside the sponsor, up from 117. The bill has not moved out of committee; its latest action is still the 29 April 2025 referral.',
+    source: { title: 'govinfo BILLSTATUS, H.R. 3069, 119th Congress', url: 'https://www.govinfo.gov/bulkdata/BILLSTATUS/119/hr/BILLSTATUS-119hr3069.xml' },
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
     id: 'newsroom-type-2026-10-09', date: '2026-10-09', kind: 'site',
     title: 'New type: headlines now in a newspaper serif, figures in a plainer sans, and a cleaner read on phones.',
     body: 'No number, source or method changed. Headlines move from condensed capitals to Newsreader, the face the page already used for reading, with their emphasis in its italic; figures, labels and buttons move to Hanken Grotesk, whose figures still line up in columns. The header and footer links are lowercase. On phones, the ZIP button no longer breaks onto two lines, five digits fit the ZIP field even on the narrowest screens, the methodology tables stack instead of squeezing their text into a sliver, and labels no longer end on a single stranded word.',
