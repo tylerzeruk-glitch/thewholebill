@@ -822,16 +822,16 @@ test('deduction: the override reaches every figure, and resets away', async b =>
   await p.fill('#deduct','500');            // $500 every 2 weeks = $13,000/yr
   await p.waitForTimeout(250);
   const o = await read();
-  ok('override moves the waterfall', n(o.whole) === n(base.whole) + (13000-6850),
+  ok('override moves the waterfall', n(o.whole) === n(base.whole) + (13000-7471),
      `${base.whole} -> ${o.whole}`);
   ok('sticky bar agrees with the waterfall', o.sticky === o.whole, `${o.sticky} vs ${o.whole}`);
-  ok('COBRA follows the real premium', n(o.cobra) === Math.round((13000+20143)*1.02),
+  ok('COBRA follows the real premium', n(o.cobra) === Math.round((13000+20832)*1.02),
      o.cobra);
   ok('the employer share does not move', o.empShare === base.empShare, o.empShare);
 
   await p.selectOption('#period','12');     // same $500, monthly = $6,000/yr
   await p.waitForTimeout(250);
-  ok('cadence reinterprets the typed amount', n((await read()).whole) === n(base.whole) - (6850-6000));
+  ok('cadence reinterprets the typed amount', n((await read()).whole) === n(base.whole) - (7471-6000));
 
   await p.click('#advReset');
   await p.waitForTimeout(250);
@@ -867,7 +867,7 @@ test('drawer: overrides compose, disclose, and stay in their lane', async b => {
 
   await p.fill('#totPrem','30000');
   await p.waitForTimeout(250);
-  ok('total premium alone recomputes the share', n((await cards())[1]) === 30000-6850,
+  ok('total premium alone recomputes the share', n((await cards())[1]) === 30000-7471,
      (await cards())[1]);
   ok('summary names what is yours', /your total premium/.test(await sum()), await sum());
 
@@ -900,7 +900,7 @@ test('drawer: overrides compose, disclose, and stay in their lane', async b => {
   await p.click('#advReset');
   await p.waitForTimeout(250);
   ok('reset-all returns every figure to the averages',
-     /survey averages/.test(await sum()) && n((await cards())[1]) === 20143);
+     /survey averages/.test(await sum()) && n((await cards())[1]) === 20832);
   ok('and then withdraws itself',
      await p.evaluate(()=>document.getElementById('advReset').hidden));
   ok('and the checks go dark with it', await p.evaluate(()=>{

@@ -6,12 +6,12 @@
 // Public Notice (2026-10-09): the site's own hero in miniature. The amber notice
 // strip, the headline on paper (in the Newsroom type: serif, amber italic) and the
 // whole bill's four columns at the example household's proportions
-// ($6,850, $20,143, $3,800, $1,378).
+// ($7,471, $20,832, $3,800, $1,378).
 import { chromium } from 'playwright';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const out = resolve(dirname(fileURLToPath(import.meta.url)), '../src/card.png');
-const H = 360, parts = [6850, 20143, 3800, 1378], whole = parts.reduce((a, b) => a + b, 0);
+const H = 360, parts = [7471, 20832, 3800, 1378], whole = parts.reduce((a, b) => a + b, 0);
 const tones = ['#F0C98D', '#D99A3F', '#A87A43', '#86603E'];
 const cols = parts.map((_, i) => '<div class="col">' + parts.slice(0, i + 1).map((v, j) =>
   `<div class="b" style="height:${(v / whole * H).toFixed(1)}px;background:${tones[j]}"></div>`).join('') + '</div>').join('');

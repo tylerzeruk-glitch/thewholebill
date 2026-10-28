@@ -18,7 +18,7 @@
  *                          beginning in 2026. NOTE: the enhanced (ARPA/IRA)
  *                          schedule EXPIRED 31 Dec 2025. The 400% FPL cliff is
  *                          back — above 400% the credit is zero, not tapered.
- *   Employer premiums .... KFF Employer Health Benefits Survey 2025.
+ *   Employer premiums .... KFF Employer Health Benefits Survey 2026.
  *   Marketplace deductible KFF, 2026 marketplace analysis.
  * ========================================================================== */
 
@@ -60,10 +60,10 @@
   var MEDICAID_ADULT = 1.38;
   var MEDICAID_ADULT_BY_STATE = { DC: 2.15 };
 
-  // KFF Employer Health Benefits Survey 2025.
+  // KFF Employer Health Benefits Survey 2026 (published 22 October 2026).
   var EMPLOYER = {
-    family: { premium: 26993, worker: 6850 },   // employer share = 20,143
-    single: { premium:  9325, worker: 1440 }    // employer share =  7,885
+    family: { premium: 28303, worker: 7471 },   // employer share = 20,832
+    single: { premium:  9804, worker: 1672 }    // employer share =  8,132
   };
 
   var MEDICARE_RATE = 0.0145;   // employee share, Additional Medicare Tax ignored below the threshold
