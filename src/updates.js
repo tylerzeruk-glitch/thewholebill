@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'employer-2026-survey', date: '2026-10-28', kind: 'site',
+    title: 'Employer figures now use KFF&rsquo;s 2026 survey: the example family&rsquo;s whole bill rises from $32,171 to $33,481 a year.',
+    body: 'The calculator&rsquo;s employer premiums moved from KFF&rsquo;s 2025 averages to its 2026 ones: family $28,303 (worker $7,471, employer $20,832) and single $9,804 (worker $1,672, employer $8,132). For the household the page opens with (a family of four in Dallas on $95,000 with employer coverage), the share on the paystub rises from $8,228 to $8,849, the share that never appears on it from $23,943 to $24,632, and the difference from the Sanders financing model from $22,534 to $23,844 a year. The one model that would cost this household more than today at a high enough income now crosses over at about $248,000, up from $238,000. Marketplace and universal figures do not use the survey and are unchanged. A reader who types their own premium into the drawer is unaffected.',
+    see: { id: 'employer', text: 'Employer coverage' }
+  },
+  {
     id: 'reps-2026-10-28', date: '2026-10-28', kind: 'site',
     title: 'The representatives snapshot is refreshed as of 28 October: 117 House members and 19 senators now marked as sponsor or cosponsor.',
     body: 'Rebuilt after the weekly watcher found H.R. 3069&rsquo;s cosponsor list had moved, so the rep card now shows Rep. Jason Crow as a cosponsor. Membership is unchanged: Florida&rsquo;s 20th and Texas&rsquo;s 23rd are still vacant. S. 1506 is unchanged. Every cosponsor claim on the card carries the new as-of date.',
@@ -27,6 +33,13 @@ var UPDATES = [
     body: 'Govinfo&rsquo;s BILLSTATUS record for H.R. 3069, updated 23 October, lists 118 cosponsors alongside the sponsor, up from 117. The bill has not moved out of committee; its latest action is still the 29 April 2025 referral.',
     source: { title: 'govinfo BILLSTATUS, H.R. 3069, 119th Congress', url: 'https://www.govinfo.gov/bulkdata/BILLSTATUS/119/hr/BILLSTATUS-119hr3069.xml' },
     see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
+    id: 'kff-ehbs-2026-10-22', date: '2026-10-22', kind: 'world',
+    title: 'KFF&rsquo;s 2026 Employer Health Benefits Survey, published 22 October, puts the average family premium at $28,303, with workers paying $7,471 of it.',
+    body: 'The average family premium rose 5 percent from last year&rsquo;s $26,993, to $28,303: workers pay $7,471 and employers $20,832. The worker&rsquo;s share rose faster than the total, 9 percent or $621. Single coverage averaged $9,804 (worker $1,672, employer $8,132), up from $9,325 (worker $1,440).',
+    source: { title: 'KFF, 2026 Employer Health Benefits Survey', url: 'https://www.kff.org/health-costs/2026-employer-health-benefits-survey/' },
+    see: { id: 'employer', text: 'Employer coverage' }
   },
   {
     id: 'newsroom-type-2026-10-09', date: '2026-10-09', kind: 'site',

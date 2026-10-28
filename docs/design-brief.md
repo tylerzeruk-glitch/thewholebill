@@ -348,8 +348,8 @@ figure or copy written before that assumed the old schedule and is wrong. KFF re
 enrollee premium payments up 58% ($113 → $178/mo), average deductibles up 37% to $3,786, and
 enrollment down from 22.3M to roughly 16.5–17.5M.
 
-**Employer — KFF EHBS 2025:** family premium $26,993 (worker $6,850 / employer $20,143); single
-$9,325 (worker $1,440 / employer $7,885).
+**Employer — KFF EHBS 2026:** family premium $28,303 (worker $7,471 / employer $20,832); single
+$9,804 (worker $1,672 / employer $8,132).
 
 **Statutory:** Medicare 1.45% employee (+0.9% above $200k single / $250k joint); COBRA 102%.
 
@@ -421,9 +421,9 @@ different way — and the contrast between them is the argument.
 | | employer | marketplace | uninsured |
 |---|---|---|---|
 | components | 4 | 4 | 2 |
-| whole bill | $32,171 | $28,778 | $6,878 |
-| household bears | $32,171 | $15,909 | $6,878 |
-| shows on a paystub | $8,228 | $1,378 | $1,378 |
+| whole bill | $33,481 | $28,778 | $6,878 |
+| household bears | $33,481 | $15,909 | $6,878 |
+| shows on a paystub | $8,849 | $1,378 | $1,378 |
 
 _(family of four, Hartford, $95,000)_
 
