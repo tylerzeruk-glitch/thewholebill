@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'plan-year-2027', date: '2026-11-01', kind: 'site', pin: true,
+    title: 'The calculator now uses plan year 2027: the 2027 credit schedule, the 2026 poverty guidelines and the CMS 2027 plan files.',
+    body: 'Open enrollment for 2027 began on 1 November, so every dated figure moved together. The share of income a household is expected to pay toward the benchmark plan rises in every band of the IRS schedule (Rev. Proc. 2026-26): 2.15% at the bottom, up from 2.10%, and 10.22% from 300% to 400% of the poverty line, up from 9.96%. The credit is now measured against the 2026 poverty guidelines, $33,000 for a family of four in the 48 states and DC, up from $32,150, so for that family the 400% cliff falls at $132,000 instead of $128,600. The statutory out-of-pocket maximum is $12,000 for one person and $24,000 for a family, up from $10,600 and $21,200. Benchmark premiums are every county&rsquo;s second-lowest-cost silver plan in CMS&rsquo;s 2027 files [PENDING 2027: what the benchmark did for the default household, from the rebuild]. The Sanders exemption uses the 2027 standard deduction [PENDING 2027: the amounts, once the IRS publishes them]. Last year&rsquo;s tables stay on the methodology page.',
+    see: { id: 'credit', text: 'The premium tax credit' }
+  },
+  {
     id: 'employer-2026-survey', date: '2026-10-28', kind: 'site',
     title: 'Employer figures now use KFF&rsquo;s 2026 survey: the example family&rsquo;s whole bill rises from $32,171 to $33,481 a year.',
     body: 'The calculator&rsquo;s employer premiums moved from KFF&rsquo;s 2025 averages to its 2026 ones: family $28,303 (worker $7,471, employer $20,832) and single $9,804 (worker $1,672, employer $8,132). For the household the page opens with (a family of four in Dallas on $95,000 with employer coverage), the share on the paystub rises from $8,228 to $8,849, the share that never appears on it from $23,943 to $24,632, and the difference from the Sanders financing model from $22,534 to $23,844 a year. The one model that would cost this household more than today at a high enough income now crosses over at about $248,000, up from $238,000. Marketplace and universal figures do not use the survey and are unchanged. A reader who types their own premium into the drawer is unaffected.',
@@ -147,7 +153,7 @@ var UPDATES = [
     see: { id: 'universal', text: 'Universal coverage, six models' }
   },
   {
-    id: 'kff-2027-rates', date: '2026-08-03', kind: 'world', pin: true,
+    id: 'kff-2027-rates', date: '2026-08-03', kind: 'world',
     title: 'Insurers propose a median <b>15%</b> premium increase for 2027, the second double-digit year in a row.',
     body: 'KFF&rsquo;s read of preliminary rate filings across all 50 states and DC: a median proposed increase of 15% for 2027, after 2026 finalized at 20%. Insurers cite rising prices for care, inflation and labor shortages, and two things specific to this market: the enhanced credits&rsquo; expiry and the sicker risk pool it left behind. Final 2027 rates arrive in the fall, when the benchmark table on this site is rebuilt from CMS&rsquo;s files.',
     source: { title: 'KFF, How much and why ACA Marketplace premiums are going up in 2027', url: 'https://www.kff.org/affordable-care-act/how-much-and-why-aca-marketplace-premiums-are-going-up-in-2027/' },
@@ -175,7 +181,7 @@ var UPDATES = [
     see: { id: 'poverty', text: 'Poverty guidelines' }
   },
   {
-    id: 'enhanced-credits-expired', date: '2025-12-31', kind: 'world', pin: true,
+    id: 'enhanced-credits-expired', date: '2025-12-31', kind: 'world',
     title: 'The enhanced premium tax credits expired. The 400% subsidy cliff is back for plan year 2026.',
     body: 'The 2021 enhancements (no income ceiling, a lower expected contribution at every income) ran through 2025 and were not renewed. From 1 January 2026 the schedule in IRS Rev. Proc. 2025-25 applies, and a household above 400% of the poverty line gets no credit at all. Every figure on this site uses the 2026 schedule.',
     source: { title: 'IRS Rev. Proc. 2025-25, the applicable percentage table for 2026', url: 'https://www.irs.gov/pub/irs-drop/rp-25-25.pdf' },

@@ -49,8 +49,7 @@ test('benchmarks: the generated county table holds its shape', async () => {
   const { createRequire } = await import('node:module');
   const require = createRequire(import.meta.url);
   const B = require('../src/benchmarks.js');
-  ok('plan year 2026', B.planYear === 2026);
-  const nCo = Object.keys(B.counties).length;
+    const nCo = Object.keys(B.counties).length;
   ok('a nationwide county table', nCo > 3200, nCo + ' entries');
   let nZip = 0;
   for (const m of Object.values(B.zip)) nZip += Object.keys(m).length;
@@ -108,6 +107,55 @@ test('benchmarks: the generated county table holds its shape', async () => {
   }
 });
 
+/* The plan-year switch (1 November each year). One plan year on the page,
+ * never a mix: the credit schedule, the poverty guidelines, the benchmark
+ * table and the Sanders exemption's standard deduction all belong to
+ * calc.js's YEAR, and the copy names that year. The first three checks are
+ * the gate on the switch itself: they fail until CMS's plan files are rebuilt
+ * (src/benchmarks.js planYear), the IRS publishes the year's standard
+ * deduction (SANDERS_EXEMPT.year), and every "[PENDING" marker the switch
+ * left in the copy is filled. Last year's tables stay on the methodology
+ * page, and are held to calc.js's PRIOR copy of them. */
+test('plan year: every dated figure belongs to the same year', async () => {
+  const { createRequire } = await import('node:module');
+  const { readFileSync } = await import('node:fs');
+  const require = createRequire(import.meta.url);
+  const W = require('../src/calc.js');
+  const B = require('../src/benchmarks.js');
+  ok(`the benchmark table is plan year ${W.YEAR}`, B.planYear === W.YEAR, `benchmarks.js planYear ${B.planYear}`);
+  ok(`the Sanders exemption is the ${W.YEAR} standard deduction`, W.SANDERS_EXEMPT.year === W.YEAR, `SANDERS_EXEMPT.year ${W.SANDERS_EXEMPT.year}`);
+  const files = ['src/page.html', 'src/updates.js', 'src/llms.txt', 'dist/index.html', 'dist/methodology/index.html', 'dist/updates/index.html', 'dist/updates.xml'];
+  const pending = files.filter(f => readFileSync(resolve(HERE, '..', f), 'utf8').includes('[PENDING'));
+  ok('no "[PENDING" marker is left in the copy', pending.length === 0, pending.join(', '));
+  ok('last year is last year', W.PRIOR.year === W.YEAR - 1, String(W.PRIOR.year));
+
+  const index = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
+  const meth = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
+  ok(`the notice strip says plan year ${W.YEAR}`, index.includes(`Plan year ${W.YEAR} &middot;`));
+  const named = [...(index + meth).matchAll(/(?:CMS|IRS|published) (\d{4}) (?:plan files|applicable-percentage|federal plan files)/g)].map(m => +m[1]);
+  ok(`every "CMS/IRS <year>" in the copy is ${W.YEAR}`, named.length >= 4 && named.every(y => y === W.YEAR), named.join(', '));
+
+  // the methodology's tables are the tables calc.js computes with
+  const cells = id => {
+    const at = meth.indexOf(`id="${id}"`);
+    const t = meth.slice(at, meth.indexOf('</table>', at));
+    return [...t.matchAll(/<td class="num">([^<]*)<\/td>/g)].map(m => m[1]);
+  };
+  const money = n => '$' + n.toLocaleString('en-US');
+  const pct = x => (x * 100).toFixed(2) + '%';
+  const fplRows = F => ['contiguous', 'AK', 'HI'].flatMap(r => [money(F[r].base), money(F[r].add), money(F[r].base + 3 * F[r].add)]);
+  const schedRows = A => A.flatMap(b => [pct(b.from), pct(b.to)]);
+  ok(`the ${W.YEAR - 1} poverty guidelines table is calc.js's`, cells('fpl-current').join() === fplRows(W.FPL).join(), cells('fpl-current').join(' '));
+  ok(`last year's guidelines table is calc.js's PRIOR`, cells('fpl-prior').join() === fplRows(W.PRIOR.FPL).join(), cells('fpl-prior').join(' '));
+  ok(`the ${W.YEAR} credit schedule is calc.js's`, cells('schedule-current').join() === schedRows(W.APPLICABLE).join(), cells('schedule-current').join(' '));
+  ok(`last year's schedule is calc.js's PRIOR`, cells('schedule-prior').join() === schedRows(W.PRIOR.APPLICABLE).join(), cells('schedule-prior').join(' '));
+  ok(`the ${W.YEAR} out-of-pocket maximum on the page is calc.js's`,
+     index.includes(`<div class="v">${money(W.OOP_MAX.single)}</div><div class="s">the ${W.YEAR} `), money(W.OOP_MAX.single));
+  ok(`and on the methodology, self-only and family`,
+     meth.includes(`<span class="num">${money(W.OOP_MAX.single)}</span> self-only / <span class="num">${money(W.OOP_MAX.family)}</span> family: the ${W.YEAR} `) &&
+     meth.includes(`up from ${money(W.PRIOR.OOP_MAX.single)} and ${money(W.PRIOR.OOP_MAX.family)} in ${W.PRIOR.year}`));
+});
+
 test('calc: loads and computes in node, outside any browser', async () => {
   const { createRequire } = await import('node:module');
   const require = createRequire(import.meta.url);
@@ -116,12 +164,12 @@ test('calc: loads and computes in node, outside any browser', async () => {
   W.useBenchmarks(B);
   ok('calc.js loads in node', typeof W.summary === 'function', Object.keys(W).length + ' exports');
   const s = W.summary({ income:95000, size:4, ages:[41,39,12,9], bkey:'09003', model:'sanders1' });
-  ok('poverty line for a household of 4', Math.round(s.fpl.line) === 32150, `$${Math.round(s.fpl.line)}`);
+  ok('poverty line for a household of 4', Math.round(s.fpl.line) === 33000, `$${Math.round(s.fpl.line)}`);
   ok('employer total is the sum of its parts',
      Math.abs(s.employer.total - (s.employer.worker + s.employer.employer + s.employer.oop + s.employer.medicareTax)) < 0.01);
-  ok('exactly 400% still qualifies ("does not exceed"), at the top band\'s 9.96%', W.applicablePercentage(4.0) === 0.0996, String(W.applicablePercentage(4.0)));
+  ok('exactly 400% still qualifies ("does not exceed"), at the top band\'s 10.22%', W.applicablePercentage(4.0) === 0.1022, String(W.applicablePercentage(4.0)));
   // the curve must climb to the cliff and jump, never dip first: the sample
-  // that lands exactly on 400% once fell through every band to 2.10%
+  // that lands exactly on 400% once fell through every band to the floor
   const curve = W.cliffCurve({ size:4, adults:2, ages:[41,39,12,9], bkey:'48113' }, 200).points;
   let dips = 0;
   for (let i = 1; i < curve.length; i++) if (curve[i].ratio <= 4.0 && curve[i].household < curve[i - 1].household - 1) dips++;
@@ -131,20 +179,20 @@ test('calc: loads and computes in node, outside any browser', async () => {
      atLine ? `$${Math.round(atLine.household)} vs $${Math.round(curve[curve.indexOf(atLine) - 1].household)}` : 'no sample on the line');
   ok('a hair over the cliff has no credit', W.applicablePercentage(4.0001) === null);
   // the floor: §36B(c)(1)(A) below 100% FPL, §36B(c)(2)(B) Medicaid-eligible
-  const gap = W.marketplaceCost({ income:30000, size:4, ages:[40,40,10,8], bkey:'48113' });   // TX, 93%
-  ok('below the poverty line there is no credit (TX, 93%)', gap.belowFloor && gap.noCredit && gap.subsidy === 0
+  const gap = W.marketplaceCost({ income:30000, size:4, ages:[40,40,10,8], bkey:'48113' });   // TX, 91%
+  ok('below the poverty line there is no credit (TX, 91%)', gap.belowFloor && gap.noCredit && gap.subsidy === 0
      && gap.applicablePercentage === null && !gap.overCliff, `$${Math.round(gap.subsidy)} subsidy`);
   ok('the household then bears the full benchmark', Math.abs(gap.net - gap.benchmark) < 0.01);
-  const txLow = W.marketplaceCost({ income:16000, size:1, ages:[40], bkey:'48113' });          // TX, 102%
+  const txLow = W.marketplaceCost({ income:16500, size:1, ages:[40], bkey:'48113' });          // TX, 103%
   ok('just over 100% in a non-expansion state gets the credit', !txLow.noCredit && txLow.subsidy > 0);
-  const ctMed = W.marketplaceCost({ income:20000, size:1, ages:[40], bkey:'09003' });          // CT, 128%
+  const ctMed = W.marketplaceCost({ income:20000, size:1, ages:[40], bkey:'09003' });          // CT, 125%
   ok('under 138% in an expansion state is Medicaid, no credit', ctMed.medicaidLikely && ctMed.noCredit && ctMed.subsidy === 0
      && !ctMed.belowFloor);
-  const ctMkt = W.marketplaceCost({ income:22000, size:1, ages:[40], bkey:'09003' });          // CT, 141%
+  const ctMkt = W.marketplaceCost({ income:22500, size:1, ages:[40], bkey:'09003' });          // CT, 141%
   ok('over 138% in an expansion state gets the credit', !ctMkt.noCredit && ctMkt.subsidy > 0);
-  const dc = W.marketplaceCost({ income:30000, size:1, ages:[40], bkey:'11001' });             // DC, 192%
-  ok('DC covers adults to 215%, so 192% is Medicaid there', dc.medicaidLikely && dc.medicaidCeiling === 2.15);
-  const dcMkt = W.marketplaceCost({ income:34000, size:1, ages:[40], bkey:'11001' });          // DC, 217%
+  const dc = W.marketplaceCost({ income:30000, size:1, ages:[40], bkey:'11001' });             // DC, 188%
+  ok('DC covers adults to 215%, so 188% is Medicaid there', dc.medicaidLikely && dc.medicaidCeiling === 2.15);
+  const dcMkt = W.marketplaceCost({ income:35000, size:1, ages:[40], bkey:'11001' });          // DC, 219%
   ok('over 215% in DC gets the credit', !dcMkt.noCredit && dcMkt.subsidy > 0);
   const d = W.cliffDrop({ size:4, ages:[41,39,12,9], bkey:'09003' });
   ok('cliff drop equals the credit lost', Math.abs(d.drop - d.lostCredit) < 1,
@@ -169,7 +217,7 @@ test('calc: loads and computes in node, outside any browser', async () => {
   const ak = W.zipResolve('99501');
   ok('Anchorage resolves through its ZIP3 rating area', ak.st === 'covered' && ak.key === '02020|1', JSON.stringify(ak.key));
   const akSum = W.summary({ income:95000, size:4, ages:[41,39,12,9], bkey:'02020|1', model:'sanders1' });
-  ok('an Alaska household uses the Alaska poverty line', Math.round(akSum.fpl.line) === 40190, `$${Math.round(akSum.fpl.line)}`);
+  ok('an Alaska household uses the Alaska poverty line', Math.round(akSum.fpl.line) === 41250, `$${Math.round(akSum.fpl.line)}`);
 });
 
 test('layout: no horizontal overflow', async b => {
@@ -504,7 +552,7 @@ test('slot 03: the cliff for the covered, the bad year for the uninsured', async
   ok('and keeps slot number 03', r.eyebrows.join() === '03 · The bad year', r.eyebrows.join());
   const txt = await p.evaluate(()=>document.getElementById('badYear').innerText);
   ok('the modeled figure is labelled where it appears', /57,000/.test(txt) && /modeled/.test(txt));
-  ok('the statutory ceiling contrast is stated', /\$10,600/.test(txt) && /No limit/.test(txt));
+  ok('the statutory ceiling contrast is stated', /\$12,000/.test(txt) && /No limit/.test(txt));
   ok('both care-avoidance figures appear, tied to their surveys',
      /three in four/.test(txt) && /38\.6%/.test(txt) && /KFF/.test(txt) && /NHIS/.test(txt));
 
@@ -969,10 +1017,10 @@ test('marketplace: every reason for a zero credit is named for what it is', asyn
   ok('with a credit: the taxpayer share, and the credit note', /carried by taxpayers/.test(t.sub) && /never touches your bank account/.test(t.wf), JSON.stringify(t));
   await setIncome(p, 240000); t = await read();
   ok('over the cliff: the cliff, on both', /400% cliff/.test(t.sub) && /400% cliff/.test(t.wf), JSON.stringify(t));
-  await setIncome(p, 30000); t = await read();   // Dallas family of four at 93%
+  await setIncome(p, 30000); t = await read();   // Dallas family of four at 91%
   ok('below the floor: the floor, never the cliff', /Under 100% of the poverty line/.test(t.sub) && /Under 100% of the poverty line/.test(t.wf)
      && !/cliff|never touches/.test(t.sub + t.wf), JSON.stringify(t));
-  await zip('06106'); await setAges(p, [40]); await setIncome(p, 20000);   // Hartford, one adult at 128%
+  await zip('06106'); await setAges(p, [40]); await setIncome(p, 20000);   // Hartford, one adult at 125%
   t = await read();
   ok('Medicaid range: Medicaid, never the cliff', /Medicaid/.test(t.sub) && /Medicaid/.test(t.wf)
      && !/cliff|never touches/.test(t.sub + t.wf), JSON.stringify(t));
@@ -1846,11 +1894,11 @@ test('marketplace: below the floor and in Medicaid\'s range there is no credit, 
   ok('coverage gap: the letter claims no taxpayer help', /below the level where the marketplace tax credit begins/.test(t.letter) && !/taxpayer help/.test(t.letter));
   await p.locator('#zip').fill('06106'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
   await setAges(p, [40]);
-  await setIncome(p, 20000);   // a single adult at 128% of the poverty line
+  await setIncome(p, 20000);   // a single adult at 125% of the poverty line
   t = await p.evaluate(() => ({ elig: document.getElementById('elig').innerText, note: document.getElementById('mktNote').innerText }));
   ok('Medicaid range: the eligibility box names the state and its ceiling', /qualify for Medicaid in Connecticut/.test(t.elig) && /138%/.test(t.elig), t.elig.slice(0, 140));
   ok('Medicaid range: the bar note says so', /Medicaid/.test(t.note), t.note);
-  await setIncome(p, 22000);
+  await setIncome(p, 23000);   // 144%
   t = await p.evaluate(() => document.getElementById('elig').innerText);
   ok('just above the ceiling the credit returns', /what you qualify for today/i.test(t) && /credit of \$/.test(t), t.slice(0, 100));
   await p.close();
@@ -2108,7 +2156,7 @@ test('letter: the paystub share sentence follows the drawer', async b => {
   ok('opens on what healthcare costs, not what the household spends',
      /what healthcare actually costs my household/.test(t0) && !/actually spends/.test(t0));
   ok('survey average: less than a quarter', /Less than a quarter of it shows up as the premium deduction/.test(t0));
-  await setIncome(p, 30000);   // TX family at 93% FPL: the floor, with no exception offered
+  await setIncome(p, 30000);   // TX family at 91% FPL: the floor, with no exception offered
   ok('the floor copy offers no immigrant exception', !/exception; they can take the credit/.test(await p.evaluate(() => document.body.innerText)));
   await setIncome(p, 95000);
   await p.locator('#adv summary').click(); await p.waitForTimeout(150);
@@ -2308,11 +2356,11 @@ test('accessibility: focus, state, announcements and contrast', async b => {
   ok('a good ZIP clears aria-invalid', (await p.getAttribute('#zip', 'aria-invalid')) === 'false');
   // A4: value text and one polite live region
   const vt0 = await p.getAttribute('#income', 'aria-valuetext');
-  ok('slider value text reads money and poverty ratio', /^\$95,000, 29\d% of the poverty line$/.test(vt0), vt0);
+  ok('slider value text reads money and poverty ratio', /^\$95,000, 28\d% of the poverty line$/.test(vt0), vt0);
   await setIncome(p, 120000); await p.waitForTimeout(700);
   const live = await p.evaluate(() => ({ vt: document.getElementById('income').getAttribute('aria-valuetext'), live: document.getElementById('liveFig').textContent,
     n: document.querySelectorAll('[aria-live]:not(#agesNote)').length, big: document.querySelector('.bignum').textContent }));   // agesNote is the other live region, by design
-  ok('value text follows the slider', /^\$120,000, 37\d% of the poverty line$/.test(live.vt), live.vt);
+  ok('value text follows the slider', /^\$120,000, 36\d% of the poverty line$/.test(live.vt), live.vt);
   ok('one live region announces the headline figure', live.n === 1 && live.live.includes(live.big) && /a year\.$/.test(live.live), live.live);
   await setIncome(p, 95000);
   // A5: the waterfall is one image with a spoken summary
@@ -2371,7 +2419,7 @@ test('accessibility: reduced motion, whole-page print, sticky at 1024, structure
     noScope: document.querySelectorAll('th:not([scope])').length,
     rowhFace: (() => { const th = document.querySelector('th.rowh'), td = document.querySelector('th.rowh + td'); const a = getComputedStyle(th), b = getComputedStyle(td); return a.fontFamily === b.fontFamily && a.fontSize === b.fontSize && a.textTransform === b.textTransform; })() }));
   ok('methodology: one h1 ("Check our work.") and a main', ms.h1.length === 1 && /Check our work/.test(ms.h1[0]) && ms.main, JSON.stringify(ms.h1));
-  ok('methodology: every table has a caption and headers with scope', ms.tables === 8 && ms.captions === 8 && ms.noTh === 0 && ms.noScope === 0, JSON.stringify(ms));
+  ok('methodology: every table has a caption and headers with scope', ms.tables === 10 && ms.captions === 10 && ms.noTh === 0 && ms.noScope === 0, JSON.stringify(ms));
   ok('row headers keep the body-cell face', ms.rowhFace);
   await m.close();
   const f = await page(b, 1280, 900, false, '404.html');

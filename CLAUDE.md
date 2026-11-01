@@ -150,13 +150,18 @@ first is now met, so it is ready for a decision whenever the owner wants):
    being refused by the CSP and is to be switched off in the dashboard. HSTS remains a
    dashboard item (six months, includeSubDomains, no preload).
 
-3a. **Plan year 2027 (before open enrollment, 1 November 2026).** IRS Rev. Proc. 2026-26
-    sets the 2027 applicable percentages (2.15% to 10.22%; the top band was 9.96%) and the
-    2027 credit uses the 2026 poverty guidelines ($33,000 for four, contiguous states). Both
-    are logged as world entries. The decision is the switch: a plan-year control, or 2027
-    replacing 2026 on 1 November with the 2026 table kept for the methodology. Whichever,
-    every dated figure and the CMS benchmark rebuild (ritual 7) move together, with a site
-    entry in the log.
+3a. **Plan year 2027 (switch on 1 November 2026).** Decided: 2027 replaces 2026 on
+    1 November, with the 2026 tables kept on the methodology page (`calc.js` `PRIOR`). The
+    switch is built on `claude/kind-bell-ag75cx`: Rev. Proc. 2026-26 schedule, the 2026
+    poverty guidelines, the $12,000 / $24,000 out-of-pocket maximum, the copy, a pinned
+    `plan-year-2027` entry dated 1 November. The suite's "plan year" test is the gate and
+    fails until all of it is true: `src/benchmarks.js` rebuilt for 2027 (ritual 7; fill the
+    tool's `VALIDATION[2027]` from NY State of Health's and Covered California's 2027
+    publications first), `SANDERS_EXEMPT` set to the 2027 standard deduction (the IRS had
+    not published it as of 11 October 2026), and no `[PENDING` marker left in the copy
+    (the update entry's benchmark sentence, the cross-check links, the sources'
+    retrieved-on date). The entry's date also keeps the suite red before 1 November.
+    The KFF 2026 employer survey (expected late October) is a separate site entry.
 
 Ops hygiene (small, anytime):
 
