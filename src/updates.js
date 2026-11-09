@@ -16,6 +16,13 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'kff-benchmark-2027', date: '2026-11-06', kind: 'world',
+    title: 'KFF&rsquo;s benchmark premium indicator, corrected 6 November 2026, puts the national average 2027 benchmark silver premium at $703 a month, up from $625 in 2026.',
+    body: 'KFF&rsquo;s &ldquo;Marketplace Average Monthly Benchmark Premiums&rdquo; indicator, updated 6 November 2026 to fix its Oregon and California figures, tracks the same thing this calculator prices by county: the second lowest cost silver, or benchmark, premium for a 40 year old before any tax credit. Its national average rises from $625 a month in 2026 to $703 in 2027, about 12 percent. The calculator&rsquo;s own benchmark table still runs on CMS&rsquo;s 2026 plan year files; the annual rebuild onto 2027&rsquo;s files is due this fall.',
+    source: { title: 'KFF, Marketplace Average Monthly Benchmark Premiums', url: 'https://www.kff.org/affordable-care-act/state-indicator/marketplace-average-benchmark-premiums/' },
+    see: { id: 'benchmark', text: 'The benchmark premium' }
+  },
+  {
     id: 'employer-2026-survey', date: '2026-10-28', kind: 'site',
     title: 'Employer figures now use KFF&rsquo;s 2026 survey: the example family&rsquo;s whole bill rises from $32,171 to $33,481 a year.',
     body: 'The calculator&rsquo;s employer premiums moved from KFF&rsquo;s 2025 averages to its 2026 ones: family $28,303 (worker $7,471, employer $20,832) and single $9,804 (worker $1,672, employer $8,132). For the household the page opens with (a family of four in Dallas on $95,000 with employer coverage), the share on the paystub rises from $8,228 to $8,849, the share that never appears on it from $23,943 to $24,632, and the difference from the Sanders financing model from $22,534 to $23,844 a year. The one model that would cost this household more than today at a high enough income now crosses over at about $248,000, up from $238,000. Marketplace and universal figures do not use the survey and are unchanged. A reader who types their own premium into the drawer is unaffected.',
