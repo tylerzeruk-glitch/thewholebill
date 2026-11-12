@@ -22,6 +22,9 @@
  *                          annual limitation on cost sharing (29 Jan 2026).
  *   PRIOR ................ the plan-year 2026 tables, kept so the methodology
  *                          page can print last year's schedule beside this one.
+ *   PAST ................. plan year 2025 (the enhanced schedule, no cliff), for
+ *                          pricing a household in a past year against the
+ *                          tables in src/benchmarks-<year>.js (useHistory).
  *   Employer premiums .... KFF Employer Health Benefits Survey 2026.
  *   Marketplace deductible KFF, 2026 marketplace analysis.
  * ========================================================================== */
@@ -93,7 +96,37 @@
       { lo: 2.50, hi: 3.00, from: 0.0844, to: 0.0996 },
       { lo: 3.00, hi: 4.00, from: 0.0996, to: 0.0996 }
     ],
+    CLIFF: 4.00,
     OOP_MAX: { single: 10600, family: 21200 }
+  };
+
+  /* Plan year 2025, for showing what a household's coverage cost before the
+   * enhanced credits expired. Not used to price the current year anywhere.
+   * HHS 2024 poverty guidelines (Federal Register, 17 January 2024); IRS
+   * Rev. Proc. 2024-35, the American Rescue Plan schedule as extended through
+   * 2025 by the Inflation Reduction Act: nothing below 150%, and 8.5% from
+   * 400% up with no cliff (CLIFF null). 2025 Notice of Benefit and Payment
+   * Parameters for the out-of-pocket maximum. The 2025 benchmarks are
+   * src/benchmarks-2025.js (tools/build-benchmarks-history.mjs). */
+  var PAST = {
+    2025: {
+      year: 2025,
+      FPL: {
+        contiguous: { base: 15060, add: 5380 },
+        AK:         { base: 18810, add: 6730 },
+        HI:         { base: 17310, add: 6190 }
+      },
+      APPLICABLE: [
+        { lo: 0.00, hi: 1.50, from: 0.0000, to: 0.0000 },
+        { lo: 1.50, hi: 2.00, from: 0.0000, to: 0.0200 },
+        { lo: 2.00, hi: 2.50, from: 0.0200, to: 0.0400 },
+        { lo: 2.50, hi: 3.00, from: 0.0400, to: 0.0600 },
+        { lo: 3.00, hi: 4.00, from: 0.0600, to: 0.0850 },
+        { lo: 4.00, hi: Infinity, from: 0.0850, to: 0.0850 }
+      ],
+      CLIFF: null,
+      OOP_MAX: { single: 9200, family: 18400 }
+    }
   };
 
   // 26 U.S.C. §36B(c)(1)(A): the credit needs household income of at least 100%
@@ -187,9 +220,23 @@
     return (m && m.year) || YEAR;
   }
   function tablesFor(year) {
-    if (year == null || year === YEAR) return { year: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, OOP_MAX: OOP_MAX };
+    if (year == null || year === YEAR) return { year: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, CLIFF: CLIFF, OOP_MAX: OOP_MAX };
     if (year === PRIOR.year) return PRIOR;
+    if (PAST[year]) return PAST[year];
     throw new Error('no tables for plan year ' + year);
+  }
+
+  /* Past plan years' benchmark tables (src/benchmarks-<year>.js), keyed as
+   * BENCH.counties is, so a ZIP resolved against the current table prices
+   * the same county in an earlier year. Injected like useBenchmarks(). */
+  var HISTORY = {};
+  function useHistory(t) { HISTORY[t.planYear] = t; }
+  // The table that holds a state's benchmarks for a plan year, or null: the
+  // current table when the state is priced in that year (a held state's
+  // 2026), otherwise that year's history table.
+  function tableFor(st, year) {
+    if (year == null || stateYear(st) === year) return BENCH;
+    return HISTORY[year] || null;
   }
   function fplRegion(st) { return st === 'AK' ? 'AK' : st === 'HI' ? 'HI' : 'contiguous'; }
 
@@ -198,10 +245,17 @@
    * most the three oldest under-21 children charged (45 CFR 147.102(c)(1)).
    * NY and VT rate by family tier instead; a third or later adult there is
    * priced as their own individual policy, which is how they would buy in. */
-  function benchmarkPremium(key, ages) {
-    var e = BENCH && BENCH.counties[key];
+  // With a plan year, prices the county in that year (null when no table for
+  // it holds the county); without one, in the state's own year. Medicaid
+  // expansion and the CHIP limit come from the current table in every year:
+  // no state changed either between 2025 and 2027.
+  function benchmarkPremium(key, ages, year) {
+    if (!BENCH || !BENCH.counties[key]) return null;
+    var st = benchState(key);
+    var T = tableFor(st, year);
+    var e = T && T.counties[key];
     if (!e) return null;
-    var st = benchState(key), meta = BENCH.states[st];
+    var meta = T.states[st], cur = BENCH.states[st];
     var i, monthly = 0;
     var adults = 0;
     for (i = 0; i < ages.length; i++) if (ages[i] >= 21) adults++;
@@ -213,7 +267,7 @@
       monthly = t[idx] / 100;
       if (adults > 2) monthly += (adults - 2) * t[0] / 100;
     } else {
-      var curve = BENCH.curves[meta.curve];
+      var curve = T.curves[meta.curve];
       var charged = [];
       var kidAges = [];
       for (i = 0; i < ages.length; i++) {
@@ -228,9 +282,10 @@
       }
     }
     return { monthly: monthly, annual: monthly * 12,
-             ra: e[1], county: e[2], state: st, tiers: !!meta.tiers, year: stateYear(st),
-             source: meta.source || null,
-             exchange: meta.exchange, expanded: meta.expanded, chipUpTo: meta.chip };
+             ra: e[1], county: BENCH.counties[key][2], state: st, tiers: !!meta.tiers,
+             year: T === BENCH ? stateYear(st) : T.planYear,
+             source: T === BENCH ? (meta.src || null) : 'cms',
+             exchange: meta.exchange, expanded: cur.expanded, chipUpTo: cur.chip };
   }
 
   /* ------------------------------------------------------------- primitives */
@@ -248,9 +303,10 @@
   // Returns the share of income a household is expected to contribute toward the
   // benchmark plan, or null when it is over the cliff and gets nothing.
   function applicablePercentage(ratio, year) {
-    var APPLICABLE = tablesFor(year).APPLICABLE;
+    var t = tablesFor(year), APPLICABLE = t.APPLICABLE, CLIFF = t.CLIFF;
     // "does not exceed 400 percent": a household at exactly 400% still qualifies.
-    if (ratio > CLIFF) return null;
+    // 2025 had no cliff (CLIFF null): its last band runs to infinity.
+    if (CLIFF != null && ratio > CLIFF) return null;
     for (var i = 0; i < APPLICABLE.length; i++) {
       var b = APPLICABLE[i];
       // Bands are half-open, except the last one, which must own the 400%
@@ -321,7 +377,9 @@
   // What a benchmark silver plan costs, and who pays which part of it.
   function marketplaceCost(o) {
     var ages = agesFor(o);
-    var bp = benchmarkPremium(o.bkey, ages);
+    // o.year prices the household in a past plan year (its benchmark, poverty
+    // line and credit schedule together); null when no table covers it.
+    var bp = benchmarkPremium(o.bkey, ages, o.year);
     if (!bp) return null;
     var region = o.region || fplRegion(bp.state);
     var benchmark = bp.annual;
@@ -335,7 +393,9 @@
     // "under 133%" row existed for lawfully present immigrants whom Medicaid
     // excludes; Public Law 119-21 (July 2025) removed their credit for plan
     // years from 2026, so the floor is a floor for everyone and no exception is
-    // carried here or in the copy. An earlier build skipped this floor and
+    // carried here or in the copy. (Priced in 2025 the exception still existed;
+    // the calculator does not ask immigration status, so it is not carried
+    // there either.) An earlier build skipped this floor and
     // showed a $25,108 credit to a Texas family at 93% of the poverty line.
     var belowFloor = ratio < 1.00;
     var medicaidCeiling = MEDICAID_ADULT_BY_STATE[bp.state] || MEDICAID_ADULT;
@@ -364,7 +424,7 @@
       total: benchmark + oop + tax,        // the whole bill, however routed
       fplRatio: ratio,
       year: year,                           // the plan year this state is priced in
-      overCliff: ratio > CLIFF,
+      overCliff: tablesFor(year).CLIFF != null && ratio > tablesFor(year).CLIFF,
       belowFloor: belowFloor,               // under 100% FPL: no credit exists
       medicaidLikely: medicaidLikely,       // expansion state, under its adult ceiling
       medicaidCeiling: medicaidCeiling,
@@ -781,7 +841,7 @@
     YEAR: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, CLIFF: CLIFF, OOP_MAX: OOP_MAX, PRIOR: PRIOR,
     SANDERS_EXEMPT: SANDERS_EXEMPT, EMPLOYER: EMPLOYER, MODELS: MODELS,
     useBenchmarks: useBenchmarks, benchKey: benchKey, zipResolve: zipResolve,
-    stateYear: stateYear, tablesFor: tablesFor,
+    stateYear: stateYear, tablesFor: tablesFor, useHistory: useHistory, PAST: PAST,
     benchmarkPremium: benchmarkPremium,
     povertyLine: povertyLine, fplRatio: fplRatio,
     applicablePercentage: applicablePercentage, medicareTax: medicareTax,
