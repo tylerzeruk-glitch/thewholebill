@@ -2207,7 +2207,7 @@ test('calc: financing models reproduce the methodology page to the dollar', asyn
       ok(`methodology ${ids[i]}: printed allocation matches`, per && n(per[1]) === adders[ids[i]], per && per[1]);
     }
   });
-  ok('the methodology cites Rev. Proc. 2025-32 for the exemption', /Rev\. Proc\. 2025-32/.test(html));
+  ok('the methodology cites Rev. Proc. 2026-35 for the exemption', /Rev\. Proc\. 2026-35/.test(html));
   ok('no stale $29,200 exemption anywhere on the page', !/29,200/.test(html));
 });
 

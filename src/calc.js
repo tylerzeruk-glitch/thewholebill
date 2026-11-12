@@ -419,19 +419,16 @@
    * uses the standard deduction of its own plan year, so `year` must equal
    * YEAR; the suite fails until it does.
    *
-   * PLAN YEAR 2027: PENDING. The IRS publishes the 2027 inflation adjustments
-   * in its autumn revenue procedure (the 2026 one, Rev. Proc. 2025-32, came
-   * on 9 October 2025), and as of 11 October 2026 it has not. Until then this
-   * still holds the 2026 deduction ($32,200 joint, $16,100 single). When it
-   * lands: set the two amounts, year: 2027 and the citation, and update the
-   * methodology's Sanders footnote and Sources row (both read "PENDING").
+   * Plan year 2027: IRS Rev. Proc. 2026-35, section 3.15 (released November
+   * 2026): $33,200 joint, $16,600 single. The 2026 figures were $32,200 and
+   * $16,100 (Rev. Proc. 2025-32).
    *
    * The list also exempts an employer's first $2M of payroll from the 7.5%
    * levy; a household cannot know where its employer stands, so the levy is
    * applied to all wages here, which if anything overstates the cost. Both
    * choices are stated on the methodology page. Galvani (below) keeps its
    * paper's literal $29,000. */
-  var SANDERS_EXEMPT = { year: 2026, joint: 32200, single: 16100, cite: 'Rev. Proc. 2025-32' };
+  var SANDERS_EXEMPT = { year: 2027, joint: 33200, single: 16600, cite: 'Rev. Proc. 2026-35' };
   function sandersOne(income, size) {
     var exempt = size > 1 ? SANDERS_EXEMPT.joint : SANDERS_EXEMPT.single;
     var premium = 0.04 * Math.max(0, income - exempt);
