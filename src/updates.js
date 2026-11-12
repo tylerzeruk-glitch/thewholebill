@@ -16,10 +16,17 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
-    id: 'plan-year-2027', date: '2026-11-01', kind: 'site', pin: true,
+    id: 'plan-year-2027', date: '2026-11-11', kind: 'site', pin: true,
     title: 'The calculator now uses plan year 2027: the 2027 credit schedule, the 2026 poverty guidelines and the CMS 2027 plan files.',
     body: 'Open enrollment for 2027 began on 1 November, so every dated figure moved together. The share of income a household is expected to pay toward the benchmark plan rises in every band of the IRS schedule (Rev. Proc. 2026-26): 2.15% at the bottom, up from 2.10%, and 10.22% from 300% to 400% of the poverty line, up from 9.96%. The credit is now measured against the 2026 poverty guidelines, $33,000 for a family of four in the 48 states and DC, up from $32,150, so for that family the 400% cliff falls at $132,000 instead of $128,600. The statutory out-of-pocket maximum is $12,000 for one person and $24,000 for a family, up from $10,600 and $21,200. Benchmark premiums are every county&rsquo;s second-lowest-cost silver plan in CMS&rsquo;s 2027 files [PENDING 2027: what the benchmark did for the default household, from the rebuild]. The Sanders exemption uses the 2027 standard deduction [PENDING 2027: the amounts, once the IRS publishes them]. Last year&rsquo;s tables stay on the methodology page.',
     see: { id: 'credit', text: 'The premium tax credit' }
+  },
+  {
+    id: 'kff-benchmark-2027', date: '2026-11-06', kind: 'world',
+    title: 'KFF&rsquo;s benchmark premium indicator, corrected 6 November 2026, puts the national average 2027 benchmark silver premium at $703 a month, up from $625 in 2026.',
+    body: 'KFF&rsquo;s &ldquo;Marketplace Average Monthly Benchmark Premiums&rdquo; indicator, updated 6 November 2026 to fix its Oregon and California figures, tracks the same thing this calculator prices by county: the second lowest cost silver, or benchmark, premium for a 40 year old before any tax credit. Its national average rises from $625 a month in 2026 to $703 in 2027, about 12 percent. The calculator&rsquo;s own benchmark table still runs on CMS&rsquo;s 2026 plan year files; the annual rebuild onto 2027&rsquo;s files is due this fall.',
+    source: { title: 'KFF, Marketplace Average Monthly Benchmark Premiums', url: 'https://www.kff.org/affordable-care-act/state-indicator/marketplace-average-benchmark-premiums/' },
+    see: { id: 'benchmark', text: 'The benchmark premium' }
   },
   {
     id: 'employer-2026-survey', date: '2026-10-28', kind: 'site',
