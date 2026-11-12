@@ -834,3 +834,18 @@ site a little more room to breathe".
   leans on our own estimate. The results bar keeps the household and the unit switch and gives
   up its three totals in this view. The bar is wider and sits nearer the text, in two even
   columns. The view switch moved from the first step to the end of the story.
+
+## Same day, sixth pass: inside the sheets
+
+- **One title per sheet.** The sheet's bar names it, so the headings that repeated it inside are
+  gone: "Who paid the rise." above the rise, and the "The cliff" and "The bad year" eyebrows in
+  slot 03 (its headline now names it; the slot test reads the headline).
+- **The household sheet** lost its "Tell it about you" header and the read-only "Where you live"
+  box, which restated the ZIP row above it. The rating-area line moved under the ZIP's scope
+  line, where it still says when a state is priced on last year's tables. The ZIP field lost its
+  inner "ZIP" prefix (the label says it) and the button reads "Update", not "UPDATE".
+- **Dead rules out.** The old paper hero's `.hero-inner`, `.hero-head`, `.hero-body` and
+  `.footline` rules, and the unused `.rise-h`.
+- **Phone sheets** were driven in Chromium's phone emulation at 390 by 844: each wide fold opens
+  as a fixed sheet over the card row without widening the page. Still not run in WebKit or on a
+  real iPhone.

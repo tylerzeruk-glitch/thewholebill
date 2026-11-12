@@ -540,7 +540,8 @@ test('slot 03: the cliff for the covered, the bad year for the uninsured', async
     cliff: !document.getElementById('cliffView').hidden,
     bad: !document.getElementById('badYear').hidden,
     intro: document.getElementById('cliffIntro').textContent,
-    eyebrows: [...document.querySelectorAll('#cliff .eyebrow')]
+    // The sheet's own title names the slot; inside, the visible headline does.
+    heads: [...document.querySelectorAll('#cliff h2')]
       .filter(e=>e.offsetParent !== null).map(e=>e.textContent.trim()) }));
 
   let r = await view();
@@ -555,8 +556,8 @@ test('slot 03: the cliff for the covered, the bad year for the uninsured', async
   await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(300);
   r = await view();
   ok('uninsured: the bad year replaces the cliff', !r.cliff && r.bad);
-  ok('and the slot names itself for it, on the fold and inside', r.eyebrows.join() === 'The bad year'
-     && await p.evaluate(()=>document.getElementById('slotK').textContent === 'The bad year' && /Nothing in law caps/.test(document.getElementById('slotS').textContent)), r.eyebrows.join());
+  ok('and the slot names itself for it, on the fold and inside', r.heads.length === 1 && /a bad year/.test(r.heads[0])
+     && await p.evaluate(()=>document.getElementById('slotK').textContent === 'The bad year' && /Nothing in law caps/.test(document.getElementById('slotS').textContent)), r.heads.join());
   const txt = await p.evaluate(()=>document.getElementById('badYear').innerText);
   ok('the modeled figure is labelled where it appears', /57,000/.test(txt) && /modeled/.test(txt));
   ok('the statutory ceiling contrast is stated', /\$12,000/.test(txt) && /No limit/.test(txt));
