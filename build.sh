@@ -31,6 +31,8 @@ import io, json, re, subprocess
 calc = io.open('src/calc.js', encoding='utf-8').read()
 reps = io.open('src/reps.js', encoding='utf-8').read()
 bench = io.open('src/benchmarks.js', encoding='utf-8').read()
+# past plan years, for the rise figure; inlined beside the current table
+hist = ''.join('\n' + io.open('src/benchmarks-%d.js' % y, encoding='utf-8').read() for y in (2025, 2026))
 page = io.open('src/page.html', encoding='utf-8').read()
 for marker in ('/*__CALC__*/', '/*__REPS__*/', '/*__BENCH__*/',
                '<!-- METH:START', '<!-- METH:END -->',
@@ -101,7 +103,7 @@ for st in sorted(B['provenance'], key=lambda k: NAMES[k].replace('the ', '')):
 if '<!-- STATE-SOURCES -->' not in page:
     raise SystemExit('build: <!-- STATE-SOURCES --> marker missing from src/page.html')
 page = page.replace('<!-- STATE-SOURCES -->', '\n'.join(rows), 1)
-out = page.replace('/*__BENCH__*/', '\n' + bench + '\n', 1)
+out = page.replace('/*__BENCH__*/', '\n' + bench + hist + '\n', 1)
 out = out.replace('/*__CALC__*/', '\n' + calc + '\n', 1)
 out = out.replace('/*__REPS__*/', '\n' + reps + '\n', 1)
 
