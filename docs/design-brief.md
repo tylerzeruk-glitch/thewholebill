@@ -801,3 +801,15 @@ proposed with this direction and is not built: opening the folds is the current 
   the three-way comparison.
 - **Section 06** shows only the questions; the one-line answer leads each fold when opened.
 - **Widths.** The model buttons, the folds and the text in a step share one 34rem column.
+
+## Same day, fourth pass: the phone is a story
+
+"The bars currently cover half the screen on mobile... like a TikTok, Instagram story type
+format where you're tapping through each one." Under 760px the four steps are cards in a
+sideways snap row, plus a closing "Send it" card. The bar is a slim column at the right edge (a
+sixth of the width at most) with only its running total above it; the card's number and
+sentence do the labelling. Ticks above, Back and Next below (not tap-anywhere: the cards have
+controls on them). The results bar keeps the household and the Year and Month switch and drops
+its three totals while the cards are up. The model picker on the universal card is the native
+select the phone already had. Not checked on a real iPhone: fixed-position sheets inside a
+scrolling row have a history of Safari bugs, so that is the first thing to try on a device.

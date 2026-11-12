@@ -3138,6 +3138,13 @@ test('footer: its links match the header navigation', async b => {
  * chart here applies: measure the render. These run on the page as a reader first
  * sees it (folds shut), across all three routes and at phone and desktop widths. */
 const storyStep = async (p, i) => p.evaluate(async i => {
+  // on a phone, step by step, the steps are cards in a sideways row: go there the way Next does
+  if (document.documentElement.classList.contains('cards')) {
+    document.getElementById('story').scrollIntoView();
+    const row = document.getElementById('ssteps'); row.scrollTo({ left: i * row.clientWidth });
+    await new Promise(r => setTimeout(r, 320));
+    return [...document.querySelectorAll('.sstep')].findIndex(e => e.classList.contains('on'));
+  }
   const s = document.querySelectorAll('.sstep')[i], st = document.getElementById('stage');
   const sh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-h')) || 0;
   scrollTo(0, scrollY + s.getBoundingClientRect().top - (innerWidth <= 900 ? sh + st.offsetHeight + 8 : innerHeight * 0.2));
@@ -3160,6 +3167,7 @@ const barRead = p => p.evaluate(() => {
   });
   return { H, trackH: document.getElementById('sbarTrack').getBoundingClientRect().height, segs,
            run: num(document.getElementById('sbarRun').textContent), uni: document.querySelector('.inkzone').classList.contains('uni'),
+           cards: document.documentElement.classList.contains('cards'), stageW: sr.width, stageBottom: sr.bottom, vw: innerWidth, vh: innerHeight,
            stageTop: sr.top, stageLeft: sr.left, stageRight: sr.right, stickyBottom: document.querySelector('.sticky').getBoundingClientRect().bottom,
            label: document.getElementById('sbar').getAttribute('aria-label'), away: st.classList.contains('yield') };
 });
@@ -3172,8 +3180,11 @@ test('story: every segment of the pinned bar is drawn at its value', async b => 
       for (let i = 0; i < 4; i++) {
         const at = await storyStep(p, i), r = await barRead(p);
         const tag = `${w}px ${route} step ${i + 1}`;
-        ok(`${tag}: is the step in focus, and the bar is pinned under the results bar`, at === i && Math.abs(r.stageTop - r.stickyBottom) < 1.5,
-           `at ${at}, stage ${r.stageTop.toFixed(1)} vs bar ${r.stickyBottom.toFixed(1)}`);
+        // desktop: pinned under the results bar. Phone: a slim column beside the card, on screen, a sixth of the width at most
+        ok(`${tag}: is the step in focus, and the bar is ${r.cards ? 'a slim column beside the card' : 'pinned under the results bar'}`,
+           at === i && (r.cards ? (r.stageW <= r.vw * 0.17 && r.stageRight <= r.vw && r.stageTop >= r.stickyBottom - 1 && r.stageBottom <= r.vh + 1)
+                                : Math.abs(r.stageTop - r.stickyBottom) < 1.5),
+           `at ${at}, stage ${r.stageTop.toFixed(1)} to ${r.stageBottom.toFixed(1)}, ${r.stageW.toFixed(0)}px wide, bar ${r.stickyBottom.toFixed(1)}`);
         const off = r.segs.map(s => Math.abs(s.h - s.f * r.H)), sum = r.segs.reduce((a, s) => a + s.v, 0);
         ok(`${tag}: each segment is its share of the scale, to the pixel`, r.segs.length > 0 && Math.max(...off) < 0.75 && r.segs.every(s => s.shrink === '0') && Math.abs(r.trackH - r.H) < 0.75,
            r.segs.map(s => `${s.k} ${s.h.toFixed(1)}`).join(' '));
@@ -3211,7 +3222,8 @@ test('story: one scale across routes and models, and the units switch reaches th
 });
 
 test('story: bar labels never overlap or leave the stage', async b => {
-  for (const [w, h, m] of [[1280, 800, false], [390, 844, true], [360, 740, true]]) {
+  // phones show the bar without labels (the card carries them), so this is the two layouts that print them
+  for (const [w, h, m] of [[1280, 800, false], [820, 1000, false]]) {
     const p = await page(b, w, h, m);   // all on one page, so the household controls are in the flow
     const bad = [];
     for (const ages of [[30], [41, 39, 12, 9]]) {
@@ -3326,7 +3338,7 @@ test('views: one switch between step by step and all on one page', async b => {
     ok(`${w}px: all on one page opens every fold in the flow, none as a sheet`, o.all && o.open === o.n && o.fixed === 0 && !o.clamp && o.pressed === 'false,true', JSON.stringify(o));
     ok(`${w}px: charts get the full column, and the summaries become headings`, Math.abs(o.wfW - o.wrapW) < 2 && o.dead === 'none', `${o.wfW.toFixed(0)} of ${o.wrapW.toFixed(0)}`);
     await p.evaluate(() => { const r = document.querySelector('#foldWf .fold-bd').getBoundingClientRect(); scrollBy(0, r.top - innerHeight * 0.3); }); await p.waitForTimeout(260);
-    ok(`${w}px: there the bar steps aside for a chart that needs its space`, await p.evaluate(() => document.getElementById('stage').classList.contains('yield')));
+    ok(`${w}px: there the bar ${m ? 'is put away, since every chart is already in the flow' : 'steps aside for a chart that needs its space'}`, await p.evaluate(m => { const st = document.getElementById('stage'); return m ? !st.offsetHeight : st.classList.contains('yield'); }, m));
     await p.reload(); await p.waitForTimeout(1200);
     ok(`${w}px: the choice is remembered on the next visit`, (await read()).all);
     await p.evaluate(() => document.getElementById('viewStory').scrollIntoView({ block: 'center' }));
@@ -3519,6 +3531,57 @@ test('glyphs: every story fold wears a drawing made from its own figures', async
   r = await read();
   ok('they follow the household and the route', r.people === 5 && r.npts === 0 && r.wfCols === r.parts, JSON.stringify([r.people, r.npts, r.wfCols, r.parts]));
   await p.close();
+});
+
+/* Cards. On a phone the first build pinned the bar across the top third of the
+ * screen; the owner: "the bars currently cover half the screen". The story is
+ * now read like a story there: one step a card, the bar a slim column beside
+ * it, Back and Next under it. The row is the browser's own sideways scrolling,
+ * so nothing is hijacked. */
+test('cards: on a phone the story is tapped or swiped through, one step a screen', async b => {
+  for (const [w, h] of [[390, 844], [360, 640], [430, 932]]) {
+    const p = await page(b, w, h, true, 'index.html', true);
+    await p.evaluate(() => document.getElementById('story').scrollIntoView()); await p.waitForTimeout(300);
+    const read = () => p.evaluate(() => { const row = document.getElementById('ssteps'), cs = [...row.querySelectorAll('.sstep')], on = cs.findIndex(e => e.classList.contains('on'));
+      const rr = row.getBoundingClientRect(), st = document.getElementById('stage').getBoundingClientRect(), nav = document.getElementById('snav').getBoundingClientRect(), sb = document.querySelector('.sticky').getBoundingClientRect();
+      const c = cs[on].getBoundingClientRect(), num = cs[on].querySelector('.snum, .ssend').getBoundingClientRect();
+      return { cards: document.documentElement.classList.contains('cards'), n: cs.filter(e => e.offsetHeight).length, on,
+        cardW: c.width, rowW: rr.width, left: c.left - rr.left, yOver: cs[on].scrollHeight - cs[on].clientHeight, xOver: cs[on].scrollWidth - cs[on].clientWidth,
+        barShare: st.width / innerWidth, barLeft: st.left, numRight: num.right, navBottom: nav.bottom, vh: innerHeight, top: rr.top, stickyBottom: sb.bottom,
+        ticks: [...document.querySelectorAll('#sticks i')].filter(i => i.classList.contains('on')).length, uni: document.querySelector('.inkzone').classList.contains('uni'),
+        prev: document.getElementById('sPrev').disabled, next: document.getElementById('sNext').textContent, btn: Math.min(...[...document.querySelectorAll('#snav button')].map(x => x.getBoundingClientRect().height)),
+        figs: getComputedStyle(document.querySelector('.sticky .figs')).display, docW: document.documentElement.scrollWidth, y: scrollY,
+        hx: getComputedStyle(row).overflowX, snap: getComputedStyle(row).scrollSnapType, labels: [...document.querySelectorAll('.sseg.on .sseg-l')].filter(l => l.offsetWidth).length }; });
+    let r = await read();
+    ok(`${w}px: five cards, the first in view, in a native snap row`, r.cards && r.n === 5 && r.on === 0 && r.hx === 'auto' && /x mandatory/.test(r.snap), JSON.stringify([r.n, r.on, r.snap]));
+    ok(`${w}px: a card is exactly the row wide and nothing spills sideways`, Math.abs(r.cardW - r.rowW) < 1 && r.xOver <= 0 && r.docW <= w, `${r.cardW} of ${r.rowW}, page ${r.docW}`);
+    ok(`${w}px: the bar is a slim column, a sixth of the width at most, clear of the number`, r.barShare <= 0.17 && r.numRight <= r.barLeft && r.labels === 0, `${(r.barShare * 100).toFixed(0)}%, number ends ${r.numRight.toFixed(0)}, bar starts ${r.barLeft.toFixed(0)}`);
+    ok(`${w}px: the whole card and its buttons fit the screen under the results bar`, r.top >= r.stickyBottom - 1 && (h < 700 || r.navBottom <= r.vh + 1), `row ${r.top.toFixed(0)}, bar ${r.stickyBottom.toFixed(0)}, buttons end ${r.navBottom.toFixed(0)} of ${r.vh}`);
+    ok(`${w}px: Back is off on the first card, buttons are 48px, and the three totals leave the bar`, r.prev && r.btn >= 48 && r.figs === 'none' && r.ticks === 1, JSON.stringify([r.prev, r.btn, r.figs, r.ticks]));
+    const y0 = r.y, fit = [];
+    for (let i = 1; i < 5; i++) {
+      await p.locator('#sNext').click(); await p.waitForTimeout(350);
+      r = await read(); fit.push(r.yOver);
+      ok(`${w}px: Next goes to card ${i + 1}, ticks follow, teal from the universal card on`, r.on === i && r.ticks === i + 1 && r.uni === (i >= 3) && Math.abs(r.left) < 1 && r.y === y0, JSON.stringify([r.on, r.ticks, r.uni, r.left, r.y]));
+    }
+    ok(`${w}px: every card fits without scrolling inside it${h < 700 ? ' (a short phone may scroll one a little)' : ''}`, fit.every(o => o <= (h < 700 ? 60 : 0)), fit.join(' '));
+    ok(`${w}px: the last card says the story is done and Next carries on`, /Keep reading/.test(r.next), r.next);
+    await p.locator('#sPrev').click(); await p.waitForTimeout(350);
+    ok(`${w}px: Back returns`, (await read()).on === 3);
+    await p.evaluate(() => { const row = document.getElementById('ssteps'); row.scrollTo({ left: 0 }); }); await p.waitForTimeout(350);
+    ok(`${w}px: a swipe (the row's own scroll) moves the step and the bar with it`, (await read()).on === 0 && (await barRead(p)).segs.length === 2);
+    await p.evaluate(() => { const row = document.getElementById('ssteps'); row.scrollTo({ left: 4 * row.clientWidth }); }); await p.waitForTimeout(350);
+    await p.locator('#toSend').click(); await p.waitForTimeout(350);
+    ok(`${w}px: the last card's button lands on the letter`, await p.evaluate(() => Math.abs(document.getElementById('send').getBoundingClientRect().top) < 80));
+    await p.close();
+  }
+  // wider than a phone, or all on one page, there are no cards
+  const d = await page(b, 1280, 800, false, 'index.html', true);
+  ok('1280px: no cards, no Back and Next, no closing card', await d.evaluate(() => !document.documentElement.classList.contains('cards') && !document.getElementById('snav').offsetHeight && !document.querySelector('.send-card').offsetHeight && getComputedStyle(document.getElementById('ssteps')).overflowX === 'visible'));
+  await d.close();
+  const q = await page(b, 390, 844, true);
+  ok('390px, all on one page: the steps stack again and the bar is put away', await q.evaluate(() => !document.documentElement.classList.contains('cards') && !document.getElementById('stage').offsetHeight && document.querySelectorAll('.sstep')[1].getBoundingClientRect().top > document.querySelectorAll('.sstep')[0].getBoundingClientRect().bottom - 1));
+  await q.close();
 });
 
 const b = await chromium.launch();

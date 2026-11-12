@@ -656,6 +656,9 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   @keyframes fly-in{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:none}}
   .fold-g{transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
   .fold > summary:hover .fold-g{transform:translateY(-3px)}
+  .sticks i{transition:background-color .35s ease}
+  .snav button{transition:transform .18s cubic-bezier(.3,.7,.2,1),opacity .2s ease,background-color .2s ease}
+  .snav button:active:not(:disabled){transform:scale(.97)}
   /* a sliding thumb under the segmented controls */
   .motion .glides{position:relative}
   .motion .glides > button{position:relative;z-index:1}
@@ -708,7 +711,7 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   body:not(.print-letter) #cliffChart rect{fill:#fff}   /* the annotation box carries an inline ink fill */
   .skip{display:none}
   *{transition:none!important}   /* a colour caught mid-change would print as that colour */
-  .stage,.sprog,.lmore{display:none}
+  .stage,.sprog,.lmore,.sticks,.snav,.sstep.send-card{display:none}
   .letter .bd.clamp{max-height:none;overflow:visible;-webkit-mask-image:none;mask-image:none}
   .story-in{display:block} .sstep{min-height:0;padding:24px 0} .story .fold.wide > .fold-bd{width:auto}
   body.print-letter :not(.pk):not(.letter):not(.letter *){display:none}
@@ -773,7 +776,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    every segment is --H times its fraction of the shared scale: a segment's pixel
    height IS the data, so nothing here may shrink it (flex-shrink:0). */
 :root{--sticky-h:58px;--stage-w:340px;--sgap:clamp(32px,5vw,72px)}
-#story{scroll-margin-top:0}
+#story{scroll-margin-top:var(--sticky-h)}   /* the results bar sticks over the first rows otherwise */
 .story-in{display:grid;grid-template-columns:minmax(0,1fr) var(--stage-w);column-gap:var(--sgap);padding-bottom:clamp(40px,6vw,72px)}
 .stage{grid-column:2;grid-row:1;position:sticky;top:var(--sticky-h);height:calc(100vh - var(--sticky-h));height:calc(100svh - var(--sticky-h));display:flex;align-items:center;justify-content:flex-end;z-index:1;--H:300px}
 .ssteps{grid-column:1;grid-row:1;min-width:0}
@@ -854,6 +857,21 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 #foldHh .fold-in{padding-top:6px}
 .slot + .slot{margin-top:0}
 
+
+/* ---------- cards (phones) ----------
+   Under 760px the story is read like a story: one step a card, swiped or tapped
+   through, with the bar as a slim column beside them instead of a third of the
+   screen above them. Everything here is behind html.cards, which the script sets
+   on phones in the step-by-step view; the rules themselves live in the 760px
+   block. These three are simply absent everywhere else. */
+.sticks,.snav,.sstep.send-card{display:none}
+.ssend{font-family:var(--serif);font-size:clamp(46px,14vw,64px);line-height:1;letter-spacing:-.02em;color:var(--teal)}
+.sticks i{flex:1;height:3px;border-radius:2px;background:var(--irule-2)}
+.sticks i.on{background:var(--ik)}
+.snav button{appearance:none;-webkit-appearance:none;flex:1;min-height:48px;border-radius:999px;border:1px solid var(--ictrl);background:none;color:var(--ik);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer}
+.snav button.go{flex:2;background:var(--ik);border-color:var(--ik);color:var(--ink)}
+.snav button:disabled{opacity:.35;cursor:default}
+.snav button:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
 
 /* ---------- the view switch ---------- */
 .viewpick{display:inline-flex;align-self:flex-start;gap:2px;padding:3px;border:1px solid var(--irule-2);border-radius:999px;margin-bottom:10px}
@@ -1028,6 +1046,32 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 }
 
 @media (max-width:760px){
+  /* the story as cards */
+  .cards{--card-h:max(430px,calc(100svh - var(--sticky-h) - 112px))}
+  .cards .sticky .figs{display:none}
+  .cards .story-in{display:grid;grid-template-columns:minmax(0,1fr) 56px;column-gap:14px;padding-bottom:30px}
+  .cards .sticks{display:flex;gap:4px;grid-column:1 / -1;grid-row:1;padding:14px 0 4px}
+  .cards .ssteps{grid-column:1;grid-row:2;display:flex;height:var(--card-h);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
+  .cards .ssteps::-webkit-scrollbar{display:none}
+  .cards .sstep{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;height:100%;min-height:0;overflow-y:auto;justify-content:flex-start;gap:14px;padding:16px 2px 10px 0}
+  .cards .sstep.send-card{display:flex}
+  .cards .stage{grid-column:2;grid-row:2;position:static;height:var(--card-h);min-height:0;margin:0;padding:10px 0 6px;background:none;border:0;z-index:auto;align-items:flex-end}
+  .cards .snav{display:flex;gap:8px;grid-column:1 / -1;grid-row:3;padding-top:10px}
+  .cards #sec2Note{grid-row:4;margin-top:22px}
+  /* beside a card there is no room for the bar's labels: the card's own number and sentence carry them */
+  .cards .sbar-track{width:44px}
+  .cards .sseg-l,.cards .sbar-gap,.cards .sbar-open span,.cards .sbar-cap span{display:none}
+  .cards .sbar-cap b{font-size:12.5px;letter-spacing:0}
+  .cards .snum{font-size:clamp(40px,13vw,56px)}
+  .cards .ssay{font-size:19px}
+  .cards .fold-s{display:none}
+  .cards .fold > summary{padding:11px 0}
+  .cards .sstep > .folds{margin-top:auto}   /* the actions sit low on the card, by the thumb */
+  .cards .viewpick{margin-bottom:2px}
+  .cards .viewpick button{font-size:12.5px;padding:0 12px}
+  .cards .send-card .btn-dark{align-self:flex-start;height:54px;padding:0 24px}
+  /* all on one page, on a phone: the charts are all in the flow, so the pinned bar would only cover them */
+  .onepage .stage{display:none}
   :root{--chart-h:260px;--rise-h:220px}
 
   /* layout */
@@ -1227,6 +1271,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
       </div>
 
+      <!-- Phones read the story as cards: these ticks and the Back and Next row
+           only show there (html.cards), where the steps sit side by side and
+           the bar is a slim column beside them. -->
+      <div class="sticks" id="sticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
       <div class="ssteps" id="ssteps">
         <div class="sstep on" data-step="0">
           <div class="viewpick" id="viewpick" role="group" aria-label="How to read this page">
@@ -1554,8 +1602,18 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 </details>
           </div>
         </div>
-      </div>
 
+        <div class="sstep send-card" data-step="4">
+          <h2 class="eyebrow i">Now use it</h2>
+          <div class="ssend">Send it.</div>
+          <p class="ssay">Your letter is already written, with your number in it.</p>
+          <button type="button" class="btn-dark" id="toSend">Write to them &darr;</button>
+        </div>
+      </div>
+      <div class="snav" id="snav">
+        <button type="button" id="sPrev" disabled>Back</button>
+        <button type="button" id="sNext" class="go">Next</button>
+      </div>
       <p class="note-i" id="sec2Note">Figures are <span data-uw="per">per year</span> and follow your household. Employer premiums are survey averages; marketplace premiums are your county&rsquo;s <span data-py>2027</span> rates. <a class="term" href="#/methodology">How every figure is sourced</a>.</p>
     </div>
   </section>
@@ -1684,7 +1742,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 </section>
 
 <!-- ============ 07 WRITE YOUR REP ============ -->
-<section class="paper">
+<section class="paper" id="send">
   <div class="wrap sec">
     <div class="split tie" style="margin-bottom:46px">
       <div class="stack" style="gap:20px">
@@ -3616,7 +3674,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   var rz;
   window.addEventListener("resize", function(){
     clearTimeout(rz);
-    rz = setTimeout(function(){ sizeStory(); paint(); trackStory(); }, 140);
+    rz = setTimeout(function(){ applyCards(); sizeStory(); paint(); trackStory(); }, 140);
   });
 
   /* The cliff chart's viewBox tracks its container width, so it has to re-render
@@ -4184,6 +4242,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     document.querySelector(".inkzone").classList.toggle("uni", uni);
     var steps = document.querySelectorAll(".sstep");
     for (i = 0; i < steps.length; i++) steps[i].classList.toggle("on", i === storyStep);
+    if (cardsOn()) paintCards();
   }
 
   /* ---------- fold glyphs ----------
@@ -4266,15 +4325,64 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   function sizeStory(){
     var sb = document.querySelector(".sticky");
     document.documentElement.style.setProperty("--sticky-h", (sb ? sb.offsetHeight : 0) + "px");
-    var H = Math.max(150, Math.min(460, stageEl.clientHeight - 30 - 48));
+    // beside the cards the bar has only a small total above it, so it gets nearly the whole stage
+    var room = cardsOn() ? 16 + 48 : 30 + 48;
+    var H = Math.max(150, Math.min(cardsOn() ? 560 : 460, stageEl.clientHeight - room));
     stageEl.style.setProperty("--H", H + "px");
   }
+  /* Cards: on a phone, in the step-by-step view, the steps sit side by side in a
+     native scroll-snap row. Swiping is the browser's own scrolling, so nothing
+     is hijacked: a vertical swipe still leaves the story. Back and Next, and the
+     arrow keys, do the same move for anyone who would rather not swipe. */
+  var mqCards = window.matchMedia("(max-width:760px)"), sstepsEl = byId("ssteps");
+  function cardsOn(){ return document.documentElement.classList.contains("cards"); }
+  function cardCount(){ return sstepsEl.querySelectorAll(".sstep").length; }
+  function paintCards(){
+    var ticks = byId("sticks").children, i, last = cardCount() - 1;
+    for (i = 0; i < ticks.length; i++) ticks[i].className = i <= storyStep ? "on" : "";
+    byId("sPrev").disabled = storyStep === 0;
+    byId("sNext").innerHTML = storyStep >= last ? "Keep reading &darr;" : "Next";
+    byId("sprog").style.setProperty("--p", (storyStep / last).toFixed(4));
+  }
+  function goCard(i){
+    i = Math.max(0, Math.min(cardCount() - 1, i));
+    sstepsEl.scrollTo({ left: i * sstepsEl.clientWidth, behavior: scrollBehavior() });
+  }
+  function applyCards(){
+    var on = mqCards.matches && !document.documentElement.classList.contains("onepage"), was = cardsOn();
+    if (on === was) return;
+    document.documentElement.classList.toggle("cards", on);
+    sizeStory();
+    sstepsEl.scrollLeft = on ? Math.min(storyStep, 3) * sstepsEl.clientWidth : 0;
+    if (on) storyStep = Math.min(storyStep, 3);
+    if (S){ paintStory(); if (on) paintCards(); }
+    queueStory();
+  }
+  sstepsEl.addEventListener("scroll", function(){
+    if (!cardsOn()) return;
+    var idx = Math.round(sstepsEl.scrollLeft / Math.max(1, sstepsEl.clientWidth));
+    if (idx !== storyStep){ storyStep = idx; paintStory(); }
+    paintCards();
+  }, { passive:true });
+  byId("sPrev").addEventListener("click", function(){ goCard(storyStep - 1); });
+  byId("sNext").addEventListener("click", function(){
+    // past the last card the story is over: Next carries on down the page
+    if (storyStep >= cardCount() - 1) byId("lives").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
+    else goCard(storyStep + 1);
+  });
+  sstepsEl.addEventListener("keydown", function(e){
+    if (!cardsOn() || e.target.closest("input, select, textarea, [contenteditable]")) return;
+    if (e.key === "ArrowRight"){ e.preventDefault(); goCard(storyStep + 1); }
+    if (e.key === "ArrowLeft"){ e.preventDefault(); goCard(storyStep - 1); }
+  });
+  byId("toSend").addEventListener("click", function(){ byId("send").scrollIntoView({ behavior:scrollBehavior(), block:"start" }); });
   function trackStory(){
+    if (cardsOn()){ stageEl.classList.remove("yield"); paintCards(); return; }   // the cards' own scroll decides the step
     var steps = document.querySelectorAll(".sstep"), sr = stageEl.getBoundingClientRect(), i, r;
     var stacked = window.matchMedia("(max-width:900px)").matches;
     var y = stacked ? sr.bottom + (window.innerHeight - sr.bottom) * 0.5 : window.innerHeight * 0.62;
     var idx = 0;
-    for (i = 0; i < steps.length; i++) if (steps[i].getBoundingClientRect().top <= y) idx = i;
+    for (i = 0; i < steps.length; i++) if (steps[i].offsetHeight && steps[i].getBoundingClientRect().top <= y) idx = i;   // the closing card exists only as a card
     // an open fold is as wide as the page, so the bar steps aside while one is
     // in the space it occupies and returns when the reader scrolls past it
     var open = isOnePage() ? storyEl.querySelectorAll("details.fold.wide[open] > .fold-bd") : [], away = false;
@@ -4356,6 +4464,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     if (all) byId("letterBd").classList.remove("clamp");
     else if (byId("letterMore").getAttribute("aria-expanded") !== "true") byId("letterBd").classList.add("clamp");
     if (keep) { try { localStorage.setItem("wb-view", all ? "all" : "steps"); } catch (e) {} }
+    applyCards();
     sizeStory(); if (S) { paintStory(); renderCliff(); } queueStory();
   }
   byId("viewStory").addEventListener("click", function(){ setView(false, true); });
@@ -4422,6 +4531,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   document.addEventListener("click", function(e){ var f = byId("changed"); if (f.open && !f.contains(e.target)) f.open = false; });
   document.addEventListener("keydown", function(e){ var f = byId("changed"); if (e.key === "Escape" && f.open){ f.open = false; f.querySelector("summary").focus(); } });
 
+  applyCards();
   sizeStory();
   paint();
   route();

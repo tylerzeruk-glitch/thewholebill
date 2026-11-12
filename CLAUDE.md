@@ -88,6 +88,13 @@ and the page has two views of them, switched at the first step (`setView()`):
 
 With no script the same `<details>` simply open in place.
 
+**On a phone (760px and under) the steps are cards** (`html.cards`, set by `applyCards()` in the
+step-by-step view): `.ssteps` becomes a native scroll-snap row, the bar a slim column beside it
+without labels, with ticks above and Back and Next below, and a fifth closing card. The step in
+focus comes from the row's own scroll position, so swiping is the browser's scrolling and nothing
+is hijacked. The first build pinned the bar across the top third of a phone; the owner's verdict
+was "the bars cover half the screen". All on one page, on a phone, puts the bar away entirely.
+
 - **The suite reads the page all on one page** (`page()` in `test/test.mjs` clicks the reader's
   own switch), because most checks measure what is inside the folds. Checks about the story,
   the sheets and the hero pass `shut = true` to get the page as a reader first meets it.
