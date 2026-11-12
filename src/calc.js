@@ -472,7 +472,7 @@
       if (!m) out.push({ year: y, status: 'unpublished' });
       else if (m.medicaidLikely) out.push({ year: y, status: 'medicaid' });
       else out.push({ year: y, status: 'ok', you: m.net, other: m.subsidy, total: m.benchmark,
-                      overCliff: m.overCliff, belowFloor: m.belowFloor, applicablePercentage: m.applicablePercentage,
+                      overCliff: m.overCliff, belowFloor: m.belowFloor, applicablePercentage: m.applicablePercentage, fplRatio: m.fplRatio,
                       basis: 'statutory' });
     }
     return out;

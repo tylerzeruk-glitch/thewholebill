@@ -1703,7 +1703,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <h3 id="rise">Who paid the rise</h3>
       <p class="body" style="max-width:760px">The figure under the reveal sets the same household&rsquo;s premium in 2025, 2026 and 2027 on one scale and splits each year by who pays it. It shows premiums only: deductibles, copays and the payroll tax are left out, because the question is what happened to the price and who absorbed it.</p>
       <p class="body" style="max-width:760px"><b>Employer coverage</b> uses KFF&rsquo;s averages for each year, not the plan you entered: your own figures describe this year alone. 2025 is KFF&rsquo;s 2025 survey (published 22 October 2025): family $26,993, of which the worker pays $6,850; single $9,325, of which the worker pays $1,440. 2026 is the table above. KFF publishes 2027&rsquo;s averages in October 2027, so that column stays empty and says so.</p>
-      <p class="body" style="max-width:760px"><b>Marketplace coverage</b> is computed the same way every year, with nothing modeled: that year&rsquo;s second-lowest-cost silver plan in your county, rated for your household at the ages you entered, and that year&rsquo;s poverty guideline and credit schedule. For 2025 those are the HHS 2024 guidelines ($15,060 plus $5,380 a person; higher in Alaska and Hawaii) and the enhanced schedule of Rev. Proc. 2024-35, with no cliff: no one paid more than 8.5% of income for the benchmark. The 2025 and 2026 benchmarks come entirely from CMS&rsquo;s files, including the state exchanges&rsquo; own plan files, which CMS posts the May after the plan year. We check them three ways: every HealthCare.gov county against CMS&rsquo;s landscape file to the cent; Vermont, the District and Rhode Island against KFF&rsquo;s published state averages; and our 2026 rebuild against the 2026 table this site shipped, which it reproduces exactly. One exception, disclosed: CMS&rsquo;s 2025 Vermont service-area file is empty, so we take Vermont&rsquo;s one 2025 service area as statewide, as the 2026 file defines it. A state still priced on 2026 (see the table above) has no 2027 column.</p>
+      <p class="body" style="max-width:760px"><b>Marketplace coverage</b> is computed the same way every year, with nothing modeled: that year&rsquo;s second-lowest-cost silver plan in your county, rated for your household at the ages you entered, and that year&rsquo;s poverty guideline and credit schedule. For 2025 those are the HHS 2024 guidelines ($15,060 plus $5,380 a person; higher in Alaska and Hawaii) and the enhanced schedule of Rev. Proc. 2024-35, with no cliff: no one paid more than 8.5% of income for the benchmark. The 2025 and 2026 benchmarks come entirely from CMS&rsquo;s files, including the state exchanges&rsquo; own plan files, which CMS posts the May after the plan year. We check them three ways: every HealthCare.gov county against CMS&rsquo;s landscape file to the cent; Vermont, the District and Rhode Island against KFF&rsquo;s published state averages; and our 2026 rebuild against the 2026 table this site shipped, which it reproduces exactly. Your income is held where you put it in every year, but the poverty line under the credit rises each year (plan year 2026 uses the 2025 guideline, 2027 the 2026 one), so an income just under 400% today can have been just over it in 2026; the figure says so when that happens, with both percentages. One exception, disclosed: CMS&rsquo;s 2025 Vermont service-area file is empty, so we take Vermont&rsquo;s one 2025 service area as statewide, as the 2026 file defines it. A state still priced on 2026 (see the table above) has no 2027 column.</p>
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
@@ -2661,6 +2661,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    * the note says so. A year with no figure keeps its column and says why. */
   function riseVerb(d){ return d >= 0 ? "rose " + fmt(d) : "fell " + fmt(-d); }
   function risePct(a, b){ return Math.round((b / a - 1) * 100) + "%"; }
+  function fplPct(r){ var p = Math.round(r * 100); return (p === 400 && r !== 4 ? (r * 100).toFixed(1) : p) + "%"; }
   function renderRise(opts){
     var emp = state.route === "employer", unins = state.route === "none";
     var ser = W.riseSeries(emp ? "employer" : "marketplace", opts), i, html = "";
@@ -2677,7 +2678,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             (prev.you >= 1 && Math.abs(r.you / prev.you - 1) >= 0.005 ? " (" + (r.you >= prev.you ? "+" : "&minus;") + risePct(prev.you, r.you).replace("-", "") + ")" : "") + '</div>'
           : '<div class="rd">&nbsp;</div>';
         html += '<div class="rlab"><div class="rv">' + fmt(r.you) + '</div><div class="rs">' +
-                (emp ? "your share" : unins ? "would be yours" : "yours") + ", of " + fmt(r.total) + '</div>' + dl + '</div>';
+                (emp ? "your share" : unins ? "would be yours" : "yours") + ", of " + fmt(r.total) + '</div>' + dl +
+                (r.overCliff ? '<div class="rs" data-cliff>over the cliff, at ' + fplPct(r.fplRatio) + ' of the poverty line</div>' : '') + '</div>';
         var hOther = r.other / scale, hYou = r.you / scale;
         if (r.other > 0)
           html += '<div class="rbar top" data-part="other" style="height:calc(var(--rise-h) * ' + hOther.toFixed(5) + ' - ' + (r.you > 0 ? 2 : 0) +
@@ -2711,19 +2713,30 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     } else {
       s.push((unins ? "What the benchmark plan would have cost your household" : "Your household’s benchmark plan") +
              " each year, the second-lowest-cost silver plan where you live, split between " + (unins ? "your share" : "what you pay") + " and what the premium tax credit pays.");
+      /* Income is held where the reader put it, but the poverty line under the
+       * credit moves every year (plan year Y uses the guideline published in Y-1),
+       * so the same income can sit on either side of the 400% cliff in different
+       * years. When it does, say so with both percentages, or the figure reads
+       * as a bug against the rest of the page, which shows only the current year. */
+      var cut = function(x){ return x.overCliff; };
       if (ok(a) && ok(b)){
-        var lost = a.other > 0 && b.other === 0;
-        s.push("The enhanced credits expired at the end of 2025" + (lost ? " and the 400% cliff came back, so the credit stopped" : "") +
+        s.push("The enhanced credits expired at the end of 2025" +
+               (cut(b) ? " and the 400% cliff came back. At " + money(state.income) + " your household was " + fplPct(b.fplRatio) +
+                         " of the poverty line that sets 2026 credits, over the cliff, so the credit stopped" : "") +
                ": from 2025 to 2026 the premium " + riseVerb(b.total - a.total) + " and " + (unins ? "your share would have gone" : "your share went") +
                " from " + fmt(a.you) + " to " + fmt(b.you) + ".");
       }
       if (ok(b) && ok(c)){
         var dp = c.total - b.total, dy = c.you - b.you;
-        if (b.other > 0 && c.other > 0)
+        if (cut(b) && !cut(c))
+          s.push("For 2027 the poverty line rose, so the same income is " + fplPct(c.fplRatio) + " of it: back under the cliff, the credit " +
+                 (unins ? "would return" : "returns") + ", and your share " + (unins ? "would fall" : "falls") + " to " + fmt(c.you) +
+                 " even though the premium " + riseVerb(dp) + ".");
+        else if (cut(b) && cut(c))
+          s.push("In 2027 the premium " + riseVerb(dp) + ", and past the cliff every dollar of it " + (unins ? "would be" : "is") + " yours.");
+        else if (b.other > 0 && c.other > 0)
           s.push("In 2027 the premium " + riseVerb(dp) + ". The credit " + (dp >= 0 ? "grew" : "shrank") + " with it, so your share " + (unins ? "would " : "") +
                  (unins ? riseVerb(dy).replace(/^rose/, "rise").replace(/^fell/, "fall") : riseVerb(dy)) + ".");
-        else if (b.other === 0 && c.other === 0)
-          s.push("In 2027 the premium " + riseVerb(dp) + ", and past the cliff every dollar of it " + (unins ? "would be" : "is") + " yours.");
         else s.push("In 2027 the premium " + riseVerb(dp) + " and your share " + (unins ? "would go" : "went") + " from " + fmt(b.you) + " to " + fmt(c.you) + ".");
       }
       if (ok(c) === false && c.status === "unpublished")
@@ -2734,7 +2747,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       ? 'Premiums only, ' + WORDS.per[state.unit] + '. <a class="term" href="#/methodology/rise">KFF survey averages</a> for ' +
         (state.size > 1 ? "family" : "single") + ' coverage, not your plan' +
         (state.totPrem != null || state.deductPer != null ? ': the figures you entered above describe this year only, so this chart stays on the averages' : '') + '.'
-      : 'Premiums only, ' + WORDS.per[state.unit] + '; deductibles and the payroll tax are left out. Nothing here is modeled: each year is <a class="term" href="#/methodology/rise">CMS’s benchmark</a> for that year and the IRS credit schedule in force that year, including the enhanced schedule in 2025.';
+      : 'Premiums only, ' + WORDS.per[state.unit] + '; deductibles and the payroll tax are left out. Your income is held at what you entered in every year, while the poverty line moves. Nothing here is modeled: each year is <a class="term" href="#/methodology/rise">CMS’s benchmark</a> for that year and the IRS credit schedule in force that year, including the enhanced schedule in 2025.';
   }
 
   /* Short forms for the key beside each bar. The waterfall's own labels assume a

@@ -1270,6 +1270,17 @@ test('rise: three years on one scale, each bar its own value', async b => {
   r = await bars();
   ok('over the cliff: no credit bar in 2026 or 2027, the 2025 credit still there', r[0].other > 0 && r[1].other === 0 && r[2].other === 0 && r[1].rv === 25788, JSON.stringify(r.map(x => [x.rv, Math.round(x.other)])));
   ok('over the cliff: the intro says so', /cliff came back/.test(await intro()) && /every dollar of it is yours/.test(await intro()));
+  // The poverty line moves under a fixed income: Fairfield, CT at $131,000 is 407%
+  // of the 2026 line (over the cliff, no credit) and 397% of the 2027 one (credit
+  // back). Correct, and it read as a bug until the figure said why.
+  await p.locator('#zip').fill('06824'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  await setIncome(p, 131000);
+  r = await bars();
+  ok('Fairfield at $131,000: no credit in 2026, the credit back in 2027', r[1].other === 0 && r[2].other > 0 && r[0].other > 0, JSON.stringify(r.map(x => [x.rv, Math.round(x.other)])));
+  const fi = await intro();
+  ok('Fairfield: the intro gives both percentages and says the poverty line rose', /407% of the poverty line/.test(fi) && /poverty line rose, so the same income is 397%/.test(fi), fi);
+  ok('Fairfield: the 2026 column names the cliff', await p.evaluate(() => /over the cliff, at 407%/.test(document.querySelector('#riseChart .rcol[data-year="2026"]').textContent)));
+  await p.locator('#zip').fill('75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
   await setIncome(p, 95000);
   // the unit switch divides at render time, the bars do not move
   const before = await bars();
