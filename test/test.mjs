@@ -180,6 +180,62 @@ test('plan year: every dated figure belongs to the same year', async () => {
      meth.includes(`up from ${money(W.PRIOR.OOP_MAX.single)} and ${money(W.PRIOR.OOP_MAX.family)} in ${W.PRIOR.year}`));
 });
 
+/* Past plan years (tools/build-benchmarks-history.mjs): the same household
+ * priced in 2025 and 2026, each year on its own benchmarks, poverty line and
+ * credit schedule. Built entirely from CMS's files after the fact; the builder
+ * cross-checks them against the landscape file and KFF, and the 2026 build
+ * reproduces the shipped 2026 table exactly. These checks hold the shipped
+ * files to the same claims. */
+test('past plan years: 2025 and 2026 price the same household on their own tables', async () => {
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const W = require('../src/calc.js');
+  const B = require('../src/benchmarks.js');
+  const H = { 2025: require('../src/benchmarks-2025.js'), 2026: require('../src/benchmarks-2026.js') };
+  W.useBenchmarks(B);
+  for (const y of [2025, 2026]) {
+    W.useHistory(H[y]);
+    ok(`benchmarks-${y}.js is plan year ${y}`, H[y].planYear === y);
+    const lacking = Object.keys(B.counties).filter(k => !H[y].counties[k]);
+    ok(`  it prices every county the current table does`, lacking.length === 0 &&
+       Object.keys(H[y].counties).length === Object.keys(B.counties).length, lacking.slice(0, 5).join(' '));
+  }
+  ok('the 2026 history table is calc.js\'s PRIOR year', H[W.PRIOR.year] && Object.keys(W.PAST).every(y => H[y]));
+  // the held states' 2026 entries in the current table came from the shipped
+  // 2026 build; the history rebuild must agree with them county for county
+  const held = Object.keys(B.counties).filter(k => B.states[B.fips[k.slice(0, 2)]].year === W.PRIOR.year);
+  const differ = held.filter(k => JSON.stringify(B.counties[k].slice(0, 2)) !== JSON.stringify(H[2026].counties[k]));
+  ok(`the 2026 rebuild matches the held states' ${held.length} county entries`, held.length > 200 && differ.length === 0, differ.slice(0, 5).join(' '));
+
+  // KFF's published state averages, where one benchmark covers the state (a
+  // 40 year old; Vermont rates by tier with no age). Whole dollars; within a
+  // dollar because the table stores age factors to three decimals.
+  const KFF = { VT: [1277, 1299, 1313], DC: [578, 610, 678], RI: [425, 506, 629] };
+  const at = { VT: '50007', DC: '11001', RI: '44007' };
+  for (const [st, want] of Object.entries(KFF)) {
+    const got = [2025, 2026, 2027].map(y => W.benchmarkPremium(at[st], [40], y).monthly);
+    ok(`${st} matches KFF's benchmark in 2025, 2026 and 2027`, got.every((g, i) => Math.abs(g - want[i]) < 1), got.map(g => g.toFixed(2)).join(' '));
+  }
+
+  // 2025's schedule: the enhanced credits, no cliff
+  const T = W.tablesFor(2025);
+  ok('2025 uses the 2024 poverty guidelines ($31,200 for four)', W.povertyLine(4, 'contiguous', 2025) === 31200);
+  ok('2025 charges nothing under 150% of the poverty line', W.applicablePercentage(1.4, 2025) === 0);
+  ok('2025 has no cliff: 8.5% at 450% and at 900%', T.CLIFF === null &&
+     W.applicablePercentage(4.5, 2025) === 0.085 && W.applicablePercentage(9, 2025) === 0.085);
+  ok('2026 and 2027 do have the cliff', W.applicablePercentage(4.01, 2026) === null && W.applicablePercentage(4.01) === null);
+  const fam = (income, year) => W.marketplaceCost({ income, size: 4, ages: [41, 39, 12, 9], bkey: '48113', year });
+  const d = [2025, 2026, 2027].map(y => fam(95000, y));
+  ok('the Dallas family is priced in each year it asks for', d.map(m => m.year).join() === '2025,2026,2027', d.map(m => m.year).join());
+  ok('  2025 at $95,000: 6.11% of income, $5,807 a year', Math.round(d[0].net) === 5807 && Math.abs(d[0].applicablePercentage - 0.06112) < 1e-4, String(Math.round(d[0].net)));
+  ok('  2026 and 2027 net premiums: $9,332 and $9,350', Math.round(d[1].net) === 9332 && Math.round(d[2].net) === 9350, d.map(m => Math.round(m.net)).join(' '));
+  const rich = fam(140000, 2025);
+  ok('  2025 at $140,000: capped at 8.5% ($11,900), not over a cliff', Math.round(rich.net) === 11900 && !rich.overCliff, String(Math.round(rich.net)));
+  ok('  2026 at $140,000: over the cliff, the whole benchmark', fam(140000, 2026).overCliff && fam(140000, 2026).net === fam(140000, 2026).benchmark);
+  ok('a held state in 2026 is priced from the current table', W.benchmarkPremium('08031', [40], 2026).monthly === W.benchmarkPremium('08031', [40]).monthly);
+  ok('a year with no table prices nothing', W.benchmarkPremium('48113', [40], 2024) === null);
+});
+
 test('calc: loads and computes in node, outside any browser', async () => {
   const { createRequire } = await import('node:module');
   const require = createRequire(import.meta.url);
