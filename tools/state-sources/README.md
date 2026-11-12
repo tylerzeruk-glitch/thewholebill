@@ -77,3 +77,18 @@ use, and says so in a note if the state's own source numbers areas differently.
 the Python standard library, `pdftotext` (poppler) for PDFs, the federal default
 age curve, county name to FIPS, and `writeState()`, which checks the shape before
 writing.
+
+## Which states, and the held ones
+
+`STATE_SOURCED` in `tools/build-benchmarks.mjs` is every state exchange not in
+`HELD`. A held state is priced wholly on last year (its benchmarks copied from
+the `FROZEN` commit, and `calc.js` uses last year's poverty line and credit
+schedule for it); the page says so wherever the state appears. A state is held
+when its own rates are unpublished, or when its own publications contradict
+each other and nothing published says which is right (`HELD_WHY` gives the
+reason, and the methodology prints it). `il.mjs` and `pa.mjs` exist and fail on
+purpose, naming the contradiction; they pass once it is resolved.
+
+One extractor needs a hand step, documented at its top: Nevada's rates
+come from the Division of Insurance's search app, exported in a browser to the
+cache folder (the script fails with the recipe if the files are absent).
