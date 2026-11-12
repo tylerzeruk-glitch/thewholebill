@@ -31,9 +31,8 @@ const page = async (browser, w, h, mobile=false, doc='index.html', shut=false) =
   // The charts live in folds now. Most checks measure what is inside them, so the
   // page opens with every fold open and the letter unfolded; the checks about the
   // folds and the story themselves ask for the page as a reader first sees it.
-  if (!shut) await p.evaluate(() => {
-    document.querySelectorAll('details.fold').forEach(d => { d.open = true; });
-    const bd = document.getElementById('letterBd'); if (bd) bd.classList.remove('clamp');
+  if (!shut && doc !== 'methodology/index.html' && doc !== 'updates/index.html') await p.evaluate(() => {
+    const all = document.getElementById('viewAll'); if (all) all.click();   // the reader's own "All on one page" switch
     window.dispatchEvent(new Event('resize'));
   }).then(() => p.waitForTimeout(350));
   return p;
@@ -409,31 +408,6 @@ test('splits: heading and supporting line share a baseline', async b => {
   }
 });
 
-/* The dateline's amber rule and the area-picker buttons opposite it are both real
- * edges, so they align edge to edge. A 6px margin used to hold them apart, which
- * read as a mistake rather than a decision. Only meaningful while the hero is two
- * columns -- below 1101px the dateline stacks underneath. */
-test('hero: the dateline ends on the same line as the controls', async b => {
-  for (const w of [1101,1250,1440,1920]) {
-    const p = await page(b,w,1000);
-    const d = await p.evaluate(()=>{
-      const hero=document.querySelector('.hero-inner');
-      if (getComputedStyle(hero).gridTemplateColumns.split(' ').length < 2) return null;
-      const bot=e=>document.querySelector(e).getBoundingClientRect().bottom;
-      return +(bot('.dateline') - bot('#areapick')).toFixed(1);
-    });
-    if (d === null) continue;
-    ok(`${w}px: dateline bottom meets the controls`, Math.abs(d) < 0.5, `Δ${d}px`);
-    await p.close();
-  }
-});
-
-/* Three bars compared by length, so each one's SOLID length has to carry the
- * figure printed beside it. This asserts the solid part only.
- * The marketplace row also carries a hatched subsidy on the end of it, drawn at
- * full height by deliberate choice -- its texture and its own caption line carry
- * the distinction -- so that row's OVERALL length is longer than its figure.
- * Do not extend this to total width; the hatch is not part of the number. */
 test('comparison: every bar draws the figure printed beside it', async b => {
   for (const [w,h] of [[1440,900],[1200,900]]) {
     const p = await page(b,w,h);
@@ -1833,7 +1807,7 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   ok('an at-large seat never says 0th', /at-large district/.test(r.dist) && !/0th/.test(r.dist), r.dist);
 
   // a sample button is a real ZIP now, so it resolves the card like typing one
-  await p.locator('#areapick button[data-z="75201"]').click(); await p.waitForTimeout(400);
+  await p.locator('#zip').fill('75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   r = await st();
   ok('a sample click is a ZIP: the card follows', /Crockett/.test(r.name), r.name);
 
@@ -2705,7 +2679,10 @@ test('hygiene: the minor list from the launch review', async b => {
   const t0 = await body();
   ok('footer no longer hedges with "live preview", and names what leaves the page', !/live preview|still being built/i.test(t0) && /nothing else leaves this page/.test(t0));
   ok('American spellings', !/labelled|modelled|modelling|maths/.test(t0));
-  ok('"try a city", not "try a sample"', /try a city/.test(t0) && !/try a sample/.test(t0));
+  await p.locator('#zip').fill('00000'); await p.locator('#zipGo').click(); await p.waitForTimeout(200);
+  const tBad = await body();   // the sample cities are offered only when a ZIP cannot be priced
+  ok('"try a city", not "try a sample"', /try a city/.test(tBad) && !/try a sample/.test(tBad));
+  await p.locator('#zip').fill('75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(300);
   ok('the rep card date reads as a long date', /Cosponsor status as of \d{1,2} [A-Z][a-z]+ 20\d\d/.test(t0), (t0.match(/Cosponsor status as of [^.]*/) || [''])[0]);
   ok('no motive attribution for Mercatus beyond its funding', !/built to be damning|written to show|written to make it look bad|written to argue/.test(t0));
   ok('no "anyone has published" on the calculator', !/anyone has published/.test(t0));
@@ -2856,7 +2833,7 @@ test('updates: the log renders the hero box, its own page and the feed', async b
   const want = sorted.filter(e => e.pin).concat(sorted.filter(e => !e.pin)).slice(0, 3).sort((a, b2) => b2.date.localeCompare(a.date)).map(e => e.id);
   const p = await page(b, 1280, 900);
   const box = await p.evaluate(() => ({
-    k: document.querySelector('.dateline .k').textContent,
+    k: document.querySelector('#foldChanged .fold-k').textContent,
     ids: [...document.querySelectorAll('.dateline .upd-when')].map(a => a.getAttribute('href')),
     more: (document.querySelector('.dateline .more') || {}).getAttribute?.('href'),
     nav: [...document.querySelectorAll('.nav a')].map(a => a.getAttribute('href')),
@@ -3234,23 +3211,20 @@ test('story: one scale across routes and models, and the units switch reaches th
 
 test('story: bar labels never overlap or leave the stage', async b => {
   for (const [w, h, m] of [[1280, 800, false], [390, 844, true], [360, 740, true]]) {
-    const p = await page(b, w, h, m, 'index.html', true);
+    const p = await page(b, w, h, m);   // all on one page, so the household controls are in the flow
     const bad = [];
     for (const ages of [[30], [41, 39, 12, 9]]) {
-      await p.evaluate(() => { document.getElementById('foldHh').open = true; });
       await setAges(p, ages);
       for (const inc of [18000, 95000, 250000]) {
         await setIncome(p, inc);
         for (const route of ['employer', 'marketplace', 'none']) {
           await p.evaluate(r => document.querySelector(`#route button[data-r="${r}"]`).click(), route);
-          await p.evaluate(() => { document.getElementById('foldHh').open = false; });
           for (const i of [2, 3]) {
             await storyStep(p, i);
             const r = await barRead(p), ls = r.segs.slice().sort((a, c) => a.lt - c.lt);
             for (let j = 1; j < ls.length; j++) if (ls[j].lt < ls[j - 1].lb - 0.5) bad.push(`${ages.length}p $${inc} ${route} s${i + 1}: ${ls[j - 1].k}/${ls[j].k} overlap`);
             for (const s of ls) if (s.ll < r.stageLeft - 0.5 || s.ll < 0) bad.push(`${ages.length}p $${inc} ${route} s${i + 1}: ${s.k} runs off the left`);
           }
-          await p.evaluate(() => { document.getElementById('foldHh').open = true; });
         }
       }
     }
@@ -3287,42 +3261,109 @@ test('story: text holds its contrast on the teal ground', async b => {
   }
 });
 
-/* Folds. Every chart the long page showed at once is behind one now, so three
- * things have to hold: they are shut when the reader arrives, what is inside is
- * all there at full width when one opens, and the bar gets out of its way. */
-test('folds: shut at load, whole when open, and the bar steps aside', async b => {
+/* Folds. Every chart the long page showed at once is behind one now. Step by
+ * step, a wide fold rises over the page as a sheet: the first build opened it in
+ * the flow, which pushed a screen of chart under the step and sent the bar away,
+ * and the owner called it unnatural. So the thing measured here is that NOTHING
+ * underneath moves: not the scroll position, not the bar. */
+test('folds: shut at load; a wide one rises as a sheet and the page stays put', async b => {
   for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
     const p = await page(b, w, h, m, 'index.html', true);
     const at = await p.evaluate(() => ({
       n: document.querySelectorAll('details.fold').length, open: document.querySelectorAll('details.fold[open]').length,
       wf: document.getElementById('wf').checkVisibility() ? 1 : 0, screens: document.documentElement.scrollHeight / innerHeight,
       twists: [...document.querySelectorAll('details.fold > summary')].every(s => s.querySelector('.fold-x') && s.getBoundingClientRect().height >= 44) }));
-    ok(`${w}px: every fold is shut on arrival`, at.n >= 10 && at.open === 0 && at.wf === 0, JSON.stringify(at));
+    ok(`${w}px: every fold is shut on arrival`, at.n >= 13 && at.open === 0 && at.wf === 0, JSON.stringify(at));
     ok(`${w}px: each fold's summary is a 44px target with its twist`, at.twists);
     ok(`${w}px: the page a reader meets is far shorter than the old one`, at.screens < (m ? 13 : 11), at.screens.toFixed(1) + ' screens');   // was 15.3 at 1280 by 800
-    await storyStep(p, 2);
-    const shut = await barRead(p);
-    await p.locator('#foldWf > summary').click(); await p.waitForTimeout(250);
-    await p.evaluate(() => { const r = document.querySelector('#foldWf .fold-bd').getBoundingClientRect(); scrollBy(0, r.top - innerHeight * 0.3); });
-    await p.waitForTimeout(260);
-    const open = await p.evaluate(() => { const bd = document.querySelector('#foldWf .fold-bd').getBoundingClientRect(), wrap = document.querySelector('.story-in'), cs = getComputedStyle(wrap);
-      return { w: bd.width, full: wrap.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), wf: document.getElementById('wf').offsetHeight,
-               away: document.getElementById('stage').classList.contains('yield'), barOpacity: getComputedStyle(document.getElementById('sbar')).opacity }; });
-    ok(`${w}px: an open fold spans the full column the charts were drawn for`, Math.abs(open.w - open.full) < 1.5 && open.wf > 200, `${open.w.toFixed(0)} of ${open.full.toFixed(0)}`);
-    ok(`${w}px: the bar steps aside while the fold is where it stands`, !shut.away && open.away && +open.barOpacity === 0, JSON.stringify(open));
-    await p.locator('#foldWf > summary').click(); await p.waitForTimeout(300);
-    ok(`${w}px: and returns when the fold closes`, !(await barRead(p)).away);
+    await storyStep(p, 1);
+    const read = () => p.evaluate(() => { const d = document.getElementById('foldRise'), bd = d.querySelector('.fold-bd'), r = bd.getBoundingClientRect(), x = d.querySelector('.sheet-x').getBoundingClientRect();
+      return { open: d.open, pos: getComputedStyle(bd).position, top: r.top, bottom: r.bottom, left: r.left, right: r.right, vw: innerWidth, vh: innerHeight, y: scrollY,
+        role: bd.getAttribute('role'), label: bd.getAttribute('aria-label'), shade: !document.getElementById('shade').hidden,
+        focusX: document.activeElement === d.querySelector('.sheet-x'), focusSum: document.activeElement === d.querySelector('summary'),
+        away: document.getElementById('stage').classList.contains('yield'), bar: document.getElementById('sbarTrack').getBoundingClientRect().top,
+        chart: document.getElementById('riseChart').checkVisibility(), x: Math.min(x.width, x.height) }; });
+    // Playwright scrolls a control clear of the pinned bar before clicking it; let it, then take the reading
+    await p.locator('#foldRise > summary').scrollIntoViewIfNeeded(); await p.locator('#foldRise > summary').hover(); await p.waitForTimeout(200);
+    const was = await read();
+    await p.locator('#foldRise > summary').click(); await p.waitForTimeout(300);
+    const s = await read();
+    ok(`${w}px: the fold opens as a sheet inside the viewport, its chart showing`, s.open && s.pos === 'fixed' && s.chart && s.top >= h * 0.08 && s.bottom <= s.vh + 1 && s.left >= -0.5 && s.right <= s.vw + 0.5,
+       JSON.stringify([s.pos, s.top.toFixed(0), s.bottom.toFixed(0), s.left.toFixed(0), s.right.toFixed(0)]));
+    ok(`${w}px: nothing underneath moved, and the bar is still there`, s.y === was.y && Math.abs(s.bar - was.bar) < 0.5 && !s.away, `scroll ${was.y} to ${s.y}, bar ${was.bar.toFixed(1)} to ${s.bar.toFixed(1)}`);
+    ok(`${w}px: it is a labelled dialog with a 44px close button holding focus`, s.role === 'dialog' && s.label === 'Who paid the rise' && s.shade && s.focusX && s.x >= 44, JSON.stringify([s.role, s.label, s.shade, s.focusX, s.x]));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(250);
+    const c = await read();
+    ok(`${w}px: Escape closes it and hands focus back to where the reader was`, !c.open && !c.shade && c.focusSum && c.y === was.y, JSON.stringify([c.open, c.shade, c.focusSum, c.y]));
+    await p.locator('#foldRise > summary').click(); await p.waitForTimeout(250);
+    await p.mouse.click(12, 60); await p.waitForTimeout(250);
+    ok(`${w}px: a click on the dimmed page closes it too`, !(await read()).open);
+    const prov = await p.evaluate(() => document.getElementById('provS').textContent);
+    ok(`${w}px: shut, the provenance fold still names the model and the kind of figure`, /^Sanders, .+\. [A-Z].+\.$/.test(prov), prov);
+    await p.locator('#foldWhy > summary').click(); await p.waitForTimeout(250);
+    const inl = await p.evaluate(() => { const d = document.getElementById('foldWhy'); return { open: d.open, pos: getComputedStyle(d.querySelector('.fold-bd')).position, shade: !document.getElementById('shade').hidden }; });
+    ok(`${w}px: a fold that only holds a paragraph opens in place`, inl.open && inl.pos === 'static' && !inl.shade, JSON.stringify(inl));
     await p.close();
   }
 });
 
-test('folds: with motion on, a fold opens and closes over time and ends clean', async b => {
+test('views: one switch between step by step and all on one page', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const read = () => p.evaluate(() => ({ all: document.documentElement.classList.contains('onepage'),
+      open: document.querySelectorAll('details.fold[open]').length, n: document.querySelectorAll('details.fold').length,
+      fixed: [...document.querySelectorAll('details.fold > .fold-bd')].filter(x => getComputedStyle(x).position === 'fixed').length,
+      clamp: document.getElementById('letterBd').classList.contains('clamp'),
+      pressed: [document.getElementById('viewStory'), document.getElementById('viewAll')].map(x => x.getAttribute('aria-pressed')).join(),
+      target: Math.min(...[...document.querySelectorAll('#viewpick button')].map(x => x.getBoundingClientRect().height)),
+      wfW: document.getElementById('wf').getBoundingClientRect().width, wrapW: (() => { const e = document.querySelector('.story-in'), cs = getComputedStyle(e); return e.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); })(),
+      dead: getComputedStyle(document.querySelector('#foldWf > summary')).pointerEvents }));
+    const a = await read();
+    ok(`${w}px: step by step is the default, and the switch is a real target`, !a.all && a.open === 0 && a.pressed === 'true,false' && a.target >= 38, JSON.stringify(a));
+    await p.locator('#viewAll').click(); await p.waitForTimeout(350);
+    const o = await read();
+    ok(`${w}px: all on one page opens every fold in the flow, none as a sheet`, o.all && o.open === o.n && o.fixed === 0 && !o.clamp && o.pressed === 'false,true', JSON.stringify(o));
+    ok(`${w}px: charts get the full column, and the summaries become headings`, Math.abs(o.wfW - o.wrapW) < 2 && o.dead === 'none', `${o.wfW.toFixed(0)} of ${o.wrapW.toFixed(0)}`);
+    await p.evaluate(() => { const r = document.querySelector('#foldWf .fold-bd').getBoundingClientRect(); scrollBy(0, r.top - innerHeight * 0.3); }); await p.waitForTimeout(260);
+    ok(`${w}px: there the bar steps aside for a chart that needs its space`, await p.evaluate(() => document.getElementById('stage').classList.contains('yield')));
+    await p.reload(); await p.waitForTimeout(1200);
+    ok(`${w}px: the choice is remembered on the next visit`, (await read()).all);
+    await p.evaluate(() => document.getElementById('viewStory').scrollIntoView({ block: 'center' }));
+    await p.locator('#viewStory').click(); await p.waitForTimeout(350);
+    const z = await read();
+    ok(`${w}px: and step by step shuts them again`, !z.all && z.open === 0 && z.clamp && z.pressed === 'true,false', JSON.stringify(z));
+    await p.close();
+  }
+});
+
+/* The hero. The owner's read of the first build: still busy. It is now one
+ * question, one sentence, one field, the place being priced, and the dated log
+ * on a single line. The five sample cities only appear when a ZIP fails. */
+test('hero: one question, one field, and the log on one line', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const r = await p.evaluate(() => { const hero = document.querySelector('main > section.paper'), f = document.getElementById('foldChanged');
+      return { bottom: hero.getBoundingClientRect().bottom, vh: innerHeight, words: hero.innerText.split(/\s+/).filter(Boolean).length,
+        lede: document.querySelector('.lede').textContent, chips: document.querySelectorAll('#areapick button').length, scope: document.getElementById('scope').textContent,
+        open: f.open, k: f.querySelector('.fold-k').textContent, s: f.querySelector('.fold-s').textContent, entries: f.querySelectorAll('.upd-when').length,
+        zip: document.getElementById('zip').getBoundingClientRect().bottom }; });
+    ok(`${w}px: the whole hero fits the first screen`, r.bottom <= r.vh + 1 && r.zip < r.vh * 0.75, `${r.bottom.toFixed(0)} of ${r.vh}`);
+    ok(`${w}px: under 70 words, where it had 174`, r.words < 70, r.words + ' words');
+    ok(`${w}px: the place and its source, and no city buttons until they are needed`, /^Showing Dallas County, Texas, priced from/.test(r.scope) && r.chips === 0, r.scope);
+    ok(`${w}px: the log is one shut line that carries its newest date`, !r.open && r.k === 'What changed' && /^Latest: \d{1,2} [A-Z][a-z]+ \d{4}\.$/.test(r.s) && r.entries === 3, r.s);
+    await p.locator('#zip').fill('00000'); await p.locator('#zipGo').click(); await p.waitForTimeout(250);
+    ok(`${w}px: a ZIP we cannot price brings the sample cities back`, await p.evaluate(() => document.querySelectorAll('#areapick button[data-z]').length === 5 && /try a city/.test(document.getElementById('scope').textContent)));
+    await p.close();
+  }
+});
+
+test('folds: with motion on, folds and sheets move over time and end clean', async b => {
   const p = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
   p.on('pageerror', e => ok('no page errors', false, e.message));
   await p.goto(URL); await p.waitForTimeout(1200);
-  for (const sel of ['#foldWf', '#obj2', '#adv']) {
-    if (sel === '#adv') await p.evaluate(() => { document.getElementById('foldHh').open = true; });
-    await p.evaluate(s => document.querySelector(s).scrollIntoView({ block: 'center' }), sel); await p.waitForTimeout(500);
+  for (const sel of ['#foldWhy', '#obj2', '#adv']) {
+    if (sel === '#adv') { await p.evaluate(() => document.querySelector('#foldHh').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400); await p.locator('#foldHh > summary').click(); await p.waitForTimeout(900); }
+    else { await p.evaluate(s => document.querySelector(s).scrollIntoView({ block: 'center' }), sel); await p.waitForTimeout(500); }
     await p.locator(sel + ' > summary').click();
     const mid = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
     await p.waitForTimeout(1300);
@@ -3337,6 +3378,16 @@ test('folds: with motion on, a fold opens and closes over time and ends clean', 
     await p.waitForTimeout(1000);
     const shut = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
     ok(`${sel}: stays in the page while it closes, then is shut`, midc.open && /closing/.test(midc.cls) && !shut.open && !/closing/.test(shut.cls), JSON.stringify([midc, shut]));
+    if (sel === '#adv') {
+      const thumb = await p.evaluate(async () => {
+        const g = document.getElementById('routeGlide'), on = () => document.querySelector('#route button.on').getBoundingClientRect();
+        document.querySelector('#route button[data-r="none"]').click(); await new Promise(r => setTimeout(r, 900));
+        const a = g.getBoundingClientRect(), o = on();
+        return { dx: Math.abs(a.left - o.left), dw: Math.abs(a.width - o.width), dy: Math.abs(a.top - o.top) };
+      });
+      ok('the sliding thumb lands on the chosen route', thumb.dx < 1 && thumb.dw < 1 && thumb.dy < 1, JSON.stringify(thumb));
+      await p.keyboard.press('Escape'); await p.waitForTimeout(700);
+    }
   }
   // a click during the close reopens it instead of fighting it
   await p.evaluate(() => document.querySelector('#obj1').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400);
@@ -3344,17 +3395,24 @@ test('folds: with motion on, a fold opens and closes over time and ends clean', 
   await p.locator('#obj1 > summary').click(); await p.waitForTimeout(80);
   await p.locator('#obj1 > summary').click(); await p.waitForTimeout(1300);
   ok('a second click mid-close reopens the fold', await p.evaluate(() => { const d = document.getElementById('obj1'); return d.open && d.className.indexOf('closing') < 0; }));
-  const thumb = await p.evaluate(async () => {
-    document.getElementById('foldHh').open = true; await new Promise(r => setTimeout(r, 200));
-    const g = document.getElementById('routeGlide'), on = () => document.querySelector('#route button.on').getBoundingClientRect();
-    document.querySelector('#route button[data-r="none"]').click(); await new Promise(r => setTimeout(r, 900));
-    const a = g.getBoundingClientRect(), o = on();
-    return { dx: Math.abs(a.left - o.left), dw: Math.abs(a.width - o.width), dy: Math.abs(a.top - o.top) };
-  });
-  ok('the sliding thumb lands on the chosen route', thumb.dx < 1 && thumb.dw < 1 && thumb.dy < 1, JSON.stringify(thumb));
+  // the sheet: on its way up at once, settled at the bottom edge, and still in the page while it leaves
+  await p.evaluate(() => document.querySelector('#foldWf').scrollIntoView({ block: 'center' })); await p.waitForTimeout(500);
+  const y0 = await p.evaluate(() => scrollY);
+  await p.locator('#foldWf > summary').click(); await p.waitForTimeout(60);
+  const rise = () => p.evaluate(() => { const d = document.getElementById('foldWf'), r = d.querySelector('.fold-bd').getBoundingClientRect();
+    return { open: d.open, shown: d.classList.contains('shown'), top: r.top, bottom: r.bottom, vh: innerHeight, y: scrollY, shade: +getComputedStyle(document.getElementById('shade')).opacity }; });
+  const up = await rise();
+  await p.waitForTimeout(1000);
+  const there = await rise();
+  ok('the sheet starts below the screen and rises', up.open && up.shown && up.top > there.top + 20, `${up.top.toFixed(0)} to ${there.top.toFixed(0)}`);
+  ok('it settles on the bottom edge with the page dimmed and unmoved', Math.abs(there.bottom - there.vh) < 1.5 && there.shade === 1 && there.y === y0, JSON.stringify(there));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(80);
+  const leaving = await rise();
+  await p.waitForTimeout(600);
+  const gone = await rise();
+  ok('closing, it is still in the page on its way down, then shut', leaving.open && !leaving.shown && !gone.open && gone.y === y0, JSON.stringify([leaving.open, gone.open]));
   await p.close();
 });
-
 test('send: three portraits are the recipient control', async b => {
   for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
     const p = await page(b, w, h, m);

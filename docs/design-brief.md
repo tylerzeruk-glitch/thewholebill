@@ -767,3 +767,20 @@ off under reduced motion, and none of it computes anything.
 **Not done.** The 365-dot "your year" direction would add a derived figure (cost over total pay)
 that is not on the site; it waits on the owner. A plain "everything on one page" view was
 proposed with this direction and is not built: opening the folds is the current answer.
+
+## Same day, second pass (owner's review of the first build)
+
+- **Wide folds are sheets.** "It disappears, the running total bar, and a section appears below,
+  requiring some scrolling." A wide fold now rises over the page; the scroll position and the
+  bar are measured not to move.
+- **All on one page** is a switch at the first step, remembered for the reader. It is the long
+  page again (about 17 screens at 1280 by 800), for people who would rather scan.
+- **The hero** went from 174 words to under 70: the question, one sentence, the ZIP field, the
+  place being priced with its source, and the change log as one line carrying its newest date.
+  The five sample cities appear only when a ZIP cannot be priced.
+- **"Who produced this estimate"** is a fold under the model picker; its one line names the model
+  and the kind of figure, so the provenance is still on the page when shut.
+- **The other number** shows the figure and the one finding; what it is made of is a fold. The
+  not-peer-reviewed disclosure stays visible at the same volume as before.
+- **The other side** is one row per objection on a wide screen: the question, its one-line
+  answer, the twist.

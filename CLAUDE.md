@@ -74,14 +74,23 @@ segment's height is always value / scale. `--H` (the bar's height in px) and `--
 by `sizeStory()`; the stylesheet never guesses them.
 
 Every chart the long page used to show at once (calculator inputs, waterfall, rise, cliff or bad
-year, side-by-side comparison) is a real `<details class="fold">` under the step it supports. The
-motion script only gives folds a duration; with no script they still open. `.wide` folds span the
-whole wrap because the charts were drawn for that width, and the bar steps aside (`.stage.yield`)
-while one is where it stands.
+year, side-by-side comparison) is a real `<details class="fold">` under the step it supports,
+and the page has two views of them, switched at the first step (`setView()`):
 
-- **The suite opens every fold by default** (`page()` in `test/test.mjs`), because most checks
-  measure what is inside them. Checks about the story and the folds themselves pass `shut = true`
-  to get the page as a reader first meets it.
+- **Step by step** (default, `html.sheets`): a `.wide` fold rises over the page as a sheet
+  (`openSheet()`), a labelled dialog with a shade, Escape and a close button. Nothing underneath
+  moves. The first build opened wide folds in the flow; the owner found that unnatural (a screen
+  of chart pushed in under the step, and the bar left to make room). Folds that hold only a
+  paragraph open in place.
+- **All on one page** (`html.onepage`): every fold stands open in the flow at full width, the
+  summaries become headings, and the bar steps aside (`.stage.yield`) where a wide chart needs
+  its space. Printing borrows this view.
+
+With no script the same `<details>` simply open in place.
+
+- **The suite reads the page all on one page** (`page()` in `test/test.mjs` clicks the reader's
+  own switch), because most checks measure what is inside the folds. Checks about the story,
+  the sheets and the hero pass `shut = true` to get the page as a reader first meets it.
 - **New copy in a step goes through `storyPlan()`**, per route, and a modeled part says so in its
   bar label ("(estimate)") and in the step's basis line.
 - **The teal turn re-points the grey tokens** (`.inkzone.uni`). Panels go darker than the ground

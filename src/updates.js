@@ -18,7 +18,7 @@ var UPDATES = [
   {
     id: 'one-bar-at-a-time', date: '2026-11-12', kind: 'site',
     title: 'The page is rebuilt around one bar. The same figures now arrive one at a time, and every chart opens from the step it supports.',
-    body: 'No figure changed and nothing was removed. The page used to show every chart at once, about fifteen screens of them. It now opens on four steps beside a single bar drawn to scale: what a paystub shows, the part it never shows, the whole bill, and the same care under universal coverage. The calculator inputs, the waterfall, who paid the rise, the cliff and the side by side comparison each open from the step they belong to. Each objection shows its question and a one line answer, with the full answer and its footnote one click below. The letter section now starts with your representative and both senators.',
+    body: 'No figure changed and nothing was removed. The page used to show every chart at once, about fifteen screens of them. It now opens on four steps beside a single bar drawn to scale: what a paystub shows, the part it never shows, the whole bill, and the same care under universal coverage. The calculator inputs, the waterfall, who paid the rise, the cliff and the side by side comparison each open over the page from the step they belong to, and a switch at the first step puts everything back on one page. Each objection shows its question and a one line answer, with the full answer and its footnote one click below. The letter section now starts with your representative and both senators.',
     see: { id: 'kinds', text: 'Three kinds of number' }
   },
   {

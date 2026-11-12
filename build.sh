@@ -153,7 +153,7 @@ def text_of(html):
 obj = page[page.index('id="objections"'):]
 obj = obj[:obj.index('</section>')]
 faq = []
-for card in re.findall(r'<details class="fold obj"[^>]*>([\s\S]*?)</details>', obj):
+for card in re.findall(r'<details class="fold pp obj"[^>]*>([\s\S]*?)</details>', obj):
     q = re.search(r'<span class="quote">([\s\S]*?)</span>', card)
     a = re.search(r'<p class="body">([\s\S]*?)</p>', card)
     if q and a:
