@@ -36,8 +36,14 @@
 
   /* The plan year. Every dated table below belongs to it, and the suite fails
    * if the benchmark table (src/benchmarks.js planYear) or the Sanders
-   * exemption's standard deduction is from any other year: one plan year on
-   * the page, never a mix. */
+   * exemption's standard deduction is from any other year.
+   *
+   * One exception, per state and disclosed: a state whose own 2027 rates were
+   * not yet published when the table was built stays wholly on plan year 2026
+   * (its benchmark, its poverty line and its credit schedule, from PRIOR) and
+   * the page says so. benchmarks.js marks it with states[ST].year; the suite
+   * holds the list of such states. A household is never priced on one year's
+   * premiums and another year's schedule. */
   var YEAR = 2027;
 
   // HHS 2026 poverty guidelines (Federal Register, 15 January 2026): $33,000
@@ -68,11 +74,10 @@
   // methodology quote it, and the build fills both from here.
   var OOP_MAX = { single: 12000, family: 24000 };
 
-  /* Plan year 2026, kept for reference only: the methodology page prints it
-   * under this year's tables and the suite holds the two to these numbers.
+  /* Plan year 2026: the methodology page prints it under this year's tables,
+   * and a state still on 2026 benchmarks (see YEAR) is priced on it.
    * HHS 2025 poverty guidelines; IRS Rev. Proc. 2025-25; CMS's 2025
-   * Marketplace Integrity and Affordability final rule. Nothing computes
-   * from it. */
+   * Marketplace Integrity and Affordability final rule. */
   var PRIOR = {
     year: 2026,
     FPL: {
@@ -175,6 +180,17 @@
   }
 
   function benchState(key) { return BENCH.fips[key.slice(0, 2)]; }
+  // The plan year a state is priced in: YEAR, or PRIOR.year for a state held
+  // on last year's benchmarks until its own rates are published.
+  function stateYear(st) {
+    var m = BENCH && st && BENCH.states[st];
+    return (m && m.year) || YEAR;
+  }
+  function tablesFor(year) {
+    if (year == null || year === YEAR) return { year: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, OOP_MAX: OOP_MAX };
+    if (year === PRIOR.year) return PRIOR;
+    throw new Error('no tables for plan year ' + year);
+  }
   function fplRegion(st) { return st === 'AK' ? 'AK' : st === 'HI' ? 'HI' : 'contiguous'; }
 
   /* The household's monthly benchmark premium: each member priced at the
@@ -212,24 +228,27 @@
       }
     }
     return { monthly: monthly, annual: monthly * 12,
-             ra: e[1], county: e[2], state: st, tiers: !!meta.tiers,
+             ra: e[1], county: e[2], state: st, tiers: !!meta.tiers, year: stateYear(st),
+             source: meta.source || null,
              exchange: meta.exchange, expanded: meta.expanded, chipUpTo: meta.chip };
   }
 
   /* ------------------------------------------------------------- primitives */
 
-  function povertyLine(size, region) {
-    var t = FPL[region] || FPL.contiguous;
+  function povertyLine(size, region, year) {
+    var f = tablesFor(year).FPL;
+    var t = f[region] || f.contiguous;
     return t.base + t.add * (Math.max(1, size) - 1);
   }
 
-  function fplRatio(income, size, region) {
-    return income / povertyLine(size, region);
+  function fplRatio(income, size, region, year) {
+    return income / povertyLine(size, region, year);
   }
 
   // Returns the share of income a household is expected to contribute toward the
   // benchmark plan, or null when it is over the cliff and gets nothing.
-  function applicablePercentage(ratio) {
+  function applicablePercentage(ratio, year) {
+    var APPLICABLE = tablesFor(year).APPLICABLE;
     // "does not exceed 400 percent": a household at exactly 400% still qualifies.
     if (ratio > CLIFF) return null;
     for (var i = 0; i < APPLICABLE.length; i++) {
@@ -306,8 +325,9 @@
     if (!bp) return null;
     var region = o.region || fplRegion(bp.state);
     var benchmark = bp.annual;
+    var year = bp.year;
 
-    var ratio = fplRatio(o.income, o.size, region);
+    var ratio = fplRatio(o.income, o.size, region, year);
     // The floor. Below 100% of the poverty line there is no credit at all; in a
     // state that has not expanded Medicaid, adults there are in the coverage gap.
     // In an expansion state, adults under the Medicaid ceiling are Medicaid's,
@@ -320,7 +340,7 @@
     var belowFloor = ratio < 1.00;
     var medicaidCeiling = MEDICAID_ADULT_BY_STATE[bp.state] || MEDICAID_ADULT;
     var medicaidLikely = !belowFloor && !!bp.expanded && ratio < medicaidCeiling;
-    var pct = (belowFloor || medicaidLikely) ? null : applicablePercentage(ratio);
+    var pct = (belowFloor || medicaidLikely) ? null : applicablePercentage(ratio, year);
     var expected = pct === null ? benchmark : o.income * pct;
     var subsidy = pct === null ? 0 : Math.max(0, benchmark - expected);
     var net = Math.max(0, benchmark - subsidy);
@@ -343,6 +363,7 @@
       household: net + oop + tax,          // what the household bears
       total: benchmark + oop + tax,        // the whole bill, however routed
       fplRatio: ratio,
+      year: year,                           // the plan year this state is priced in
       overCliff: ratio > CLIFF,
       belowFloor: belowFloor,               // under 100% FPL: no credit exists
       medicaidLikely: medicaidLikely,       // expansion state, under its adult ceiling
@@ -648,13 +669,16 @@
     var st = BENCH && o.bkey ? benchState(o.bkey) : null;
     return o.region || (st ? fplRegion(st) : 'contiguous');
   }
+  function planYearOf(o) {
+    return stateYear(BENCH && o.bkey ? benchState(o.bkey) : null);
+  }
   // hiRatio widens the right edge (default 5.5x the poverty line) so a household
   // past it still appears on the chart; capped at 10x so a very high income cannot
   // squash the cliff into the left margin. The curve is flat past 400%, so widening
   // distorts nothing.
   function cliffCurve(o, steps, hiRatio) {
     var region = cliffRegion(o);
-    var line = povertyLine(o.size, region);
+    var line = povertyLine(o.size, region, planYearOf(o));
     var hiX = Math.min(Math.max(hiRatio || 5.5, 5.5), 10);
     var lo = line * 1.5, hi = line * hiX, n = steps || 120, out = [], i;
     for (i = 0; i <= n; i++) {
@@ -671,7 +695,7 @@
   // The size of the drop at the boundary: one dollar of income, this many dollars.
   function cliffDrop(o) {
     var region = cliffRegion(o);
-    var line = povertyLine(o.size, region);
+    var line = povertyLine(o.size, region, planYearOf(o));
     var at = line * CLIFF;
     var under = marketplaceCost({ income: at - 1, size: o.size, adults: o.adults,
                                   ages: o.ages, bkey: o.bkey, region: region });
@@ -738,8 +762,9 @@
     var uni = universalCost(o.model || 'sanders1', o.income, o.size);
     var all = MODELS.map(function (m) { return m.compute(o.income, o.size).total; });
 
+    var year = planYearOf(opts);
     return {
-      year: YEAR,
+      year: year,                              // the household's plan year (see YEAR)
       employer: emp,
       marketplace: mkt,
       universal: uni,
@@ -747,7 +772,7 @@
       savings: emp.total - uni.total,          // employer route; see savingsFor()
       decade: (emp.total - uni.total) * 10,
       cobra: cobra(opts),
-      fpl: { line: povertyLine(o.size, opts.region), ratio: fplRatio(o.income, o.size, opts.region) },
+      fpl: { line: povertyLine(o.size, opts.region, year), ratio: fplRatio(o.income, o.size, opts.region, year) },
       replacedByUniversal: emp.total - emp.medicareTax   // the payroll tax is not a premium
     };
   }
@@ -756,6 +781,7 @@
     YEAR: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, CLIFF: CLIFF, OOP_MAX: OOP_MAX, PRIOR: PRIOR,
     SANDERS_EXEMPT: SANDERS_EXEMPT, EMPLOYER: EMPLOYER, MODELS: MODELS,
     useBenchmarks: useBenchmarks, benchKey: benchKey, zipResolve: zipResolve,
+    stateYear: stateYear, tablesFor: tablesFor,
     benchmarkPremium: benchmarkPremium,
     povertyLine: povertyLine, fplRatio: fplRatio,
     applicablePercentage: applicablePercentage, medicareTax: medicareTax,

@@ -952,7 +952,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="rule" style="margin:56px 0 24px"></div>
     <div class="row" style="gap:56px;flex-wrap:wrap">
-      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labeled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums come from the CMS 2027 plan files for your county.</p>
+      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labeled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums are your county&rsquo;s <span data-py>2027</span> rates, from the source named beside your ZIP.</p>
       <p class="note" style="max-width:360px">Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
     </div>
   </div>
@@ -1089,7 +1089,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           </div>
           <div class="cards" id="cards"></div>
           <div id="elig"></div>
-          <p class="note-i" id="panelNote">Employer premiums are <a class="term" href="#/methodology/employer">KFF 2026 survey averages</a>. Subsidy math follows the IRS 2027 applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan from the CMS 2027 plan files, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
+          <p class="note-i" id="panelNote">Employer premiums are <a class="term" href="#/methodology/employer">KFF 2026 survey averages</a>. Subsidy math follows the IRS <span data-py>2027</span> applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan in the <span data-py>2027</span> rates named beside your ZIP, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
         </div>
       </div>
     </div>
@@ -1609,11 +1609,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
       <h3 id="benchmark">The benchmark premium <span class="tag stat" style="vertical-align:middle;margin-left:8px">Statutory</span></h3>
-      <p class="body" style="max-width:760px">The credit is measured against the second-lowest-cost silver plan available to your household, so that premium is the hinge of every marketplace figure here. It comes from the published 2027 federal plan files, computed per county, and here is exactly how.</p>
+      <p class="body" style="max-width:760px">The credit is measured against the second-lowest-cost silver plan available to your household, so that premium is the hinge of every marketplace figure here. For 2027 it comes from published rate tables, the federal plan files for the HealthCare.gov states and each state exchange&rsquo;s own for the rest, computed per county. Here is exactly how.</p>
       <table style="margin-top:12px"><caption class="vh">How the benchmark premium is built</caption>
         <tr>
           <th scope="row" class="rowh wide"><b style="font-weight:500;color:var(--pk)">The plan set</b></th>
-          <td>Individual-market, on-exchange, non-dental silver plans, excluding child-only offerings. HealthCare.gov states come from the CMS Exchange PUFs (rate, plan attributes, service area); the 21 state-run exchanges come from the CMS State-based Exchange PUFs. Both are published federal tables; no key, no scraping of insurer sites.</td>
+          <td>Individual-market, on-exchange, non-dental silver plans, excluding child-only offerings and cost-sharing variants. HealthCare.gov states come from the CMS Exchange PUFs (rate, plan attributes, service area). CMS publishes the state-run exchanges&rsquo; files only the following May, so for 2027 each of those states comes from its own exchange or insurance regulator instead: their approved rate tables or, where a state publishes the benchmark itself, that table. <a class="term" href="#/methodology/state-sources">Every state&rsquo;s source</a> is listed below, with whether its rates are final and how precisely they are published. Nine states had published nothing the build could use when the table was made (Colorado, Kentucky, Maine, Maryland, Massachusetts, New Jersey and Virginia), or published figures that contradict each other (Illinois and Pennsylvania); they stay on plan year 2026 until they do, and the calculator says so for a household there. Every source is a public table from a government or its exchange; no key, nothing from an insurer&rsquo;s own site.</td>
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Why the second lowest</b></th>
@@ -1637,8 +1637,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">How we know it is right</b></th>
-          <td>Three independent checks, run every time the table is rebuilt: every HealthCare.gov county must match the separately published QHP landscape file&rsquo;s own second-lowest silver premium to the cent; New York&rsquo;s county floors must match NY State of Health&rsquo;s published 2027 lowest-cost-silver table to the cent; and Los Angeles must match Covered California&rsquo;s published 2027 rate booklet. A build that fails any check does not ship.</td>
+          <td>Independent checks, run every time the table is rebuilt. Every HealthCare.gov county must match the separately published QHP landscape file&rsquo;s own second-lowest silver premium to the cent. Every state built from its own tables must reproduce each figure its exchange or regulator prints separately (a benchmark or lowest-cost silver by county or rating area), to the cent, or to the dollar where the figure is printed in whole dollars; the table below gives the count for each state, and says so plainly where no such figure exists. A build that fails any check does not ship.</td>
         </tr>
+      </table>
+      <h3 id="state-sources" style="margin-top:24px">Where each state&rsquo;s benchmark comes from</h3>
+      <p class="body" style="max-width:760px">The HealthCare.gov states not listed here come from the CMS 2027 plan files. Every other state, with its sources and what to know about them:</p>
+      <table style="margin-top:12px"><caption class="vh">Benchmark sources by state, plan year 2027</caption>
+<!-- STATE-SOURCES -->
       </table>
       <p class="fn">Two judgment calls to know about. &ldquo;Second lowest&rdquo; counts plans, not distinct prices, so if two plans tie for cheapest the benchmark equals that tied price; the IRS defines it the same way. And the credit legally counts only the essential-health-benefits share of the benchmark premium, typically 99% to 100% of it; the plan files publish that share only as a whole percent, so we use the full premium, which can overstate a credit by a fraction of a percent (about $7 a month on a $3,081 Connecticut benchmark, checked against the state exchange&rsquo;s own quote).</p>
     </div>
@@ -1663,7 +1668,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="lbl p">Model one <span class="tag stat" style="margin-left:6px">Published formula</span></div>
           <div class="quote" style="font-size:23px">Sanders &middot; bill&rsquo;s authors</div>
           <p class="body">From the financing options published by Sen. Sanders&rsquo; office in 2019 (its &ldquo;Option 1&rdquo;), the first of the two household-level formulas in this debate that anyone actually wrote down.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">4% &times; (income &minus; $32,200)<br>+ 7.5% &times; income<br><br>= 4% &times; $62,800 &nbsp;=&nbsp; $2,512<br>+ 7.5% &times; $95,000 &nbsp;=&nbsp; $7,125<br><b>= $9,637 a year</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">4% &times; (income &minus; $33,200)<br>+ 7.5% &times; income<br><br>= 4% &times; $61,800 &nbsp;=&nbsp; $2,472<br>+ 7.5% &times; $95,000 &nbsp;=&nbsp; $7,125<br><b>= $9,597 a year</b></p>
           <p class="fn">The exemption is the standard deduction, as the 2019 list stipulates; its own worked example used $29,000 for a family of four, the figure of its day. A 2027 calculator uses the 2027 deduction: $33,200 for a joint return, $16,600 for a single filer (IRS Rev. Proc. 2026-35; in 2026 it was $32,200 and $16,100). The Lancet formula below keeps its paper&rsquo;s literal $29,000, because that is what the paper wrote down.</p>
           <p class="fn">Two liberties, both ours. The 2019 list presents the income premium and the payroll tax as <i>separate</i> options; we pair them. It also exempts an employer&rsquo;s first $2 million of payroll from the 7.5% levy; a household cannot know where its employer&rsquo;s payroll stands, so we apply the levy to all wages, which if anything overstates the cost. Say both out loud rather than let someone discover them.</p>
         </div>
@@ -1680,7 +1685,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="lbl p">Model three <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">RAND &middot; nonpartisan</div>
           <p class="body">Liu &amp; Eibner, RAND Corporation, 2019: nonpartisan, modeling the bill <i>with</i> long-term care at payment rates around 109% of Medicare. National health spending rises 1.8%, from $3,823 billion to $3,892 billion.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$68.8B &divide; 134,790,000 households<br>= <b>$510</b> per household per year<br><br>$9,637 + $510 = <b>$10,147</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$68.8B &divide; 134,790,000 households<br>= <b>$510</b> per household per year<br><br>$9,597 + $510 = <b>$10,107</b></p>
           <p class="fn">RAND assumed supply constraints absorb half of new demand; without that assumption its increase is 9.8%. RAND published no household figure. The allocation is ours, same convention as Blahous.</p>
         </div>
 
@@ -1688,7 +1693,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="lbl p">Model four <span class="tag mod" style="margin-left:6px">Our allocation</span></div>
           <div class="quote" style="font-size:23px">CBO &middot; the scorekeeper</div>
           <p class="body">Congressional Budget Office, December 2020: five illustrative options for 2030; CBO has never scored the bill itself. We use Option 5, the one shaped most like the bill (long-term care covered, no cost sharing), which <b>raises</b> national spending $290 billion, the least friendly of the five. It also assumes provider payment rates above Medicare&rsquo;s, which the bill does not; CBO&rsquo;s options at Medicare-like rates come out cheaper. CBO&rsquo;s four options <i>without</i> long-term care all <b>lower</b> national spending, by $42 to $743 billion.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$290B &divide; 134,790,000 households<br>= <b>$2,151</b> per household per year<br><br>$9,637 + $2,151 = <b>$11,788</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$290B &divide; 134,790,000 households<br>= <b>$2,151</b> per household per year<br><br>$9,597 + $2,151 = <b>$11,748</b></p>
           <p class="fn">CBO published no household figure. The allocation is ours, same convention as Blahous. Its $290 billion is a 2030 projection against CBO&rsquo;s own $6,631 billion baseline; we spread the source&rsquo;s dollars as published rather than false-precision adjust them to a common year.</p>
         </div>
 
@@ -1697,7 +1702,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="quote" style="font-size:23px">Mercatus &middot; the opposition</div>
           <p class="body">Charles Blahous, Mercatus Center, 2018: Koch-funded, and its author opposes the policy. He modeled two scenarios. His <i>main</i> one has national health spending <b>falling $2.05 trillion</b> over a decade against current law. His alternative, where provider payments do not fall to Medicare rates, has it <b>rising $3.25 trillion</b>.</p>
           <p class="body">We use the alternative, so this site never rests on the friendly reading of an unfriendly study.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">$3.252T &divide; 10 years<br>&divide; 134,790,000 households<br>= <b>$2,413</b> per household per year<br><br>$9,637 + $2,413 = <b>$12,050</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">$3.252T &divide; 10 years<br>&divide; 134,790,000 households<br>= <b>$2,413</b> per household per year<br><br>$9,597 + $2,413 = <b>$12,010</b></p>
           <p class="fn">Blahous published no household figure, so that allocation is ours. Spreading it flat across all households is a simplification: real financing would be progressive, which would move this number down for most households and up for high earners.</p>
         </div>
 
@@ -1706,7 +1711,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="quote" style="font-size:23px">Urban &middot; the priciest</div>
           <p class="body">Blumberg, Holahan and colleagues, Urban Institute, October 2019, in a report financed by the Commonwealth Fund (named for the same reason Mercatus&rsquo; funder is): a left-leaning institute&rsquo;s &ldquo;Single-Payer Enhanced&rdquo;, and the most expensive estimate we know of: national spending rising <b>$719.7 billion a year (+20.6%)</b>, covering long-term care, dental, zero cost sharing and every US resident.</p>
           <p class="body">We include it so the top of the range is the hardest number on offer. If the argument survives this one, it survives.</p>
-          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$719.7B &divide; 134,790,000 households<br>= <b>$5,339</b> per household per year<br><br>$9,637 + $5,339 = <b>$14,976</b></p>
+          <p class="body" style="font-family:var(--mono);font-size:14px;line-height:1.75;background:var(--paper-tint);padding:16px 18px;border-radius:2px">+$719.7B &divide; 134,790,000 households<br>= <b>$5,339</b> per household per year<br><br>$9,597 + $5,339 = <b>$14,936</b></p>
           <p class="fn">Urban published no household figure. The allocation is ours, same convention as Blahous. Its &ldquo;Single-Payer Lite&rdquo; option, without long-term care and with income-scaled cost sharing, <i>cuts</i> national spending 6.0%. We use the expensive one.</p>
         </div>
       </div>
@@ -1766,7 +1771,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </tr>
         <tr>
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">What the universal figure is</b></th>
-          <td>A contribution, not a cost of care. The other two bars show what covering this household costs in full; this one shows the share of it the household would pay. Its coverage would still cost roughly what it costs now (for the worked household above, <b>$33,481</b> a year through an employer), and on the six models the household would pay <b>$9,637 to $14,976</b> of that, <b>29% to 45%</b>, the rest coming from progressive financing and the federal health spending that already exists. Read as a like-for-like total, it flatters universal coverage. Putting a number on that remainder would mean allocating national spending per household, a second modeled figure stacked on the one we already publish, so for now we say this instead.</td>
+          <td>A contribution, not a cost of care. The other two bars show what covering this household costs in full; this one shows the share of it the household would pay. Its coverage would still cost roughly what it costs now (for the worked household above, <b>$33,481</b> a year through an employer), and on the six models the household would pay <b>$9,597 to $14,936</b> of that, <b>29% to 45%</b>, the rest coming from progressive financing and the federal health spending that already exists. Read as a like-for-like total, it flatters universal coverage. Putting a number on that remainder would mean allocating national spending per household, a second modeled figure stacked on the one we already publish, so for now we say this instead.</td>
         </tr>
         <tr id="wrong-vintages">
           <th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">Mixed vintages in the allocations</b></th>
@@ -1797,7 +1802,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
     <div class="stack" style="gap:16px">
       <h3 id="sources">Sources</h3>
-      <p class="note" style="font-size:13.5px;line-height:1.6">Each link goes to the primary document, not a summary of it. Every one was retrieved and checked on [PENDING 2027: the date the new plan-year links are checked], the employer survey on 28 October 2026; if a link has since moved, the citation still stands on its own.</p>
+      <p class="note" style="font-size:13.5px;line-height:1.6">Each link goes to the primary document, not a summary of it. Every one was retrieved and checked on 11 November 2026, the employer survey on 28 October 2026; if a link has since moved, the citation still stands on its own.</p>
       <p class="note" style="font-size:13.5px;line-height:1.6" id="cite">To cite this page: The Whole Bill, &ldquo;Methodology,&rdquo; thewholebill.org/methodology, with the date you read it. Every figure here also carries its own source above.</p>
       <table style="margin-top:12px"><caption class="vh">Sources</caption>
         <tr><th scope="col">Figure</th><th scope="col">Source</th></tr>
@@ -1823,8 +1828,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <tr><td>Care skipped over cost</td><td><a class="srclink" href="https://www.kff.org/health-costs/americans-challenges-with-health-care-costs/" rel="noopener">KFF Health Tracking Poll, May 2025</a>; <a class="srclink" href="https://www.cdc.gov/nchs/nhis/" rel="noopener">National Health Interview Survey, 2024</a></td></tr>
         <tr><td>Medical bankruptcy, both sides</td><td>Himmelstein et al., <a class="srclink" href="https://doi.org/10.2105/AJPH.2018.304901" rel="noopener">AJPH, 2019</a> (PNHP-affiliated authors); Dobkin et al., <a class="srclink" href="https://doi.org/10.1056/NEJMp1716604" rel="noopener">NEJM, 2018</a></td></tr>
         <tr><td>Benchmark premiums, HealthCare.gov states</td><td><a class="srclink" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS Exchange PUFs</a> (rate, plan attributes, service area) and the <a class="srclink" href="https://www.healthcare.gov/plan-data/" rel="noopener">QHP Landscape file</a>, plan year 2027</td></tr>
-        <tr><td>Benchmark premiums, state exchanges</td><td><a class="srclink" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS State-based Exchange QHP PUFs</a>, plan year 2027 (data as of [PENDING 2027: the as-of date of the files used])</td></tr>
-        <tr><td>Benchmark cross-checks</td><td>[PENDING 2027: NY State of Health, 2027 Lowest Cost Silver Plan by County, and Covered California, 2027 QHP Rates by County, linked once published]</td></tr>
+        <tr><td>Benchmark premiums, state exchanges</td><td>Each state&rsquo;s own exchange or insurance regulator, plan year 2027, every document linked in the table Where each state&rsquo;s benchmark comes from, above; for the nine states held on 2026, the <a class="srclink" href="https://www.cms.gov/marketplace/resources/data/public-use-files" rel="noopener">CMS State-based Exchange QHP PUFs</a>, plan year 2026 (data as of May 2026)</td></tr>
+        <tr><td>Benchmark cross-checks</td><td>The <a class="srclink" href="https://www.healthcare.gov/plan-data/" rel="noopener">QHP Landscape file</a> for the HealthCare.gov states; for the others, the benchmark and lowest-silver figures each state publishes, linked per state in the table Where each state&rsquo;s benchmark comes from</td></tr>
         <tr><td>Rating area definitions</td><td><a class="srclink" href="https://www.cms.gov/cciio/programs-and-initiatives/health-insurance-market-reforms/state-gra" rel="noopener">CMS, State Specific Geographic Rating Areas</a></td></tr>
         <tr><td>ZIP to county</td><td><a class="srclink" href="https://www.census.gov/geographies/reference-files/time-series/geo/relationship-files.html" rel="noopener">Census 2020 ZCTA-county relationship file</a>; <a class="srclink" href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0) for PO-box-only ZIPs</td></tr>
         <tr><td>Medicaid expansion &amp; CHIP limits</td><td><a class="srclink" href="https://www.medicaid.gov/medicaid/national-medicaid-chip-program-information/medicaid-childrens-health-insurance-program-basic-health-program-eligibility-levels" rel="noopener">Medicaid.gov, Medicaid and CHIP eligibility levels</a></td></tr>
@@ -2296,6 +2301,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       byId("scope").innerHTML = '<b>The plan tables did not load.</b> Reload the page; if it keeps happening, tell us at contact@thewholebill.org.';
       return;
     }
+    // copy that names the plan year follows the household's: a state held on
+    // last year is priced, and labelled, on last year throughout
+    [].forEach.call(document.querySelectorAll("[data-py]"), function(n){ n.textContent = S.year; });
     S.breakdown = W.routeBreakdown(state.route, opts);
     // Objection 01 argues against the route's own figure: what this household
     // bears today less the Medicare payroll tax, which universal coverage does
@@ -2466,7 +2474,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("areaNote").textContent  =
       "Rating area " + a.ra + " \u00b7 " +
       (a.exchange === "state" ? "State-run exchange" : "HealthCare.gov") +
-      " \u00b7 Medicaid " + (a.expanded ? "expanded" : "not\u00a0expanded");
+      " \u00b7 Medicaid " + (a.expanded ? "expanded" : "not\u00a0expanded") +
+      // a state held on last year says so where it is always visible, not
+      // only in the ZIP editor's scope line
+      (a.year !== WholeBillBench.planYear ? " \u00b7 Priced on plan year\u00a0" + a.year : "");
     byId("who").textContent  = S.universal.note;
     // The short form below 1100px: at 1024 the long form truncated to "$95,0…"
     // beside the Year/Month switch. The two-row bar itself still begins at 900px
@@ -3036,6 +3047,26 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     return /(city|Parish|Borough|Municipality|Municipio|Area)$/.test(n) ? n : n + " County";
   }
 
+  /* Where this state's benchmark comes from, in the reader's words: the CMS
+   * files, the state's own published rates (preliminary said plainly), or,
+   * for a state held on last year, that the whole marketplace figure is last
+   * year's. tools/build-benchmarks.mjs records it per state. */
+  function sourceTxt(st){
+    var m = WholeBillBench.states[st], pv = (WholeBillBench.provenance || {})[st];
+    var y = WholeBillBench.planYear, meth = '<a class="term" href="#/methodology/state-sources">';
+    if (m.src === 'prior'){
+      return '<b>priced on plan year ' + m.year + '</b>: this table cannot yet use ' + (STATE_NAMES[st] || st) + '&rsquo;s own ' + y +
+        ' rates, so the benchmark, the poverty line and the credit schedule here are all ' +
+        m.year + '&rsquo;s (' + meth + 'why</a>).';
+    }
+    if (m.src === 'state' && pv){
+      return 'priced from ' + meth + pv.by + '&rsquo;s ' + y +
+        (pv.kind === 'slcsp' ? ' published benchmarks' : ' rate tables') + '</a>' +
+        (pv.final ? '.' : ', which it still labels preliminary.');
+    }
+    return 'priced from the <a class="term" href="#/methodology/benchmark">CMS ' + y + ' plan files</a>.';
+  }
+
   function renderScope(msg){
     var scope;
     // msg is only ever an error; the field carries the state for assistive tech
@@ -3051,8 +3082,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       var stAbbr = WholeBillBench.fips[state.bkey.slice(0,2)];
       var placeTxt = stAbbr === 'DC' ? 'the District of Columbia'
         : countyLabel(e[2]) + ', ' + (STATE_NAMES[stAbbr] || stAbbr);
-      scope = 'Showing <b>' + placeTxt +
-        '</b>, priced from the <a class="term" href="#/methodology/benchmark">CMS 2027 plan files</a>. Type any US ZIP, or try a city:';
+      scope = 'Showing <b>' + placeTxt + '</b>, ' + sourceTxt(stAbbr) + ' Type any US ZIP, or try a city:';
     }
     byId("scope").innerHTML = scope;
     var html = "", i;

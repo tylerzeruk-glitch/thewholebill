@@ -123,6 +123,30 @@ test('plan year: every dated figure belongs to the same year', async () => {
   const W = require('../src/calc.js');
   const B = require('../src/benchmarks.js');
   ok(`the benchmark table is plan year ${W.YEAR}`, B.planYear === W.YEAR, `benchmarks.js planYear ${B.planYear}`);
+  // The one sanctioned exception: states whose own rates were unpublished at
+  // build time stay wholly on last year. The list lives here so that holding
+  // a state, or forgetting to move one, is a deliberate edit and never drift.
+  const HELD = ['CO', 'IL', 'KY', 'MA', 'MD', 'ME', 'NJ', 'PA', 'VA'];
+  const byYear = y => Object.keys(B.states).filter(st => B.states[st].year === y).sort();
+  ok(`every state is plan year ${W.YEAR} or held on ${W.PRIOR.year}`,
+     Object.values(B.states).every(m => m.year === W.YEAR || m.year === W.PRIOR.year));
+  ok(`the held states are exactly ${HELD.join(', ')}`, byYear(W.PRIOR.year).join() === HELD.join(), byYear(W.PRIOR.year).join(', '));
+  ok('a held state is marked as such', HELD.every(st => B.states[st].src === 'prior' && B.provenance[st] && B.provenance[st].held));
+  ok('every state-sourced state carries its sources', Object.entries(B.states).filter(([, m]) => m.src === 'state')
+     .every(([st]) => B.provenance[st] && B.provenance[st].sources.length && B.provenance[st].sources.every(x => /^https:\/\//.test(x.url))));
+  {
+    W.useBenchmarks(B);
+    // a held household is priced on last year's poverty line and schedule, never a mix
+    const denver = W.summary({ income: 95000, size: 4, ages: [41, 39, 12, 9], bkey: '08031', model: 'sanders1' });
+    ok('Denver (held) uses last year\'s poverty line', denver.year === W.PRIOR.year &&
+       Math.round(denver.fpl.line) === W.PRIOR.FPL.contiguous.base + 3 * W.PRIOR.FPL.contiguous.add, `$${Math.round(denver.fpl.line)}, ${denver.year}`);
+    const dm = W.marketplaceCost({ income: 60000, size: 1, ages: [40], bkey: '08031' });
+    ok('and last year\'s credit schedule', dm.year === W.PRIOR.year &&
+       Math.abs(dm.applicablePercentage - W.applicablePercentage(60000 / W.PRIOR.FPL.contiguous.base, W.PRIOR.year)) < 1e-12 &&
+       Math.abs(dm.applicablePercentage - W.applicablePercentage(60000 / W.FPL.contiguous.base)) > 1e-4, String(dm.applicablePercentage));
+    const dallas = W.summary({ income: 95000, size: 4, ages: [41, 39, 12, 9], bkey: '48113', model: 'sanders1' });
+    ok(`Dallas is plan year ${W.YEAR}`, dallas.year === W.YEAR && Math.round(dallas.fpl.line) === 33000);
+  }
   ok(`the Sanders exemption is the ${W.YEAR} standard deduction`, W.SANDERS_EXEMPT.year === W.YEAR, `SANDERS_EXEMPT.year ${W.SANDERS_EXEMPT.year}`);
   const files = ['src/page.html', 'src/updates.js', 'src/llms.txt', 'dist/index.html', 'dist/methodology/index.html', 'dist/updates/index.html', 'dist/updates.xml'];
   const pending = files.filter(f => readFileSync(resolve(HERE, '..', f), 'utf8').includes('[PENDING'));
@@ -132,8 +156,8 @@ test('plan year: every dated figure belongs to the same year', async () => {
   const index = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
   const meth = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
   ok(`the notice strip says plan year ${W.YEAR}`, index.includes(`Plan year ${W.YEAR} &middot;`));
-  const named = [...(index + meth).matchAll(/(?:CMS|IRS|published) (\d{4}) (?:plan files|applicable-percentage|federal plan files)/g)].map(m => +m[1]);
-  ok(`every "CMS/IRS <year>" in the copy is ${W.YEAR}`, named.length >= 4 && named.every(y => y === W.YEAR), named.join(', '));
+  const named = [...(index + meth).matchAll(/(?:CMS|IRS|published) (?:<span data-py>)?(\d{4})(?:<\/span>)? (?:plan files|applicable-percentage|federal plan files)/g)].map(m => +m[1]);
+  ok(`every "CMS/IRS <year>" in the copy is ${W.YEAR}`, named.length >= 2 && named.every(y => y === W.YEAR), named.join(', '));
 
   // the methodology's tables are the tables calc.js computes with
   const cells = id => {
@@ -2047,7 +2071,8 @@ test('language: no em or en dashes anywhere a reader can see', async b => {
   await setIncome(p, 240000); await scan('over the cliff');
   await setIncome(p, 30000);  await scan('below the credit floor, coverage gap');
   await setIncome(p, 95000);
-  for (const z of ['10001', '44113', '06106']) {
+  // 80202 (Denver) is held on last year; 90012 (Los Angeles) is state-sourced
+  for (const z of ['10001', '44113', '06106', '80202', '90012']) {
     await p.locator('#zip').fill(z); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
     await scan(`zip ${z}`);
   }
@@ -2174,7 +2199,7 @@ test('letter: the paystub share sentence follows the drawer', async b => {
 /* The methodology page prints the six financing derivations and invites the
  * reader to redo the arithmetic, so the printed figures must be exactly what
  * calc.js computes: the allocations are rounded to the dollar once, in
- * calc.js, and the Sanders exemption is the 2026 standard deduction. */
+ * calc.js, and the Sanders exemption is the 2027 standard deduction. */
 test('calc: financing models reproduce the methodology page to the dollar', async () => {
   const { createRequire } = await import('node:module');
   const { readFileSync } = await import('node:fs');
@@ -2182,15 +2207,15 @@ test('calc: financing models reproduce the methodology page to the dollar', asyn
   const W = require('../src/calc.js');
   W.useBenchmarks(require('../src/benchmarks.js'));
   const fam = W.universalCost('sanders1', 95000, 4), one = W.universalCost('sanders1', 95000, 1);
-  ok('Sanders exempts the 2026 joint standard deduction, $32,200', fam.parts.premium === 0.04 * (95000 - 32200), `$${fam.parts.premium}`);
-  ok('and the single one, $16,100', one.parts.premium === 0.04 * (95000 - 16100), `$${one.parts.premium}`);
-  ok('the default family pays $9,637 under Sanders', fam.total === 9637, `$${fam.total}`);
+  ok('Sanders exempts the 2027 joint standard deduction, $33,200', fam.parts.premium === 0.04 * (95000 - 33200), `$${fam.parts.premium}`);
+  ok('and the single one, $16,600', one.parts.premium === 0.04 * (95000 - 16600), `$${one.parts.premium}`);
+  ok('the default family pays $9,597 under Sanders', fam.total === 9597, `$${fam.total}`);
   const ids = ['sanders1', 'galvani', 'rand', 'cbo5', 'blahous', 'urban'];
   const adders = { rand: 510, cbo5: 2151, blahous: 2413, urban: 5339 };
   for (const id of Object.keys(adders)) {
     const u = W.universalCost(id, 95000, 4), k = Object.keys(u.parts).find(x => /Gap$/.test(x));
     ok(`${id}: allocation is a whole-dollar $${adders[id]}`, u.parts[k] === adders[id], `$${u.parts[k]}`);
-    ok(`${id}: total is the integer sum`, Number.isInteger(u.total) && u.total === 9637 + adders[id], `$${u.total}`);
+    ok(`${id}: total is the integer sum`, Number.isInteger(u.total) && u.total === 9597 + adders[id], `$${u.total}`);
   }
   const html = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
   const sec = html.slice(html.indexOf('What universal coverage would cost you'), html.indexOf('What a bad year costs without coverage'));
@@ -2419,7 +2444,7 @@ test('accessibility: reduced motion, whole-page print, sticky at 1024, structure
     noScope: document.querySelectorAll('th:not([scope])').length,
     rowhFace: (() => { const th = document.querySelector('th.rowh'), td = document.querySelector('th.rowh + td'); const a = getComputedStyle(th), b = getComputedStyle(td); return a.fontFamily === b.fontFamily && a.fontSize === b.fontSize && a.textTransform === b.textTransform; })() }));
   ok('methodology: one h1 ("Check our work.") and a main', ms.h1.length === 1 && /Check our work/.test(ms.h1[0]) && ms.main, JSON.stringify(ms.h1));
-  ok('methodology: every table has a caption and headers with scope', ms.tables === 10 && ms.captions === 10 && ms.noTh === 0 && ms.noScope === 0, JSON.stringify(ms));
+  ok('methodology: every table has a caption and headers with scope', ms.tables === 11 && ms.captions === 11 && ms.noTh === 0 && ms.noScope === 0, JSON.stringify(ms));
   ok('row headers keep the body-cell face', ms.rowhFace);
   await m.close();
   const f = await page(b, 1280, 900, false, '404.html');

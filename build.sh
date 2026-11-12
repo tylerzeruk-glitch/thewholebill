@@ -64,6 +64,43 @@ if upd['count'] < 1:
 page = page.replace('<!-- UPDATES:BOX -->', upd['box'], 1)
 page = page.replace('<!-- UPDATES:LIST -->', upd['list'], 1)
 io.open('dist/updates.xml', 'w', encoding='utf-8').write(upd['rss'])
+# --- where each state's benchmark comes from: the methodology's table, from
+# the provenance tools/build-benchmarks.mjs wrote into src/benchmarks.js ---
+B = json.loads(re.search(r'return (\{.*\});\s*\}\)\);\s*$', bench, re.S).group(1))
+NAMES = dict(re.findall(r'([A-Z]{2}):"([^"]+)"', re.search(r'var STATE_NAMES = (\{[^}]*\});', page).group(1)))
+def esc(t):
+    t = t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    return re.sub(r"(\w)'", '\\1&rsquo;', t)      # the page's typographic apostrophe
+MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+def day(iso):
+    p = iso.split('-')
+    if len(p) == 2: return '%s %s' % (MONTHS[int(p[1]) - 1], p[0])
+    return '%d %s %s' % (int(p[2]), MONTHS[int(p[1]) - 1], p[0])
+rows = []
+for st in sorted(B['provenance'], key=lambda k: NAMES[k].replace('the ', '')):
+    v = B['provenance'][st]
+    name = NAMES[st][0].upper() + NAMES[st][1:]
+    if v.get('held'):
+        why = esc(v['why']) if v.get('why') else ('Its own %d rates were not published when this table was built.' % B['planYear'])
+        cell = ('Held on plan year %d. %s A household here is priced wholly on %d: that year&rsquo;s benchmark, poverty line '
+                'and credit schedule. It moves to %d when usable %d rates are published.') % (v['year'], why, v['year'], B['planYear'], B['planYear'])
+    else:
+        links = '; '.join('<a class="srclink" href="%s" rel="noopener">%s</a>%s' % (
+            esc(s_['url']), esc(s_['title']), (', ' + day(s_['published'])) if s_.get('published') else '') for s_ in v['sources'])
+        bits = [links + '.']
+        if v['kind'] == 'slcsp':
+            bits.append('The state publishes the benchmark itself, county by county, at age %d; other ages follow the state&rsquo;s rate curve.' % v['age'])
+        bits.append('Rates final.' if v['final'] else '<b style="font-weight:500;color:var(--pk)">Rates preliminary</b>, as the publisher labels them.')
+        if v['precision'] == 'dollars':
+            bits.append('Published in whole dollars, so figures here can differ from a quote by under a dollar a month.')
+        bits.append(('%d published figure%s reproduced by every build.' % (v['checks'], '' if v['checks'] == 1 else 's'))
+                    if v['checks'] else 'No independent published figure exists to check the build against.')
+        bits += [esc(n) for n in v['notes']]
+        cell = ' '.join(bits)
+    rows.append('<tr><th scope="row" class="rowh"><b style="font-weight:500;color:var(--pk)">%s</b></th><td>%s</td></tr>' % (name, cell))
+if '<!-- STATE-SOURCES -->' not in page:
+    raise SystemExit('build: <!-- STATE-SOURCES --> marker missing from src/page.html')
+page = page.replace('<!-- STATE-SOURCES -->', '\n'.join(rows), 1)
 out = page.replace('/*__BENCH__*/', '\n' + bench + '\n', 1)
 out = out.replace('/*__CALC__*/', '\n' + calc + '\n', 1)
 out = out.replace('/*__REPS__*/', '\n' + reps + '\n', 1)
