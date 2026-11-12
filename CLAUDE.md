@@ -97,6 +97,16 @@ With no script the same `<details>` simply open in place.
   there, not lighter: small teal and amber labels sit on them. The suite measures contrast in
   that state.
 - A static `data-fig` needs a default in `tools/default-figures.mjs` or the build refuses.
+- **Small text is the thing the owner keeps cutting.** A step carries one basis chip (`tag` in
+  `storyPlan()`: "Survey average", "Set in law", "Includes our estimate"), not a sentence with
+  links. Detail and links belong inside the fold. Before adding a note, ask whether a chip, a
+  glyph or the fold can carry it.
+- **Fold glyphs** (`renderGlyphs()`) are 56 by 36 drawings made from the page's own figures:
+  the household as dots, the cliff as this household's curve, the arithmetic as the waterfall's
+  columns. Icons, so aria-hidden, but never an invented shape; the suite checks the ones that
+  carry proportion.
+- **"What changed" is a flyout beside the ZIP** (`details.flyout#changed`), not a fold: it opens
+  over the page so the hero never grows. The notice strip and the hero footline are gone.
 
 ## Traps that have bitten this codebase
 
@@ -158,9 +168,11 @@ figure or copy written before that assumed the old schedule and is wrong.
 
 ## Type
 
-Two families (Newsroom type, since 2026-10-09): Newsreader for headlines and reading, with
-its real italic for emphasis (headlines are regular weight, sentence case, set by size);
-Hanken Grotesk for figures, labels and controls, roman only, tabular figures. **Italic only in
+Two families: Newsreader for headlines and reading, with its real italic for emphasis
+(headlines are regular weight, sentence case, set by size); Inter for figures, labels and
+controls, roman only, tabular figures. Inter replaced Hanken Grotesk on 2026-11-12: the owner
+found Hanken's numerals did not read well as numbers. Its digits were measured tabular with a
+narrow comma before it went in; measure any replacement the same way. **Italic only in
 the serif**: the sans loads no italic, so `i`/`em` inside sans notes and table cells are set
 roman, and the suite fails on a third family or on any italic in the sans. Buttons do not
 inherit the page font: give every button a font-family (the model pills rendered in Arial

@@ -784,3 +784,20 @@ proposed with this direction and is not built: opening the folds is the current 
   not-peer-reviewed disclosure stays visible at the same volume as before.
 - **The other side** is one row per objection on a wide screen: the question, its one-line
   answer, the twist.
+
+## Same day, third pass
+
+- **Figures in Inter.** "I don't really like the fonts we're using for the numbers. They just
+  don't read well as numbers." Inter replaces Hanken Grotesk for everything operated or scanned.
+  Still two families. Measured before adopting: every digit the same width at 40px, comma about
+  four tenths of a digit. The letter's button row breakpoint moved from 663px to 720px for it.
+- **Hero.** The notice strip and the footline are gone, the button's arrow points down, and
+  "What changed" is a flyout to the right of the ZIP (under it on a phone) that opens over the
+  page. Under 60 words.
+- **Chips, not sentences.** Each step's basis line became a one-chip tag; the story's closing
+  note is one sentence with one link.
+- **Glyphs on the folds.** Small live drawings in place of sub-lines: household dots, the rise's
+  three years, the waterfall's columns, this household's cliff curve, where six models land,
+  the three-way comparison.
+- **Section 06** shows only the questions; the one-line answer leads each fold when opened.
+- **Widths.** The model buttons, the folds and the text in a step share one 34rem column.

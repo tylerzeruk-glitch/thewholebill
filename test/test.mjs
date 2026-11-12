@@ -162,7 +162,7 @@ test('plan year: every dated figure belongs to the same year', async () => {
 
   const index = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
   const meth = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
-  ok(`the notice strip says plan year ${W.YEAR}`, index.includes(`Plan year ${W.YEAR} &middot;`));
+  ok('the notice strip is gone from the page', !/pn-strip/.test(index));   // removed 2026-11-12; the plan year rides the notes, checked below
   const named = [...(index + meth).matchAll(/(?:CMS|IRS|published) (?:<span data-py>)?(\d{4})(?:<\/span>)? (?:plan files|applicable-percentage|federal plan files)/g)].map(m => +m[1]);
   ok(`every "CMS/IRS <year>" in the copy is ${W.YEAR}`, named.length >= 2 && named.every(y => y === W.YEAR), named.join(', '));
 
@@ -1170,7 +1170,7 @@ test('rise: three years on one scale, each bar its own value', async b => {
          okc.map(total).map(v => v.toFixed(1)).join('/') + ' of ' + okc[0].H);
       ok(`${w}px ${route}: nothing overflows its column`, Math.max(...r.plots.flatMap(x => x.over)) <= 0.5, r.plots.map(x => x.over.join(',')).join(' | '));
       ok(`${w}px ${route}: labels stay clear of the intro`, okc.every(x => x.labTop >= r.introBottom + 8), `${okc.map(x => x.labTop.toFixed(0)).join('/')} vs ${r.introBottom.toFixed(0)}`);
-      ok(`${w}px ${route}: two key entries, figures in the sans`, r.key === 2 && /Hanken/.test(r.font), r.font);
+      ok(`${w}px ${route}: two key entries, figures in the sans`, r.key === 2 && /^Inter/.test(r.font), r.font);
     }
     await p.close();
   }
@@ -1333,7 +1333,8 @@ test('objections: every footnote marker has its anchor', async b => {
     const cards = document.querySelectorAll('#objections .objlist > .obj');
     if (cards.length !== 5) out.push('expected five objections, found ' + cards.length);
     cards.forEach(c=>{
-      if (!c.querySelector('summary .quote') || !c.querySelector('summary .obj-a')) out.push('an objection without its question or one-line answer');
+      if (!c.querySelector('summary .quote') || !c.querySelector('.fold-in > .obj-a')) out.push('an objection without its question or its one-line answer');
+      if (c.querySelector('summary .obj-a')) out.push('the short answer belongs inside the fold, not on the shut row');
       const fn=c.querySelector('.fn'), body=c.querySelector('p.body');
       if(!fn) return;
       if(!fn.querySelector('.fnm')) out.push('note without marker: '+fn.textContent.slice(0,30));
@@ -2833,7 +2834,7 @@ test('updates: the log renders the hero box, its own page and the feed', async b
   const want = sorted.filter(e => e.pin).concat(sorted.filter(e => !e.pin)).slice(0, 3).sort((a, b2) => b2.date.localeCompare(a.date)).map(e => e.id);
   const p = await page(b, 1280, 900);
   const box = await p.evaluate(() => ({
-    k: document.querySelector('#foldChanged .fold-k').textContent,
+    k: document.querySelector('#changed .fly-k').textContent,
     ids: [...document.querySelectorAll('.dateline .upd-when')].map(a => a.getAttribute('href')),
     more: (document.querySelector('.dateline .more') || {}).getAttribute?.('href'),
     nav: [...document.querySelectorAll('.nav a')].map(a => a.getAttribute('href')),
@@ -2968,7 +2969,7 @@ test('footer: copyright on every document, contact underline on the text', async
  * reading, Newsreader roman for reading. Newsreader loads without an italic, so any
  * italic left in the page would be a synthesized slant; none may render. */
 /* Newsroom type (2026-10): Newsreader for headlines and reading, with its real italic;
- * Hanken Grotesk for figures, labels and controls, roman only. So an italic is fine in
+ * Inter for figures, labels and controls, roman only (Hanken Grotesk until 2026-11-12). So an italic is fine in
  * the serif and a synthesized one in the sans. Buttons do not inherit the page font,
  * which is how the model pills once rendered in Arial: a third family fails here. */
 test('newsroom type: two font families, italic only where a real italic loads', async b => {
@@ -2987,10 +2988,10 @@ test('newsroom type: two font families, italic only where a real italic loads', 
     return { link, used: [...used], italic: italic.length, fake: fake.slice(0, 5),
              loaded: [...document.fonts].filter(x => x.status === 'loaded').map(x => x.family.replace(/['"]/g, '') + ' ' + x.style) };
   });
-  ok('one stylesheet link: Newsreader with its italic, Hanken Grotesk roman, nothing else',
-     /family=Newsreader:ital,opsz,wght@0,6\.\.72,400\.\.500;1,6\.\.72,400\.\.500/.test(f.link) && /family=Hanken\+Grotesk:wght@400\.\.500/.test(f.link)
+  ok('one stylesheet link: Newsreader with its italic, Inter roman, nothing else',
+     /family=Newsreader:ital,opsz,wght@0,6\.\.72,400\.\.500;1,6\.\.72,400\.\.500/.test(f.link) && /family=Inter:wght@400\.\.500/.test(f.link)
      && (f.link.match(/family=/g) || []).length === 2, f.link);
-  ok('rendered text uses only the two families', f.used.every(x => x === 'Hanken Grotesk' || x === 'Newsreader'), f.used.join(', '));
+  ok('rendered text uses only the two families', f.used.every(x => x === 'Inter' || x === 'Newsreader'), f.used.join(', '));
   ok('the italics on the page are the serif\'s own', f.italic > 0 && f.loaded.some(x => x === 'Newsreader italic'), f.italic + ' italic runs; ' + [...new Set(f.loaded)].join(', '));
   ok('nothing in the sans is set in italic (it would be synthesized)', f.fake.length === 0, f.fake.join(' | '));
   await p.close();
@@ -3336,27 +3337,44 @@ test('views: one switch between step by step and all on one page', async b => {
   }
 });
 
-/* The hero. The owner's read of the first build: still busy. It is now one
- * question, one sentence, one field, the place being priced, and the dated log
- * on a single line. The five sample cities only appear when a ZIP fails. */
-test('hero: one question, one field, and the log on one line', async b => {
+/* The hero. The owner's read, twice: still busy. It is now one question, one
+ * sentence, one field, the place being priced, and the dated log as a flyout
+ * beside the ZIP that opens over the page: open or shut, the hero is the same
+ * height. No banner above it, no footline under it, and the five sample cities
+ * only appear when a ZIP fails. */
+test('hero: one question, one field, and the log in a flyout that adds no height', async b => {
   for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
     const p = await page(b, w, h, m, 'index.html', true);
-    const r = await p.evaluate(() => { const hero = document.querySelector('main > section.paper'), f = document.getElementById('foldChanged');
-      return { bottom: hero.getBoundingClientRect().bottom, vh: innerHeight, words: hero.innerText.split(/\s+/).filter(Boolean).length,
-        lede: document.querySelector('.lede').textContent, chips: document.querySelectorAll('#areapick button').length, scope: document.getElementById('scope').textContent,
-        open: f.open, k: f.querySelector('.fold-k').textContent, s: f.querySelector('.fold-s').textContent, entries: f.querySelectorAll('.upd-when').length,
-        zip: document.getElementById('zip').getBoundingClientRect().bottom }; });
-    ok(`${w}px: the whole hero fits the first screen`, r.bottom <= r.vh + 1 && r.zip < r.vh * 0.75, `${r.bottom.toFixed(0)} of ${r.vh}`);
-    ok(`${w}px: under 70 words, where it had 174`, r.words < 70, r.words + ' words');
+    const read = () => p.evaluate(() => { const hero = document.querySelector('main > section.paper'), f = document.getElementById('changed'), bd = f.querySelector('.fly-bd'), r = bd.getBoundingClientRect();
+      const zf = document.querySelector('.zipfield').getBoundingClientRect(), go = document.getElementById('zipGo').getBoundingClientRect(), sm = f.querySelector('summary').getBoundingClientRect();
+      return { h: hero.offsetHeight, bottom: hero.getBoundingClientRect().bottom, vh: innerHeight, vw: innerWidth, words: hero.innerText.split(/\s+/).filter(Boolean).length,
+        first: document.querySelector('main').firstElementChild.tagName, go: document.getElementById('zipGo').textContent,
+        chips: document.querySelectorAll('#areapick button').length, scope: document.getElementById('scope').textContent,
+        open: f.open, k: f.querySelector('.fly-k').textContent, d: f.querySelector('.fly-d').textContent, entries: f.querySelectorAll('.upd-when').length,
+        pos: getComputedStyle(bd).position, fly: [r.left, r.right, r.top, r.bottom], vis: bd.checkVisibility(),
+        zip: [zf.width, go.right, sm.height, sm.left, zf.top, sm.top] }; });
+    const r = await read();
+    ok(`${w}px: nothing above the masthead, and the hero ends on the first screen`, r.first === 'SECTION' && r.bottom <= r.vh * 0.8, `${r.first}, ${r.bottom.toFixed(0)} of ${r.vh}`);
+    ok(`${w}px: under 60 words, where it had 174`, r.words < 60, r.words + ' words');
+    ok(`${w}px: the button points down the page`, /Show me\s*↓/.test(r.go), r.go);
+    ok(`${w}px: the ZIP field keeps its width and the button stays on screen`, r.zip[0] >= 120 && r.zip[1] <= r.vw - 15, JSON.stringify(r.zip.map(x => Math.round(x))));
     ok(`${w}px: the place and its source, and no city buttons until they are needed`, /^Showing Dallas County, Texas, priced from/.test(r.scope) && r.chips === 0, r.scope);
-    ok(`${w}px: the log is one shut line that carries its newest date`, !r.open && r.k === 'What changed' && /^Latest: \d{1,2} [A-Z][a-z]+ \d{4}\.$/.test(r.s) && r.entries === 3, r.s);
+    ok(`${w}px: the log is a shut 44px control carrying its newest date`, !r.open && !r.vis && r.k === 'What changed' && /^\d{1,2} [A-Z][a-z]+ \d{4}$/.test(r.d) && r.entries === 3 && r.zip[2] >= 44, r.d);
+    ok(`${w}px: ${m ? 'under the ZIP on a phone' : 'to the right of the ZIP on a desktop'}`, m ? r.zip[5] > r.zip[4] + 40 : (r.zip[3] > r.zip[1] + 100 && Math.abs(r.zip[5] - r.zip[4]) < 30), JSON.stringify(r.zip.map(x => Math.round(x))));
+    await p.locator('#changed > summary').click(); await p.waitForTimeout(250);
+    const o = await read();
+    ok(`${w}px: open, it floats over the page, on screen, and the hero has not grown`, o.open && o.vis && o.pos === 'absolute' && o.h === r.h && o.fly[0] >= 0 && o.fly[1] <= o.vw + 0.5, JSON.stringify([o.h, r.h, o.fly.map(x => Math.round(x))]));
+    ok(`${w}px: it sits above the results bar it overlaps`, await p.evaluate(() => { const bd = document.querySelector('#changed .fly-bd').getBoundingClientRect(); const e = document.elementFromPoint(bd.left + bd.width / 2, Math.min(innerHeight - 4, bd.bottom - 6)); return !!e && !!e.closest('#changed'); }));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(150);
+    ok(`${w}px: Escape shuts it`, !(await read()).open);
+    await p.locator('#changed > summary').click(); await p.waitForTimeout(150);
+    await p.mouse.click(8, h - 8); await p.waitForTimeout(150);
+    ok(`${w}px: so does a click anywhere else`, !(await read()).open);
     await p.locator('#zip').fill('00000'); await p.locator('#zipGo').click(); await p.waitForTimeout(250);
     ok(`${w}px: a ZIP we cannot price brings the sample cities back`, await p.evaluate(() => document.querySelectorAll('#areapick button[data-z]').length === 5 && /try a city/.test(document.getElementById('scope').textContent)));
     await p.close();
   }
 });
-
 test('folds: with motion on, folds and sheets move over time and end clean', async b => {
   const p = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
   p.on('pageerror', e => ok('no page errors', false, e.message));
@@ -3469,6 +3487,37 @@ test('story: the universal step follows the savings sign and the unit', async b 
   ok('the step follows the label when the sign flips', pays ? (/would pay \$[\d,]+ more/.test(r.say) && r.gapK === 'more than today') : /stays with your household/.test(r.say), JSON.stringify([r.lbl, r.gapK, r.say]));
   await p.locator('#unit').click(); await p.waitForTimeout(200);
   ok('month view: the sentence says a month', /a month/.test((await read()).say), (await read()).say);
+  await p.close();
+});
+
+/* The fold glyphs are drawn from the page's own figures. They are icons, but an
+ * icon of a chart that disagreed with the chart would be a small lie, so the two
+ * that carry proportion are measured against the numbers. */
+test('glyphs: every story fold wears a drawing made from its own figures', async b => {
+  const p = await page(b, 1280, 800, false, 'index.html', true);
+  const read = () => p.evaluate(() => {
+    const g = id => document.getElementById(id), n = sel => [...document.querySelectorAll(sel)];
+    const num = t => parseFloat(t.replace(/[^0-9.]/g, ''));
+    const cmp = n('#gCmp rect').map(r => parseFloat(r.getAttribute('width')));
+    const pts = (g('gSlot').querySelector('polyline') || { getAttribute: () => '' }).getAttribute('points').split(' ').filter(Boolean).map(q => q.split(',').map(Number));
+    return { all: ['gHh', 'gWhy', 'gRise', 'gWf', 'gSlot', 'gProv', 'gCmp', 'gLives'].every(id => g(id) && g(id).querySelector('svg') && g(id).getAttribute('aria-hidden') === 'true' && g(id).getBoundingClientRect().width === 56),
+      people: n('#gHh circle').length, small: n('#gHh circle').filter(c => +c.getAttribute('r') < 4).length,
+      cmp, figs: ['emp.total', 'mkt.household', 'uni.total'].map(k => num(document.querySelector('.sticky [data-fig="' + k + '"]').textContent)),
+      wfCols: new Set(n('#gWf rect').map(r => r.getAttribute('x'))).size, parts: document.querySelectorAll('#wf .wcol').length,
+      jump: pts.length ? Math.max(...pts.slice(1).map((q, i) => pts[i][1] - q[1])) : 0, npts: pts.length,
+      models: n('#gProv circle').length, chosen: n('#gProv circle').filter(c => +c.getAttribute('r') > 4).length };
+  });
+  let r = await read();
+  ok('all eight are there, 56px wide and hidden from assistive tech', r.all);
+  ok('the household glyph has a dot a person, the children smaller', r.people === 4 && r.small === 2, `${r.people} dots, ${r.small} small`);
+  ok('the comparison glyph\'s bars are in the proportion of the three figures', Math.abs(r.cmp[1] / r.cmp[0] - r.figs[1] / r.figs[0]) < 0.01 && Math.abs(r.cmp[2] / r.cmp[0] - r.figs[2] / r.figs[0]) < 0.01, JSON.stringify([r.cmp, r.figs]));
+  ok('the arithmetic glyph has the waterfall\'s columns', r.wfCols === r.parts, `${r.wfCols} vs ${r.parts}`);
+  ok('the cliff glyph is this household\'s curve, with the cliff in it', r.npts > 20 && r.jump > 6, `${r.npts} points, biggest step ${r.jump.toFixed(1)}px`);
+  ok('the estimate glyph marks six models and one choice', r.models === 6 && r.chosen === 1);
+  await p.evaluate(() => { const f = document.getElementById('foldHh'); f.open = true; document.getElementById('sizeUp').click(); document.querySelector('#route button[data-r="none"]').click(); f.open = false; });
+  await p.waitForTimeout(250);
+  r = await read();
+  ok('they follow the household and the route', r.people === 5 && r.npts === 0 && r.wfCols === r.parts, JSON.stringify([r.people, r.npts, r.wfCols, r.parts]));
   await p.close();
 });
 
