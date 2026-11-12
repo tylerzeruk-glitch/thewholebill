@@ -20,7 +20,7 @@ const ok = (name, cond, detail='') => {
 // doc picks which built document loads: the calculator by default, the
 // artifact build (which lives OUTSIDE dist so it never deploys) for
 // hash-router coverage, /methodology for its own page.
-const page = async (browser, w, h, mobile=false, doc='index.html') => {
+const page = async (browser, w, h, mobile=false, doc='index.html', shut=false) => {
   // reducedMotion: the suite measures settled values and geometry, not animation frames.
   // The motion itself has its own test, which opts back in.
   const p = await browser.newPage({ viewport:{width:w,height:h}, deviceScaleFactor:1, isMobile:mobile, hasTouch:mobile, reducedMotion:'reduce' });
@@ -28,6 +28,14 @@ const page = async (browser, w, h, mobile=false, doc='index.html') => {
   p.on('console', m => { if (m.type()==='error' && !/TUNNEL|ERR_|net::/.test(m.text())) ok('no console errors', false, m.text()); });
   const base = doc === 'artifact.html' ? '../preview/' : '../dist/';
   await p.goto(pathToFileURL(resolve(HERE, base + doc)).href); await p.waitForTimeout(1200);
+  // The charts live in folds now. Most checks measure what is inside them, so the
+  // page opens with every fold open and the letter unfolded; the checks about the
+  // folds and the story themselves ask for the page as a reader first sees it.
+  if (!shut) await p.evaluate(() => {
+    document.querySelectorAll('details.fold').forEach(d => { d.open = true; });
+    const bd = document.getElementById('letterBd'); if (bd) bd.classList.remove('clamp');
+    window.dispatchEvent(new Event('resize'));
+  }).then(() => p.waitForTimeout(350));
   return p;
 };
 // The age boxes: the stepper sets the count, then each box takes its age.
@@ -337,63 +345,6 @@ test('layout: every section keeps its gutter', async b => {
   }
 });
 
-/* The narrative's two bars are a comparison, so their geometry has to carry the
- * true ratio in BOTH dimensions. They previously did neither: unequal figure
- * widths left the tracks 529px and 483px, so length read 3.56x against a true
- * 3.91x, while heights of 52px and 64px made area read 4.38x. Understated one
- * way, overstated the other. */
-test('narrative: the two bars encode their values truthfully', async b => {
-  for (const [w,h,m] of [[1440,900,false],[900,900,false],[390,844,true]]) {
-    const p = await page(b,w,h,m);
-    const r = await p.evaluate(()=>{
-      const rows=[...document.querySelectorAll('.cmp .cmp-row')].map(row=>{
-        const t=row.querySelector('.track'), f=[...t.children], tb=t.getBoundingClientRect();
-        return { trackW:tb.width, h:Math.max(...f.map(x=>x.getBoundingClientRect().height)),
-                 filled:f.reduce((a,x)=>a+x.getBoundingClientRect().width,0),
-                 value:+row.querySelector('.num').textContent.replace(/[^0-9]/g,'') };
-      });
-      const [a,b2]=rows;
-      return { trackDelta:Math.abs(a.trackW-b2.trackW), heightDelta:Math.abs(a.h-b2.h),
-               trueRatio:b2.value/a.value, lengthRatio:b2.filled/a.filled };
-    });
-    ok(`${w}px: both bars share one height`, r.heightDelta < 0.5, `Δ${r.heightDelta.toFixed(1)}px`);
-    ok(`${w}px: both bars share one baseline`, r.trackDelta < 0.5, `Δ${r.trackDelta.toFixed(1)}px`);
-    ok(`${w}px: bar length matches the value ratio`, Math.abs(r.lengthRatio - r.trueRatio) < 0.05,
-       `drawn ${r.lengthRatio.toFixed(2)}x vs true ${r.trueRatio.toFixed(2)}x`);
-    await p.close();
-  }
-});
-
-/* The one-row bar has very little slack between its 900px breakpoint and ~1100px.
- * It fit on macOS and overflowed on Linux, where the same labels set a few pixels
- * wider -- so this asserts the row absorbs the squeeze at every width rather than
- * pushing the Year/Month switch out through overflow-x. */
-/* Each figure is parked at the end of its own bar rather than in a right-hand
- * column, so the short bar's number is not stranded across the page from the mark
- * it labels. The number is positioned by percentage against the same box the fill
- * uses, so this asserts the two edges actually coincide at every width. */
-test('narrative: each figure sits at the end of its own bar', async b => {
-  for (const [w,h,m] of [[1440,900,false],[900,900,false],[390,844,true]]) {
-    const p = await page(b,w,h,m);
-    const r = await p.evaluate(()=>[...document.querySelectorAll('.cmp .cmp-row')].map(row=>{
-      const fills=[...row.querySelector('.track').children];
-      const end=Math.max(...fills.map(f=>f.getBoundingClientRect().right));
-      const n=row.querySelector('.num').getBoundingClientRect();
-      return { gap:n.left-end, right:n.right };
-    }));
-    const [a,b2]=r;
-    ok(`${w}px: small figure follows its bar`, Math.abs(a.gap-16) < 1, `${a.gap.toFixed(1)}px from the bar end`);
-    ok(`${w}px: total figure follows its bar`, Math.abs(b2.gap-16) < 1, `${b2.gap.toFixed(1)}px from the bar end`);
-    await p.close();
-  }
-});
-
-/* Notes take the width of what they annotate. These carried a 56ch measure cap
- * for a day (the readability pass); a narrow ragged column under a full-width
- * chart read as a layout accident, and one-to-three-line captions do not pay
- * the long-measure penalty paragraphs do. Deliberate reversal, 2026-08-31 --
- * this asserts the six notes from that comment round actually span their
- * containers, so a reintroduced cap fails loudly rather than quietly. */
 test('readability: chart notes span the width of what they annotate', async b => {
   for (const w of [1440,1100]) {
     const p = await page(b,w,900);
@@ -588,9 +539,10 @@ test('narrative: the cliff precedes the turn, and the turn wears teal', async b 
     const eyebrows=[...document.querySelectorAll('.eyebrow')]
       .filter(e=>e.offsetParent !== null)
       .map(e=>e.textContent.trim()).filter(t=>/^\d\d/.test(t));
-    const cliffY=document.getElementById('cliff').offsetTop;
-    const cmpY=document.getElementById('pills').closest('section').offsetTop;
-    const em=[...document.querySelectorAll('h2 em')].find(e=>/Another way/.test(e.textContent));
+    const top = e => e.getBoundingClientRect().top + scrollY;
+    const cliffY=top(document.getElementById('foldSlot'));
+    const cmpY=top(document.getElementById('pills'));
+    const em=document.querySelector('.sstep[data-step="3"] .snum');
     return { seq: eyebrows.map(t=>t.slice(0,2)).join(','),
              cliffFirst: cliffY < cmpY,
              teal: em ? getComputedStyle(em).color : 'missing' };
@@ -598,7 +550,7 @@ test('narrative: the cliff precedes the turn, and the turn wears teal', async b 
   ok('visible sections number 01-07 in page order', r.seq === '01,02,03,04,05,06,07', r.seq);
   // the 08 eyebrow lives on /methodology now; the routing test asserts it
   ok('the cliff sits before the comparison', r.cliffFirst);
-  ok('"Another way" wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
+  ok('the universal figure wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
   await p.close();
 });
 
@@ -629,7 +581,8 @@ test('slot 03: the cliff for the covered, the bad year for the uninsured', async
   await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(300);
   r = await view();
   ok('uninsured: the bad year replaces the cliff', !r.cliff && r.bad);
-  ok('and keeps slot number 03', r.eyebrows.join() === '03 · The bad year', r.eyebrows.join());
+  ok('and the slot names itself for it, on the fold and inside', r.eyebrows.join() === 'The bad year'
+     && await p.evaluate(()=>document.getElementById('slotK').textContent === 'The bad year' && /Nothing in law caps/.test(document.getElementById('slotS').textContent)), r.eyebrows.join());
   const txt = await p.evaluate(()=>document.getElementById('badYear').innerText);
   ok('the modeled figure is labelled where it appears', /57,000/.test(txt) && /modeled/.test(txt));
   ok('the statutory ceiling contrast is stated', /\$12,000/.test(txt) && /No limit/.test(txt));
@@ -686,19 +639,20 @@ test('models: six pills spanning the published spectrum', async b => {
  * columns, every label inside its pill -- and below 900px (measured: the
  * longest role line needs ~106px and a 901px viewport gives ~112px per pill)
  * the native select takes over and drives the same state. */
-test('models: equal pills in one row, a picker on phones', async b => {
+test('models: six equal pills in two rows of three, a picker on phones', async b => {
   for (const w of [1440, 1100, 901]) {
     const p = await page(b,w,900);
     const r = await p.evaluate(()=>{
       const bs=[...document.querySelectorAll('#pills button')];
       const ws=bs.map(x=>x.getBoundingClientRect().width);
       return { rows:[...new Set(bs.map(x=>Math.round(x.getBoundingClientRect().top)))].length,
+               cols:[...new Set(bs.map(x=>Math.round(x.getBoundingClientRect().left)))].length,
                spread: Math.max(...ws)-Math.min(...ws),
                clipped: bs.filter(x=>[...x.children].some(c=>c.scrollWidth > x.clientWidth-16)).length,
                pick: getComputedStyle(document.getElementById('modelPick')).display };
     });
-    ok(`${w}px: six equal pills on one row`, r.rows === 1 && r.spread < 1.5,
-       `${r.rows} rows, ${r.spread.toFixed(1)}px spread`);
+    ok(`${w}px: six equal pills, three to a row`, r.rows === 2 && r.cols === 3 && r.spread < 1.5,
+       `${r.rows} rows, ${r.cols} columns, ${r.spread.toFixed(1)}px spread`);
     ok(`${w}px: every label fits its pill`, r.clipped === 0, `${r.clipped} clipped`);
     ok(`${w}px: no picker at this width`, r.pick === 'none');
     await p.close();
@@ -1402,7 +1356,10 @@ test('objections: every footnote marker has its anchor', async b => {
   const p = await page(b,1440,900);
   const bad = await p.evaluate(()=>{
     const out=[];
-    document.querySelectorAll('#objections .grid2 > .card-p').forEach(c=>{
+    const cards = document.querySelectorAll('#objections .objlist > .obj');
+    if (cards.length !== 5) out.push('expected five objections, found ' + cards.length);
+    cards.forEach(c=>{
+      if (!c.querySelector('summary .quote') || !c.querySelector('summary .obj-a')) out.push('an objection without its question or one-line answer');
       const fn=c.querySelector('.fn'), body=c.querySelector('p.body');
       if(!fn) return;
       if(!fn.querySelector('.fnm')) out.push('note without marker: '+fn.textContent.slice(0,30));
@@ -1706,8 +1663,8 @@ test('letter: built from the route, honest about the comparison', async b => {
     return cs.position === 'relative' && cs.zIndex === '1';
   }));
   ok('a neighbour clears the ring', await p.evaluate(()=>{
-    const rows = [...document.querySelectorAll('#senRows .rec-hit')].map(x=>x.getBoundingClientRect());
-    return rows.length === 2 && rows[1].top - rows[0].bottom >= 2;
+    const rows = [...document.querySelectorAll('#recips .rec-hit')].map(x=>x.getBoundingClientRect());
+    return rows.length === 3 && rows[1].left - rows[0].right >= 4 && rows[2].left - rows[1].right >= 4;
   }));
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
   ok('the self-employed line goes statewide for a senator',
@@ -1888,14 +1845,14 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
       n: x.querySelector('.sen-n').textContent,
       s: x.querySelector('.sen-s').textContent,
       src: (x.querySelector('img').getAttribute('src')||''),
-      oneLine: x.getBoundingClientRect().height < 58 })),   // 42px portrait + the hit's 6px padding each side
+      kind: x.querySelector('.rtile-k').textContent })),
     bill: document.getElementById('senBillLbl').textContent,
     bio: REPS.senate.TX.map(m=>m.b) }));
   ok('two senators for the state', !sen.hidden && sen.rows.length === 2, JSON.stringify(sen.rows.map(x=>x.n)));
   ok('the block names the companion bill', sen.bill === 'S. 1506', sen.bill);
-  ok('each carries a position', sen.rows.every(x=>/^(Cosponsor|Not yet)$/.test(x.s)), sen.rows.map(x=>x.s).join('/'));
+  ok('each carries a position on the Senate bill', sen.rows.every(x=>/^(Cosponsor of S\. 1506|Not yet a cosponsor)$/.test(x.s)), sen.rows.map(x=>x.s).join('/'));
   ok('portraits keyed by bioguide', sen.rows.every((x,i)=>x.src.includes(sen.bio[i])), sen.rows.map(x=>x.src.slice(-16)).join(' '));
-  ok('rows stay compact', sen.rows.every(x=>x.oneLine));
+  ok('each tile says whose senator it is', sen.rows.every(x=>x.kind === 'Your senator'));
 
   await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   ok('a split hides the senators until the pick', await p.evaluate(()=>document.getElementById('senBlock').hidden));
@@ -2084,7 +2041,8 @@ test('rep card: hidden blocks are actually hidden, across ZIP changes', async b 
   await p.locator('#zip').fill('33313'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
   r = await box('repPick'); s = await box('senBlock');
   ok('next ZIP: the stale chooser is gone', r.hidden && r.h === 0, JSON.stringify(r));
-  ok('next ZIP: the senators are Florida\'s', !s.hidden && /Scott|Moody/.test(s.text), s.text);
+  const fl = await p.evaluate(() => document.getElementById('senRows').textContent);
+  ok('next ZIP: the senators are Florida\'s', !s.hidden && /Scott|Moody/.test(fl), fl);
   await p.close();
 });
 
@@ -2561,7 +2519,7 @@ test('accessibility: reduced motion, whole-page print, sticky at 1024, structure
   await p.emulateMedia({ reducedMotion: 'no-preference' });
   // A8: Cmd+P on the whole page prints the ink sections dark on white
   await p.emulateMedia({ media: 'print' }); await p.waitForTimeout(100);
-  const pr = await p.evaluate(() => { const s = document.getElementById('cliff'), h = s.querySelector('h2'); const cs = getComputedStyle(s);
+  const pr = await p.evaluate(() => { const s = document.getElementById('story'), h = s.querySelector('h2'); const cs = getComputedStyle(s);
     return { bg: cs.backgroundColor, color: getComputedStyle(h).color, letter: document.body.classList.contains('print-letter') }; });
   ok('ink sections print dark on white', !pr.letter && lum(pr.bg) > 0.9 && lum(pr.color) < 0.2, JSON.stringify(pr));
   await p.emulateMedia({ media: 'screen' });
@@ -2797,7 +2755,10 @@ test('hygiene: the minor list from the launch review', async b => {
   const q = await page(b, 390, 844, true);
   await q.locator('#zip').fill('10001'); await q.locator('#zipGo').click(); await q.waitForTimeout(400);
   const sen = await q.evaluate(() => [...document.querySelectorAll('.sen-n')].map(e => ({ t: e.textContent, over: e.scrollWidth > e.clientWidth + 1 })));
-  ok('senator names wrap instead of ellipsizing on a phone', sen.length === 2 && sen.every(s => !s.over), JSON.stringify(sen));
+  ok('senator names wrap instead of ellipsizing on a phone', sen.length === 0, JSON.stringify(sen));   // a split ZIP shows no senators until the district is picked
+  await q.locator('#repPickBtns button[data-d="NY-12"]').click(); await q.waitForTimeout(400);
+  const sen2 = await q.evaluate(() => [...document.querySelectorAll('.sen-n')].map(e => ({ t: e.textContent, over: e.scrollWidth > e.clientWidth + 1 })));
+  ok('and once picked, both names show in full', sen2.length === 2 && sen2.every(s => !s.over), JSON.stringify(sen2));
   const wl = await q.evaluate(() => Math.min(...[...document.querySelectorAll('#wf .wlab')].map(e => parseFloat(getComputedStyle(e).fontSize))));
   ok('waterfall labels are at least 10px on a phone', wl >= 10, wl + 'px');
   await q.close();
@@ -2943,7 +2904,7 @@ test('seo: titles, structured data, robots, llms.txt and the markdown methodolog
   ok('index carries WebSite, WebApplication and FAQPage', li.length === 1 && JSON.stringify(li[0]['@graph'].map(x => x['@type'])) === '["WebSite","WebApplication","FAQPage"]');
   const faq = li[0]['@graph'][2].mainEntity;
   const src = rd('src/page.html');
-  const obj = src.slice(src.indexOf('id="objections"')); const cards = (obj.slice(0, obj.indexOf('</section>')).match(/<div class="quote">/g) || []).length;
+  const obj = src.slice(src.indexOf('id="objections"')); const cards = (obj.slice(0, obj.indexOf('</section>')).match(/<span class="quote">/g) || []).length;
   ok('the FAQ block has one question per objection card, in the cards\' own words', faq.length === cards && faq.every(q => q.name.length > 10 && q.acceptedAnswer.text.length > 80 && !/<|&[a-z]+;/.test(q.name + q.acceptedAnswer.text)), faq.length + ' of ' + cards);
   ok('no dashes in the structured data', ![index, meth, upd].some(h => /[–—]/.test((h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || ['', ''])[1])));
   ok('methodology and updates carry a WebPage that names the site and the subject', [lm, lu].every(l => l.length === 1 && l[0]['@type'] === 'WebPage' && l[0].isPartOf.name === 'The Whole Bill' && l[0].about.some(a => /Medicare for All/.test(a.name))));
@@ -2993,8 +2954,8 @@ test('other coverage: the pointer, the objection and the methodology row agree',
   const p = await page(b, 1280, 900);
   const r = await p.evaluate(() => {
     const cov = document.getElementById('otherCov'), a = cov.querySelector('a.term');
-    const cards = [...document.querySelectorAll('#objections .card-p')];
-    const grid = document.querySelector('#objections .grid2').getBoundingClientRect();
+    const cards = [...document.querySelectorAll('#objections .obj')];
+    const grid = document.querySelector('#objections .objlist').getBoundingClientRect();
     const last = cards[cards.length - 1].getBoundingClientRect();
     return { covText: cov.textContent, href: a.getAttribute('href'), n: cards.length,
       lastQuote: cards[cards.length - 1].querySelector('.quote').textContent, lastSpans: Math.abs(last.width - grid.width) < 2,
@@ -3058,39 +3019,11 @@ test('newsroom type: two font families, italic only where a real italic loads', 
   await p.close();
 });
 
-/* The stat bands are data-figs like any other, so the app fills them. The universal
- * band's sentence must follow the sign of the savings, as the label beside the figure
- * does, or it would tell a household that pays more that it keeps money. */
-test('public notice: the stat bands carry the live figures and follow the savings sign', async b => {
-  const p = await page(b, 1280, 900);
-  const read = () => p.evaluate(() => ({
-    hidden: document.querySelector('.band-stat [data-fig="emp.invisible"]').textContent,
-    callout: document.querySelector('.callout [data-fig="emp.invisible"]').textContent,
-    band: document.querySelector('.band-stat.teal [data-fig="uni.savings"]').textContent,
-    save: document.getElementById('save').textContent,
-    lbl: document.getElementById('saveLbl').textContent,
-    k: document.getElementById('bandSaveK').textContent,
-    say: document.getElementById('bandSaveSay').textContent }));
-  let r = await read();
-  ok('the paystub band matches the callout', r.hidden === r.callout && /^\$\d/.test(r.hidden), JSON.stringify([r.hidden, r.callout]));
-  ok('the universal band matches the savings panel', r.band === r.save, JSON.stringify([r.band, r.save]));
-  ok('keeping money: the band says so', /keep/.test(r.lbl) && /back in your household/.test(r.say) && !/more/.test(r.k), r.say);
-  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
-  r = await read();
-  const pays = /pay/.test(r.lbl);
-  ok('the band follows the label when the sign flips', pays ? (/more for this household/.test(r.say) && /more/.test(r.k)) : /back in your household/.test(r.say), JSON.stringify([r.lbl, r.k, r.say]));
-  await p.locator('#unit').click(); await p.waitForTimeout(200);
-  ok('month view: the band sentence says a month', /^a month/.test((await read()).say), (await read()).say);
-  await p.close();
-});
-
-/* Motion: figures count up and bars wipe in. It may decorate, never decide: once it
- * settles, every figure must read exactly what the reduced-motion page reads, the
- * letter must be untouched, and an unrevealed figure must hold its real value. */
 test('public notice: motion settles on the same figures and leaves the letter alone', async b => {
   const still = await page(b, 1280, 900);
   const grab = q => q.evaluate(() => ({ figs: [...document.querySelectorAll('[data-fig]')].map(e => e.textContent),
                                          letter: document.getElementById('letterBd').innerText }));
+  await still.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)); await still.waitForTimeout(300);
   const want = await grab(still);
   ok('reduced motion: no motion class', !(await still.evaluate(() => document.documentElement.classList.contains('motion'))));
   await still.close();
@@ -3100,7 +3033,12 @@ test('public notice: motion settles on the same figures and leaves the letter al
   ok('motion on: the class is set', await q.evaluate(() => document.documentElement.classList.contains('motion')));
   const early = await q.evaluate(() => document.querySelector('.save .v').textContent);
   ok('a figure below the fold holds its real value before it is revealed', /^\$[1-9]/.test(early), early);
-  for (let y = 0; y < 12000; y += 600) { await q.evaluate(y => window.scrollTo(0, y), y); await q.waitForTimeout(120); }
+  // the same state the settled page was read in: folds open, letter unfolded, bottom of the page
+  await q.evaluate(() => { document.querySelectorAll('details.fold').forEach(d => { d.open = true; }); document.getElementById('letterBd').classList.remove('clamp'); window.dispatchEvent(new Event('resize')); });
+  await q.waitForTimeout(400);
+  const tall = await q.evaluate(() => document.documentElement.scrollHeight);
+  for (let y = 0; y < tall; y += 600) { await q.evaluate(y => window.scrollTo(0, y), y); await q.waitForTimeout(120); }
+  await q.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await q.waitForTimeout(1800);
   const got = await grab(q);
   ok('every figure settles exactly on the reduced-motion value', JSON.stringify(got.figs) === JSON.stringify(want.figs),
@@ -3109,7 +3047,7 @@ test('public notice: motion settles on the same figures and leaves the letter al
   await q.evaluate(() => { const i = document.getElementById('income'); i.value = '148000'; i.dispatchEvent(new Event('input', { bubbles: true })); });
   await q.waitForTimeout(900);
   ok('after an input change, the eased figures land on the new values', await q.evaluate(() =>
-    document.querySelector('.save .v').textContent === document.querySelector('.band-stat.teal .band-v').textContent));
+    document.querySelector('.save .v').textContent === document.querySelector('#sbarGap [data-fig="uni.savings"]').textContent));
   // a model change replays the comparison bars' wipe; the same model does not
   const wipe = () => q.evaluate(() => getComputedStyle(document.getElementById('uBar')).clipPath);
   await q.evaluate(() => document.getElementById('uBar').scrollIntoView({ block: 'center' })); await q.waitForTimeout(1500);
@@ -3216,11 +3154,274 @@ test('footer: its links match the header navigation', async b => {
   }
 });
 
+/* ---------- the story: one pinned bar, four steps ----------
+ * The page's argument is now carried by a single bar that stays on screen while
+ * the reader scrolls. Its pixels are the data, so the same rule as every other
+ * chart here applies: measure the render. These run on the page as a reader first
+ * sees it (folds shut), across all three routes and at phone and desktop widths. */
+const storyStep = async (p, i) => p.evaluate(async i => {
+  const s = document.querySelectorAll('.sstep')[i], st = document.getElementById('stage');
+  const sh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-h')) || 0;
+  scrollTo(0, scrollY + s.getBoundingClientRect().top - (innerWidth <= 900 ? sh + st.offsetHeight + 8 : innerHeight * 0.2));
+  await new Promise(r => setTimeout(r, 260));
+  return [...document.querySelectorAll('.sstep')].findIndex(e => e.classList.contains('on'));
+}, i);
+const setRoute = async (p, r) => {
+  await p.evaluate(r => { const f = document.getElementById('foldHh'), was = f.open; f.open = true;
+    document.querySelector(`#route button[data-r="${r}"]`).click(); f.open = was; }, r);
+  await p.waitForTimeout(150);
+};
+const barRead = p => p.evaluate(() => {
+  const st = document.getElementById('stage'), H = parseFloat(st.style.getPropertyValue('--H'));
+  const num = t => parseFloat(t.replace(/[^0-9.]/g, ''));
+  const sr = st.getBoundingClientRect();
+  const segs = [...document.querySelectorAll('.sseg.on')].map(e => {
+    const r = e.getBoundingClientRect(), l = e.querySelector('.sseg-l').getBoundingClientRect();
+    return { k: e.dataset.k, h: r.height, v: num(e.querySelector('b').textContent), f: parseFloat(e.style.getPropertyValue('--f')),
+             lt: l.top, lb: l.bottom, ll: l.left, lr: l.right, shrink: getComputedStyle(e).flexShrink };
+  });
+  return { H, trackH: document.getElementById('sbarTrack').getBoundingClientRect().height, segs,
+           run: num(document.getElementById('sbarRun').textContent), uni: document.querySelector('.inkzone').classList.contains('uni'),
+           stageTop: sr.top, stageLeft: sr.left, stageRight: sr.right, stickyBottom: document.querySelector('.sticky').getBoundingClientRect().bottom,
+           label: document.getElementById('sbar').getAttribute('aria-label'), away: st.classList.contains('yield') };
+});
+
+test('story: every segment of the pinned bar is drawn at its value', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    for (const route of ['employer', 'marketplace', 'none']) {
+      await setRoute(p, route);
+      for (let i = 0; i < 4; i++) {
+        const at = await storyStep(p, i), r = await barRead(p);
+        const tag = `${w}px ${route} step ${i + 1}`;
+        ok(`${tag}: is the step in focus, and the bar is pinned under the results bar`, at === i && Math.abs(r.stageTop - r.stickyBottom) < 1.5,
+           `at ${at}, stage ${r.stageTop.toFixed(1)} vs bar ${r.stickyBottom.toFixed(1)}`);
+        const off = r.segs.map(s => Math.abs(s.h - s.f * r.H)), sum = r.segs.reduce((a, s) => a + s.v, 0);
+        ok(`${tag}: each segment is its share of the scale, to the pixel`, r.segs.length > 0 && Math.max(...off) < 0.75 && r.segs.every(s => s.shrink === '0') && Math.abs(r.trackH - r.H) < 0.75,
+           r.segs.map(s => `${s.k} ${s.h.toFixed(1)}`).join(' '));
+        ok(`${tag}: the standing segments add up to the running total`, Math.abs(sum - r.run) <= r.segs.length, `${sum} vs ${r.run}`);
+        // one scale for everything: dollars per pixel agree between any two real segments
+        const big = r.segs.filter(s => s.v >= 1500).map(s => s.v / s.h);
+        ok(`${tag}: one scale across segments`, big.length < 2 || Math.max(...big) / Math.min(...big) < 1.03, big.map(x => x.toFixed(1)).join(' '));
+        ok(`${tag}: the bar says what it shows`, /Total \$[\d,]+ per year/.test(r.label), r.label);
+        ok(`${tag}: the ground turns teal at the universal step, and only there`, r.uni === (i === 3));
+      }
+    }
+    await p.close();
+  }
+});
+
+test('story: one scale across routes and models, and the units switch reaches the bar', async b => {
+  const p = await page(b, 1280, 800, false, 'index.html', true);
+  const perPx = async () => { const r = await barRead(p); const s = r.segs.reduce((a, x) => a.h > x.h ? a : x); return s.v / s.h; };
+  const scales = [];
+  for (const route of ['employer', 'marketplace', 'none']) { await setRoute(p, route); await storyStep(p, 2); scales.push(await perPx()); }
+  ok('all three routes draw on the same dollars per pixel', Math.max(...scales) / Math.min(...scales) < 1.03, scales.map(x => x.toFixed(1)).join(' '));
+  await setRoute(p, 'employer'); await storyStep(p, 3);
+  const before = await barRead(p);
+  await p.locator('#pills .pill').nth(5).click(); await p.waitForTimeout(250);
+  const urban = await barRead(p);
+  ok('picking the priciest model grows the universal bar and its total together', urban.run > before.run && urban.segs.reduce((a, s) => a + s.h, 0) > before.segs.reduce((a, s) => a + s.h, 0) + 5,
+     `${before.run} to ${urban.run}`);
+  ok('the model\'s segments still add up', Math.abs(urban.segs.reduce((a, s) => a + s.v, 0) - urban.run) <= urban.segs.length);
+  await p.locator('#unit').click(); await p.waitForTimeout(250);
+  const mo = await barRead(p);
+  ok('monthly: the same heights, a twelfth of the figures', Math.abs(mo.run - urban.run / 12) < 1 && Math.abs(mo.segs[0].h - urban.segs[0].h) < 0.5, `${mo.run} vs ${urban.run}`);
+  const said = await p.evaluate(() => document.getElementById('st3say').textContent);
+  ok('and the sentence beside it follows', /a month/.test(said), said);
+  await p.close();
+});
+
+test('story: bar labels never overlap or leave the stage', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true], [360, 740, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const bad = [];
+    for (const ages of [[30], [41, 39, 12, 9]]) {
+      await p.evaluate(() => { document.getElementById('foldHh').open = true; });
+      await setAges(p, ages);
+      for (const inc of [18000, 95000, 250000]) {
+        await setIncome(p, inc);
+        for (const route of ['employer', 'marketplace', 'none']) {
+          await p.evaluate(r => document.querySelector(`#route button[data-r="${r}"]`).click(), route);
+          await p.evaluate(() => { document.getElementById('foldHh').open = false; });
+          for (const i of [2, 3]) {
+            await storyStep(p, i);
+            const r = await barRead(p), ls = r.segs.slice().sort((a, c) => a.lt - c.lt);
+            for (let j = 1; j < ls.length; j++) if (ls[j].lt < ls[j - 1].lb - 0.5) bad.push(`${ages.length}p $${inc} ${route} s${i + 1}: ${ls[j - 1].k}/${ls[j].k} overlap`);
+            for (const s of ls) if (s.ll < r.stageLeft - 0.5 || s.ll < 0) bad.push(`${ages.length}p $${inc} ${route} s${i + 1}: ${s.k} runs off the left`);
+          }
+          await p.evaluate(() => { document.getElementById('foldHh').open = true; });
+        }
+      }
+    }
+    ok(`${w}px: every label clear across households, incomes, routes`, bad.length === 0, bad.slice(0, 4).join(' | '));
+    await p.close();
+  }
+});
+
+test('story: text holds its contrast on the teal ground', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m);          // folds open: the charts inside sit on teal too
+    await storyStep(p, 3);
+    const r = await p.evaluate(() => {
+      const lum = c => { const a = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]; };
+      const rgb = s => { const m = /rgba?\(([^)]+)\)/.exec(s); if (!m) return null; const q = m[1].split(/[, /]+/).map(parseFloat); return { c: q.slice(0, 3), a: q.length > 3 ? q[3] : 1 }; };
+      // a bar label sits beside its segment, on the stage's ground, not on the segment's colour
+      const bgOf = el => { for (let n = el.closest('.sseg-l') ? document.getElementById('stage') : el; n; n = n.parentElement) { const cs = getComputedStyle(n); if (cs.backgroundImage !== 'none') return null; const c = rgb(cs.backgroundColor); if (c && c.a > 0.9) return c.c; } return null; };
+      const out = [], uni = document.querySelector('.inkzone').classList.contains('uni');
+      document.querySelectorAll('.sticky *, .sstep[data-step="3"] *, .stage *').forEach(el => {
+        if (el.closest('[hidden], svg, .unit') || !el.offsetWidth) return;   // the unit switch's thumb is its own element; the accessibility check measures it
+        if (![...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) return;
+        const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || +cs.opacity === 0) return;
+        if (el.closest('.sseg-l') && !el.closest('.sseg.on')) return;
+        const fg = rgb(cs.color), bg = bgOf(el); if (!fg || !bg) return;
+        const a = lum(fg.c), c = lum(bg), ratio = (Math.max(a, c) + 0.05) / (Math.min(a, c) + 0.05);
+        const big = parseFloat(cs.fontSize) >= 24 || (parseFloat(cs.fontSize) >= 18.66 && +cs.fontWeight >= 700);
+        if (ratio < (big ? 3 : 4.5)) out.push(`${(typeof el.className === 'string' && el.className) || el.tagName} "${el.textContent.trim().slice(0, 18)}" ${ratio.toFixed(2)}`);
+      });
+      return { uni, out: [...new Set(out)] };
+    });
+    ok(`${w}px: the zone is on teal`, r.uni);
+    ok(`${w}px: every piece of text on it clears its floor`, r.out.length === 0, r.out.slice(0, 5).join(' | '));
+    await p.close();
+  }
+});
+
+/* Folds. Every chart the long page showed at once is behind one now, so three
+ * things have to hold: they are shut when the reader arrives, what is inside is
+ * all there at full width when one opens, and the bar gets out of its way. */
+test('folds: shut at load, whole when open, and the bar steps aside', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const at = await p.evaluate(() => ({
+      n: document.querySelectorAll('details.fold').length, open: document.querySelectorAll('details.fold[open]').length,
+      wf: document.getElementById('wf').checkVisibility() ? 1 : 0, screens: document.documentElement.scrollHeight / innerHeight,
+      twists: [...document.querySelectorAll('details.fold > summary')].every(s => s.querySelector('.fold-x') && s.getBoundingClientRect().height >= 44) }));
+    ok(`${w}px: every fold is shut on arrival`, at.n >= 10 && at.open === 0 && at.wf === 0, JSON.stringify(at));
+    ok(`${w}px: each fold's summary is a 44px target with its twist`, at.twists);
+    ok(`${w}px: the page a reader meets is far shorter than the old one`, at.screens < (m ? 13 : 11), at.screens.toFixed(1) + ' screens');   // was 15.3 at 1280 by 800
+    await storyStep(p, 2);
+    const shut = await barRead(p);
+    await p.locator('#foldWf > summary').click(); await p.waitForTimeout(250);
+    await p.evaluate(() => { const r = document.querySelector('#foldWf .fold-bd').getBoundingClientRect(); scrollBy(0, r.top - innerHeight * 0.3); });
+    await p.waitForTimeout(260);
+    const open = await p.evaluate(() => { const bd = document.querySelector('#foldWf .fold-bd').getBoundingClientRect(), wrap = document.querySelector('.story-in'), cs = getComputedStyle(wrap);
+      return { w: bd.width, full: wrap.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), wf: document.getElementById('wf').offsetHeight,
+               away: document.getElementById('stage').classList.contains('yield'), barOpacity: getComputedStyle(document.getElementById('sbar')).opacity }; });
+    ok(`${w}px: an open fold spans the full column the charts were drawn for`, Math.abs(open.w - open.full) < 1.5 && open.wf > 200, `${open.w.toFixed(0)} of ${open.full.toFixed(0)}`);
+    ok(`${w}px: the bar steps aside while the fold is where it stands`, !shut.away && open.away && +open.barOpacity === 0, JSON.stringify(open));
+    await p.locator('#foldWf > summary').click(); await p.waitForTimeout(300);
+    ok(`${w}px: and returns when the fold closes`, !(await barRead(p)).away);
+    await p.close();
+  }
+});
+
+test('folds: with motion on, a fold opens and closes over time and ends clean', async b => {
+  const p = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
+  p.on('pageerror', e => ok('no page errors', false, e.message));
+  await p.goto(URL); await p.waitForTimeout(1200);
+  for (const sel of ['#foldWf', '#obj2', '#adv']) {
+    if (sel === '#adv') await p.evaluate(() => { document.getElementById('foldHh').open = true; });
+    await p.evaluate(s => document.querySelector(s).scrollIntoView({ block: 'center' }), sel); await p.waitForTimeout(500);
+    await p.locator(sel + ' > summary').click();
+    const mid = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
+    await p.waitForTimeout(1300);
+    const end = await p.evaluate(s => { const d = document.querySelector(s), bd = d.querySelector('.fold-bd, .adv-bd');
+      return { open: d.open, cls: d.className, overflow: bd.style.overflow, h: bd.offsetHeight, running: bd.getAnimations().length,
+               twist: getComputedStyle(d.querySelector('.fold-x, .adv-x')).transform }; }, sel);
+    ok(`${sel}: opens at once for the reader, animating`, mid.open && /opening/.test(mid.cls), JSON.stringify(mid));
+    ok(`${sel}: settles open with nothing left running or clipped`, end.open && !/opening|closing/.test(end.cls) && end.overflow === '' && end.h > 20 && end.running === 0, JSON.stringify(end));
+    ok(`${sel}: its twist has turned`, end.twist !== 'none' && !/^matrix\(1, 0, 0, 1,/.test(end.twist), end.twist);
+    await p.locator(sel + ' > summary').click();
+    const midc = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
+    await p.waitForTimeout(1000);
+    const shut = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
+    ok(`${sel}: stays in the page while it closes, then is shut`, midc.open && /closing/.test(midc.cls) && !shut.open && !/closing/.test(shut.cls), JSON.stringify([midc, shut]));
+  }
+  // a click during the close reopens it instead of fighting it
+  await p.evaluate(() => document.querySelector('#obj1').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400);
+  await p.locator('#obj1 > summary').click(); await p.waitForTimeout(1200);
+  await p.locator('#obj1 > summary').click(); await p.waitForTimeout(80);
+  await p.locator('#obj1 > summary').click(); await p.waitForTimeout(1300);
+  ok('a second click mid-close reopens the fold', await p.evaluate(() => { const d = document.getElementById('obj1'); return d.open && d.className.indexOf('closing') < 0; }));
+  const thumb = await p.evaluate(async () => {
+    document.getElementById('foldHh').open = true; await new Promise(r => setTimeout(r, 200));
+    const g = document.getElementById('routeGlide'), on = () => document.querySelector('#route button.on').getBoundingClientRect();
+    document.querySelector('#route button[data-r="none"]').click(); await new Promise(r => setTimeout(r, 900));
+    const a = g.getBoundingClientRect(), o = on();
+    return { dx: Math.abs(a.left - o.left), dw: Math.abs(a.width - o.width), dy: Math.abs(a.top - o.top) };
+  });
+  ok('the sliding thumb lands on the chosen route', thumb.dx < 1 && thumb.dw < 1 && thumb.dy < 1, JSON.stringify(thumb));
+  await p.close();
+});
+
+test('send: three portraits are the recipient control', async b => {
+  for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m);
+    const r = await p.evaluate(() => {
+      const tiles = [...document.querySelectorAll('#recips .rtile')];
+      return { n: tiles.length, on: tiles.filter(t => t.classList.contains('on') && t.getAttribute('aria-pressed') === 'true').length,
+        boxes: tiles.map(t => { const q = t.getBoundingClientRect(), ph = t.querySelector('.repph').getBoundingClientRect(); return { w: q.width, h: q.height, top: q.top, pw: ph.width, ph: ph.height }; }),
+        names: tiles.map(t => t.querySelector('.rtile-n, .sen-n').textContent), kinds: tiles.map(t => t.querySelector('.rtile-k').textContent) };
+    });
+    ok(`${w}px: the member and both senators, one of them chosen`, r.n === 3 && r.on === 1, JSON.stringify(r.names));
+    ok(`${w}px: each says who they are to the reader`, r.kinds[0] === 'Your representative' && r.kinds[1] === 'Your senator' && r.kinds[2] === 'Your senator', r.kinds.join('|'));
+    ok(`${w}px: portraits are 4:5 and large enough to recognise`, r.boxes.every(x => Math.abs(x.pw / x.ph - 0.8) < 0.02 && x.pw >= 72), r.boxes.map(x => x.pw + 'x' + x.ph).join(' '));
+    ok(`${w}px: tiles are equal and clear 44px`, Math.max(...r.boxes.map(x => x.w)) - Math.min(...r.boxes.map(x => x.w)) < 1.5 && r.boxes.every(x => x.h >= 44), r.boxes.map(x => x.w.toFixed(0)).join(' '));
+    ok(`${w}px: ${m ? 'stacked on a phone' : 'side by side on a desktop'}`, m ? r.boxes[1].top > r.boxes[0].top + 40 : Math.abs(r.boxes[0].top - r.boxes[2].top) < 1.5);
+    await p.locator('#senRows .rtile').nth(1).click(); await p.waitForTimeout(250);
+    const s = await p.evaluate(() => ({ on: [...document.querySelectorAll('#recips .rtile')].map(t => t.classList.contains('on') ? 1 : 0).join(''),
+      dear: document.getElementById('letterBd').textContent.slice(0, 40), badge: getComputedStyle(document.querySelectorAll('#recips .rtile')[2].querySelector('.rtile-go')).transform }));
+    ok(`${w}px: picking a senator moves the ring, the tick and the salutation`, s.on === '001' && /Dear Senator/.test(s.dear) && s.badge !== 'matrix(0, 0, 0, 0, 0, 0)', JSON.stringify(s));
+    await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+    const split = await p.evaluate(() => ({ sens: document.querySelectorAll('#senRows .rtile').length, repOff: document.getElementById('recRep').disabled, block: document.getElementById('senBlock').hidden }));
+    ok(`${w}px: an unresolved ZIP shows no senators from the last one`, split.sens === 0 && split.repOff && split.block, JSON.stringify(split));
+    await p.close();
+  }
+});
+
+test('letter: opens on its first lines and unfolds on request or on a click into it', async b => {
+  const p = await page(b, 1280, 900, false, 'index.html', true);
+  const read = () => p.evaluate(() => { const bd = document.getElementById('letterBd'), m = document.getElementById('letterMore');
+    return { clamp: bd.classList.contains('clamp'), h: bd.clientHeight, full: bd.scrollHeight, exp: m.getAttribute('aria-expanded'), t: m.textContent.trim(), btn: m.getBoundingClientRect().height,
+             send: document.getElementById('formBtn').getBoundingClientRect().height }; });
+  const a = await read();
+  ok('the letter shows its opening, with the send buttons already on the page', a.clamp && a.h < a.full - 100 && a.exp === 'false' && a.send > 40, JSON.stringify(a));
+  ok('the control says what it does and is a 44px target', /Read the whole letter/.test(a.t) && a.btn >= 44, a.t);
+  await p.locator('#letterMore').click(); await p.waitForTimeout(200);
+  const o = await read();
+  ok('it unfolds to the whole letter', !o.clamp && o.h >= o.full - 1 && o.exp === 'true' && /Show less/.test(o.t), JSON.stringify(o));
+  await p.locator('#letterMore').click(); await p.waitForTimeout(200);
+  ok('and folds back', (await read()).clamp);
+  await p.locator('#letterBd').click(); await p.waitForTimeout(200);
+  ok('clicking into the letter to edit unfolds it', !(await read()).clamp);
+  await p.close();
+});
+
+test('story: the universal step follows the savings sign and the unit', async b => {
+  const p = await page(b, 1280, 900);
+  const read = () => p.evaluate(() => ({ say: document.getElementById('st3say').textContent, gapK: document.getElementById('sbarGapK').textContent,
+    gap: document.querySelector('#sbarGap [data-fig="uni.savings"]').textContent, save: document.getElementById('save').textContent, lbl: document.getElementById('saveLbl').textContent }));
+  let r = await read();
+  ok('the bar\'s gap label matches the savings panel', r.gap === r.save && /^\$\d/.test(r.gap), JSON.stringify([r.gap, r.save]));
+  ok('keeping money: the step says it stays with the household', /keep/.test(r.lbl) && /stays with your household/.test(r.say) && r.gapK === 'no longer paid', r.say);
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
+  r = await read();
+  const pays = /pay/.test(r.lbl);
+  ok('the step follows the label when the sign flips', pays ? (/would pay \$[\d,]+ more/.test(r.say) && r.gapK === 'more than today') : /stays with your household/.test(r.say), JSON.stringify([r.lbl, r.gapK, r.say]));
+  await p.locator('#unit').click(); await p.waitForTimeout(200);
+  ok('month view: the sentence says a month', /a month/.test((await read()).say), (await read()).say);
+  await p.close();
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;
   console.log(`\n\x1b[1m${c.name}\x1b[0m`);
-  await c.fn(b);
+  // a check that throws (a selector that no longer exists, say) is one failure,
+  // not the end of the run: the rest of the suite still reports
+  try { await c.fn(b); }
+  catch (e) { ok('ran to the end', false, String(e && e.message || e).split('\n')[0].slice(0, 200)); }
 }
 await b.close();
 console.log(`\n${fail ? '\x1b[31m' : '\x1b[32m'}${pass} passed, ${fail} failed\x1b[0m`);

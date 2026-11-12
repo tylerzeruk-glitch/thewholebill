@@ -55,7 +55,7 @@ section.ink{background:var(--ink);color:var(--ik)}
 
 /* One label style. Thirteen rules used to set their own size (10 to 11.5px), tracking
    (.06 to .17em) and weight; readers counted the variety as extra typefaces. */
-.eyebrow,.lbl,.dateline .k,.zipfield .k,.sticky .who,.adv-k,.wkick,.src-k,.meth th,.tag,.pill-r{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.eyebrow,.lbl,.dateline .k,.zipfield .k,.sticky .who,.adv-k,.wkick,.src-k,.meth th,.tag,.pill-r,.fold-k,.rtile-k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
 .footline,.domain{font-family:var(--mono);font-size:11px;letter-spacing:.06em;font-weight:500}
 /* The one responsive exception: a pill is 110px wide at the 900px breakpoint and "the scorekeeper" needs 125px at the shared size */
 @media (max-width:1023px){.pill-r{font-size:10px;letter-spacing:.06em}}
@@ -160,9 +160,6 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
    a different relationship and is meant to hang from the top. */
 .split.tie{align-items:end;align-items:last baseline}
 .cmp{display:flex;flex-direction:column;gap:34px;margin-top:56px}
-.cmp-row{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center}
-.cmp-lab{text-align:right;display:flex;flex-direction:column;gap:5px}
-.cmp-bars{display:flex;align-items:center;min-width:0;padding-right:156px}   /* the longest figure (135px in Public Sans 500 at 30px) plus its 16px margin, with slack */
 /* These two bars are a comparison, so both dimensions have to be honest.
    ONE height for both: unequal thickness makes the taller bar read larger by
    area than its value, and thickness carries no meaning here -- length is the
@@ -177,11 +174,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
    box -- so `left` is a percentage of the same width the fill uses, and the two
    stay locked together at every viewport. .cmp-bars reserves the room the longest
    figure needs on the right, which is what keeps both tracks identical. */
-.cmp-plot{position:relative;flex-grow:1;min-width:0}
-.cmp-bars .num{font-family:var(--sans);font-weight:500;position:absolute;top:50%;transform:translateY(-50%);margin-left:16px;white-space:nowrap}
 .track{display:flex;border-radius:1px;overflow:hidden;flex-grow:1;min-width:0}
-.callout{margin-top:40px;border-left:4px solid var(--amber-deep);padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:4px}
-.callout-v{font-family:var(--serif);font-weight:400;font-style:italic;font-size:clamp(30px,3.4vw,42px);line-height:1.1;color:var(--amber-deep);font-variant-numeric:tabular-nums}
 
 /* ---------- Public Notice: the strip and the stat bands ---------- */
 /* The strip says what the page is before anything else does. */
@@ -189,12 +182,6 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .pn-strip .wrap{display:flex;justify-content:space-between;gap:6px 16px;flex-wrap:wrap;padding-top:9px;padding-bottom:9px}
 /* A stat band is a hard interrupt between sections: one live figure, one sentence.
    The figure is a data-fig like any other, so the calculator fills and refreshes it. */
-.band-stat{background:var(--c2);color:#1E1509}
-.band-stat.teal{background:var(--teal);color:#0C1F1E}
-.band-in{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(16px,4vw,56px);align-items:center;padding-top:clamp(30px,4.5vw,56px);padding-bottom:clamp(30px,4.5vw,56px)}
-.band-v{font-family:var(--sans);font-weight:500;font-size:clamp(60px,9vw,128px);line-height:.9;color:var(--ink);letter-spacing:-.03em;white-space:nowrap}
-.band-in p{font-size:clamp(17px,2vw,25px);line-height:1.38;max-width:30ch}
-.band-k{display:block;font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:10px}
 
 /* ---------- sticky results ---------- */
 .sticky{position:sticky;top:0;z-index:20;background:rgba(26,29,38,.92);backdrop-filter:saturate(1.2) blur(8px);-webkit-backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--irule-2)}
@@ -379,7 +366,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .rise-key span{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;line-height:1.5;color:var(--im)}
 
 /* ---------- comparison ---------- */
-.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 /* Six equal columns, one row: a segmented control, not a tag cloud. The source
    name carries the pill; its place in the debate rides a small second line
    inside it, so every pill is the same size and the row reads as a spectrum.
@@ -609,15 +596,73 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .motion .reveal:not(.in) .wcol{clip-path:inset(100% 0 0 0)}
   /* a model change replays the comparison bars' wipe: snap hidden, then release */
   .motion .replay .bar-bg{transition:none;clip-path:inset(0 100% 0 0)}
-  .motion .cmp-row:nth-child(2) .track{transition-delay:.3s}
   .motion .bar-row:nth-child(2) .bar-bg{transition-delay:.18s} .motion .bar-row:nth-child(3) .bar-bg{transition-delay:.36s}
   .motion .wcol:nth-child(2){transition-delay:.18s} .motion .wcol:nth-child(3){transition-delay:.36s}
   .motion .wcol:nth-child(4){transition-delay:.54s} .motion .wcol-total{transition-delay:.8s}
   .motion .track > div,.motion .bar-bg > div{transition:width .55s cubic-bezier(.4,0,.2,1)}
-  .motion .cmp-plot .num{transition:left .55s cubic-bezier(.4,0,.2,1),opacity .5s ease .7s}
-  .motion .reveal:not(.in) .cmp-plot .num{opacity:0}
-  .motion .band-v{transition:transform .9s cubic-bezier(.2,.7,.2,1),opacity .9s ease}
-  .motion .band-stat.reveal:not(.in) .band-v{transform:translateX(-24px);opacity:0}
+  /* --- the story, folds and controls (added with the pinned bar) --- */
+  .inkzone,section.ink,.sticky,.stage{transition:background-color .9s ease,border-color .9s ease}
+  .motion .sseg{transition:height .8s cubic-bezier(.3,.75,.2,1)}
+  .motion .sseg:nth-child(4){transition-delay:.06s} .motion .sseg:nth-child(5){transition-delay:.12s} .motion .sseg:nth-child(6){transition-delay:.18s}
+  .motion .sseg-l{transition:opacity .3s ease,transform .5s cubic-bezier(.2,.7,.2,1)}
+  .motion .sseg.on .sseg-l{transition-delay:.4s,0s}
+  .motion .sbar-ghost,.motion .sbar-gap,.motion .sbar-open{transition:opacity .6s ease .35s,bottom .7s cubic-bezier(.3,.75,.2,1),height .7s cubic-bezier(.3,.75,.2,1)}
+  .motion .sprog{transition:background-color .9s ease}
+  /* a step that is not the one in focus waits, dimmed, a little lower */
+  .motion .sstep > *{transition:opacity .55s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  .motion .sstep:not(.on) > :not(.folds){opacity:.38}   /* never the folds: an open chart stays readable as the next step arrives */
+  .motion .sstep:not(.on) > .snum{transform:translateY(14px)}
+  .motion .sstep:not(.on) > .ssay{transform:translateY(8px)}
+  .motion .snum{transition:opacity .55s ease,transform .7s cubic-bezier(.2,.7,.2,1),color .9s ease}
+  /* twists: every chevron on the page turns with the same spring */
+  .fold-x,.adv-x,.src-x{transition:transform .55s cubic-bezier(.34,1.56,.64,1),background-color .3s ease,border-color .3s ease,color .3s ease}
+  .fold > summary:hover .fold-x,.lmore:hover .fold-x{transform:translateY(2px)}
+  .fold[open]:not(.closing) > summary:hover .fold-x,.lmore.on:hover .fold-x{transform:rotate(180deg) translateY(2px)}
+  .fold-s,.adv-s,.src-s{transition:color .2s ease}
+  /* what a fold holds rises into place as it opens, one piece after another */
+  .motion .opening > .fold-bd > .fold-in > *,.motion .opening > .adv-bd > *,.motion .opening > .src-bd > *{animation:fold-rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .motion .opening > .fold-bd > .fold-in > :nth-child(2),.motion .opening > .adv-bd > :nth-child(2),.motion .opening > .src-bd > :nth-child(2){animation-delay:.07s}
+  .motion .opening > .fold-bd > .fold-in > :nth-child(3),.motion .opening > .adv-bd > :nth-child(3){animation-delay:.14s}
+  .motion .opening > .fold-bd > .fold-in > :nth-child(n+4),.motion .opening > .adv-bd > :nth-child(n+4){animation-delay:.21s}
+  @keyframes fold-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  /* and its charts wipe in again, as they did when the section first arrived */
+  .motion .fresh .wcol{transition:none;clip-path:inset(100% 0 0 0)}
+  .motion .fresh .bar-bg{transition:none;clip-path:inset(0 100% 0 0)}
+  .motion .fresh .range{transition:none;clip-path:inset(-12px 100% -12px 0)}
+  /* a sliding thumb under the segmented controls */
+  .motion .glides{position:relative}
+  .motion .glides > button{position:relative;z-index:1}
+  .motion .glides > button,.motion .glides > button.on{background:transparent}
+  .glide{position:absolute;left:0;top:0;z-index:0;pointer-events:none;box-sizing:border-box;transition:transform .42s cubic-bezier(.3,1.25,.4,1),width .42s cubic-bezier(.3,1.25,.4,1),height .3s ease}
+  #routeGlide{background:#2C3140;border:1px solid var(--ib)}
+  #pillsGlide{background:var(--teal)}
+  #toneGlide{background:var(--pk);border-radius:2px}
+  .motion #route > button.on,.motion #pills > .pill.on,.motion #tone > .tbtn.on{border-color:transparent}
+  button{-webkit-tap-highlight-color:transparent}
+  .btn-dark,.btn-ghost,.tbtn,.pill,.seg > button,.chk,.step,.adv-reset,.lmore{transition:transform .18s cubic-bezier(.3,.7,.2,1),background-color .18s ease,color .18s ease,border-color .18s ease}
+  .btn-dark:active,.btn-ghost:active,.tbtn:active,.pill:active,.seg > button:active,.chk:active,.adv-reset:active{transform:scale(.97)}
+  /* the tick draws itself */
+  .motion .box.off svg{display:block}
+  .motion .box svg polyline{stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .32s cubic-bezier(.3,.7,.2,1) .05s}
+  .motion .box.on svg polyline{stroke-dashoffset:0}
+  .box{transition:background-color .2s ease,border-color .2s ease}
+  /* the people */
+  .rtile.rec-hit{transition:box-shadow .3s ease,transform .35s cubic-bezier(.2,.7,.2,1),border-color .2s ease}
+  .rtile.rec-hit:hover:not(:disabled){transform:translateY(-3px)}
+  .rtile .repph img{transition:filter .6s ease,transform .8s cubic-bezier(.2,.7,.2,1),opacity .5s ease}
+  .rtile.on .repph img{transform:scale(1.04)}
+  .rtile-go{transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+  .motion .recips.fresh .rtile{animation:fold-rise .7s cubic-bezier(.2,.7,.2,1) both}
+  .motion .recips.fresh .rtile:nth-child(2),.motion .recips.fresh .senrows .rtile:nth-child(1){animation-delay:.1s}
+  .motion .recips.fresh .senrows .rtile:nth-child(2){animation-delay:.2s}
+  /* a rebuilt letter is washed once in the highlight colour; its words are never animated */
+  .motion .letter .bd.wash{animation:wash 1.1s ease both}
+  @keyframes wash{from{background-color:#F7EDDC}to{background-color:transparent}}
+  /* the mark builds itself from the bottom band up, the way the bill does */
+  .brand svg rect{transform-box:fill-box;transform-origin:50% 100%;animation:band-up .6s cubic-bezier(.3,.75,.2,1) both}
+  .brand svg rect:nth-child(4){animation-delay:.15s} .brand svg rect:nth-child(3){animation-delay:.3s}
+  .brand svg rect:nth-child(2){animation-delay:.5s} .brand svg rect:nth-child(1){animation-delay:.62s}
+  @keyframes band-up{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
@@ -635,6 +680,10 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   body:not(.print-letter) #cliffChart text{fill:#333}
   body:not(.print-letter) #cliffChart rect{fill:#fff}   /* the annotation box carries an inline ink fill */
   .skip{display:none}
+  *{transition:none!important}   /* a colour caught mid-change would print as that colour */
+  .stage,.sprog,.lmore{display:none}
+  .letter .bd.clamp{max-height:none;overflow:visible;-webkit-mask-image:none;mask-image:none}
+  .story-in{display:block} .sstep{min-height:0;padding:24px 0} .story .fold.wide > .fold-bd{width:auto}
   body.print-letter :not(.pk):not(.letter):not(.letter *){display:none}
   body.print-letter .pk{display:block;padding:0;margin:0;background:none;min-height:0;height:auto;position:static;transform:none}
   body.print-letter .letter{border:none;margin:0;max-width:none}
@@ -689,6 +738,131 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
 .tbtn:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
 footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-height:1.6}
 
+
+/* ---------- the story ----------
+   A pinned bar beside four steps. The stage is sticky under the results bar
+   (--sticky-h is measured by the script, because that bar is one row or two).
+   --H is the bar's full height in px, also set by the script from the stage, and
+   every segment is --H times its fraction of the shared scale: a segment's pixel
+   height IS the data, so nothing here may shrink it (flex-shrink:0). */
+:root{--sticky-h:58px;--stage-w:340px;--sgap:clamp(32px,5vw,72px)}
+#story{scroll-margin-top:0}
+.story-in{display:grid;grid-template-columns:minmax(0,1fr) var(--stage-w);column-gap:var(--sgap);padding-bottom:clamp(40px,6vw,72px)}
+.stage{grid-column:2;grid-row:1;position:sticky;top:var(--sticky-h);height:calc(100vh - var(--sticky-h));height:calc(100svh - var(--sticky-h));display:flex;align-items:center;justify-content:flex-end;z-index:1;--H:300px}
+.ssteps{grid-column:1;grid-row:1;min-width:0}
+#sec2Note{grid-column:1 / -1;max-width:62rem}
+.sstep{min-height:calc(100vh - var(--sticky-h));min-height:calc(100svh - var(--sticky-h));display:flex;flex-direction:column;justify-content:center;gap:18px;padding:56px 0}
+.sstep > .eyebrow,.sstep > .ssay,.sstep > .sbasis{max-width:34rem}
+.sstep > h2.eyebrow{line-height:1.5;text-wrap:balance}
+.fold:not(.wide) .fold-in{max-width:34rem}
+.fold-p,.fold-lede{margin:0 0 14px;font-family:var(--serif);font-size:17.5px;line-height:1.6;color:var(--ib)}
+.fold-lede{max-width:40rem;margin-bottom:28px}
+.snum{font-size:clamp(54px,7.4vw,98px);line-height:1;letter-spacing:-.022em;color:var(--c2)}
+.sstep[data-step="3"] .snum{color:var(--teal)}
+.ssay em{font-style:italic;color:var(--c2)}
+.ssay{margin:0;font-family:var(--serif);font-size:clamp(20px,2.15vw,25px);line-height:1.34;color:var(--ik);text-wrap:pretty}
+.sbasis{margin:0;font-size:13px}
+.sstep .prov{grid-template-columns:minmax(0,1fr);gap:18px}
+.sbar{position:relative;width:100%;height:calc(var(--H) + 48px);transition:opacity .35s ease,transform .5s cubic-bezier(.2,.7,.2,1)}
+.stage.yield{pointer-events:none}
+.stage.yield .sbar{opacity:0;transform:translateX(18px)}
+.sbar-cap{position:absolute;left:0;right:0;top:0;display:flex;justify-content:flex-end;align-items:baseline;gap:10px;font-size:13px;color:var(--im);white-space:nowrap}
+.sbar-cap b{font-size:24px;color:var(--ik);letter-spacing:-.01em}
+.sbar-track{position:absolute;right:0;bottom:0;width:92px;height:var(--H);display:flex;flex-direction:column-reverse;box-shadow:inset 0 0 0 1px var(--irule-2)}
+.sseg{position:relative;flex-shrink:0;height:0}
+.sseg.on{height:calc(var(--H) * var(--f))}
+.sseg-l{position:absolute;right:100%;top:50%;transform:translateY(calc(-50% - var(--dy,0px)));padding-right:14px;white-space:nowrap;font-size:13px;line-height:16px;color:var(--im);opacity:0;pointer-events:none}
+.sseg.on .sseg-l{opacity:1}
+.sseg-l b{color:var(--ik);margin-left:7px}
+.sbar-ghost{position:absolute;left:0;right:0;bottom:0;height:calc(var(--H) * var(--g,0));border:1.5px dashed rgba(255,255,255,.62);opacity:0;pointer-events:none}
+.sbar.uni .sbar-ghost{opacity:1}
+/* the uninsured bar has no top: nothing in law caps it, and the picture says so */
+.sbar-open{position:absolute;left:0;right:0;bottom:calc(var(--H) * var(--g,0));top:0;opacity:0;pointer-events:none}
+.sbar-open::before{content:"";position:absolute;inset:0;border-left:1.5px dashed var(--c2);border-right:1.5px dashed var(--c2);-webkit-mask-image:linear-gradient(to top,#000 30%,transparent);mask-image:linear-gradient(to top,#000 30%,transparent)}
+.sbar-open span{position:absolute;right:100%;bottom:22%;padding-right:14px;white-space:nowrap;font-size:13px;line-height:16px;color:var(--c2)}
+.sbar.open .sbar-open{opacity:1}
+.sbar-gap{position:absolute;right:106px;transform:translateY(50%);display:flex;flex-direction:column;align-items:flex-end;font-size:13px;color:var(--im);white-space:nowrap;opacity:0;pointer-events:none}
+.sbar-gap b{font-size:22px;color:var(--ik)}
+.sbar.uni .sbar-gap{opacity:1}
+.sprog{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--c2);transform-origin:0 50%;transform:scaleX(var(--p,0))}
+.inkzone.uni .sprog{background:var(--teal)}
+
+/* The turn. At the universal step the whole ink zone goes to a deep teal. Amber
+   and teal keep 4.5:1 on it; the greys do not, so they are re-pointed here. The
+   panels go DARKER than the ground, not lighter: small teal and amber labels sit
+   on them, and a lighter panel dropped both to about 4.1:1. */
+.inkzone.uni{--ink:#0A3F3C;--ink-surface:#083835;--ink-raised:#093B38;--ink-chip:#0F4B47;--irule:#1C5F5A;--irule-2:#266E68;--ictrl:#86BAB5;
+  --ib:#D6E7E4;--im:#B8D5D1;--ilabel:#B8D5D1;--ifaint:#A9CBC7}
+.inkzone.uni .sticky{background:rgba(10,63,60,.93);border-bottom-color:var(--irule-2)}
+
+/* ---------- folds ----------
+   Every chart the long page used to show at once now sits behind one of these.
+   A real <details>, so it works with no script, opens for find-in-page, and the
+   script only adds the motion. .wide folds open across the whole wrap (the charts
+   inside were drawn for that width), which is why the bar steps aside for them. */
+.fold > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k x" "s x";gap:5px 18px;align-items:center;padding:16px 0;min-height:44px;border-top:1px solid var(--irule-2)}
+.fold > summary::-webkit-details-marker{display:none}
+.folds > .fold:last-child > summary{border-bottom:1px solid var(--irule-2)}
+.folds > .fold[open]:last-child > summary{border-bottom-color:transparent}
+.sstep .fold > summary{max-width:34rem}
+.fold-k{grid-area:k;color:var(--teal)}
+.fold-s{grid-area:s;font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--im);min-width:0}
+.fold > summary:hover .fold-s{color:var(--ib)}
+.fold > summary:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
+/* the twist: a ringed chevron that flips, and fills once the fold is open */
+.fold-x{grid-area:x;box-sizing:content-box;width:14px;height:14px;padding:8px;border:1px solid var(--ictrl);border-radius:50%;color:var(--ib);flex-shrink:0}
+.fold[open]:not(.closing) > summary .fold-x{transform:rotate(180deg);background:var(--teal);border-color:var(--teal);color:#0C1F1E}
+.fold-in{padding:10px 0 44px}
+.story .fold.wide > .fold-bd{width:calc(100% + var(--stage-w) + var(--sgap))}
+#foldCmp .fold-in{display:flex;flex-direction:column;gap:30px}
+#foldHh .fold-in{padding-top:6px}
+.slot + .slot{margin-top:0}
+
+/* objections: the question and a one-line answer stay on the page; the full
+   answer and its footnote open beneath */
+.objlist{border-bottom:1px solid var(--pk)}
+.obj > summary{border-top:1px solid var(--pk);grid-template-areas:"k x" "q x" "a x";gap:9px 24px;padding:28px 0}
+.obj .fold-k{color:var(--plabel)}
+.obj .quote{grid-area:q;display:block}
+.obj-a{grid-area:a;font-family:var(--sans);font-size:15px;line-height:1.55;color:var(--pb);max-width:44rem}
+.obj .fold-x{border-color:var(--pctrl);color:var(--pk)}
+.obj[open]:not(.closing) > summary .fold-x{background:var(--pk);border-color:var(--pk);color:var(--paper)}
+.obj > summary:focus-visible{outline-color:var(--amber-deep)}
+.obj .fold-in{max-width:46rem;display:flex;flex-direction:column;gap:16px;padding:0 0 34px}
+.obj .fold-in .body{margin:0}
+.obj .fn{border-top:none;padding-top:0;margin:2px 0 0;padding-left:14px;border-left:1px solid var(--prule)}
+
+/* ---------- send: three steps, and the people are step one ---------- */
+.sendstep{display:flex;flex-direction:column;gap:18px;margin-bottom:48px}
+.sendk{display:flex;align-items:center;gap:12px}
+.sendn{width:28px;height:28px;border-radius:50%;border:1px solid var(--pk);display:flex;align-items:center;justify-content:center;font-size:13.5px;flex-shrink:0}
+.recips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.senrows{display:contents}
+.rtile.rec-hit{display:flex;align-items:center;gap:18px;padding:14px;margin:0;background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;text-align:left;position:relative;min-height:44px;width:100%}
+.rtile.rec-hit:hover:not(:disabled){background:var(--paper-card);border-color:var(--pctrl)}
+.rtile .repph{width:104px;height:130px}
+/* the portrait comes up in colour for the one the letter is going to */
+.rtile .repph img{filter:grayscale(1) contrast(1.04)}
+.rtile.on .repph img,.rtile:hover:not(:disabled) .repph img,.rtile:focus-visible .repph img{filter:none}
+.rtile-t{display:flex;flex-direction:column;gap:5px;min-width:0;padding-right:20px}
+.rtile-k{color:var(--plabel)}
+.rtile-n,.rtile .sen-n{font-family:var(--serif);font-size:22px;line-height:1.15;color:var(--pk);white-space:normal;overflow:visible}
+.rtile-d{font-family:var(--sans);font-size:13px;line-height:1.45;color:var(--pm)}
+.rtile-s,.rtile .sen-s{font-family:var(--sans);font-size:13px;line-height:1.45;color:var(--pb);white-space:normal}
+.rtile-go{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--amber-deep);color:#FFFDFA;display:flex;align-items:center;justify-content:center;transform:scale(0)}
+.rtile.on .rtile-go{transform:scale(1)}
+.recmeta{display:flex;flex-wrap:wrap;gap:4px 22px;max-width:60rem}
+.recmeta .note{margin:0;font-size:12.5px}
+/* display lives behind :not([hidden]) so the hidden attribute still wins */
+.recmeta #senBlock:not([hidden]){display:contents}
+/* the letter shows its opening; the rest unfolds */
+.letter .bd.clamp{max-height:19.5em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent)}
+.lmore{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:52px;background:none;border:0;border-top:1px solid var(--prule-soft);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--pk);cursor:pointer}
+.lmore:hover{background:var(--paper-tint)}
+.lmore:focus-visible{outline:2px solid var(--amber-deep);outline-offset:-2px}
+.lmore .fold-x{border-color:var(--pctrl);color:var(--pk);padding:6px}
+.lmore.on .fold-x{transform:rotate(180deg);background:var(--pk);border-color:var(--pk);color:var(--paper)}
+
 /* ---------- responsive ----------
    ONE block per breakpoint, widest first, so source order and the cascade agree.
    There used to be two max-width:760px blocks with the 1100px block sitting
@@ -716,6 +890,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    30px. So the two-row treatment starts here. The app script reads this same
    900px figure for the shortened context line -- keep the two in step. */
 @media (max-width:900px){
+  /* the story stacks: the bar pins on top, the steps scroll beneath it */
+  .story-in{display:block}
+  .stage{height:36vh;height:36svh;min-height:230px;margin:0 calc(var(--pad) * -1);padding:12px var(--pad);background:var(--ink);border-bottom:1px solid var(--irule-2);z-index:3;align-items:flex-end}
+  .stage.yield{background:transparent;border-bottom-color:transparent}
+  .stage.yield .sbar{transform:translateY(-14px)}
+  .sstep{min-height:54vh;min-height:54svh;justify-content:flex-start;padding:34px 0 44px}
+  .sstep:last-child{min-height:0}
+  .story .fold.wide > .fold-bd{width:100%}
+  .sbar-track{width:68px} .sbar-gap{right:82px}
+  .recips{grid-template-columns:minmax(0,1fr)}
+  .rtile .repph{width:76px;height:95px}
   .instr{scroll-margin-top:92px}   /* the two-row sticky bar is taller here */
   /* The switch spans BOTH rows on the right instead of sharing the top one with
      the context line. That row was a 10px caption next to a 44px control, so its
@@ -760,12 +945,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 }
 
 @media (max-width:760px){
-  .band-in{grid-template-columns:minmax(0,1fr)}
   :root{--chart-h:260px;--rise-h:220px}
 
   /* layout */
-  .cmp-row{grid-template-columns:minmax(0,1fr);gap:10px}
-  .cmp-lab{text-align:left}
   .bar-row{grid-template-columns:minmax(0,1fr);gap:8px}
   .bar-v{width:auto;text-align:left}
   .cards{grid-template-columns:minmax(0,1fr)}
@@ -826,6 +1008,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
    caption row and becomes a list, because aligning to a 56px column is worth
    nothing if the words do not fit inside it. */
 @media (max-width:500px){
+  .obj > summary{padding:22px 0;gap:8px 14px}
   /* The column, not the type, is where the headroom comes from: at 320px five
      columns share 272px, so every pixel of gap is worth a fifth of a pixel to each
      of them. CI caught a 1px overflow here that macOS did not -- Linux sets the
@@ -927,78 +1110,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   </div>
 </section>
 
-<!-- ============ 02 NARRATIVE ============ -->
-<section class="paper">
-  <div class="wrap sec">
-    <div class="split">
-      <div class="stack">
-        <div class="eyebrow p" style="margin-bottom:26px">01 &middot; The part you don&rsquo;t see</div>
-        <h2>You see about a quarter of it.</h2>
-      </div>
-      <div class="stack" style="gap:20px">
-        <p class="body">When your employer &ldquo;covers&rdquo; your health insurance, they are not giving you a gift. They are spending part of your compensation on a product, and handing you the product instead of the money.</p>
-        <p class="body">Economists broadly agree this cost <a class="term" href="#/methodology/wrong-wages">lands on wages</a>. It is yours. It just never appears on a paystub, so almost nobody counts it, which is exactly why healthcare costs feel survivable in the abstract and ruinous in practice.</p>
-      </div>
-    </div>
-
-    <div class="rule" style="margin:56px 0 0"></div>
-
-    <div class="cmp">
-      <div class="cmp-row">
-        <div class="cmp-lab">
-          <div style="font-size:14.5px;font-weight:500">On your paystub</div>
-          <div class="note">Premium deduction + Medicare tax</div>
-        </div>
-        <div class="cmp-bars">
-          <div class="cmp-plot">
-            <div class="track"><div id="narrSmall" style="width:26.2%;background:var(--c1)"></div></div>
-            <div class="num" id="narrSmallNum" style="font-size:30px;color:var(--pm);left:26.2%" data-fig="emp.visible">$8,278</div>
-          </div>
-        </div>
-      </div>
-      <div class="cmp-row">
-        <div class="cmp-lab">
-          <div style="font-size:14.5px;font-weight:500">What it really costs</div>
-          <div class="note">Everything, all in</div>
-        </div>
-        <div class="cmp-bars">
-          <div class="cmp-plot">
-            <div class="track">
-              <div id="narrVis" style="width:26.2%;background:var(--c1)"></div>
-              <div id="narrRest" style="width:73.8%;background:var(--c2)"></div>
-            </div>
-            <div class="num" style="font-size:40px;left:100%" data-fig="emp.total">$31,578</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="callout">
-      <div class="lbl p" style="color:var(--amber-deep)">Never on a paystub</div>
-      <div class="callout-v"><span data-fig="emp.invisible">$23,300</span> <span data-uw="a">a year</span></div>
-    </div>
-
-    <div class="rule" style="margin:56px 0 24px"></div>
-    <div class="row" style="gap:56px;flex-wrap:wrap">
-      <p class="note" id="sec2Note" style="flex:1;min-width:0">All figures are <span data-uw="per">per year</span> unless labeled otherwise, and follow the household you set below. Employer premiums are survey averages; benchmark premiums are your county&rsquo;s <span data-py>2027</span> rates, from the source named beside your ZIP.</p>
-      <p class="note" style="max-width:360px">Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
-    </div>
-  </div>
-</section>
-
-
-<!-- ============ STAT BAND: never on a paystub ============ -->
-<section class="band-stat" aria-label="Never on a paystub">
-  <div class="wrap band-in">
-    <div class="band-v num" data-fig="emp.invisible">$23,943</div>
-    <p><span class="band-k">Never on a paystub</span><span data-uw="a">a year</span> of your healthcare never shows up on your paystub. It is spent on your behalf, out of your pay.</p>
-  </div>
-</section>
-
 <!-- ============ INK ZONE (sticky results bar spans 03-05) ============ -->
 <div class="inkzone">
 
   <div class="sticky">
+    <div class="sprog" id="sprog" aria-hidden="true"></div>
     <div class="wrap sticky-in">
       <div class="who" id="who-line"></div>
       <div class="figs">
@@ -1014,9 +1130,30 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     </div>
   </div>
 
-  <!-- ---- 03 THE INSTRUMENT ---- -->
-  <section class="ink">
-    <div class="wrap">
+<!-- ---- THE STORY: one pinned bar, four steps. The bar is built from the same
+       route breakdown as the waterfall, on the same shared scale, so switching
+       route or model redraws it and the steps' copy together. Every chart the
+       page had before lives in a fold under the step it supports. ---- -->
+  <section class="ink story" id="story" aria-label="Your household&rsquo;s healthcare, one step at a time">
+    <div class="wrap story-in">
+      <div class="stage" id="stage">
+        <div class="sbar" id="sbar" role="img" aria-label="">
+          <div class="sbar-cap"><span id="sbarCapK">On a paystub</span><b class="num" id="sbarRun" data-fig="story.run">$8,849</b></div>
+          <div class="sbar-track" id="sbarTrack"></div>
+          <div class="sbar-gap" id="sbarGap"><b class="num" data-fig="uni.savings">$23,884</b><span id="sbarGapK">no longer paid</span></div>
+        </div>
+      </div>
+
+      <div class="ssteps" id="ssteps">
+        <div class="sstep on" data-step="0">
+          <h2 class="eyebrow i" id="st0k">01 &middot; On your paystub</h2>
+          <div class="snum num" data-fig="story.0">$8,849</div>
+          <p class="ssay" id="st0say">That is what healthcare looks like from where you sit, per year.</p>
+          <p class="note-i sbasis" id="st0basis"></p>
+          <div class="folds">
+<details class="fold wide" id="foldHh">
+<summary><span class="fold-k">Change the household</span><span class="fold-s"><span id="hhSum">Household of 4</span></span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
       <div class="instr">
         <div class="panel">
           <div class="stack" style="gap:7px">
@@ -1120,24 +1257,27 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <p class="note-i" id="panelNote">Employer premiums are <a class="term" href="#/methodology/employer">KFF 2026 survey averages</a>. Subsidy math follows the IRS <span data-py>2027</span> applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan in the <span data-py>2027</span> rates named beside your ZIP, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ---- 04 THE REVEAL ---- -->
-  <section class="ink">
-    <div class="wrap sec">
-      <div class="split tie">
-        <div class="stack" style="gap:16px">
-          <div class="eyebrow i">02 &middot; The reveal</div>
-          <h2>Here is <em style="color:var(--c2)">the whole bill</em>.</h2>
+</div></div>
+</details>
+          </div>
         </div>
-        <p style="font-size:16.5px;line-height:1.6;color:var(--im)">Four things add up to what your household&rsquo;s healthcare costs. Two of them appear on a paystub. The largest never does; it is spent on your behalf.</p>
-      </div>
 
-      <div class="wf" id="wf" role="img"></div>
-      <div class="wcaps" id="wcaps" aria-hidden="true"></div>
-      <p class="note-i" id="wfNote" style="margin-top:24px"></p>
-
+        <div class="sstep" data-step="1">
+          <h2 class="eyebrow i" id="st1k">02 &middot; The part you never see</h2>
+          <div class="snum num" data-fig="story.1">$20,832</div>
+          <p class="ssay" id="st1say">Your employer pays this toward your premium. It is part of what you earn, and no paystub shows it.</p>
+          <p class="note-i sbasis" id="st1basis"></p>
+          <div class="folds">
+<details class="fold" id="foldWhy">
+<summary><span class="fold-k">Why this counts as yours</span><span class="fold-s">It is part of your pay, spent on a product instead of handed to you.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
+<p class="fold-p">When your employer &ldquo;covers&rdquo; your health insurance, they are not giving you a gift. They are spending part of your compensation on a product, and handing you the product instead of the money.</p>
+<p class="fold-p">Economists broadly agree this cost <a class="term" href="#/methodology/wrong-wages">lands on wages</a>. It is yours. It just never appears on a paystub, so almost nobody counts it, which is exactly why healthcare costs feel survivable in the abstract and ruinous in practice.</p>
+</div></div>
+</details>
+<details class="fold wide" id="foldRise">
+<summary><span class="fold-k">Who paid the rise</span><span class="fold-s">The same premium in 2025, 2026 and 2027, by who pays it.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
       <!-- The rise: the same premium in 2025, 2026 and 2027, split by who pays it.
            Premiums only. Built from W.riseSeries; empty years say why. -->
       <div class="rise" id="rise">
@@ -1149,22 +1289,34 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         <div class="rise-key" id="riseKey" aria-hidden="true"></div>
         <p class="note-i" id="riseNote"></p>
       </div>
-    </div>
-  </section>
+</div></div>
+</details>
+          </div>
+        </div>
 
-  <!-- ---- 04 THE CLIFF / THE BAD YEAR (route-adaptive slot 03: the statute
-       is the closing indictment before the turn. Marketplace readers get the
-       cliff as their own market; employer readers get the same cliff reframed
-       as the market waiting behind their plan; uninsured readers get the bad
-       year, because a subsidy cliff is meaningless to someone with no subsidy
-       and no premium -- their statute story is that no out-of-pocket ceiling
-       exists at all. The SLOT is constant, so the section numbering never
-       gaps. ---- -->
-  <section class="ink" id="cliff">
-    <div class="wrap sec" id="cliffView">
+        <div class="sstep" data-step="2">
+          <h2 class="eyebrow i" id="st2k">03 &middot; The whole bill</h2>
+          <div class="snum num" data-fig="story.2">$33,481</div>
+          <p class="ssay" id="st2say">Add what you pay at the doctor, and here is <em>the whole bill</em>: what your household&rsquo;s healthcare costs, per year.</p>
+          <p class="note-i sbasis" id="st2basis"></p>
+          <div class="folds">
+<details class="fold wide" id="foldWf">
+<summary><span class="fold-k">Show the arithmetic</span><span class="fold-s">Every part to scale, and which ones a paystub shows.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
+      <p class="fold-lede">Four things add up to what your household&rsquo;s healthcare costs. Two of them appear on a paystub. The largest never does; it is spent on your behalf.</p>
+      <div class="wf" id="wf" role="img"></div>
+      <div class="wcaps" id="wcaps" aria-hidden="true"></div>
+      <p class="note-i" id="wfNote" style="margin-top:24px"></p>
+</div></div>
+</details>
+<details class="fold wide" id="foldSlot">
+<summary><span class="fold-k"><span id="slotK">The cliff</span></span><span class="fold-s"><span id="slotS">What one extra dollar of income can cost.</span></span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
+<div id="cliff">
+    <div class="slot" id="cliffView">
       <div class="split tie">
         <div class="stack" style="gap:15px">
-          <div class="eyebrow i">03 &middot; The cliff</div>
+          <div class="eyebrow i">The cliff</div>
           <h2>One dollar, <em style="color:var(--c2)" data-fig="cliff.drop">$12,980</em>.</h2>
         </div>
         <p style="font-size:16.5px;line-height:1.6;color:var(--im)" id="cliffIntro">Nothing in this section is modeled. The <a class="term" href="#/methodology/credit">premium tax credit</a> does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.</p>
@@ -1182,10 +1334,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <p class="note-i" id="cliffAge" hidden></p>
     </div>
 
-    <div class="wrap sec" id="badYear" hidden>
+    <div class="slot" id="badYear" hidden>
       <div class="split tie">
         <div class="stack" style="gap:15px">
-          <div class="eyebrow i">03 &middot; The bad year</div>
+          <div class="eyebrow i">The bad year</div>
           <h2>Nothing caps <em style="color:var(--c2)">a bad year</em>.</h2>
         </div>
         <p style="font-size:16.5px;line-height:1.6;color:var(--im)">The out-of-pocket maximum is the law&rsquo;s ceiling on a bad year, for people with coverage. Going without insurance means going without the ceiling: no statute anywhere limits what a hospital can bill you.</p>
@@ -1212,24 +1364,22 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 
       <p class="note-i">How often does cost stop care? Asked by KFF in 2025, <b style="color:var(--ib);font-weight:400">three in four</b> uninsured adults said they skipped or postponed care over cost; the federal NHIS survey, asking more narrowly, puts it at <b style="color:var(--ib);font-weight:400">38.6%</b>, more than double the privately insured. Both figures, and the list-price arithmetic above (our derivation from HCUP&rsquo;s published aggregates and published markup research, one of whose sources is union-funded and labeled so), are <a class="q" href="#/methodology/bad-year" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">on the methodology page</a>, along with the medical-bankruptcy literature, where the famous numbers disagree and we print both sides or neither.</p>
     </div>
-  </section>
-  <!-- ---- 05 THE COMPARISON (the turn: after the cliff, the alternative) ---- -->
-  <section class="ink">
-    <div class="wrap sec" style="display:flex;flex-direction:column;gap:30px">
-      <div class="split tie">
-        <div class="stack" style="gap:15px">
-          <div class="eyebrow i">04 &middot; The comparison</div>
-          <h2><em style="color:var(--teal)">Another way</em> to pay for the same care.</h2>
+</div>
+</div></div>
+</details>
+          </div>
         </div>
-        <p style="font-size:16.5px;line-height:1.6;color:var(--im)">Nobody agrees on what single-payer would cost. So pick whose estimate you trust, including the one funded by its opponents.</p>
-      </div>
 
+        <div class="sstep" data-step="3">
+          <h2 class="eyebrow i" id="st3k">04 &middot; Same care, universal coverage</h2>
+          <div class="snum num" data-fig="uni.total">$9,597</div>
+          <p class="ssay" id="st3say">No premiums. Nothing due at the doctor.</p>
+          <p class="note-i sbasis" id="st3basis">Nobody agrees on what single-payer would cost. So pick whose estimate you trust, including the one funded by its opponents.</p>
       <div class="stack" style="gap:14px">
         <div class="lbl" id="modelLbl">Financing model</div>
         <div class="pills" id="pills" role="group" aria-labelledby="modelLbl"></div>
         <select class="ctrl" id="modelPick" aria-label="Financing model"></select>
       </div>
-
       <div class="prov">
         <div class="stack" style="gap:7px">
           <div class="lbl" style="color:var(--teal)">Who produced this estimate</div>
@@ -1240,7 +1390,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div style="font-size:14.5px;line-height:1.6;color:var(--im)"><a id="basis" class="term" href="#/methodology/universal" style="color:var(--c2)"></a>. <a class="q" href="#/methodology/universal" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">See the arithmetic</a>.</div>
         </div>
       </div>
-
+          <div class="folds">
+<details class="fold wide" id="foldCmp">
+<summary><span class="fold-k">Compare side by side</span><span class="fold-s">Employer, marketplace and universal on one scale, and where all six estimates land.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
       <div class="bars">
         <div class="bar-row">
           <div class="bar-t"><div class="a">Through your employer</div><div class="b">What you pay today</div><div class="b bkey" id="empSub"></div></div>
@@ -1266,7 +1419,6 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       </div>
 
       <p class="note-i" id="cmpNote" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b>: employer money counts on both sides, a taxpayer subsidy on neither. No study published a per-household figure, so the universal numbers are our allocation; <a class="q" href="#/methodology/universal" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">the methodology page shows the arithmetic</a>.</p>
-
       <div class="summary">
         <div class="save">
           <div class="stack" style="gap:5px">
@@ -1290,7 +1442,6 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <div class="note-i">The employer share does not disappear. It moves onto your bill.</div>
         </div>
       </div>
-
       <div class="stack" style="gap:11px;border-top:1px solid var(--irule);padding-top:22px">
         <div class="row" style="justify-content:space-between;align-items:baseline;gap:16px">
           <div class="lbl">Where every model lands</div>
@@ -1307,18 +1458,17 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           <span id="nowLbl" style="color:var(--c2)"><span data-fig="route.borne">$31,578</span> &nbsp;today</span>
         </div>
       </div>
+</div></div>
+</details>
+          </div>
+        </div>
+      </div>
+
+      <p class="note-i" id="sec2Note">All figures are <span data-uw="per">per year</span> unless labeled otherwise, and follow the household you set. Employer premiums are survey averages; benchmark premiums are your county&rsquo;s <span data-py>2027</span> rates, from the source named beside your ZIP. Sources: KFF Employer Health Benefits Survey; CMS; Census Bureau.</p>
     </div>
   </section>
 
 </div>
-
-<!-- ============ STAT BAND: what universal coverage would leave ============ -->
-<section class="band-stat teal" aria-label="Under universal coverage">
-  <div class="wrap band-in">
-    <div class="band-v num" data-fig="uni.savings">$22,534</div>
-    <p><span class="band-k" id="bandSaveK">Under universal coverage</span><span id="bandSaveSay">a year back in your household&rsquo;s pocket under the estimate you picked. Five others, critics included, are one click away.</span></p>
-  </div>
-</section>
 
 <!-- ============ 05 IN LIVES ============ -->
 <section class="paper" id="lives">
@@ -1389,40 +1539,42 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       </div>
     </div>
 
-    <div class="grid2">
-      <div class="card-p">
-        <div class="lbl p">Objection 01</div>
-        <div class="quote">&ldquo;My taxes would go through the roof.&rdquo;</div>
+    <div class="objlist">
+<details class="fold obj" id="obj1">
+<summary><span class="fold-k">Objection 01</span><span class="quote">&ldquo;My taxes would go through the roof.&rdquo;</span><span class="obj-a">Taxes rise, and the premium line goes to zero at the same time. What matters is the total.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
         <p class="body">Yes. Your taxes would rise, and every honest model says so, the ones above included. The question is whether the <em>total</em> shrinks, because the premium line goes to zero at the same time. For this household the tax increase runs <span style="color:var(--amber-deep)"><span data-fig="uni.rangeLo">$8,400</span> to <span data-fig="uni.rangeHi">$14,600</span></span> depending on whose model you pick, against <span style="color:var(--amber-deep)" data-fig="route.replaced">$30,793</span> <span id="objTail">in premiums, deductibles and copays it replaces</span>.<sup class="fnr">*</sup></p>
         <p class="fn"><span class="fnm">*</span><span id="crossText">For a household like yours, 1 of the 6 models starts costing more than today at about $248,000 of income, and the other 5 do not at any income the slider reaches. If that is you, the calculator will say so.</span></p>
-      </div>
-
-      <div class="card-p">
-        <div class="lbl p">Objection 02</div>
-        <div class="quote">&ldquo;I&rsquo;d be stuck waiting months for care.&rdquo;</div>
+</div></div>
+</details>
+<details class="fold obj" id="obj2">
+<summary><span class="fold-k">Objection 02</span><span class="quote">&ldquo;I&rsquo;d be stuck waiting months for care.&rdquo;</span><span class="obj-a">Some universal systems have long waits and some do not. The US already rations care, by price.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
         <p class="body">Wait times are real in some universal systems and not in others. Canada&rsquo;s elective queues are long; Germany&rsquo;s multi-payer sickness funds and France&rsquo;s statutory system cover everyone without them. How a system is designed and paid for matters more than whether it is single-payer, a distinction the debate usually flattens.<sup class="fnr">*</sup></p>
         <p class="fn"><span class="fnm">*</span>The US already rations by price. KFF&rsquo;s surveys have repeatedly found around four in ten adults saying they or a family member delayed or skipped care because of cost. That is a waiting list too. It is just invisible.</p>
-      </div>
-
-      <div class="card-p">
-        <div class="lbl p">Objection 03</div>
-        <div class="quote">&ldquo;I&rsquo;d lose the doctor I have now.&rdquo;</div>
+</div></div>
+</details>
+<details class="fold obj" id="obj3">
+<summary><span class="fold-k">Objection 03</span><span class="quote">&ldquo;I&rsquo;d lose the doctor I have now.&rdquo;</span><span class="obj-a">Narrow networks and job changes already decide that for most people.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
         <p class="body">Worth checking against what you have today. Narrow networks already decide this for most people: your plan drops a hospital system, your employer switches carriers, you change jobs. A single national network is the version where your doctor does not depend on your employer&rsquo;s procurement decisions.<sup class="fnr">*</sup></p>
         <p class="fn"><span class="fnm">*</span>Transition is disruptive, and providers who do well under commercial rates would be paid less.</p>
-      </div>
-
-      <div class="card-p">
-        <div class="lbl p">Objection 04</div>
-        <div class="quote">&ldquo;The country simply cannot afford it.&rdquo;</div>
+</div></div>
+</details>
+<details class="fold obj" id="obj4">
+<summary><span class="fold-k">Objection 04</span><span class="quote">&ldquo;The country simply cannot afford it.&rdquo;</span><span class="obj-a">It replaces spending that is already happening. The comparison is with today, not with zero.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
         <p class="body">The headline figure is enormous: on the order of $30 to $40 trillion over a decade. But it replaces spending already happening: premiums, employer contributions, out-of-pocket costs, Medicaid, Medicare. The comparison that matters is against the status quo, not against zero.<sup class="fnr">*</sup></p>
         <p class="fn"><span class="fnm">*</span>The <a class="term" href="#/methodology/model-blahous">Mercatus study</a> is the useful one here. Funded by opponents of the policy, it still showed lower national spending than the status quo. But that result depends on the bill&rsquo;s own assumption that providers are paid Medicare rates, a reading Blahous himself rejects. Both halves of that are true.</p>
-      </div>
-      <div class="card-p">
-        <div class="lbl p">Objection 05</div>
-        <div class="quote">&ldquo;Government-run coverage cannot work here.&rdquo;</div>
+</div></div>
+</details>
+<details class="fold obj" id="obj5">
+<summary><span class="fold-k">Objection 05</span><span class="quote">&ldquo;Government-run coverage cannot work here.&rdquo;</span><span class="obj-a">It already does, for about a third of the country.</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+<div class="fold-bd"><div class="fold-in">
         <p class="body">It already does, for about a third of the country. Medicare covers 69.7 million people. The <a class="term" href="#/methodology/other-coverage">Military Health System</a> covers 9.4 million service members, families and retirees through TRICARE, at about $6,800 a person a year, with no enrollment fee for active-duty families and a yearly cap on what any family pays. The VA treats 9.1 million enrolled veterans. Nobody in this debate proposes taking any of it away. The question is whether the rest of the country joins a version of it, not whether such a thing can exist here.<sup class="fnr">*</sup></p>
         <p class="fn"><span class="fnm">*</span>TRICARE is not free: retirees pay $375 to $1,191 a year in enrollment fees, with cost shares up to a cap of $3,000 to $4,635 by plan and group, and the $64 billion budget includes military hospitals and medical readiness, so the per-person figure is a budget divided by a headcount, not a premium. Figures and sources are on the methodology page.</p>
-      </div>
+</div></div>
+</details>
     </div>
 
     <div class="rule" style="margin:48px 0 24px"></div>
@@ -1444,26 +1596,33 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       <p class="note" style="font-size:15px;line-height:1.65">Staffers count letters by position and topic. A specific figure from a constituent in the district reads differently than a form letter, so this one is built from your own numbers.</p>
     </div>
 
-    <div class="actgrid">
-      <div class="stack" style="gap:20px">
-        <div class="card-p" style="padding:28px 30px;gap:20px">
-          <div class="lbl p">Your representative</div>
-          <!-- The people ARE the recipient control: click the member or a
-               senator to address the letter to them. The selected one carries
-               the amber outline, and the letter highlights their name. -->
-          <button type="button" class="rec-hit row" id="recRep" data-rec="rep" style="gap:16px;align-items:center" aria-pressed="true">
-            <div class="repph">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              <!-- No loading="lazy" here: a hidden (display:none) image never
-                   intersects the viewport, so a lazy one would never load at
-                   all. Only the one resolved member's photo is requested. -->
-              <img id="repPhoto" alt="" hidden decoding="async" referrerpolicy="no-referrer">
-            </div>
-            <div class="stack" style="gap:4px;text-align:left">
-              <div style="font-family:var(--serif);font-size:23px;line-height:1.15" id="repName">-</div>
-              <div class="note" style="font-size:13.5px"><span id="repDistrict">Enter your five-digit ZIP above.</span></div>
-            </div>
-          </button>
+    <!-- The people ARE the recipient control: three portraits, the member and
+         both senators. Click one to address the letter to them; the selected
+         tile carries the amber ring and the letter highlights their name. -->
+    <div class="sendstep">
+      <div class="sendk"><span class="sendn num">1</span><span class="lbl p">Who gets it</span></div>
+      <div class="recips" id="recips">
+        <button type="button" class="rtile rec-hit" id="recRep" data-rec="rep" aria-pressed="true">
+          <div class="repph">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <!-- No loading="lazy" here: a hidden (display:none) image never
+                 intersects the viewport, so a lazy one would never load at
+                 all. Only the one resolved member's photo is requested. -->
+            <img id="repPhoto" alt="" hidden decoding="async" referrerpolicy="no-referrer">
+          </div>
+          <span class="rtile-t">
+            <span class="rtile-k">Your representative</span>
+            <span class="rtile-n" id="repName">-</span>
+            <span class="rtile-d" id="repDistrict">Enter your five-digit ZIP above.</span>
+            <span class="rtile-s" id="repPos">-</span>
+          </span>
+          <span class="rtile-go" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        </button>
+        <!-- Both senators, each with their own position on the Senate companion.
+             Rebuilt only when the state changes (the portraits would otherwise
+             re-request on every slider repaint). -->
+        <div class="senrows" id="senRows"></div>
+      </div>
           <!-- A quarter of covered ZIPs genuinely span two or three districts.
                The reader knows which town they live in; we do not. Ask, never
                guess -- a letter to the wrong office is this card's one
@@ -1472,25 +1631,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
             <div class="note" style="font-size:13px" id="repPickWhy"></div>
             <div class="row" style="gap:6px;flex-wrap:wrap" id="repPickBtns" role="group" aria-labelledby="repPickWhy"></div>
           </div>
-          <div style="height:1px;background:var(--prule-soft)"></div>
-          <div class="stack" style="gap:11px">
-            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">House bill</span><span id="repBill"></span></div>
-            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm);white-space:nowrap">Their position</span><span id="repPos" style="color:var(--pm);text-align:right">-</span></div>
-          </div>
-          <!-- The Senate companion, no longer a bare bill number: both of the
-               state's senators, each with their own position on S. 1506. Rows
-               are rebuilt only when the state changes (the portraits would
-               otherwise re-request on every slider repaint). -->
-          <div class="stack" style="gap:11px" id="senBlock" hidden>
-            <div style="height:1px;background:var(--prule-soft)"></div>
-            <div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px"><span style="color:var(--pm)">Your senators</span><span class="note" style="font-size:12.5px">on <span id="senBillLbl"></span>, the Senate companion</span></div>
-            <div class="stack" style="gap:9px" id="senRows"></div>
-            <p class="note" style="font-size:12px" id="recHint">The letter is addressed to the outlined name. Pick another to switch.</p>
-          </div>
-          <p class="note" style="font-size:12px" id="repAsOf" hidden><a class="term" href="#/methodology/src-congress">Cosponsor status</a> as of <span id="repAsOfDate"></span>.</p>
-          <p class="note" style="font-size:12px" id="repHedge" hidden>District from your ZIP. If you live near a district line, double-check on your representative&rsquo;s site.</p>
+      <div class="recmeta">
+        <p class="note">House bill: <span id="repBill"></span>.</p>
+        <div id="senBlock" hidden>
+          <p class="note">Senators are shown with their position on <span id="senBillLbl"></span>, the Senate companion.</p>
+          <p class="note" id="recHint">The letter is addressed to the outlined name. Pick another to switch.</p>
         </div>
+        <p class="note" id="repAsOf" hidden><a class="term" href="#/methodology/src-congress">Cosponsor status</a> as of <span id="repAsOfDate"></span>.</p>
+        <p class="note" id="repHedge" hidden>District from your ZIP. If you live near a district line, double-check on your representative&rsquo;s site.</p>
+      </div>
+    </div>
 
+    <div class="actgrid">
+      <div class="stack" style="gap:20px">
+        <div class="sendk"><span class="sendn num">2</span><span class="lbl p">Make it yours</span></div>
         <div class="card-p" style="padding:28px 30px;gap:16px">
           <!-- Two groups, because the six stories were never independent: three of
                them are WHO is writing (one at a time; the route sets the default) and
@@ -1521,6 +1675,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
         </div>
       </div>
 
+      <div class="stack" style="gap:20px;min-width:0">
+      <div class="sendk"><span class="sendn num">3</span><span class="lbl p">Read it, then send it</span></div>
       <div class="letter">
         <div class="hd">
           <div class="lbl p">Your letter</div>
@@ -1530,7 +1686,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
              inside resolve through the same data-fig map as the rest of the
              page. Editable by hand -- and a control change rewrites the body,
              which the header says while an edit is in force. -->
-        <div class="bd" id="letterBd" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="Your letter. Editable text."></div>
+        <div class="bd clamp" id="letterBd" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="Your letter. Editable text."></div>
+        <button type="button" class="lmore" id="letterMore" aria-expanded="false" aria-controls="letterBd"><span id="letterMoreT">Read the whole letter</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
         <div class="ft">
           <!-- Congressional offices take constituent mail through the web
                forms on their own sites, never a public inbox, so there is no
@@ -1545,6 +1702,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           </div>
           <p class="note" style="font-size:12.5px;flex:1 1 100%;text-align:left" id="ftNote"><span id="ftNoteSite">Congressional offices take letters through the forms on their own sites, not a public inbox. The amber button copies your letter and opens the outlined member&rsquo;s site; paste it into their contact form. We never see your letter.</span><span id="ftNoteNoSite" hidden>Congressional offices take letters through the forms on their own sites, not a public inbox. We do not have this member&rsquo;s site on file, so the amber button is off: use Copy text, then paste the letter into the contact form listed on their house.gov page. We never see your letter.</span><span id="ftLong" hidden> This letter is too long for a mail link, so Mail app copies it and opens a message with the subject filled in; paste it in.</span></p>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -2020,7 +2178,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       "uni.rangeLo": S.universalRange.lo, "uni.rangeHi": S.universalRange.hi,
       "cobra.annual": S.cobra.annual, "cliff.drop": S.cliffDrop, "route.replaced": S.routeReplaced,
       "route.whole": R.whole, "route.borne": R.borne,
-      "route.onPaystub": R.onPaystub, "route.offPaystub": R.offPaystub
+      "route.onPaystub": R.onPaystub, "route.offPaystub": R.offPaystub,
+      // the story: each step's headline figure, and the bar's running total
+      "story.0": S.story.steps[0].v, "story.1": S.story.steps[1].v, "story.2": S.story.steps[2].v,
+      "story.run": storyRun()
     };
   }
 
@@ -2073,16 +2234,20 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   var senSig = "";
   function renderSenators(stCode){
     byId("senBlock").hidden = !stCode;
-    if (!stCode){ senSig = ""; return; }
+    // the tiles sit beside the member's, outside the hidden block, so an
+    // unresolved card has to empty them itself or last ZIP's senators stay up
+    if (!stCode){ senSig = ""; byId("senRows").innerHTML = ""; return; }
     if (senSig === stCode) return;
     senSig = stCode;
     var list = REPS.senate[stCode] || [], html = "", i;
     for (i = 0; i < list.length; i++){
-      html += '<button type="button" class="senrow rec-hit" data-rec="sen' + i + '" aria-pressed="false"><div class="repph sm">' +
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' +
+      html += '<button type="button" class="senrow rtile rec-hit" data-rec="sen' + i + '" aria-pressed="false"><div class="repph">' +
+        '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#988B76" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' +
         '<img alt="Official portrait of ' + list[i].n + '" hidden decoding="async" referrerpolicy="no-referrer">' +
-        '</div><span class="sen-n">' + list[i].n + ' (' + list[i].p + ')</span>' +
-        '<span class="sen-s">' + (list[i].co ? 'Cosponsor' : 'Not yet') + '</span></button>';
+        '</div><span class="rtile-t"><span class="rtile-k">Your senator</span>' +
+        '<span class="sen-n">' + list[i].n + '\u00a0(' + list[i].p + ')</span>' +
+        '<span class="sen-s">' + (list[i].co ? 'Cosponsor of ' + BILL.senate : 'Not yet a cosponsor') + '</span></span>' +
+        '<span class="rtile-go" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></button>';
     }
     byId("senRows").innerHTML = html;
     [].forEach.call(byId("senRows").querySelectorAll("img"), function(img, idx){
@@ -2292,7 +2457,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
                S.marketplace.overCliff, S.marketplace.noCredit, rec.kind, rec.m ? rec.m.n + rec.m.co : ""].join("|");
     if (sig === letterSig) return;
     letterSig = sig; letterEdited = false;
-    byId("letterBd").innerHTML = letterHTML();
+    var bd = byId("letterBd");
+    bd.innerHTML = letterHTML();
+    bd.classList.remove("wash"); void bd.offsetWidth; bd.classList.add("wash");
   }
   function updateLetterMeta(){
     var txt = letterPlain();
@@ -2384,6 +2551,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     S.decade  = Math.abs(sav.delta) * 10;
     S.savingsNegative = sav.delta < 0;
 
+    S.story = storyPlan();
     // Before the fig loop, so freshly injected marks get filled this same pass.
     renderLetter();
     // The range comparison changes continuously with income, so it lives in a
@@ -2466,18 +2634,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     byId("rangeBand").style.left  = (S.universalRange.lo / max * 100).toFixed(1) + "%";
     byId("rangeBand").style.width = ((S.universalRange.hi - S.universalRange.lo) / max * 100).toFixed(1) + "%";
 
-    // narrative bars
-    var vis = S.breakdown.onPaystub / S.breakdown.whole * 100;
-    byId("narrSmall").style.width = vis.toFixed(1) + "%";
-    byId("narrSmallNum").style.left = vis.toFixed(1) + "%";
-    byId("narrVis").style.width   = vis.toFixed(1) + "%";
-    byId("narrRest").style.width  = (100 - vis).toFixed(1) + "%";
-
     byId("saveLbl").textContent   = S.savingsNegative ? "Your household would pay" : "Your household would keep";
-    byId("bandSaveK").textContent = S.savingsNegative ? "Under universal coverage, more" : "Under universal coverage";
-    byId("bandSaveSay").textContent = WORDS.a[state.unit] + (S.savingsNegative
-      ? " more for this household under the estimate you picked. Change the model or the income and watch it move."
-      : " back in your household\u2019s pocket under the estimate you picked. Five others, critics included, are one click away.");
     byId("decadeLbl").textContent = S.savingsNegative ? "Over a decade, on top" : "Over a decade";
     document.querySelector(".save").classList.toggle("neg", S.savingsNegative);
     // "today" on the range strip is this household's route, so the marker cannot
@@ -2566,6 +2723,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       ? 'Not your market today, but it is the market waiting if the employer plan ever goes away. Nothing in this section is modeled: the <a class="term" href="#/methodology/credit">premium tax credit</a> does not taper at the top, it stops, and this is what it does to a household that earns one dollar too much.'
       : 'Nothing in this section is modeled. The <a class="term" href="#/methodology/credit">premium tax credit</a> does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.';
 
+    renderStory();
     renderElig();
     renderPills();
     renderScope();
@@ -3252,7 +3410,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
           state.bkey = b.getAttribute("data-k");
           state.bChoices = null;
           paint();
-          document.querySelector(".instr").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
+          byId("story").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
         } else {
           byId("zip").value = b.getAttribute("data-z");
           submitZip();
@@ -3294,7 +3452,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       state.bkey = r.key;
       state.bChoices = null;
       paint();
-      document.querySelector(".instr").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
+      byId("story").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
     } else {
       // spans rating areas: EVERYTHING keeps the previous ZIP until the reader
       // picks a county -- the figures, and the rep card with them. Updating the
@@ -3357,7 +3515,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
   var rz;
   window.addEventListener("resize", function(){
     clearTimeout(rz);
-    rz = setTimeout(function(){ paint(); }, 140);
+    rz = setTimeout(function(){ sizeStory(); paint(); trackStory(); }, 140);
   });
 
   /* The cliff chart's viewBox tracks its container width, so it has to re-render
@@ -3764,8 +3922,248 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
     paint();
   });
 
+
+  /* ---------- the story ----------
+     One pinned bar and four steps. The bar's segments are the route's own parts
+     (W.routeBreakdown) and the model's (S.universal.parts), drawn on one scale
+     shared by every route and every model, so nothing on it is authored twice
+     and a segment's height is always value / scale. A step only decides WHICH
+     segments stand; paint() decides how tall they are. */
+  var SEG_LABEL = { worker:"From your paycheck", employer:"Paid by your employer", oop:"At the doctor",
+                    tax:"Medicare tax", netPremium:"Your premium", subsidy:"Tax credit, not your money",
+                    cash:"Care at cost" };
+  var storyStep = 0, storySig = "";
+  function partBy(key){
+    var ps = S.breakdown.parts, i;
+    for (i = 0; i < ps.length; i++) if (ps[i].key === key) return ps[i];
+    return { value: 0 };
+  }
+  function storyPlan(){
+    var R = S.breakdown, m = S.marketplace, per = WORDS.per[state.unit];
+    var L = function(a, t){ return '<a class="term" href="' + METH_LINK + a + '">' + t + '</a>'; };
+    if (state.route === "marketplace"){
+      var credit = partBy("subsidy").value > 0;
+      return { order:["netPremium","subsidy","oop","tax"], steps:[
+        { k:"What you pay the insurer", v:partBy("netPremium").value, on:["netPremium"], cap:"You pay the insurer",
+          say: credit ? "Your premium after the tax credit. It looks like the price of the plan. It is not."
+                      : "Your premium. With no credit behind it, this is the plan at full price.",
+          basis:"The benchmark silver plan in your county, priced at your ages, after the " + L("credit", "premium tax credit") + "." },
+        { k: credit ? "The part you never see" : "The credit that is not there", v:partBy("subsidy").value,
+          on:["netPremium","subsidy"], cap:"Running total",
+          say: credit ? "Taxpayers pay this to the insurer on your behalf. It is not your money, and it stops the moment you earn one dollar too much."
+                      : R.note,
+          basis:"Set by statute from your income and the benchmark premium. Nothing in this figure is modeled." },
+        { k:"The whole bill", v:R.whole, on:["netPremium","subsidy","oop","tax"], cap:"The whole bill",
+          say:"Add the deductible, copays and the Medicare tax, and here is <em>the whole bill</em>: what the plan costs, " + per + ". Your household bears " + fmt(R.borne) + " of it.",
+          basis:"Out-of-pocket spend is a " + L("kinds", "modeled") + " average." }
+      ] };
+    }
+    if (state.route === "none"){
+      return { order:["tax","cash"], open:true, steps:[
+        { k:"On your paystub", v:partBy("tax").value, on:["tax"], cap:"On a paystub",
+          say:"With no coverage, the only healthcare line on a paystub is the Medicare tax.",
+          basis:"1.45% of pay, set in law." },
+        { k:"Care you pay for at cost", v:partBy("cash").value, on:["tax","cash"], cap:"Running total",
+          say:"What a household like yours spends on care with no plan. It is lower because people go without care, not because care is cheaper.",
+          basis:"A " + L("kinds", "modeled") + " average." },
+        { k:"What you spend, and what you risk", v:R.whole, on:["tax","cash"], cap:"What you spend",
+          say:"Every insured plan has a legal ceiling on a bad year. Without coverage there is none.",
+          basis:"No statute limits what an uninsured household can be billed. " + L("bad-year", "What a bad year costs") + "." }
+      ] };
+    }
+    var own = state.deductPer != null, tier = state.size > 1 ? "family" : "single";
+    return { order:["worker","tax","employer","oop"], steps:[
+      { k:"On your paystub", v:R.onPaystub, on:["worker","tax"], cap:"On a paystub",
+        say:"That is what healthcare looks like from where you sit, " + per + ".",
+        basis: own ? "Your own premium deduction, plus the Medicare tax, which is set in law."
+                   : "The premium deduction is a " + L("employer", "KFF survey average") + " until you enter your own. The Medicare tax is set in law." },
+      { k:"The part you never see", v:partBy("employer").value, on:["worker","tax","employer"], cap:"Running total",
+        say:"Your employer pays this toward your premium. It is part of what you earn, and no paystub shows it.",
+        basis:(state.totPrem != null ? "The total premium you entered, less your deduction." : "A " + L("employer", "KFF survey average") + " for " + tier + " coverage.") +
+              " Economists broadly agree this cost " + L("wrong-wages", "lands on wages") + "." },
+      { k:"The whole bill", v:R.whole, on:["worker","tax","employer","oop"], cap:"The whole bill",
+        say:"Add what you pay at the doctor, and here is <em>the whole bill</em>: what your household’s healthcare costs, " + per + ".",
+        basis: state.oopOwn != null ? "Using the deductible you entered." : "Out-of-pocket spend is a " + L("kinds", "modeled") + " average." }
+    ] };
+  }
+  function uniSegs(){
+    var parts = S.universal.parts, list = [], k;
+    for (k in parts){
+      if (!Object.prototype.hasOwnProperty.call(parts, k) || !UNI_PARTS[k]) continue;
+      list.push({ key:"u-" + k, value:parts[k], bg:UNI_PARTS[k].tone,
+                  label:UNI_PARTS[k].who.charAt(0).toUpperCase() + UNI_PARTS[k].who.slice(1) });
+    }
+    return list;
+  }
+  function storyOn(){
+    if (storyStep >= 3) return uniSegs().map(function(u){ return u.key; });
+    return S.story.steps[storyStep].on;
+  }
+  function storyRun(){
+    if (storyStep >= 3) return S.universal.total;
+    var on = S.story.steps[storyStep].on, t = 0, i;
+    for (i = 0; i < on.length; i++) t += partBy(on[i]).value;
+    return t;
+  }
+  function storyScale(){ return Math.max(S.routeMax, S.universalRange.hi, S.universal.total); }
+  function renderStory(){
+    var plan = S.story, scale = storyScale(), i, p, segs = [], html = "";
+    for (i = 0; i < plan.order.length; i++){
+      p = partBy(plan.order[i]);
+      segs.push({ key:p.key, value:p.value, bg:p.ghost ? HATCH : TONE[p.tone],
+                  label:SEG_LABEL[p.key] + ((p.key === "oop" && !(state.route === "employer" && state.oopOwn != null)) || p.key === "cash" ? " (estimate)" : "") });
+    }
+    segs = segs.concat(uniSegs());
+    var sig = segs.map(function(x){ return x.key; }).join(",");
+    var track = byId("sbarTrack");
+    if (sig !== storySig){
+      // rebuilt only when the SET of segments changes (a new route, a model with
+      // a different allocation), so an income drag eases heights instead
+      storySig = sig;
+      html = '<div class="sbar-ghost" id="sbarGhost"></div><div class="sbar-open" id="sbarOpen"><span>No ceiling</span></div>';
+      for (i = 0; i < segs.length; i++)
+        html += '<div class="sseg" data-k="' + segs[i].key + '"><span class="sseg-l"><span class="sseg-t"></span><b class="num"></b></span></div>';
+      track.innerHTML = html;
+    }
+    for (i = 0; i < segs.length; i++){
+      var el = track.querySelector('[data-k="' + segs[i].key + '"]');
+      el.style.setProperty("--f", (segs[i].value / scale).toFixed(5));
+      el.style.background = segs[i].bg;
+      el.querySelector(".sseg-t").textContent = segs[i].label;
+      el.querySelector("b").textContent = fmt(segs[i].value);
+    }
+    byId("sbarGhost").style.setProperty("--g", (S.breakdown.borne / scale).toFixed(5));
+    byId("sbarOpen").style.setProperty("--g", (S.breakdown.whole / scale).toFixed(5));
+    for (i = 0; i < 3; i++){
+      byId("st" + i + "k").textContent = "0" + (i + 1) + " · " + plan.steps[i].k;
+      byId("st" + i + "say").innerHTML = plan.steps[i].say;   // our own sentences; one carries the italic callback
+      byId("st" + i + "basis").innerHTML = plan.steps[i].basis;
+    }
+    byId("st3say").textContent = "No premiums. Nothing due at the doctor. " + (S.savingsNegative
+      ? "Under this estimate your household would pay " + fmt(S.savings) + " more " + WORDS.a[state.unit] + " than it bears today."
+      : fmt(S.savings) + " " + WORDS.a[state.unit] + " stays with your household.");
+    byId("sbarGapK").textContent = S.savingsNegative ? "more than today" : "no longer paid";
+    var a = S.marketplace.place;
+    byId("hhSum").textContent = "Household of " + state.size + " · " + countyLabel(a) + " · " + money(state.income) + " · " +
+      (state.route === "employer" ? "employer coverage" : state.route === "marketplace" ? "marketplace plan" : "uninsured");
+    byId("foldWhy").hidden = state.route !== "employer";   // the wage argument is about an employer's share
+    byId("slotK").textContent = state.route === "none" ? "The bad year" : "The cliff";
+    byId("slotS").textContent = state.route === "none"
+      ? "Nothing in law caps what an uninsured household can owe."
+      : S.cliffDrop ? "One extra dollar of income can cost this household " + fmt(S.cliffDrop) + " " + WORDS.a[state.unit] + "."
+                    : "What one extra dollar of income can cost.";
+    paintStory();
+  }
+  // The step-dependent half: which segments stand, the running total, the ground.
+  function paintStory(){
+    if (!S || !S.story) return;
+    var plan = S.story, uni = storyStep >= 3, on = storyOn(), scale = storyScale();
+    var segs = byId("sbarTrack").querySelectorAll(".sseg"), i, H = parseFloat(byId("stage").style.getPropertyValue("--H")) || 300;
+    // labels sit beside their segment's middle; thin neighbours would print on
+    // top of each other, so each label keeps 18px from the one below it
+    var base = 0, last = -99, said = [];
+    for (i = 0; i < segs.length; i++){
+      var k = segs[i].getAttribute("data-k"), isOn = on.indexOf(k) > -1;
+      segs[i].classList.toggle("on", isOn);
+      if (!isOn){ segs[i].style.setProperty("--dy", "0px"); continue; }
+      var h = parseFloat(segs[i].style.getPropertyValue("--f")) * H, mid = base + h / 2;
+      var at = Math.max(mid, last + 18);
+      segs[i].style.setProperty("--dy", (at - mid).toFixed(1) + "px");
+      last = at; base += h;
+      said.push(segs[i].querySelector(".sseg-t").textContent + " " + segs[i].querySelector("b").textContent);
+    }
+    byId("sbarCapK").textContent = uni ? "Under universal coverage" : plan.steps[storyStep].cap;
+    byId("sbarRun").textContent = fmt(storyRun());
+    var gap = byId("sbarGap"), uTop = S.universal.total / scale, gTop = S.breakdown.borne / scale;
+    gap.style.bottom = ((uTop + gTop) / 2 * H).toFixed(1) + "px";
+    var bar = byId("sbar");
+    bar.classList.toggle("uni", uni);
+    bar.classList.toggle("open", !!plan.open && storyStep === 2);
+    bar.setAttribute("aria-label", (uni ? "Under universal coverage: " : plan.steps[storyStep].k + ": ") + said.join(", plus ") +
+      ". Total " + fmt(storyRun()) + " " + WORDS.per[state.unit] + "." +
+      (uni ? " Today this household bears " + fmt(S.breakdown.borne) + "." : ""));
+    document.querySelector(".inkzone").classList.toggle("uni", uni);
+    var steps = document.querySelectorAll(".sstep");
+    for (i = 0; i < steps.length; i++) steps[i].classList.toggle("on", i === storyStep);
+  }
+  var stageEl = byId("stage"), storyEl = byId("story");
+  function sizeStory(){
+    var sb = document.querySelector(".sticky");
+    document.documentElement.style.setProperty("--sticky-h", (sb ? sb.offsetHeight : 0) + "px");
+    var H = Math.max(150, Math.min(460, stageEl.clientHeight - 30 - 48));
+    stageEl.style.setProperty("--H", H + "px");
+  }
+  function trackStory(){
+    var steps = document.querySelectorAll(".sstep"), sr = stageEl.getBoundingClientRect(), i, r;
+    var stacked = window.matchMedia("(max-width:900px)").matches;
+    var y = stacked ? sr.bottom + (window.innerHeight - sr.bottom) * 0.5 : window.innerHeight * 0.62;
+    var idx = 0;
+    for (i = 0; i < steps.length; i++) if (steps[i].getBoundingClientRect().top <= y) idx = i;
+    // an open fold is as wide as the page, so the bar steps aside while one is
+    // in the space it occupies and returns when the reader scrolls past it
+    var open = storyEl.querySelectorAll("details.fold.wide[open] > .fold-bd"), away = false;
+    for (i = 0; i < open.length; i++){
+      r = open[i].getBoundingClientRect();
+      if (r.bottom > sr.top + 48 && r.top < sr.bottom - 48){ away = true; break; }
+    }
+    stageEl.classList.toggle("yield", away);
+    var st = storyEl.getBoundingClientRect(), span = st.height - window.innerHeight;
+    byId("sprog").style.setProperty("--p", span > 0 ? Math.max(0, Math.min(1, -st.top / span)).toFixed(4) : (st.top < 0 ? 1 : 0));
+    if (idx !== storyStep){ storyStep = idx; paintStory(); }
+  }
+  if (window.ResizeObserver){
+    var lastSh = 0;
+    new ResizeObserver(function(){
+      var sb = document.querySelector(".sticky"), h = sb ? sb.offsetHeight : 0;
+      if (h === lastSh) return;
+      lastSh = h; sizeStory(); paintStory(); queueStory();
+    }).observe(document.querySelector(".sticky"));
+  }
+  var storyQ = false;
+  function queueStory(){
+    if (storyQ) return; storyQ = true;
+    requestAnimationFrame(function(){ storyQ = false; trackStory(); });
+  }
+  window.addEventListener("scroll", queueStory, { passive:true });
+  document.addEventListener("toggle", function(e){ if (e.target.matches && e.target.matches("details.fold")) queueStory(); }, true);
+
+  // The letter shows its opening and unfolds on request, or the moment the reader
+  // clicks into it to edit.
+  function letterOpen(open){
+    var bd = byId("letterBd"), was = !bd.classList.contains("clamp");
+    if (open === was) return;
+    var from = bd.offsetHeight;
+    bd.classList.toggle("clamp", !open);
+    byId("letterMore").setAttribute("aria-expanded", open ? "true" : "false");
+    byId("letterMoreT").textContent = open ? "Show less of the letter" : "Read the whole letter";
+    byId("letterMore").classList.toggle("on", open);
+    var to = bd.offsetHeight;
+    if (bd.animate && scrollBehavior() === "smooth" && from !== to){
+      bd.style.overflow = "hidden";
+      bd.animate([{ height: from + "px" }, { height: to + "px" }], { duration: 520, easing: "cubic-bezier(.2,.8,.2,1)" })
+        .onfinish = function(){ bd.style.overflow = ""; };
+    }
+  }
+  byId("letterMore").addEventListener("click", function(){ letterOpen(byId("letterBd").classList.contains("clamp")); });
+  byId("letterBd").addEventListener("focus", function(){ letterOpen(true); });
+  // Cmd+P prints what is on the page, and a closed fold prints nothing: open them
+  // all for the print and put them back after.
+  var printOpened = [];
+  window.addEventListener("beforeprint", function(){
+    printOpened = [].slice.call(document.querySelectorAll("details:not([open])"));
+    printOpened.forEach(function(d){ d.open = true; });
+    byId("letterBd").classList.remove("clamp");
+  });
+  window.addEventListener("afterprint", function(){
+    printOpened.forEach(function(d){ d.open = false; });
+    printOpened = [];
+    if (byId("letterMore").getAttribute("aria-expanded") !== "true") byId("letterBd").classList.add("clamp");
+  });
+
+  sizeStory();
   paint();
   route();
+  sizeStory(); paintStory(); trackStory();
 })();
 </script>
 <script>
@@ -3846,7 +4244,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       var s = st(e.target);
       if (s.revealed) return;
       s.revealed = true;
-      tween(e.target, 0, e.target.matches(".bignum, .band-v, .bigstat .n, .save .v") ? 1500 : 1100);
+      tween(e.target, 0, e.target.matches(".bignum, .snum, .bigstat .n, .save .v") ? 1500 : 1100);
     });
   }, { threshold: 0.6 });
   targets.forEach(function(el){ figIO.observe(el); });
@@ -3861,7 +4259,14 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       if (e.target.id === "cliff") drawCliff();
     });
   }, { threshold: 0.18 });
-  sections.forEach(function(sec){ secIO.observe(sec); });
+  sections.forEach(function(sec){ if (sec.id !== "story") secIO.observe(sec); });
+  // The story is several screens tall (more with a fold open), so 18% of it may
+  // never be on screen at once. It counts as arrived the moment any of it is.
+  var storySec = document.getElementById("story");
+  if (storySec) new IntersectionObserver(function(es, io){
+    if (!es[0].isIntersecting) return;
+    storySec.classList.add("in"); io.disconnect();
+  }, { threshold: 0 }).observe(storySec);
 
   // Picking a different financing model replays the comparison bars' wipe (pills on
   // desktop, the select on phones). #modelPick always holds the current model, so a
@@ -3890,6 +4295,79 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
       });
     } catch (e) {}
   }
+
+  /* Folds. A <details> opens and closes by itself; this only gives the change a
+     duration. Opening measures the body and grows to it, closing shrinks and
+     THEN drops the open attribute, so the content is there for the whole trip.
+     The .opening and .closing classes drive the chevron and the staggered rise
+     in the stylesheet. Charts inside wipe in again, since a chart nobody saw
+     arrive has not really arrived. */
+  all("details.fold, details.adv, details.src").forEach(function(d){
+    var sum = d.querySelector("summary"), bd = d.querySelector(".fold-bd, .adv-bd, .src-bd"), run = null;
+    if (!sum || !bd || !bd.animate) return;
+    function done(){ bd.style.overflow = ""; d.classList.remove("opening", "closing"); run = null; }
+    sum.addEventListener("click", function(e){
+      if (e.target.closest("a")) return;
+      e.preventDefault();
+      var opening = !d.open || d.classList.contains("closing");
+      if (run){ run.onfinish = null; run.cancel(); }
+      bd.style.overflow = "hidden";
+      if (opening){
+        d.classList.remove("closing");
+        d.open = true;
+        d.classList.add("opening");
+        bd.classList.add("fresh");
+        var h = bd.offsetHeight;
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ bd.classList.remove("fresh"); }); });
+        run = bd.animate([{ height: "0px", opacity: 0 }, { height: h + "px", opacity: 1 }],
+                         { duration: Math.min(820, 300 + h * 0.4), easing: "cubic-bezier(.2,.8,.2,1)" });
+        run.onfinish = done;
+        if (d.id === "foldSlot") setTimeout(drawCliff, 160);
+      } else {
+        d.classList.remove("opening");
+        d.classList.add("closing");
+        run = bd.animate([{ height: bd.offsetHeight + "px", opacity: 1 }, { height: "0px", opacity: 0 }],
+                         { duration: Math.min(560, 240 + bd.offsetHeight * 0.22), easing: "cubic-bezier(.4,0,.2,1)" });
+        run.onfinish = function(){ d.open = false; done(); };
+      }
+    });
+  });
+
+  /* A sliding thumb for the three segmented controls. It lives beside the control,
+     not inside it (the model pills are addressed by child index), and follows
+     whichever button carries .on, so the app never has to know it exists. */
+  function glide(box, sel){
+    if (!box || !box.parentNode) return;
+    var host = box.parentNode, g = document.createElement("span");
+    g.className = "glide"; g.setAttribute("aria-hidden", "true");
+    host.style.position = "relative";
+    box.classList.add("glides");
+    host.insertBefore(g, box);
+    function move(){
+      var on = box.querySelector(sel + ".on");
+      if (!on || !on.offsetWidth){ g.style.opacity = 0; return; }
+      var a = on.getBoundingClientRect(), h = host.getBoundingClientRect();
+      g.style.opacity = 1;
+      g.style.width = a.width + "px"; g.style.height = a.height + "px";
+      g.style.transform = "translate(" + (a.left - h.left) + "px," + (a.top - h.top) + "px)";
+    }
+    new MutationObserver(move).observe(box, { attributes: true, attributeFilter: ["class"], subtree: true });
+    window.addEventListener("resize", move);
+    document.addEventListener("toggle", function(){ requestAnimationFrame(move); }, true);
+    g.id = box.id + "Glide";
+    move();
+    return move;
+  }
+  glide(document.getElementById("route"), "button");
+  glide(document.getElementById("pills"), ".pill");
+  glide(document.getElementById("tone"), ".tbtn");
+
+  // The three portraits arrive one after another, once, when they are first seen.
+  var recips = document.getElementById("recips");
+  if (recips) new IntersectionObserver(function(es, io){
+    if (!es[0].isIntersecting) return;
+    recips.classList.add("fresh"); io.disconnect();
+  }, { threshold: 0.3 }).observe(recips);
 })();
 </script>
 

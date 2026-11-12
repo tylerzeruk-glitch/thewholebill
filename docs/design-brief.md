@@ -736,3 +736,34 @@ member's actual position.
 
 The letter no longer claims the reader "did the arithmetic this week" — a small falsehood, but
 the letter is the one artifact that leaves the site and lands on a staffer's desk.
+
+---
+
+# Session: one bar, four steps (2026-11-12)
+
+The owner's review: the page was right and overwhelming. Measured at 1280 by 800 it ran 15.3
+screens, 2,488 words, 97 dollar and percent figures and 36 text sizes, with the universal
+comparison starting at screen 8 and the letter at screen 13. Three directions were pitched (a
+bill drawn to scale, one thing at a time, a year of 365 dots); the owner previewed the second
+with a plain bar and with the bill, and chose the bar.
+
+**What changed.** The argument is now four steps beside one pinned bar that grows and then
+shrinks: what a paystub shows, the part it never shows, the whole bill, the same care under
+universal coverage. The ink ground turns teal at the fourth step, the page's one large gesture.
+Everything the long page showed at once still exists and opens from the step it supports. The
+objections show their question and a one-line answer; the full answer and footnote are a click
+below. The send section starts with three portraits (the member and both senators), which are
+the recipient control, and the letter shows its opening until asked for the rest. The page a
+reader first meets is 10.3 screens at the same window.
+
+**What did not change.** No figure, no source, no disclosure. Two typefaces. Amber for today,
+teal for universal. Every modeled figure still says so where it is shown.
+
+**Motion budget.** One moving thing per step (the bar), figures ticking in place, the teal
+turn. Folds open over time with a turning chevron and their contents rising in; the segmented
+controls have a sliding thumb; ticks draw; the chosen portrait comes up in colour. All of it is
+off under reduced motion, and none of it computes anything.
+
+**Not done.** The 365-dot "your year" direction would add a derived figure (cost over total pay)
+that is not on the site; it waits on the owner. A plain "everything on one page" view was
+proposed with this direction and is not built: opening the folds is the current answer.

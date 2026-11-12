@@ -63,7 +63,44 @@ Three separate defects shipped past code review and were caught only by measurin
 behaviour without checking the screen.** It caught the axis caption rendering at 8.5px on its
 first run.
 
+## The story and its folds (since 2026-11-12)
+
+The page is one pinned bar beside four steps (paystub, the hidden part, the whole bill, universal
+coverage), inside `.inkzone`. `storyPlan()` in the page script holds each route's steps and copy;
+`renderStory()` sizes the segments on every paint and `paintStory()` decides which stand for the
+step in focus. Segments are the route's own parts (`W.routeBreakdown`) and the model's
+(`S.universal.parts`) on one scale shared by every route and model (`storyScale()`), so a
+segment's height is always value / scale. `--H` (the bar's height in px) and `--sticky-h` are set
+by `sizeStory()`; the stylesheet never guesses them.
+
+Every chart the long page used to show at once (calculator inputs, waterfall, rise, cliff or bad
+year, side-by-side comparison) is a real `<details class="fold">` under the step it supports. The
+motion script only gives folds a duration; with no script they still open. `.wide` folds span the
+whole wrap because the charts were drawn for that width, and the bar steps aside (`.stage.yield`)
+while one is where it stands.
+
+- **The suite opens every fold by default** (`page()` in `test/test.mjs`), because most checks
+  measure what is inside them. Checks about the story and the folds themselves pass `shut = true`
+  to get the page as a reader first meets it.
+- **New copy in a step goes through `storyPlan()`**, per route, and a modeled part says so in its
+  bar label ("(estimate)") and in the step's basis line.
+- **The teal turn re-points the grey tokens** (`.inkzone.uni`). Panels go darker than the ground
+  there, not lighter: small teal and amber labels sit on them. The suite measures contrast in
+  that state.
+- A static `data-fig` needs a default in `tools/default-figures.mjs` or the build refuses.
+
 ## Traps that have bitten this codebase
+
+- **`.steps` and `.step` are the household stepper.** A new container named `.steps` inherited
+  its flex row and laid four story steps out side by side. Grep a class name before reusing it.
+- **A closed `<details>` still reports sizes.** Chrome hides its content with content-visibility,
+  so `offsetHeight` on a chart inside a shut fold is its full height. Ask `checkVisibility()`, or
+  select on `[open]`.
+- **A share-of-itself IntersectionObserver threshold can be unreachable.** The reveal waited for
+  18% of a section to be on screen; the story is several screens tall, so its bars would have
+  stayed clipped. Tall sections reveal on any intersection.
+- **A transition can be caught by print.** The ink-to-teal background change printed mid-colour
+  until `@media print` turned transitions off.
 
 - **`overflow-x: hidden` on html/body kills `position: sticky`** — it computes `overflow-y` to
   `auto`, making them scroll containers. Use `overflow-x: clip`.
@@ -166,8 +203,8 @@ first is now met, so it is ready for a decision whenever the owner wants):
     state-sourced states to them (a CMS reader for them was removed with this change; it is
     in git history before PR #95's merge).
 
-3b. **Past plan years: on the page as "Who paid the rise"** (inside section 02, under the
-    waterfall; `renderRise` in the page, `riseSeries` in `calc.js`). `src/benchmarks-2025.js` and
+3b. **Past plan years: on the page as "Who paid the rise"** (a fold under step 02 of the
+    story; `renderRise` in the page, `riseSeries` in `calc.js`). `src/benchmarks-2025.js` and
     `src/benchmarks-2026.js` come from `tools/build-benchmarks-history.mjs <year>`, entirely
     from CMS's files (HealthCare.gov plus every state exchange's, which CMS posts the May
     after). Checks: landscape to the cent, VT/DC/RI against KFF's published averages, and
