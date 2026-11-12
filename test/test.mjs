@@ -1210,6 +1210,93 @@ test('routes: each coverage route rebuilds the waterfall', async b => {
   await p.close();
 });
 
+/* Who paid the rise: one household's premium in 2025, 2026 and 2027 on ONE
+ * scale (CLAUDE.md: never per-column maxima), split by payer. Each bar must be
+ * exactly its value over the shared scale; a year with no figure keeps its
+ * column and says why; labels must not spill out of narrow columns or climb
+ * into the intro above the chart. */
+test('rise: three years on one scale, each bar its own value', async b => {
+  const read = p => p.evaluate(() => {
+    const plots = [...document.querySelectorAll('#riseChart .rcol')].map(c => {
+      const plot = c.querySelector('.rplot'), H = parseFloat(getComputedStyle(plot).getPropertyValue('--rise-h'));
+      const bar = k => { const e = c.querySelector(`.rbar[data-part="${k}"]`); return e ? e.getBoundingClientRect().height : 0; };
+      const lab = c.querySelector('.rlab');
+      return { year: +c.dataset.year, H, you: bar('you'), other: bar('other'),
+               rv: (c.querySelector('.rv') || {}).textContent || null, none: (c.querySelector('.rnone b') || {}).textContent || null,
+               labTop: lab ? lab.getBoundingClientRect().top : null,
+               over: [...c.querySelectorAll('.rlab > *, .rnone')].map(e => e.scrollWidth - e.clientWidth) };
+    });
+    return { plots, introBottom: document.getElementById('riseIntro').getBoundingClientRect().bottom,
+             key: document.getElementById('riseKey').children.length,
+             font: getComputedStyle(document.querySelector('#riseChart .rv') || document.body).fontFamily };
+  });
+  for (const [w, h, m] of [[1440, 900, false], [900, 900, false], [390, 844, true], [320, 844, true]]) {
+    const p = await page(b, w, h, m);
+    for (const route of ['employer', 'marketplace', 'none']) {
+      await p.locator(`#route button[data-r="${route}"]`).click(); await p.waitForTimeout(250);
+      const r = await read(p);
+      ok(`${w}px ${route}: three year columns`, r.plots.map(x => x.year).join() === '2025,2026,2027');
+      const okc = r.plots.filter(x => x.rv);
+      const total = x => x.you + x.other + (x.you && x.other ? 2 : 0);
+      ok(`${w}px ${route}: the tallest year is the full plot height (one shared scale)`, Math.abs(Math.max(...okc.map(total)) - okc[0].H) < 1.5,
+         okc.map(total).map(v => v.toFixed(1)).join('/') + ' of ' + okc[0].H);
+      ok(`${w}px ${route}: nothing overflows its column`, Math.max(...r.plots.flatMap(x => x.over)) <= 0.5, r.plots.map(x => x.over.join(',')).join(' | '));
+      ok(`${w}px ${route}: labels stay clear of the intro`, okc.every(x => x.labTop >= r.introBottom + 8), `${okc.map(x => x.labTop.toFixed(0)).join('/')} vs ${r.introBottom.toFixed(0)}`);
+      ok(`${w}px ${route}: two key entries, figures in the sans`, r.key === 2 && /Hanken/.test(r.font), r.font);
+    }
+    await p.close();
+  }
+  // the numbers: the default household is the Dallas family of four at $95,000
+  const p = await page(b, 1440, 900);
+  const n = s => +String(s).replace(/[^0-9]/g, '');
+  const bars = async () => {
+    const r = await read(p);
+    return r.plots.map(x => ({ year: x.year, rv: x.rv && n(x.rv), none: x.none, you: x.you, other: x.other, H: x.H }));
+  };
+  await p.locator('#route button[data-r="employer"]').click(); await p.waitForTimeout(250);
+  let r = await bars();
+  ok('employer: KFF 2025 then 2026 worker shares, 2027 not measured', r[0].rv === 6850 && r[1].rv === 7471 && r[2].none === 'Not measured yet', JSON.stringify(r.map(x => x.rv || x.none)));
+  const sc = 28303;
+  ok('employer: bars are value over the shared scale', Math.abs(r[0].you - 6850 / sc * r[0].H) < 1 && Math.abs(r[0].other - (20143 / sc * r[0].H - 2)) < 1 && Math.abs(r[1].you - 7471 / sc * r[1].H) < 1,
+     `${r[0].you.toFixed(1)} / ${r[0].other.toFixed(1)} / ${r[1].you.toFixed(1)}`);
+  await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
+  r = await bars();
+  ok('marketplace: $5,807 then $9,332 then $9,350', r.map(x => x.rv).join() === '5807,9332,9350', r.map(x => x.rv).join());
+  ok('marketplace: the 2027 bars sit on the 2027 benchmark, $28,752, which sets the scale', Math.abs(r[2].you + r[2].other + 2 - r[2].H) < 1.5 &&
+     Math.abs(r[0].you - 5807 / 28752 * r[0].H) < 1, `${r[0].you.toFixed(1)}`);
+  const intro = () => p.evaluate(() => document.getElementById('riseIntro').textContent);
+  ok('marketplace: the intro names the expiry and the 2027 credit absorbing the rise', /enhanced credits expired/.test(await intro()) && /credit grew with it/.test(await intro()));
+  await setIncome(p, 140000);
+  r = await bars();
+  ok('over the cliff: no credit bar in 2026 or 2027, the 2025 credit still there', r[0].other > 0 && r[1].other === 0 && r[2].other === 0 && r[1].rv === 25788, JSON.stringify(r.map(x => [x.rv, Math.round(x.other)])));
+  ok('over the cliff: the intro says so', /cliff came back/.test(await intro()) && /every dollar of it is yours/.test(await intro()));
+  // The poverty line moves under a fixed income: Fairfield, CT at $131,000 is 407%
+  // of the 2026 line (over the cliff, no credit) and 397% of the 2027 one (credit
+  // back). Correct, and it read as a bug until the figure said why.
+  await p.locator('#zip').fill('06824'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  await setIncome(p, 131000);
+  r = await bars();
+  ok('Fairfield at $131,000: no credit in 2026, the credit back in 2027', r[1].other === 0 && r[2].other > 0 && r[0].other > 0, JSON.stringify(r.map(x => [x.rv, Math.round(x.other)])));
+  const fi = await intro();
+  ok('Fairfield: the intro gives both percentages and says the poverty line rose', /407% of the poverty line/.test(fi) && /poverty line rose, so the same income is 397%/.test(fi), fi);
+  ok('Fairfield: the 2026 column names the cliff', await p.evaluate(() => /over the cliff, at 407%/.test(document.querySelector('#riseChart .rcol[data-year="2026"]').textContent)));
+  await p.locator('#zip').fill('75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  await setIncome(p, 95000);
+  // the unit switch divides at render time, the bars do not move
+  const before = await bars();
+  await p.locator('#unit').click(); await p.waitForTimeout(300);
+  const after = await bars();
+  ok('month view divides each figure by 12, bars unchanged', after.every((x, i) => Math.abs(x.rv - Math.round(before[i].rv / 12)) <= 1 && Math.abs(x.you - before[i].you) < 0.5),
+     after.map(x => x.rv).join('/'));
+  await p.locator('#unit').click(); await p.waitForTimeout(300);
+  // a state held on 2026 has no 2027 figure, and says why
+  await p.locator('#zip').fill('80202'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+  r = await bars();
+  ok('Denver (held on 2026): 2025 and 2026 drawn, 2027 not published', r[0].rv > 0 && r[1].rv > 0 && r[2].none === 'Not published yet', JSON.stringify(r.map(x => x.rv || x.none)));
+  ok('Denver: the intro says Colorado is still on 2026', /Colorado is still priced on 2026/.test(await intro()));
+  await p.close();
+});
+
 /* Column width carries no meaning in a waterfall -- height is the data -- so the
  * data columns must not vary. They did: flex-grow with the default basis:auto
  * sized each column from its own label, giving 123/224/148/148 at 1440px. The

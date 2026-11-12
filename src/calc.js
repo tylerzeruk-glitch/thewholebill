@@ -143,6 +143,16 @@
     single: { premium:  9804, worker: 1672 }    // employer share =  8,132
   };
 
+  // The same survey by year, for the three-year figure. 2025: KFF Employer
+  // Health Benefits Survey 2025 (published 22 October 2025), family $26,993
+  // (worker $6,850), single $9,325 (worker $1,440). KFF publishes a year's
+  // averages that October, so the current plan year has none yet: 2027's
+  // arrive with the 2027 survey in October 2027.
+  var EMPLOYER_BY_YEAR = {
+    2025: { family: { premium: 26993, worker: 6850 }, single: { premium: 9325, worker: 1440 } },
+    2026: EMPLOYER
+  };
+
   var MEDICARE_RATE = 0.0145;   // employee share, Additional Medicare Tax ignored below the threshold
   var ADDL_MEDICARE_RATE = 0.009;
   var ADDL_MEDICARE_THRESHOLD = { single: 200000, joint: 250000 };
@@ -433,6 +443,39 @@
       place: bp,                            // county, state, rating area, exchange
       basis: { benchmark: 'statutory', applicablePercentage: 'statutory', oop: 'modeled', medicareTax: 'statutory' }
     };
+  }
+
+  /* The premium in each of RISE_YEARS, split by who pays it: the household
+   * ("you") and whoever pays the rest ("other": the employer's share, or the
+   * premium tax credit). Premiums only; the deductible and payroll tax are not
+   * part of this figure. One entry per year, never skipped, so a column is
+   * always there to say why a year is missing:
+   *   status 'ok'           you, other, total
+   *   status 'unmeasured'   employer route, no survey for the year yet
+   *   status 'unpublished'  marketplace, no benchmark table for the year (a
+   *                         state held on last year has no 2027)
+   *   status 'medicaid'     marketplace, the household is likely on Medicaid
+   * Employer figures are KFF's survey averages for the tier, deliberately not
+   * the reader's own overrides, which describe the current year only. */
+  var RISE_YEARS = [2025, 2026, 2027];
+  function riseSeries(route, o) {
+    var out = [], i, y;
+    for (i = 0; i < RISE_YEARS.length; i++) {
+      y = RISE_YEARS[i];
+      if (route === 'employer') {
+        var t = EMPLOYER_BY_YEAR[y] && EMPLOYER_BY_YEAR[y][o.size > 1 ? 'family' : 'single'];
+        out.push(t ? { year: y, status: 'ok', you: t.worker, other: t.premium - t.worker, total: t.premium, basis: 'survey' }
+                   : { year: y, status: 'unmeasured' });
+        continue;
+      }
+      var m = marketplaceCost({ income: o.income, size: o.size, adults: o.adults, ages: o.ages, bkey: o.bkey, year: y });
+      if (!m) out.push({ year: y, status: 'unpublished' });
+      else if (m.medicaidLikely) out.push({ year: y, status: 'medicaid' });
+      else out.push({ year: y, status: 'ok', you: m.net, other: m.subsidy, total: m.benchmark,
+                      overCliff: m.overCliff, belowFloor: m.belowFloor, applicablePercentage: m.applicablePercentage, fplRatio: m.fplRatio,
+                      basis: 'statutory' });
+    }
+    return out;
   }
 
   function cobra(o) {
@@ -842,6 +885,7 @@
     SANDERS_EXEMPT: SANDERS_EXEMPT, EMPLOYER: EMPLOYER, MODELS: MODELS,
     useBenchmarks: useBenchmarks, benchKey: benchKey, zipResolve: zipResolve,
     stateYear: stateYear, tablesFor: tablesFor, useHistory: useHistory, PAST: PAST,
+    EMPLOYER_BY_YEAR: EMPLOYER_BY_YEAR, RISE_YEARS: RISE_YEARS, riseSeries: riseSeries,
     benchmarkPremium: benchmarkPremium,
     povertyLine: povertyLine, fplRatio: fplRatio,
     applicablePercentage: applicablePercentage, medicareTax: medicareTax,

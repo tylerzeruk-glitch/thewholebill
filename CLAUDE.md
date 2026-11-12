@@ -166,16 +166,18 @@ first is now met, so it is ready for a decision whenever the owner wants):
     state-sourced states to them (a CMS reader for them was removed with this change; it is
     in git history before PR #95's merge).
 
-3b. **Past plan years: tables built, not yet on the page.** `src/benchmarks-2025.js` and
+3b. **Past plan years: on the page as "Who paid the rise"** (inside section 02, under the
+    waterfall; `renderRise` in the page, `riseSeries` in `calc.js`). `src/benchmarks-2025.js` and
     `src/benchmarks-2026.js` come from `tools/build-benchmarks-history.mjs <year>`, entirely
     from CMS's files (HealthCare.gov plus every state exchange's, which CMS posts the May
     after). Checks: landscape to the cent, VT/DC/RI against KFF's published averages, and
     the 2026 build reproduces the shipped 2026 table exactly. One disclosed exception: CMS's
     2025 Vermont service-area file is empty, so VTS001 is taken as statewide (as 2026
     defines it). `calc.js` prices them through `useHistory()` and `marketplaceCost({year})`,
-    with 2025's enhanced schedule (no cliff) in `PAST`. Next: the per-household
-    "who pays the rise" figure (2025 to 2027 by payer; employer 2027 left empty until
-    KFF's October 2027 survey). Each year, once the old year's state-exchange files post,
+    with 2025's enhanced schedule (no cliff) in `PAST`. The figure shows 2025 to
+    2027 by payer on one shared scale; employer columns are KFF's averages
+    (`EMPLOYER_BY_YEAR`), and 2027 stays empty until KFF's October 2027 survey: add it
+    there, and add 2028 to `RISE_YEARS` only once a full year of tables exists. Each year, once the old year's state-exchange files post,
     add it to `YEARS` in the history builder.
 
 Ops hygiene (small, anytime):
