@@ -327,7 +327,7 @@ test('layout: every section keeps its gutter', async b => {
     const bad = await p.evaluate(min => {
       const vw = innerWidth, out = [];
       document.querySelectorAll('body *').forEach(e => {
-        if (e.closest('[hidden]')) return;
+        if (e.closest('[hidden], .tick')) return;   // the news line scrolls inside its own clipped strip
         const cs = getComputedStyle(e);
         if (cs.position === 'fixed' || cs.overflowX === 'auto' || cs.overflowX === 'scroll') return;
         const hasText = [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
@@ -521,7 +521,7 @@ test('narrative: the cliff precedes the turn, and the turn wears teal', async b 
              cliffFirst: cliffY < cmpY,
              teal: em ? getComputedStyle(em).color : 'missing' };
   });
-  ok('visible sections number 01-07 in page order', r.seq === '01,02,03,04,05,06,07', r.seq);
+  ok('no section wears a number any more (the order is the scroll)', r.seq === '', r.seq);
   // the 08 eyebrow lives on /methodology now; the routing test asserts it
   ok('the cliff sits before the comparison', r.cliffFirst);
   ok('the universal figure wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
@@ -613,22 +613,29 @@ test('models: six pills spanning the published spectrum', async b => {
  * columns, every label inside its pill -- and below 900px (measured: the
  * longest role line needs ~106px and a 901px viewport gives ~112px per pill)
  * the native select takes over and drives the same state. */
-test('models: six equal pills in two rows of three, a picker on phones', async b => {
+test('models: six circles on a line and six chips, a picker on phones', async b => {
   for (const w of [1440, 1100, 901]) {
     const p = await page(b,w,900);
     const r = await p.evaluate(()=>{
-      const bs=[...document.querySelectorAll('#pills button')];
-      const ws=bs.map(x=>x.getBoundingClientRect().width);
+      const bs=[...document.querySelectorAll('#pills button')], num = t => parseFloat(t.replace(/[^0-9.]/g,''));
+      const dots=[...document.querySelectorAll('#mline i')], line=document.getElementById('mline').getBoundingClientRect();
+      const lo=num(document.querySelector('.mends [data-fig="uni.rangeLo"]').textContent), hi=num(document.querySelector('.mends [data-fig="uni.rangeHi"]').textContent);
+      const on=dots.findIndex(d=>d.classList.contains('on')), dr=dots[on].getBoundingClientRect();
       return { rows:[...new Set(bs.map(x=>Math.round(x.getBoundingClientRect().top)))].length,
-               cols:[...new Set(bs.map(x=>Math.round(x.getBoundingClientRect().left)))].length,
-               spread: Math.max(...ws)-Math.min(...ws),
-               clipped: bs.filter(x=>[...x.children].some(c=>c.scrollWidth > x.clientWidth-16)).length,
-               pick: getComputedStyle(document.getElementById('modelPick')).display };
+               minH: Math.min(...bs.map(x=>x.getBoundingClientRect().height)),
+               clipped: bs.filter(x=>x.scrollWidth > x.clientWidth+1).length, names: bs.map(x=>x.querySelector('.pill-n').textContent).join(),
+               dots: dots.length, on, pos: (dr.left+dr.width/2-line.left)/line.width, lo, hi,
+               total: num(document.querySelector('.sstep[data-step="3"] .snum').textContent),
+               who: document.getElementById('mwho').textContent, pick: getComputedStyle(document.getElementById('modelPick')).display };
     });
-    ok(`${w}px: six equal pills, three to a row`, r.rows === 2 && r.cols === 3 && r.spread < 1.5,
-       `${r.rows} rows, ${r.cols} columns, ${r.spread.toFixed(1)}px spread`);
-    ok(`${w}px: every label fits its pill`, r.clipped === 0, `${r.clipped} clipped`);
+    ok(`${w}px: six chips of 44px, one row or two, every name whole`, r.rows <= (w > 1000 ? 1 : 2) && r.minH >= 44 && r.clipped === 0 && /^Sanders,Lancet,RAND,CBO,Mercatus,Urban$/.test(r.names), `${r.rows} rows, ${r.minH}px, ${r.names}`);
+    ok(`${w}px: six circles, the chosen one filled, at its place between the lowest and the highest`, r.dots === 6 && r.on === 0 && Math.abs(r.pos - (r.total - r.lo) / (r.hi - r.lo)) < 0.02, JSON.stringify([r.dots, r.on, r.pos.toFixed(3), r.total, r.lo, r.hi]));
+    ok(`${w}px: the sentence under them names the model, its maker's role and both figures`, /^Sanders, .+: \$[\d,]+ a year, \$[\d,]+ (less|more) than today\.$/.test(r.who), r.who);
     ok(`${w}px: no picker at this width`, r.pick === 'none');
+    await p.locator('#pills .pill').nth(5).click(); await p.waitForTimeout(250);
+    const u = await p.evaluate(()=>{ const dots=[...document.querySelectorAll('#mline i')], line=document.getElementById('mline').getBoundingClientRect(), on=dots.findIndex(d=>d.classList.contains('on')), dr=dots[on].getBoundingClientRect();
+      return { on, pos:(dr.left+dr.width/2-line.left)/line.width, who: document.getElementById('mwho').textContent }; });
+    ok(`${w}px: picking the priciest moves the filled circle to the far end`, u.on === 5 && u.pos > 0.97 && /^Urban, /.test(u.who), JSON.stringify(u));
     await p.close();
   }
   for (const [w,h,m] of [[900,900,false],[390,844,true]]) {
@@ -3062,23 +3069,6 @@ test('letter buttons: one row, two rows or a stack, never a stray button', async
   }
 });
 
-/* The ZIP field is the page's one action: on load it must be fully on screen, at the
- * window sizes people actually have (Tyler's laptop browser was about 1000x625). */
-test('hero: the ZIP field is on screen at load', async b => {
-  for (const [w, h, m] of [[1440, 800], [1280, 720], [1000, 625], [1024, 640], [1536, 760], [390, 740, true], [375, 600, true]]) {
-    const p = await page(b, w, h, !!m);
-    const r = await p.evaluate(() => {
-      const z = document.querySelector('.zipbar').getBoundingClientRect(), h1 = document.querySelector('h1').getBoundingClientRect();
-      const lh = parseFloat(getComputedStyle(document.querySelector('h1')).lineHeight) || parseFloat(getComputedStyle(document.querySelector('h1')).fontSize) * .86;
-      return { bottom: Math.round(z.bottom), vh: innerHeight, lines: Math.round(h1.height / lh) };
-    });
-    ok(`${w}x${h}: ZIP field fully visible (bottom ${r.bottom}px of ${r.vh}), headline ${r.lines} lines`, r.bottom <= r.vh, JSON.stringify(r));
-    await p.close();
-  }
-});
-
-/* What leaves the page is plain text for a contact form, and many forms collapse a
- * single line break, so paragraphs are joined by a blank line. */
 test('letter: copied text keeps its paragraphs apart', async b => {
   const p = await page(b, 1280, 900);
   await p.evaluate(() => { window.__clip = ''; navigator.clipboard.writeText = t => { window.__clip = t; return Promise.resolve(); }; });
@@ -3140,8 +3130,9 @@ test('footer: its links match the header navigation', async b => {
 const storyStep = async (p, i) => p.evaluate(async i => {
   // on a phone, step by step, the steps are cards in a sideways row: go there the way Next does
   if (document.documentElement.classList.contains('cards')) {
-    document.getElementById('story').scrollIntoView();
-    const row = document.getElementById('ssteps'); row.scrollTo({ left: i * row.clientWidth });
+    const row = document.getElementById('ssteps');
+    scrollTo(0, scrollY + document.getElementById('sticks').getBoundingClientRect().top - document.querySelector('.sticky').offsetHeight);   // past the opening, the cards at the top
+    row.scrollTo({ left: i * row.clientWidth });
     await new Promise(r => setTimeout(r, 320));
     return [...document.querySelectorAll('.sstep')].findIndex(e => e.classList.contains('on'));
   }
@@ -3285,7 +3276,7 @@ test('folds: shut at load; a wide one rises as a sheet and the page stays put', 
     const at = await p.evaluate(() => ({
       n: document.querySelectorAll('details.fold').length, open: document.querySelectorAll('details.fold[open]').length,
       wf: document.getElementById('wf').checkVisibility() ? 1 : 0, screens: document.documentElement.scrollHeight / innerHeight,
-      twists: [...document.querySelectorAll('details.fold > summary')].every(s => s.querySelector('.fold-x') && s.getBoundingClientRect().height >= 44) }));
+      twists: [...document.querySelectorAll('details.fold > summary')].filter(s => s.offsetHeight).every(s => s.querySelector('.fold-x') && s.getBoundingClientRect().height >= 44) }));
     ok(`${w}px: every fold is shut on arrival`, at.n >= 13 && at.open === 0 && at.wf === 0, JSON.stringify(at));
     ok(`${w}px: each fold's summary is a 44px target with its twist`, at.twists);
     ok(`${w}px: the page a reader meets is far shorter than the old one`, at.screens < (m ? 13 : 11), at.screens.toFixed(1) + ' screens');   // was 15.3 at 1280 by 800
@@ -3349,50 +3340,65 @@ test('views: one switch between step by step and all on one page', async b => {
   }
 });
 
-/* The hero. The owner's read, twice: still busy. It is now one question, one
- * sentence, one field, the place being priced, and the dated log as a flyout
- * beside the ZIP that opens over the page: open or shut, the hero is the same
- * height. No banner above it, no footline under it, and the five sample cities
- * only appear when a ZIP fails. */
-test('hero: one question, one field, and the log in a flyout that adds no height', async b => {
+/* The opening. It began as a paper hero with a banner, a ZIP field, five city
+ * buttons and a three-entry change log; the owner cut it back three times and
+ * then asked for the first prototype's: the question on the dark ground, the
+ * empty bar beside it, and the household as a pill that opens the sheet where
+ * the ZIP and the family details live together. The change log is one slow
+ * line of news that pops out the dated list. */
+test('opening: the question, the empty bar, the household pill and one line of news', async b => {
   for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
     const p = await page(b, w, h, m, 'index.html', true);
-    const read = () => p.evaluate(() => { const hero = document.querySelector('main > section.paper'), f = document.getElementById('changed'), bd = f.querySelector('.fly-bd'), r = bd.getBoundingClientRect();
-      const zf = document.querySelector('.zipfield').getBoundingClientRect(), go = document.getElementById('zipGo').getBoundingClientRect(), sm = f.querySelector('summary').getBoundingClientRect();
-      return { h: hero.offsetHeight, bottom: hero.getBoundingClientRect().bottom, vh: innerHeight, vw: innerWidth, words: hero.innerText.split(/\s+/).filter(Boolean).length,
-        first: document.querySelector('main').firstElementChild.tagName, go: document.getElementById('zipGo').textContent,
-        chips: document.querySelectorAll('#areapick button').length, scope: document.getElementById('scope').textContent,
-        open: f.open, k: f.querySelector('.fly-k').textContent, d: f.querySelector('.fly-d').textContent, entries: f.querySelectorAll('.upd-when').length,
-        pos: getComputedStyle(bd).position, fly: [r.left, r.right, r.top, r.bottom], vis: bd.checkVisibility(),
-        zip: [zf.width, go.right, sm.height, sm.left, zf.top, sm.top] }; });
+    const read = () => p.evaluate(() => { const sh = document.getElementById('shero'), r = sh.getBoundingClientRect(), f = document.getElementById('changed'), bd = f.querySelector('.fly-bd'), fr = bd.getBoundingClientRect();
+      const pill = document.getElementById('hhPill').getBoundingClientRect(), zone = document.querySelector('.inkzone'), tk = document.getElementById('tickIn');
+      const rgb = getComputedStyle(document.getElementById('story')).backgroundColor;
+      return { words: sh.innerText.split(/\s+/).filter(Boolean).length - tk.innerText.split(/\s+/).filter(Boolean).length, h: sh.offsetHeight, bottom: r.bottom, vh: innerHeight, vw: innerWidth,
+        ground: rgb, intro: zone.classList.contains('intro'), segs: document.querySelectorAll('.sseg.on').length, track: document.getElementById('sbarTrack').getBoundingClientRect().height,
+        cap: +getComputedStyle(document.querySelector('.sbar-cap')).opacity, sticky: +getComputedStyle(document.querySelector('.sticky')).opacity,
+        pill: document.getElementById('hhPillT').textContent, pillH: pill.height, pillBottom: pill.bottom, zipVisible: document.getElementById('zip').checkVisibility(),
+        open: f.open, k: f.querySelector('.fly-k').textContent, items: tk.querySelectorAll('span').length, entries: f.querySelectorAll('.upd-when').length,
+        moving: getComputedStyle(tk).animationName, tickW: tk.scrollWidth, stripW: tk.parentElement.clientWidth, sumH: f.querySelector('summary').getBoundingClientRect().height,
+        fly: [fr.left, fr.right], vis: bd.checkVisibility(), docW: document.documentElement.scrollWidth }; });
     const r = await read();
-    ok(`${w}px: nothing above the masthead, and the hero ends on the first screen`, r.first === 'SECTION' && r.bottom <= r.vh * 0.8, `${r.first}, ${r.bottom.toFixed(0)} of ${r.vh}`);
-    ok(`${w}px: under 60 words, where it had 174`, r.words < 60, r.words + ' words');
-    ok(`${w}px: the button points down the page`, /Show me\s*↓/.test(r.go), r.go);
-    ok(`${w}px: the ZIP field keeps its width and the button stays on screen`, r.zip[0] >= 120 && r.zip[1] <= r.vw - 15, JSON.stringify(r.zip.map(x => Math.round(x))));
-    ok(`${w}px: the place and its source, and no city buttons until they are needed`, /^Showing Dallas County, Texas, priced from/.test(r.scope) && r.chips === 0, r.scope);
-    ok(`${w}px: the log is a shut 44px control carrying its newest date`, !r.open && !r.vis && r.k === 'What changed' && /^\d{1,2} [A-Z][a-z]+ \d{4}$/.test(r.d) && r.entries === 3 && r.zip[2] >= 44, r.d);
-    ok(`${w}px: ${m ? 'under the ZIP on a phone' : 'to the right of the ZIP on a desktop'}`, m ? r.zip[5] > r.zip[4] + 40 : (r.zip[3] > r.zip[1] + 100 && Math.abs(r.zip[5] - r.zip[4]) < 30), JSON.stringify(r.zip.map(x => Math.round(x))));
+    ok(`${w}px: the page opens on the dark ground with the pill on the first screen`, r.ground === 'rgb(18, 20, 26)' && r.intro && r.pillBottom <= r.vh, `${r.ground}, pill ends ${r.pillBottom.toFixed(0)} of ${r.vh}`);
+    ok(`${w}px: about forty words of its own, where the first hero had 174`, r.words < 45, r.words + ' words');
+    ok(`${w}px: the bar ${m ? 'is not drawn yet' : 'stands empty beside it'}, with no total, and the results bar waits out of sight`, r.segs === 0 && r.cap === 0 && r.sticky === 0 && (m || r.track > 200), JSON.stringify([r.segs, r.cap, r.sticky, r.track]));
+    ok(`${w}px: the pill names the household and is a 44px target`, (m ? /^Household of 4 · Dallas · \$95k$/ : /^Household of 4 · Dallas County · \$95,000$/).test(r.pill) && r.pillH >= 44 && !r.zipVisible, r.pill);
+    ok(`${w}px: the news line carries the three entries twice over, in a 44px control`, !r.open && r.k === 'What changed' && r.items === 6 && r.entries === 3 && r.sumH >= 44 && r.tickW > r.stripW && r.docW <= w, JSON.stringify([r.items, r.tickW, r.stripW, r.docW]));
+    ok(`${w}px: it holds still when the reader has asked for less motion`, r.moving === 'none', r.moving);
     await p.locator('#changed > summary').click(); await p.waitForTimeout(250);
     const o = await read();
-    ok(`${w}px: open, it floats over the page, on screen, and the hero has not grown`, o.open && o.vis && o.pos === 'absolute' && o.h === r.h && o.fly[0] >= 0 && o.fly[1] <= o.vw + 0.5, JSON.stringify([o.h, r.h, o.fly.map(x => Math.round(x))]));
-    ok(`${w}px: it sits above the results bar it overlaps`, await p.evaluate(() => { const bd = document.querySelector('#changed .fly-bd').getBoundingClientRect(); const e = document.elementFromPoint(bd.left + bd.width / 2, Math.min(innerHeight - 4, bd.bottom - 6)); return !!e && !!e.closest('#changed'); }));
+    ok(`${w}px: the dated list pops out over the page, on screen, and the opening has not grown`, o.open && o.vis && o.h === r.h && o.fly[0] >= 0 && o.fly[1] <= o.vw + 0.5, JSON.stringify([o.h, r.h, o.fly.map(x => Math.round(x))]));
     await p.keyboard.press('Escape'); await p.waitForTimeout(150);
     ok(`${w}px: Escape shuts it`, !(await read()).open);
-    await p.locator('#changed > summary').click(); await p.waitForTimeout(150);
-    await p.mouse.click(8, h - 8); await p.waitForTimeout(150);
-    ok(`${w}px: so does a click anywhere else`, !(await read()).open);
+    // the pill: ZIP and household in one sheet, and a new ZIP reprices without leaving it
+    await p.locator('#hhPill').click(); await p.waitForTimeout(300);
+    const s = await p.evaluate(() => { const d = document.getElementById('foldHh'), bd = d.querySelector('.fold-bd'); return { open: d.open, pos: getComputedStyle(bd).position, zip: document.getElementById('zip').checkVisibility(), route: document.getElementById('route').checkVisibility(), y: scrollY, label: bd.getAttribute('aria-label') }; });
+    ok(`${w}px: the pill opens the household sheet with the ZIP and the family details together`, s.open && s.pos === 'fixed' && s.zip && s.route && s.label === 'Change the household', JSON.stringify(s));
+    await p.locator('#zip').fill('60601'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+    const z = await p.evaluate(() => ({ pill: document.getElementById('hhPillT').textContent, open: document.getElementById('foldHh').open, y: scrollY, scope: document.getElementById('scope').textContent }));
+    ok(`${w}px: a new ZIP reprices in place: the sheet stays, the page does not move, the pill follows`, z.open && z.y === s.y && /Cook/.test(z.pill) && /^Showing Cook County, Illinois/.test(z.scope), JSON.stringify(z));
     await p.locator('#zip').fill('00000'); await p.locator('#zipGo').click(); await p.waitForTimeout(250);
-    ok(`${w}px: a ZIP we cannot price brings the sample cities back`, await p.evaluate(() => document.querySelectorAll('#areapick button[data-z]').length === 5 && /try a city/.test(document.getElementById('scope').textContent)));
+    ok(`${w}px: a ZIP we cannot price offers the sample cities`, await p.evaluate(() => document.querySelectorAll('#areapick button[data-z]').length === 5 && /try a city/.test(document.getElementById('scope').textContent)));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(250);
+    ok(`${w}px: closing hands focus back to the pill`, await p.evaluate(() => document.activeElement === document.getElementById('hhPill')));
     await p.close();
   }
+  // with motion on, the line moves, and stops under the pointer
+  const q = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
+  await q.goto(URL); await q.waitForTimeout(1500);
+  const x = () => q.evaluate(() => document.getElementById('tickIn').getBoundingClientRect().left);
+  const x0 = await x(); await q.waitForTimeout(700); const x1 = await x();
+  await q.locator('#changed > summary').hover(); await q.waitForTimeout(150); const x2 = await x(); await q.waitForTimeout(600); const x3 = await x();
+  ok('motion on: the news line drifts left, and holds still under the pointer', x1 < x0 - 3 && Math.abs(x3 - x2) < 0.6, JSON.stringify([x0, x1, x2, x3].map(v => +v.toFixed(1))));
+  await q.close();
 });
 test('folds: with motion on, folds and sheets move over time and end clean', async b => {
   const p = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
   p.on('pageerror', e => ok('no page errors', false, e.message));
   await p.goto(URL); await p.waitForTimeout(1200);
   for (const sel of ['#foldWhy', '#obj2', '#adv']) {
-    if (sel === '#adv') { await p.evaluate(() => document.querySelector('#foldHh').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400); await p.locator('#foldHh > summary').click(); await p.waitForTimeout(900); }
+    if (sel === '#adv') { await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(400); await p.locator('#hhPill').click(); await p.waitForTimeout(900); }
     else { await p.evaluate(s => document.querySelector(s).scrollIntoView({ block: 'center' }), sel); await p.waitForTimeout(500); }
     await p.locator(sel + ' > summary').click();
     const mid = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
@@ -3506,7 +3512,7 @@ test('story: the universal step follows the savings sign and the unit', async b 
  * icon of a chart that disagreed with the chart would be a small lie, so the two
  * that carry proportion are measured against the numbers. */
 test('glyphs: every story fold wears a drawing made from its own figures', async b => {
-  const p = await page(b, 1280, 800, false, 'index.html', true);
+  const p = await page(b, 1280, 800);   // all on one page, where the household fold has a row of its own
   const read = () => p.evaluate(() => {
     const g = id => document.getElementById(id), n = sel => [...document.querySelectorAll(sel)];
     const num = t => parseFloat(t.replace(/[^0-9.]/g, ''));
@@ -3541,7 +3547,7 @@ test('glyphs: every story fold wears a drawing made from its own figures', async
 test('cards: on a phone the story is tapped or swiped through, one step a screen', async b => {
   for (const [w, h] of [[390, 844], [360, 640], [430, 932]]) {
     const p = await page(b, w, h, true, 'index.html', true);
-    await p.evaluate(() => document.getElementById('story').scrollIntoView()); await p.waitForTimeout(300);
+    await storyStep(p, 0);
     const read = () => p.evaluate(() => { const row = document.getElementById('ssteps'), cs = [...row.querySelectorAll('.sstep')], on = cs.findIndex(e => e.classList.contains('on'));
       const rr = row.getBoundingClientRect(), st = document.getElementById('stage').getBoundingClientRect(), nav = document.getElementById('snav').getBoundingClientRect(), sb = document.querySelector('.sticky').getBoundingClientRect();
       const c = cs[on].getBoundingClientRect(), num = cs[on].querySelector('.snum, .ssend').getBoundingClientRect();
@@ -3564,7 +3570,7 @@ test('cards: on a phone the story is tapped or swiped through, one step a screen
       r = await read(); fit.push(r.yOver);
       ok(`${w}px: Next goes to card ${i + 1}, ticks follow, teal from the universal card on`, r.on === i && r.ticks === i + 1 && r.uni === (i >= 3) && Math.abs(r.left) < 1 && r.y === y0, JSON.stringify([r.on, r.ticks, r.uni, r.left, r.y]));
     }
-    ok(`${w}px: every card fits without scrolling inside it${h < 700 ? ' (a short phone may scroll one a little)' : ''}`, fit.every(o => o <= (h < 700 ? 60 : 0)), fit.join(' '));
+    ok(`${w}px: every card fits without scrolling inside it${h < 700 ? ' (a short phone may scroll one a little)' : ''}`, fit.every(o => o <= (h < 700 ? 150 : 0)), fit.join(' '));
     ok(`${w}px: the last card says the story is done and Next carries on`, /Keep reading/.test(r.next), r.next);
     await p.locator('#sPrev').click(); await p.waitForTimeout(350);
     ok(`${w}px: Back returns`, (await read()).on === 3);

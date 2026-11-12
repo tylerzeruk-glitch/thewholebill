@@ -48,9 +48,9 @@ const F = {
   'route.replaced': R.borne - ((R.parts.find(p => p.key === 'tax') || { value: 0 }).value),
   'route.onPaystub': R.onPaystub, 'route.offPaystub': R.offPaystub,
   // the story's first three steps on the default (employer) route: what a paystub
-  // shows, the employer's share, the whole; the bar opens on step one
+  // shows, the employer's share, the whole; the bar opens empty
   'story.0': R.onPaystub, 'story.1': (R.parts.find(p => p.key === 'employer') || { value: 0 }).value,
-  'story.2': R.whole, 'story.run': R.onPaystub
+  'story.2': R.whole, 'story.run': 0   // the bar stands empty beside the opening
 };
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
 const out = {};

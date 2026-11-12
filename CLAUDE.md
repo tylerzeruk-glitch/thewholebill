@@ -112,8 +112,22 @@ was "the bars cover half the screen". All on one page, on a phone, puts the bar 
   the household as dots, the cliff as this household's curve, the arithmetic as the waterfall's
   columns. Icons, so aria-hidden, but never an invented shape; the suite checks the ones that
   carry proportion.
-- **"What changed" is a flyout beside the ZIP** (`details.flyout#changed`), not a fold: it opens
-  over the page so the hero never grows. The notice strip and the hero footline are gone.
+- **The opening is the story's first rows** (`.shero`), on the dark ground with the empty bar
+  beside it. While it has the screen the zone is `.intro`: no segments, no running total, and
+  the results bar waits out of sight. There is no ZIP field on it. The household pill
+  (`#hhPill`), and the household line in the results bar, open the household sheet, which
+  holds the ZIP and the family details together.
+- **"What changed" is one slow line of news** on the opening (`details.flyout#changed`) that
+  pops the dated list out over the page. The owner asked for the moving line on 2026-11-12,
+  reversing the earlier "static, no ticker" choice. It never moves under reduced motion and
+  stops under the pointer; the scrolling text is an aria-hidden copy of the entries.
+- **After the turn the page stays teal**: the other number, the objections and the letter are
+  `section.paper.onteal` inside `.inkzone`, with the paper tokens re-pointed. The letter is the
+  exception, a sheet of paper with its own tokens put back. No section wears a number.
+- **Step by step, the results bar shows only the household and the unit switch.** Its three
+  totals are what the steps reveal; they return in the all-on-one-page view.
+- **The six estimates are circles on a line** (`renderModelLine()`), each at the calculator's
+  own total for that model and this household, with name chips under it.
 
 ## Traps that have bitten this codebase
 
@@ -125,6 +139,12 @@ was "the bars cover half the screen". All on one page, on a phone, puts the bar 
 - **A share-of-itself IntersectionObserver threshold can be unreachable.** The reveal waited for
   18% of a section to be on screen; the story is several screens tall, so its bars would have
   stayed clipped. Tall sections reveal on any intersection.
+- **A shut `<details>` is a containing block for fixed children.** Its hidden content box has
+  containment, so a sheet styled `position:fixed` while shut was laid out against its own card.
+  Sheet rules are scoped to `[open]`.
+- **Absolute children escape a scroll row.** The visually hidden fold lines (`.vh`) sat in the
+  phone card row with no positioned ancestor inside it, so they were placed against the page
+  and widened it to 841px at 390. `.sstep` is `position:relative` for that reason.
 - **A transition can be caught by print.** The ink-to-teal background change printed mid-colour
   until `@media print` turned transitions off.
 

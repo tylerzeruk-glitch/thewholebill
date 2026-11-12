@@ -813,3 +813,24 @@ controls on them). The results bar keeps the household and the Year and Month sw
 its three totals while the cards are up. The model picker on the universal card is the native
 select the phone already had. Not checked on a real iPhone: fixed-position sheets inside a
 scrolling row have a history of Safari bugs, so that is the first thing to try on a device.
+
+## Same day, fifth pass: back toward the first prototype
+
+The owner pointed at the first scroll prototype: "I kind of liked how minimal this initial
+version was", and later "cut back even more on the text... giving the key features of the
+site a little more room to breathe".
+
+- **The opening is on the dark ground** with the empty bar beside it, as in the prototype. The
+  ZIP field left the hero: the household pill opens one sheet with the ZIP and the family
+  details together, and a new ZIP reprices without leaving it.
+- **What changed** is a slow line of news on the opening that pops out the dated list. This
+  reverses the earlier decision to keep the log static.
+- **The universal step** has the dotted line with six circles and name chips again, and one
+  sentence naming the model, its maker's role and both figures.
+- **Teal to the end.** The other number, the objections and the letter sit on the teal ground;
+  the letter stays a sheet of paper on it.
+- **Steps are down to the prototype's parts:** a grey label with no number, the figure, one
+  sentence, and plain fold rows with a plus that turns. A chip appears only where the figure
+  leans on our own estimate. The results bar keeps the household and the unit switch and gives
+  up its three totals in this view. The bar is wider and sits nearer the text, in two even
+  columns. The view switch moved from the first step to the end of the story.
