@@ -11,13 +11,17 @@
  * The UI is expected to surface anything that is not 'statutory' or 'survey'.
  *
  * SOURCES
- *   FPL .................. HHS 2025 poverty guidelines (the guidelines in force
- *                          at the start of 2026 open enrollment, so these are the
- *                          ones that govern 2026 coverage).
- *   Applicable percentage  IRS Rev. Proc. 2025-25, table for taxable years
- *                          beginning in 2026. NOTE: the enhanced (ARPA/IRA)
+ *   FPL .................. HHS 2026 poverty guidelines (the guidelines in force
+ *                          at the start of 2027 open enrollment, so these are the
+ *                          ones that govern 2027 coverage).
+ *   Applicable percentage  IRS Rev. Proc. 2026-26, table for taxable years
+ *                          beginning in 2027. NOTE: the enhanced (ARPA/IRA)
  *                          schedule EXPIRED 31 Dec 2025. The 400% FPL cliff is
  *                          back — above 400% the credit is zero, not tapered.
+ *   Out-of-pocket maximum  CMS, 2027 premium adjustment percentage and maximum
+ *                          annual limitation on cost sharing (29 Jan 2026).
+ *   PRIOR ................ the plan-year 2026 tables, kept so the methodology
+ *                          page can print last year's schedule beside this one.
  *   Employer premiums .... KFF Employer Health Benefits Survey 2026.
  *   Marketplace deductible KFF, 2026 marketplace analysis.
  * ========================================================================== */
@@ -30,27 +34,67 @@
 
   /* ---------------------------------------------------------------- tables */
 
-  var YEAR = 2026;
+  /* The plan year. Every dated table below belongs to it, and the suite fails
+   * if the benchmark table (src/benchmarks.js planYear) or the Sanders
+   * exemption's standard deduction is from any other year.
+   *
+   * One exception, per state and disclosed: a state whose own 2027 rates were
+   * not yet published when the table was built stays wholly on plan year 2026
+   * (its benchmark, its poverty line and its credit schedule, from PRIOR) and
+   * the page says so. benchmarks.js marks it with states[ST].year; the suite
+   * holds the list of such states. A household is never priced on one year's
+   * premiums and another year's schedule. */
+  var YEAR = 2027;
 
-  // HHS 2025 poverty guidelines.
+  // HHS 2026 poverty guidelines (Federal Register, 15 January 2026): $33,000
+  // for four in the 48 states and DC.
   var FPL = {
-    contiguous: { base: 15650, add: 5500 },
-    AK:         { base: 19550, add: 6880 },
-    HI:         { base: 17990, add: 6330 }
+    contiguous: { base: 15960, add: 5680 },
+    AK:         { base: 19950, add: 7100 },
+    HI:         { base: 18360, add: 6530 }
   };
 
-  // IRS Rev. Proc. 2025-25 — applicable percentage table for 2026.
+  // IRS Rev. Proc. 2026-26 — applicable percentage table for 2027.
   // Within a band the percentage rises linearly from `from` to `to`.
-  // There is no band above 400%: that is the cliff.
+  // There is no band above 400%: that is the cliff. Each figure is the 2014
+  // statutory percentage times the year's premium index, rounded to the
+  // hundredth (2.0 x 1.0758 = 2.15 ... 9.5 x 1.0758 = 10.22).
   var APPLICABLE = [
-    { lo: 0.00, hi: 1.33, from: 0.0210, to: 0.0210 },
-    { lo: 1.33, hi: 1.50, from: 0.0314, to: 0.0419 },
-    { lo: 1.50, hi: 2.00, from: 0.0419, to: 0.0660 },
-    { lo: 2.00, hi: 2.50, from: 0.0660, to: 0.0844 },
-    { lo: 2.50, hi: 3.00, from: 0.0844, to: 0.0996 },
-    { lo: 3.00, hi: 4.00, from: 0.0996, to: 0.0996 }
+    { lo: 0.00, hi: 1.33, from: 0.0215, to: 0.0215 },
+    { lo: 1.33, hi: 1.50, from: 0.0323, to: 0.0430 },
+    { lo: 1.50, hi: 2.00, from: 0.0430, to: 0.0678 },
+    { lo: 2.00, hi: 2.50, from: 0.0678, to: 0.0866 },
+    { lo: 2.50, hi: 3.00, from: 0.0866, to: 0.1022 },
+    { lo: 3.00, hi: 4.00, from: 0.1022, to: 0.1022 }
   ];
   var CLIFF = 4.00;
+
+  // The statutory out-of-pocket maximum for in-network covered care (45 CFR
+  // 156.130). Not part of any calculation: the bad-year panel and the
+  // methodology quote it, and the build fills both from here.
+  var OOP_MAX = { single: 12000, family: 24000 };
+
+  /* Plan year 2026: the methodology page prints it under this year's tables,
+   * and a state still on 2026 benchmarks (see YEAR) is priced on it.
+   * HHS 2025 poverty guidelines; IRS Rev. Proc. 2025-25; CMS's 2025
+   * Marketplace Integrity and Affordability final rule. */
+  var PRIOR = {
+    year: 2026,
+    FPL: {
+      contiguous: { base: 15650, add: 5500 },
+      AK:         { base: 19550, add: 6880 },
+      HI:         { base: 17990, add: 6330 }
+    },
+    APPLICABLE: [
+      { lo: 0.00, hi: 1.33, from: 0.0210, to: 0.0210 },
+      { lo: 1.33, hi: 1.50, from: 0.0314, to: 0.0419 },
+      { lo: 1.50, hi: 2.00, from: 0.0419, to: 0.0660 },
+      { lo: 2.00, hi: 2.50, from: 0.0660, to: 0.0844 },
+      { lo: 2.50, hi: 3.00, from: 0.0844, to: 0.0996 },
+      { lo: 3.00, hi: 4.00, from: 0.0996, to: 0.0996 }
+    ],
+    OOP_MAX: { single: 10600, family: 21200 }
+  };
 
   // 26 U.S.C. §36B(c)(1)(A): the credit needs household income of at least 100%
   // of the poverty line. §36B(c)(2)(B): anyone eligible for Medicaid gets no
@@ -136,6 +180,17 @@
   }
 
   function benchState(key) { return BENCH.fips[key.slice(0, 2)]; }
+  // The plan year a state is priced in: YEAR, or PRIOR.year for a state held
+  // on last year's benchmarks until its own rates are published.
+  function stateYear(st) {
+    var m = BENCH && st && BENCH.states[st];
+    return (m && m.year) || YEAR;
+  }
+  function tablesFor(year) {
+    if (year == null || year === YEAR) return { year: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, OOP_MAX: OOP_MAX };
+    if (year === PRIOR.year) return PRIOR;
+    throw new Error('no tables for plan year ' + year);
+  }
   function fplRegion(st) { return st === 'AK' ? 'AK' : st === 'HI' ? 'HI' : 'contiguous'; }
 
   /* The household's monthly benchmark premium: each member priced at the
@@ -173,24 +228,27 @@
       }
     }
     return { monthly: monthly, annual: monthly * 12,
-             ra: e[1], county: e[2], state: st, tiers: !!meta.tiers,
+             ra: e[1], county: e[2], state: st, tiers: !!meta.tiers, year: stateYear(st),
+             source: meta.source || null,
              exchange: meta.exchange, expanded: meta.expanded, chipUpTo: meta.chip };
   }
 
   /* ------------------------------------------------------------- primitives */
 
-  function povertyLine(size, region) {
-    var t = FPL[region] || FPL.contiguous;
+  function povertyLine(size, region, year) {
+    var f = tablesFor(year).FPL;
+    var t = f[region] || f.contiguous;
     return t.base + t.add * (Math.max(1, size) - 1);
   }
 
-  function fplRatio(income, size, region) {
-    return income / povertyLine(size, region);
+  function fplRatio(income, size, region, year) {
+    return income / povertyLine(size, region, year);
   }
 
   // Returns the share of income a household is expected to contribute toward the
   // benchmark plan, or null when it is over the cliff and gets nothing.
-  function applicablePercentage(ratio) {
+  function applicablePercentage(ratio, year) {
+    var APPLICABLE = tablesFor(year).APPLICABLE;
     // "does not exceed 400 percent": a household at exactly 400% still qualifies.
     if (ratio > CLIFF) return null;
     for (var i = 0; i < APPLICABLE.length; i++) {
@@ -267,8 +325,9 @@
     if (!bp) return null;
     var region = o.region || fplRegion(bp.state);
     var benchmark = bp.annual;
+    var year = bp.year;
 
-    var ratio = fplRatio(o.income, o.size, region);
+    var ratio = fplRatio(o.income, o.size, region, year);
     // The floor. Below 100% of the poverty line there is no credit at all; in a
     // state that has not expanded Medicaid, adults there are in the coverage gap.
     // In an expansion state, adults under the Medicaid ceiling are Medicaid's,
@@ -281,7 +340,7 @@
     var belowFloor = ratio < 1.00;
     var medicaidCeiling = MEDICAID_ADULT_BY_STATE[bp.state] || MEDICAID_ADULT;
     var medicaidLikely = !belowFloor && !!bp.expanded && ratio < medicaidCeiling;
-    var pct = (belowFloor || medicaidLikely) ? null : applicablePercentage(ratio);
+    var pct = (belowFloor || medicaidLikely) ? null : applicablePercentage(ratio, year);
     var expected = pct === null ? benchmark : o.income * pct;
     var subsidy = pct === null ? 0 : Math.max(0, benchmark - expected);
     var net = Math.max(0, benchmark - subsidy);
@@ -304,6 +363,7 @@
       household: net + oop + tax,          // what the household bears
       total: benchmark + oop + tax,        // the whole bill, however routed
       fplRatio: ratio,
+      year: year,                           // the plan year this state is priced in
       overCliff: ratio > CLIFF,
       belowFloor: belowFloor,               // under 100% FPL: no credit exists
       medicaidLikely: medicaidLikely,       // expansion state, under its adult ceiling
@@ -376,14 +436,20 @@
   var URBAN_ADDER = Math.round(719.7e9 / BLAHOUS.households);
 
   /* Sanders' 2019 list exempts "the standard deduction" from the 4% premium
-   * (its worked example: $29,000 for a family of four, 2019). This is a 2026
-   * calculator, so it uses the 2026 standard deduction: $32,200 joint, $16,100
-   * single, IRS Rev. Proc. 2025-32. The list also exempts an employer's first
-   * $2M of payroll from the 7.5% levy; a household cannot know where its
-   * employer stands, so the levy is applied to all wages here, which if
-   * anything overstates the cost. Both choices are stated on the methodology
-   * page. Galvani (below) keeps its paper's literal $29,000. */
-  var SANDERS_EXEMPT = { joint: 32200, single: 16100 };
+   * (its worked example: $29,000 for a family of four, 2019). The calculator
+   * uses the standard deduction of its own plan year, so `year` must equal
+   * YEAR; the suite fails until it does.
+   *
+   * Plan year 2027: IRS Rev. Proc. 2026-35, section 3.15 (released November
+   * 2026): $33,200 joint, $16,600 single. The 2026 figures were $32,200 and
+   * $16,100 (Rev. Proc. 2025-32).
+   *
+   * The list also exempts an employer's first $2M of payroll from the 7.5%
+   * levy; a household cannot know where its employer stands, so the levy is
+   * applied to all wages here, which if anything overstates the cost. Both
+   * choices are stated on the methodology page. Galvani (below) keeps its
+   * paper's literal $29,000. */
+  var SANDERS_EXEMPT = { year: 2027, joint: 33200, single: 16600, cite: 'Rev. Proc. 2026-35' };
   function sandersOne(income, size) {
     var exempt = size > 1 ? SANDERS_EXEMPT.joint : SANDERS_EXEMPT.single;
     var premium = 0.04 * Math.max(0, income - exempt);
@@ -428,8 +494,9 @@
       basis: 'published formula',
       note: 'Sen. Bernie Sanders\u2019 office, 2019, from its published list of financing options, ' +
             'the first of two household-level formulas anyone in this debate has published. A 4% ' +
-            'income-based premium above the standard deduction ($32,200 joint, $16,100 single in ' +
-            '2026), plus a 7.5% employer payroll tax replacing what your employer pays now. The ' +
+            'income-based premium above the standard deduction ($' + SANDERS_EXEMPT.joint.toLocaleString('en-US') +
+            ' joint, $' + SANDERS_EXEMPT.single.toLocaleString('en-US') + ' single in ' + SANDERS_EXEMPT.year +
+            '), plus a 7.5% employer payroll tax replacing what your employer pays now. The ' +
             'list presents these as separate options; pairing them is our doing. It also exempts an ' +
             'employer\u2019s first $2 million of payroll from the levy; we apply it to all wages.',
       compute: sandersOne
@@ -602,13 +669,16 @@
     var st = BENCH && o.bkey ? benchState(o.bkey) : null;
     return o.region || (st ? fplRegion(st) : 'contiguous');
   }
+  function planYearOf(o) {
+    return stateYear(BENCH && o.bkey ? benchState(o.bkey) : null);
+  }
   // hiRatio widens the right edge (default 5.5x the poverty line) so a household
   // past it still appears on the chart; capped at 10x so a very high income cannot
   // squash the cliff into the left margin. The curve is flat past 400%, so widening
   // distorts nothing.
   function cliffCurve(o, steps, hiRatio) {
     var region = cliffRegion(o);
-    var line = povertyLine(o.size, region);
+    var line = povertyLine(o.size, region, planYearOf(o));
     var hiX = Math.min(Math.max(hiRatio || 5.5, 5.5), 10);
     var lo = line * 1.5, hi = line * hiX, n = steps || 120, out = [], i;
     for (i = 0; i <= n; i++) {
@@ -625,7 +695,7 @@
   // The size of the drop at the boundary: one dollar of income, this many dollars.
   function cliffDrop(o) {
     var region = cliffRegion(o);
-    var line = povertyLine(o.size, region);
+    var line = povertyLine(o.size, region, planYearOf(o));
     var at = line * CLIFF;
     var under = marketplaceCost({ income: at - 1, size: o.size, adults: o.adults,
                                   ages: o.ages, bkey: o.bkey, region: region });
@@ -692,8 +762,9 @@
     var uni = universalCost(o.model || 'sanders1', o.income, o.size);
     var all = MODELS.map(function (m) { return m.compute(o.income, o.size).total; });
 
+    var year = planYearOf(opts);
     return {
-      year: YEAR,
+      year: year,                              // the household's plan year (see YEAR)
       employer: emp,
       marketplace: mkt,
       universal: uni,
@@ -701,15 +772,16 @@
       savings: emp.total - uni.total,          // employer route; see savingsFor()
       decade: (emp.total - uni.total) * 10,
       cobra: cobra(opts),
-      fpl: { line: povertyLine(o.size, opts.region), ratio: fplRatio(o.income, o.size, opts.region) },
+      fpl: { line: povertyLine(o.size, opts.region, year), ratio: fplRatio(o.income, o.size, opts.region, year) },
       replacedByUniversal: emp.total - emp.medicareTax   // the payroll tax is not a premium
     };
   }
 
   return {
-    YEAR: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, CLIFF: CLIFF,
-    EMPLOYER: EMPLOYER, MODELS: MODELS,
+    YEAR: YEAR, FPL: FPL, APPLICABLE: APPLICABLE, CLIFF: CLIFF, OOP_MAX: OOP_MAX, PRIOR: PRIOR,
+    SANDERS_EXEMPT: SANDERS_EXEMPT, EMPLOYER: EMPLOYER, MODELS: MODELS,
     useBenchmarks: useBenchmarks, benchKey: benchKey, zipResolve: zipResolve,
+    stateYear: stateYear, tablesFor: tablesFor,
     benchmarkPremium: benchmarkPremium,
     povertyLine: povertyLine, fplRatio: fplRatio,
     applicablePercentage: applicablePercentage, medicareTax: medicareTax,

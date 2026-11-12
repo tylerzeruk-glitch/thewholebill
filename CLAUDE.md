@@ -150,13 +150,21 @@ first is now met, so it is ready for a decision whenever the owner wants):
    being refused by the CSP and is to be switched off in the dashboard. HSTS remains a
    dashboard item (six months, includeSubDomains, no preload).
 
-3a. **Plan year 2027 (before open enrollment, 1 November 2026).** IRS Rev. Proc. 2026-26
-    sets the 2027 applicable percentages (2.15% to 10.22%; the top band was 9.96%) and the
-    2027 credit uses the 2026 poverty guidelines ($33,000 for four, contiguous states). Both
-    are logged as world entries. The decision is the switch: a plan-year control, or 2027
-    replacing 2026 on 1 November with the 2026 table kept for the methodology. Whichever,
-    every dated figure and the CMS benchmark rebuild (ritual 7) move together, with a site
-    entry in the log.
+3a. **Plan year 2027: built on `claude/kind-bell-ag75cx` (PR #95), awaiting merge.** CMS posts
+    the state exchanges' plan files only the following May, so (owner's decision, 11 November
+    2026: "switch 44, hold 7") the 29 HealthCare.gov states come from CMS's 2027 files, the
+    state exchanges from their own published rates (one extractor each in
+    `tools/state-sources/`, which checks its sources and carries the state's own published
+    figures for the build to reproduce), and states with nothing usable stay WHOLLY on 2026
+    (benchmark, poverty line, credit schedule; `calc.js` picks tables by
+    `benchmarks.js states[ST].year`). Held at build: CO, KY, ME, MD, MA, NJ, VA (unpublished),
+    IL and PA (their own published figures contradict each other; reasons in the builder's
+    `HELD_WHY`). The suite's "plan year" test names the held list, so moving a state is a
+    deliberate edit. **Move each held state** as it publishes: write its extractor, take it
+    out of `HELD` in `tools/build-benchmarks.mjs` and the test, rebuild, add a site entry.
+    In May 2027 CMS posts the 2027 state-exchange files: decide then whether to switch the
+    state-sourced states to them (a CMS reader for them was removed with this change; it is
+    in git history before PR #95's merge).
 
 Ops hygiene (small, anytime):
 
@@ -179,10 +187,11 @@ Ops hygiene (small, anytime):
     dashes, anchors must exist). A log that goes quiet reads as abandonment, so a benchmark
     or reps regeneration is an entry too. Never edit the hero box by hand.
 7. Standing ritual, not a task: rerun `node tools/build-benchmarks.mjs` when CMS publishes a
-    new plan year's files (each fall) — it re-downloads everything, re-runs every validation
-    (landscape cross-check to the cent, NY and CA published numbers, curve uniformity) and
-    refuses to write a table that fails any of them. Update the hardcoded validation values
-    for the new year first; they live at the top of the tool with their sources.
+    new plan year's files (each fall), after running each state extractor
+    (`node tools/state-sources/<st>.mjs`, README there). It re-runs every validation
+    (landscape cross-check to the cent, every state's own published figures, curve
+    uniformity) and refuses to write a table that fails any of them. Each fall, point
+    `FROZEN` at last year's table and set `HELD` to the states with nothing usable yet.
 
 Reader feedback, done and tabled, with the assessment of each ask: `docs/FEEDBACK.md`. Add to
 it whenever feedback arrives, including the asks that get a no.

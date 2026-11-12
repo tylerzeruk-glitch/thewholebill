@@ -4,8 +4,8 @@
 
 Plain facts about the site:
 - The calculator needs JavaScript; the methodology and the log are static pages.
-- Marketplace benchmark premiums are the real second-lowest-cost silver plan for every county in the 50 states and DC, from CMS plan-year 2026 files.
-- The enhanced premium tax credits expired on 31 December 2025; the 400% of poverty subsidy cliff is back and the site uses the 2026 schedule.
+- Marketplace benchmark premiums are the real second-lowest-cost silver plan for every county in the 50 states and DC, from CMS plan-year 2027 files.
+- The enhanced premium tax credits expired on 31 December 2025; the 400% of poverty subsidy cliff is back and the site uses the 2027 schedule.
 - Financing models span the published spectrum, including one produced by opponents of the policy; their provenance is disclosed either way.
 - No tracking, no cookies, no analytics script.
 

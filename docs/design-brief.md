@@ -325,23 +325,36 @@ Every returned figure carries a `basis`:
 The instrument's footer states plainly which parts are which. This is the difference between a
 calculator people trust and one they screenshot to mock.
 
-## Verified tables (all checked 2026-08-25)
+## Verified tables
 
-**FPL — HHS 2025 guidelines** (the ones in force at the start of 2026 open enrollment, so they
-govern 2026 coverage): contiguous base $15,650 / +$5,500; Alaska $19,550 / +$6,880; Hawaii
-$17,990 / +$6,330.
+**Plan year 2027** (the calculator from 1 November 2026; `calc.js` holds these, and the suite
+holds the methodology page to `calc.js`).
 
-**Applicable percentage — IRS Rev. Proc. 2025-25, 2026 table.** Rises linearly within each band:
+**FPL — HHS 2026 guidelines** (in force at the start of 2027 open enrollment, so they govern
+2027 coverage): contiguous base $15,960 / +$5,680 ($33,000 for four); Alaska $19,950 / +$7,100;
+Hawaii $18,360 / +$6,530.
+
+**Applicable percentage — IRS Rev. Proc. 2026-26, 2027 table.** Rises linearly within each band.
+Each figure is the 2014 statutory percentage times the year's index, so the rows can be re-derived
+from the top one (10.22 / 9.5).
 
 | % FPL | from | to |
 |---|---|---|
-| <133% | 2.10% | 2.10% |
-| 133–150% | 3.14% | 4.19% |
-| 150–200% | 4.19% | 6.60% |
-| 200–250% | 6.60% | 8.44% |
-| 250–300% | 8.44% | 9.96% |
-| 300–400% | 9.96% | 9.96% |
+| <133% | 2.15% | 2.15% |
+| 133–150% | 3.23% | 4.30% |
+| 150–200% | 4.30% | 6.78% |
+| 200–250% | 6.78% | 8.66% |
+| 250–300% | 8.66% | 10.22% |
+| 300–400% | 10.22% | 10.22% |
 | **≥400%** | **no credit at all** | |
+
+**Out-of-pocket maximum, 2027:** $12,000 self-only / $24,000 family (CMS 2027 payment parameters
+guidance, 29 January 2026).
+
+**Plan year 2026** (checked 2026-08-25; kept on the methodology page as last year's tables):
+FPL from the HHS 2025 guidelines, contiguous base $15,650 / +$5,500; Alaska $19,550 / +$6,880;
+Hawaii $17,990 / +$6,330. Applicable percentages from IRS Rev. Proc. 2025-25: 2.10%; 3.14–4.19%;
+4.19–6.60%; 6.60–8.44%; 8.44–9.96%; 9.96%. Out-of-pocket maximum $10,600 / $21,200.
 
 ⚠️ **The enhanced (ARPA/IRA) credits expired 31 December 2025 and the 400% cliff is back.** Any
 figure or copy written before that assumed the old schedule and is wrong. KFF reports 2026

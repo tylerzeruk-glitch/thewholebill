@@ -16,6 +16,12 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'plan-year-2027', date: '2026-11-11', kind: 'site', pin: true,
+    title: 'The calculator now uses plan year 2027 in 41 states and DC: the 2027 credit schedule, the 2026 poverty guidelines and 2027 benchmark premiums. Nine states stay on 2026 for now.',
+    body: 'Open enrollment for 2027 began on 1 November, so every dated figure moved together. The share of income a household is expected to pay toward the benchmark plan rises in every band of the IRS schedule (Rev. Proc. 2026-26): 2.15% at the bottom, up from 2.10%, and 10.22% from 300% to 400% of the poverty line, up from 9.96%. The credit is now measured against the 2026 poverty guidelines, $33,000 for a family of four in the 48 states and DC, up from $32,150, so for that family the 400% cliff falls at $132,000 instead of $128,600. The statutory out-of-pocket maximum is $12,000 for one person and $24,000 for a family, up from $10,600 and $21,200. Benchmark premiums are every county&rsquo;s second-lowest-cost silver plan for 2027: from CMS&rsquo;s plan files for the 29 HealthCare.gov states, and, because CMS posts the state exchanges&rsquo; files only next May, from the published rates of 12 state exchanges and the District&rsquo;s own, every source listed on the methodology page. For the default family of four in Dallas the benchmark rises 11.5%, from $25,788 a year to $28,752; across the counties priced in both years the median rise is 11.7%, in line with KFF&rsquo;s national 12%. California&rsquo;s rates are still labeled preliminary by Covered California, and the page says so for a household there. Colorado, Kentucky, Maine, Maryland, Massachusetts, New Jersey and Virginia had published nothing usable yet, and Illinois and Pennsylvania published figures that contradict each other, so those nine stay wholly on plan year 2026 (benchmark, poverty line and credit schedule) and the page says that too; each moves when its rates can be used. The Sanders exemption uses the 2027 standard deduction, $33,200 for a joint return and $16,600 for a single filer (IRS Rev. Proc. 2026-35), which lowers every model&rsquo;s figure for the default family by $40. Last year&rsquo;s tables stay on the methodology page.',
+    see: { id: 'credit', text: 'The premium tax credit' }
+  },
+  {
     id: 'kff-benchmark-2027', date: '2026-11-06', kind: 'world',
     title: 'KFF&rsquo;s benchmark premium indicator, corrected 6 November 2026, puts the national average 2027 benchmark silver premium at $703 a month, up from $625 in 2026.',
     body: 'KFF&rsquo;s &ldquo;Marketplace Average Monthly Benchmark Premiums&rdquo; indicator, updated 6 November 2026 to fix its Oregon and California figures, tracks the same thing this calculator prices by county: the second lowest cost silver, or benchmark, premium for a 40 year old before any tax credit. Its national average rises from $625 a month in 2026 to $703 in 2027, about 12 percent. The calculator&rsquo;s own benchmark table still runs on CMS&rsquo;s 2026 plan year files; the annual rebuild onto 2027&rsquo;s files is due this fall.',
@@ -154,7 +160,7 @@ var UPDATES = [
     see: { id: 'universal', text: 'Universal coverage, six models' }
   },
   {
-    id: 'kff-2027-rates', date: '2026-08-03', kind: 'world', pin: true,
+    id: 'kff-2027-rates', date: '2026-08-03', kind: 'world',
     title: 'Insurers propose a median <b>15%</b> premium increase for 2027, the second double-digit year in a row.',
     body: 'KFF&rsquo;s read of preliminary rate filings across all 50 states and DC: a median proposed increase of 15% for 2027, after 2026 finalized at 20%. Insurers cite rising prices for care, inflation and labor shortages, and two things specific to this market: the enhanced credits&rsquo; expiry and the sicker risk pool it left behind. Final 2027 rates arrive in the fall, when the benchmark table on this site is rebuilt from CMS&rsquo;s files.',
     source: { title: 'KFF, How much and why ACA Marketplace premiums are going up in 2027', url: 'https://www.kff.org/affordable-care-act/how-much-and-why-aca-marketplace-premiums-are-going-up-in-2027/' },
@@ -182,7 +188,7 @@ var UPDATES = [
     see: { id: 'poverty', text: 'Poverty guidelines' }
   },
   {
-    id: 'enhanced-credits-expired', date: '2025-12-31', kind: 'world', pin: true,
+    id: 'enhanced-credits-expired', date: '2025-12-31', kind: 'world',
     title: 'The enhanced premium tax credits expired. The 400% subsidy cliff is back for plan year 2026.',
     body: 'The 2021 enhancements (no income ceiling, a lower expected contribution at every income) ran through 2025 and were not renewed. From 1 January 2026 the schedule in IRS Rev. Proc. 2025-25 applies, and a household above 400% of the poverty line gets no credit at all. Every figure on this site uses the 2026 schedule.',
     source: { title: 'IRS Rev. Proc. 2025-25, the applicable percentage table for 2026', url: 'https://www.irs.gov/pub/irs-drop/rp-25-25.pdf' },
