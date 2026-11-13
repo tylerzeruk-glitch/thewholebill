@@ -38,12 +38,15 @@
    narrow comma (Schibsted Grotesk's tabular comma is a full digit wide: "$23 , 943").
    --mono is kept as the name of the LABEL AND FIGURE role; it resolves to the sans. */
   --mono:'Inter',system-ui,-apple-system,sans-serif;
+  /* figures: Newsreader's own lining, tabular figures (owner, 2026-11-12, after seeing six
+     faces side by side); labels and controls stay in Inter. Still two families. */
+  --fig:'Newsreader',Georgia,'Times New Roman',serif;
 }
 *{box-sizing:border-box}
 html,body{overflow-x:clip}
 body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--pk);-webkit-font-smoothing:antialiased;text-wrap:pretty}   /* inherited: no one-word last lines in labels, notes and captions either; headlines override with balance */
 img{max-width:100%}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;font-weight:500}
+.num{font-family:var(--fig);font-variant-numeric:lining-nums tabular-nums;font-feature-settings:'lnum' 1,'tnum' 1;font-weight:500}
 .wrap{max-width:1248px;margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
 
 /* Paper grain, not ruled lines: the 34px rules read as lined paper and readers found
@@ -120,12 +123,12 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
    the earlier "static, no ticker" choice. It never moves under reduced motion,
    it stops under the pointer or focus, and the text it scrolls is a copy for
    the eye only: the real entries are in the pop-out. */
-.flyout{position:relative;width:100%;max-width:34rem;margin-top:10px}
-.flyout > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;min-height:46px;padding:0 6px 0 18px;border:1px solid var(--irule-2);border-radius:999px;white-space:nowrap}
+.flyout{position:relative;flex:1 1 auto;min-width:0}
+.flyout > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;min-height:44px;padding:0;white-space:nowrap}
 .flyout > summary::-webkit-details-marker{display:none}
-.flyout > summary:hover{border-color:var(--ictrl)}
+.flyout > summary:hover .fold-x{border-color:var(--ib)}
 .flyout > summary:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
-.fly-k{color:var(--teal);flex-shrink:0}
+.fly-k{color:var(--im);flex-shrink:0}
 .tick{flex:1 1 auto;min-width:0;overflow:hidden;font-family:var(--sans);font-size:13.5px;color:var(--ib);-webkit-mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 24px),transparent)}
 .tick-in{display:inline-block;white-space:nowrap;padding-left:12px}
 .tick-in b{font-weight:500;color:var(--ik);margin-right:8px;font-variant-numeric:tabular-nums}
@@ -148,7 +151,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .zipbar{display:flex;gap:12px;align-items:center;margin-top:28px;flex-wrap:wrap}
 .zipfield{display:flex;align-items:center;border:2px solid var(--pk);border-radius:0;overflow:hidden;background:var(--paper-card)}
 .zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;color:var(--pk);border-right:1px solid var(--prule)}
-.zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent;font-variant-numeric:tabular-nums}
+.zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--fig);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent;font-variant-numeric:lining-nums tabular-nums}
 .zipfield .v::placeholder{color:#A79A85}
 .zipfield:focus-within{outline:2px solid var(--amber-deep);outline-offset:2px}
 .btn-dark{height:62px;padding:0 34px;background:var(--c2);color:#1E1509;border:none;border-radius:0;font-family:var(--sans);font-size:16px;font-weight:500;letter-spacing:0;cursor:pointer}
@@ -206,7 +209,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .figs{display:flex;gap:clamp(16px,2.6vw,38px);align-items:center}
 .fig{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.fig .n{font-family:var(--sans);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
+.fig .n{font-family:var(--fig);font-weight:500;font-size:16px;font-variant-numeric:lining-nums tabular-nums}
 .fig .t{font-size:13px;color:var(--im)}
 .unit{position:relative;display:inline-flex;align-items:center;padding:3px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);cursor:pointer;flex-shrink:0;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
 .unit:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
@@ -301,10 +304,10 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .step:active{background:var(--ictrl);color:var(--ik)}
 .step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
 .warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:0;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
-.bignum{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(56px,7.4vw,100px);line-height:.95;letter-spacing:-.02em;color:var(--c2)}
+.bignum{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(56px,7.4vw,100px);line-height:.95;letter-spacing:-.02em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:20px 22px;display:flex;flex-direction:column;gap:7px}
-.card-i .v{font-family:var(--sans);font-weight:500;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.card-i .v{font-family:var(--fig);font-weight:500;font-size:30px;letter-spacing:-.02em;font-variant-numeric:lining-nums tabular-nums}
 .card-i.hi{border-color:#34302A} .card-i.hi .v,.card-i.hi .t{color:var(--c2)}
 .card-i .t{font-size:13px;color:var(--im)}
 .callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:0;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
@@ -328,7 +331,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    text, so it can only start at the left. Two rows describing the same columns
    disagreeing about which edge they hang from is worse than either choice. Left
    is the edge both rows can share: figure, bar and swatch now all begin together. */
-.wlab{font-family:var(--sans);font-weight:500;font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.wlab{font-family:var(--fig);font-weight:500;font-size:clamp(14px,1.5vw,21px);margin-bottom:12px;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
 .wlab.big{font-size:clamp(18px,2.1vw,30px)}
 .wlab.total{font-size:clamp(24px,3.1vw,44px);color:#F2EFE9;letter-spacing:-.03em}
 /* Its column is now the same width as the others, so this label wraps where it
@@ -416,7 +419,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    two segments cannot be read as one length. */
 .bar-ghost{height:100%;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1);background:repeating-linear-gradient(135deg,rgba(138,143,156,.85) 0 4px,rgba(138,143,156,.22) 4px 10px);box-shadow:inset 1px 0 0 rgba(232,230,225,.35),inset -1px 0 0 rgba(232,230,225,.35)}
 .bar-fill{height:100%;flex-shrink:0;border-radius:1px;transition:width .35s cubic-bezier(.4,0,.2,1)}
-.bar-v{width:112px;flex-shrink:0;font-family:var(--sans);font-weight:500;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.02em;text-align:right;font-variant-numeric:tabular-nums}
+.bar-v{width:112px;flex-shrink:0;font-family:var(--fig);font-weight:500;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.02em;text-align:right;font-variant-numeric:lining-nums tabular-nums}
 .summary{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px}
 .save{background:var(--ink-surface);border:1px solid #24382F;border-radius:0;padding:24px 26px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
 /* Uninsured households come out BEHIND under every model here, because they are
@@ -424,11 +427,11 @@ button.step{cursor:pointer;font-family:var(--sans)}
    green border for a saving, amber for a loss. */
 .save.neg{border-color:#4A3520}
 .save.neg .v{color:var(--c2)}
-.save .v{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(48px,6vw,74px);line-height:1;letter-spacing:-.02em;color:var(--teal)}
-.save .v2{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(30px,3.4vw,42px);line-height:1;letter-spacing:-.02em}
+.save .v{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(48px,6vw,74px);line-height:1;letter-spacing:-.02em;color:var(--teal)}
+.save .v2{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(30px,3.4vw,42px);line-height:1;letter-spacing:-.02em}
 .vsep{width:1px;align-self:stretch;background:var(--irule)}
 .cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
-.cobra .num{font-family:var(--sans);font-weight:500}
+.cobra .num{font-family:var(--fig);font-weight:500}
 .range{height:26px;background:var(--ink-raised);border-radius:1px;position:relative}
 .range .band-t{position:absolute;top:0;bottom:0;background:rgba(63,181,174,.30);border-left:2px solid var(--teal);border-right:2px solid var(--teal)}
 .range .mk{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ik);transition:left .35s cubic-bezier(.4,0,.2,1)}
@@ -454,14 +457,14 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:0;background:var(--ink-surface);overflow:hidden}
 .cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
 .cstat .t{font-size:13.5px;color:var(--im)}
-.cstat .v{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(32px,4vw,52px);letter-spacing:-.02em;line-height:1}
+.cstat .v{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(32px,4vw,52px);letter-spacing:-.02em;line-height:1}
 .cstat .s{font-size:12.5px;color:var(--ifaint)}
 .chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px}
 .chartbox svg{display:block;width:100%;height:auto}
 
 /* ---------- lives ---------- */
 .livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
-.bigstat .n{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(64px,9vw,120px);line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
+.bigstat .n{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(64px,9vw,120px);line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
 .bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
 /* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
    ARE that number, split in two. Set as a sum -- operator in its own column so the
@@ -473,7 +476,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .tally{display:grid;grid-template-columns:14px auto minmax(0,1fr);gap:14px 13px;align-items:end;
        border-top:1px solid var(--prule);padding-top:18px}
 .tally .op{font-family:var(--mono);font-size:19px;color:var(--pm)}   /* --pctrl measured 3.12:1 on paper */
-.tally .v{font-family:var(--sans);font-weight:500;font-variant-numeric:tabular-nums;font-size:28px;line-height:1.15;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
+.tally .v{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:28px;line-height:1.15;letter-spacing:-.01em;color:var(--amber-deep);white-space:nowrap}
 .tally .d{font-size:15px;line-height:1.5;color:var(--pb);text-wrap:pretty}
 
 /* The source note collapses, but the DISCLOSURE does not: both facts a reader
@@ -507,7 +510,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .meth table{width:100%;border-collapse:collapse;font-size:14.5px}
 .meth th{text-align:left;color:var(--plabel);padding:0 16px 10px 0;border-bottom:1px solid var(--prule)}
 .meth td{padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;color:var(--pb);line-height:1.6}
-.meth td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--pk);white-space:nowrap}
+.meth td.num{font-family:var(--fig);font-variant-numeric:lining-nums tabular-nums;color:var(--pk);white-space:nowrap}
 .meth h3{font-family:var(--serif);font-size:clamp(22px,2.2vw,27px);font-weight:400;margin:0;letter-spacing:-.01em}
 .meth .card-p{gap:14px}
 .tag{display:inline-block;padding:4px 8px;border-radius:2px;white-space:nowrap}
@@ -643,8 +646,8 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .motion .fresh .wcol{transition:none;clip-path:inset(100% 0 0 0)}
   .motion .fresh .bar-bg{transition:none;clip-path:inset(0 100% 0 0)}
   .motion .fresh .range{transition:none;clip-path:inset(-12px 100% -12px 0)}
-  /* sheets rise with a little spring and leave faster than they came */
-  .motion .fold.wide > .fold-bd{transition:transform .34s cubic-bezier(.4,0,.6,1)}
+  /* sheets rise from the bottom with a little spring and sink back the same way */
+  .motion .fold.wide > .fold-bd{transition:transform .5s cubic-bezier(.5,0,.7,.4)}
   .motion .fold.wide.shown > .fold-bd{transition:transform .62s cubic-bezier(.2,1.05,.3,1)}
   .motion .shade{transition:opacity .4s ease}
   .motion .fold.wide.shown .fold-in > *{animation:fold-rise .6s cubic-bezier(.2,.7,.2,1) .12s both}
@@ -652,14 +655,18 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .motion .fold.wide.shown .fold-in > :nth-child(n+3){animation-delay:.28s}
   .sheet-x svg{transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
   .sheet-x:hover svg{transform:rotate(90deg)}
-  .sheets:not(.onepage) .fold.wide > summary:hover .fold-x{transform:rotate(90deg)}
+  .sheets:not(.onepage) .fold.wide > summary:hover .fold-x{transform:translateY(-3px)}
   .viewpick button{transition:background-color .25s ease,color .25s ease}
   .flyout[open] > .fly-bd{animation:fly-in .32s cubic-bezier(.2,.9,.3,1) both;transform-origin:0 0}
   .motion .tick-in.go{animation:tick var(--tick-s,48s) linear infinite}
   .flyout > summary:hover .tick-in,.flyout > summary:focus-visible .tick-in,.flyout[open] .tick-in{animation-play-state:paused}
   @keyframes tick{to{transform:translateX(-50%)}}
   .sticky{transition:background-color .9s ease,border-color .9s ease,opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1)}
-  .shero > *{animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) both}
+  .shero > :not(.cue){animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) both}
+  /* the arrow keeps its centring transform, so it bobs with its own keyframes */
+  .cue{animation:cue-bob 1.8s cubic-bezier(.45,0,.55,1) 1s infinite}
+  @keyframes cue-bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
+  .newsbar{animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) .3s both}
   .shero > :nth-child(2){animation-delay:.08s} .shero > :nth-child(3){animation-delay:.16s} .shero > :nth-child(4){animation-delay:.24s} .shero > :nth-child(n+5){animation-delay:.32s}
   .hhpill{transition:background-color .2s ease,transform .18s cubic-bezier(.3,.7,.2,1)} .hhpill:active{transform:scale(.98)}
   .hhpill:hover .fold-x{transform:rotate(-90deg) translateY(3px)}
@@ -723,7 +730,7 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .skip{display:none}
   *{transition:none!important}   /* a colour caught mid-change would print as that colour */
   body:not(.print-letter) .onteal{--paper:#fff;--paper-card:#fff;--paper-tint:#f1f1f1;--pk:#000;--pb:#222;--pm:#333;--plabel:#333;--prule:#bbb;--prule-soft:#ccc;--pctrl:#555;--amber-deep:#7a4f0e}
-  .shero{min-height:0} .flyout{display:none}
+  .shero{min-height:0} .newsbar,.cue{display:none}
   .stage,.sprog,.lmore,.sticks,.snav,.sstep.send-card{display:none}
   .letter .bd.clamp{max-height:none;overflow:visible;-webkit-mask-image:none;mask-image:none}
   .story-in{display:block} .sstep{min-height:0;padding:24px 0} .story .fold.wide > .fold-bd{width:auto}
@@ -793,14 +800,24 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .story-in{max-width:1180px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);column-gap:var(--sgap);padding-bottom:clamp(40px,6vw,72px)}
 .stage{grid-column:2;grid-row:2 / span 2;position:sticky;top:var(--sticky-h);height:calc(100vh - var(--sticky-h));height:calc(100svh - var(--sticky-h));display:flex;align-items:center;justify-content:center;z-index:1;--H:300px}
 .ssteps{grid-column:1;grid-row:3;min-width:0}
-.story .masthead{grid-column:1 / -1;grid-row:1;border-bottom-color:var(--irule-2)}
+.story .top{grid-column:1 / -1;grid-row:1;min-width:0}
+.story .masthead{border-bottom-color:var(--irule-2)}
 .story .nav{color:var(--im)}
 /* The opening: the question on the dark ground, the empty bar beside it. */
-.shero{grid-column:1;grid-row:2;min-width:0;min-height:calc(100vh - 150px);min-height:calc(100svh - 150px);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:24px;padding:36px 0 72px}
+.shero{grid-column:1;grid-row:2;min-width:0;min-height:calc(100vh - 194px);min-height:calc(100svh - 194px);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:24px;padding:36px 0 72px}
 .shero h1{font-size:clamp(44px,min(6.4vw,11vh),88px);max-width:11em}
 .shero h1 em{color:var(--c2)}
 .shero .lede{margin:0;font-family:var(--serif);font-size:clamp(20px,2.1vw,26px);line-height:1.35;color:var(--ik);max-width:22em}
-.shero .cue{margin:0;font-family:var(--sans);font-size:14px;color:var(--im)}
+/* the way down: centred on the whole opening (the shero is the first of two columns,
+   so its centre is half of both columns and the gap), bouncing while it waits */
+.shero{position:relative}
+.cue{position:absolute;bottom:14px;left:calc((100% / 1.1 * 2 + var(--sgap)) / 2);transform:translateX(-50%);appearance:none;-webkit-appearance:none;width:48px;height:48px;border:0;border-radius:50%;background:none;color:var(--im);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .4s ease,color .2s ease}
+.cue:hover{color:var(--ik)}
+.cue:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
+.inkzone:not(.intro) .cue{opacity:0;pointer-events:none}
+/* the news strip sits just under the header's rule, the plan year beside it */
+.newsbar{display:flex;align-items:center;gap:18px;min-width:0;border-bottom:1px solid var(--irule-2)}
+.newsbar-py{flex-shrink:0;color:var(--teal)}
 /* the household, as a button: it opens the sheet with the ZIP and everything else */
 .hhpill{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;gap:14px;max-width:100%;min-height:52px;padding:6px 8px 6px 22px;border:1px solid var(--ictrl);border-radius:999px;background:none;color:var(--ik);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;text-align:left}
 .hhpill:hover{background:var(--ink-raised)}
@@ -820,6 +837,8 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .sticky{margin-bottom:calc(-1 * var(--sticky-h))}
 .inkzone.intro .sticky{opacity:0;pointer-events:none;transform:translateY(-100%)}
 .inkzone.intro .sbar-cap{opacity:0}
+.inkzone.intro .sbar-track{opacity:0}
+.sbar-track{transition:opacity .6s ease}
 /* all on one page reads like the long page did: the results bar is always there, in the flow */
 .onepage .sticky{margin-bottom:0}
 .onepage .inkzone.intro .sticky{opacity:1;pointer-events:auto;transform:none}
@@ -833,6 +852,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .fold-lede{max-width:40rem;margin-bottom:28px}
 .snum{font-size:clamp(54px,7.4vw,98px);line-height:1;letter-spacing:-.022em;color:var(--c2)}
 .sstep[data-step="3"] .snum{color:var(--teal)}
+/* the large figures take the serif at the headlines' regular weight */
+.snum,.bignum,.save .v,.save .v2,.bigstat .n,.cstat .v{font-weight:400}
+/* the serif's dollar sign stands taller than Inter's did: room above it */
+.bignum,.bigstat .n{line-height:1.08;padding-top:.04em}
 .ssay em{font-style:italic;color:var(--c2)}
 .ssay{margin:0;font-family:var(--serif);font-size:clamp(20px,2.15vw,25px);line-height:1.34;color:var(--ik);text-wrap:pretty}
 /* one or two words on how solid the step's figure is: the basis tag, as a chip */
@@ -890,14 +913,13 @@ section.paper.onteal{background:var(--paper);background-image:none}
    A real <details>, so it works with no script, opens for find-in-page, and the
    script only adds the motion. .wide folds open across the whole wrap (the charts
    inside were drawn for that width), which is why the bar steps aside for them. */
-.fold > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"g k x" "g s x";gap:4px 16px;align-items:center;padding:14px 0;min-height:44px;border-top:1px solid var(--irule-2)}
+.fold > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"g k x";gap:4px 16px;align-items:center;padding:14px 0;min-height:44px;border-top:1px solid var(--irule-2)}
 /* The glyph: a small live drawing of what the fold holds (the household as dots,
    the cliff as its own curve, the arithmetic as its own columns), built by
    renderGlyphs() from the same figures as the chart behind it. An icon, so
    aria-hidden, but never a made-up shape. */
 .fold-g{grid-area:g;width:56px;height:36px;display:block;color:var(--ib)}
 .fold-g svg{display:block;width:56px;height:36px;overflow:visible}
-.fold-k:only-of-type,.fold-g + .fold-k:last-of-type{grid-row:1 / span 2}
 .fold > summary::-webkit-details-marker{display:none}
 .folds > .fold:last-child > summary{border-bottom:1px solid var(--irule-2)}
 .folds > .fold[open]:last-child > summary{border-bottom-color:transparent}
@@ -915,6 +937,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 #foldHh .fold-in{padding-top:6px}
 .sheets:not(.onepage) #foldHh > summary{display:none}
 .sfoot{grid-column:1 / -1;grid-row:5;display:flex;align-items:center;gap:14px;padding-top:8px}
+.sfoot[hidden]{display:none}
 /* step by step, the results bar is only the household and the unit: the three totals are what the steps reveal */
 .sheets:not(.onepage) .sticky .figs{display:none}
 .sticky .who{cursor:pointer}
@@ -988,7 +1011,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 #foldLives .fold-in{display:flex;flex-direction:column;gap:22px;padding-bottom:34px}
 .finding{display:flex;flex-direction:column;gap:16px;border-left:2px solid var(--amber-deep);padding-left:clamp(18px,2.4vw,30px)}
 .finding .quote{font-size:clamp(22px,2.2vw,27px)}
-.objlist{border-bottom:1px solid var(--pk)}
+.objlist{border-bottom:1px solid var(--prule)}
 /* one row each on a wide screen: the question on the left, its short answer beside it */
 .obj > summary{border-top:1px solid var(--pk);grid-template-columns:2.4rem minmax(0,1fr) auto;grid-template-areas:"k q x";gap:0 14px;padding:20px 0;align-items:baseline}
 .obj .fold-k{grid-row:auto;font-variant-numeric:tabular-nums;font-size:13px;color:var(--plabel)}
@@ -1114,7 +1137,9 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .cards{--card-h:max(430px,calc(100svh - var(--sticky-h) - 112px))}
   .cards .sticky .figs{display:none}
   .cards .story-in{display:grid;grid-template-columns:minmax(0,1fr) 56px;column-gap:14px;padding-bottom:30px}
-  .cards .shero{grid-column:1 / -1;min-height:calc(100svh - 120px)}
+  .cards .shero{grid-column:1 / -1;min-height:calc(100svh - 164px)}
+  .cards .cue{left:50%}
+  .newsbar{gap:12px} .newsbar .fly-k{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .cards .sticks{display:flex;gap:4px;grid-column:1 / -1;grid-row:3;padding:14px 0 4px}
   .cards .ssteps{grid-column:1;grid-row:4;display:flex;height:var(--card-h);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
   .cards .ssteps::-webkit-scrollbar{display:none}
@@ -1277,6 +1302,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
        page had before lives in a fold under the step it supports. ---- -->
   <section class="ink story" id="story" aria-label="Your household&rsquo;s healthcare, one step at a time">
     <div class="wrap story-in">
+      <div class="top">
       <header class="masthead">
       <a class="brand" href="#">
         <svg width="13" height="24" viewBox="0 0 13 24" aria-hidden="true">
@@ -1289,18 +1315,11 @@ section.paper.onteal{background:var(--paper);background-image:none}
       </a>
       <nav class="nav"><a class="q" href="#/methodology" style="color:inherit;border:none">Methodology &amp; sources</a><a class="q" href="#/updates" style="color:inherit;border:none">What changed</a></nav>
       </header>
-      <!-- The opening. The bar beside it stands empty until the reader scrolls,
-           and the pill is the way in to their own numbers: ZIP and household
-           together, in the same sheet as the rest of the calculator. -->
-      <div class="shero" id="shero">
-        <div class="eyebrow i">Plan year <span data-py>2027</span></div>
-        <h1>What does your healthcare <em>actually</em> cost?</h1>
-        <p class="lede">Not the number on your paystub. The whole number.</p>
-        <button type="button" class="hhpill" id="hhPill" aria-haspopup="dialog"><span class="hhpill-t" id="hhPillT">Household of 4</span><span class="hhpill-a">Make it yours</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
-        <p class="cue">Scroll to add it up.</p>
-        <!-- What changed: a slow line of the newest entries, and the whole dated
-             list one tap away. Entries are generated from src/updates.js by the
-             build; never edit them here. -->
+      <!-- The news strip: the plan year and one slow line of the newest entries, tucked
+           under the header's rule; the whole dated list is one tap away. Entries are
+           generated from src/updates.js by the build; never edit them here. -->
+      <div class="newsbar">
+        <span class="eyebrow i newsbar-py">Plan year <span data-py>2027</span></span>
         <details class="flyout" id="changed">
           <summary><span class="fly-k">What changed</span><span class="vh" id="changedS"></span><span class="tick" aria-hidden="true"><span class="tick-in" id="tickIn"></span></span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
           <div class="fly-bd">
@@ -1310,6 +1329,17 @@ section.paper.onteal{background:var(--paper);background-image:none}
             </aside>
           </div>
         </details>
+      </div>
+      </div>
+      <!-- The opening. The bar beside it stands empty until the reader scrolls,
+           and the pill is the way in to their own numbers: ZIP and household
+           together, in the same sheet as the rest of the calculator. -->
+      <div class="shero" id="shero">
+        <h1>What does your healthcare <em>actually</em> cost?</h1>
+        <p class="lede">Not the number on your paystub.<br>The whole number.</p>
+        <button type="button" class="hhpill" id="hhPill" aria-haspopup="dialog"><span class="hhpill-t" id="hhPillT">Household of 4</span><span class="hhpill-a">Make it yours</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+        <!-- the way down: an arrow, not a sentence; it leaves once the story starts -->
+        <button type="button" class="cue" id="cue" aria-label="Scroll to add it up"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="19"></line><polyline points="6 13 12 19 18 13"></polyline></svg></button>
       </div>
       <div class="stage" id="stage">
         <div class="sbar" id="sbar" role="img" aria-label="">
@@ -1331,7 +1361,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
           <div class="btags" id="st0basis"></div>
           <div class="folds">
 <details class="fold wide" id="foldHh">
-<summary><span class="fold-g" id="gHh" aria-hidden="true"></span><span class="fold-k">Change the household</span><span class="vh" id="hhSum"></span><svg class="fold-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"></line><line x1="4" y1="12" x2="20" y2="12"></line></svg></summary>
+<summary><span class="fold-g" id="gHh" aria-hidden="true"></span><span class="fold-k">Change the household</span><span class="vh" id="hhSum"></span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
 <div class="fold-bd"><div class="fold-in">
       <div class="hhzip">
         <div class="lbl">Your ZIP</div>
@@ -1465,7 +1495,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 </div></div>
 </details>
 <details class="fold wide" id="foldRise">
-<summary><span class="fold-g" id="gRise" aria-hidden="true"></span><span class="fold-k">Who paid the rise</span><svg class="fold-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"></line><line x1="4" y1="12" x2="20" y2="12"></line></svg></summary>
+<summary><span class="fold-g" id="gRise" aria-hidden="true"></span><span class="fold-k">How premiums have risen</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
 <div class="fold-bd"><div class="fold-in">
       <!-- The rise: the same premium in 2025, 2026 and 2027, split by who pays it.
            Premiums only. Built from W.riseSeries; empty years say why. -->
@@ -1487,7 +1517,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
           <div class="btags" id="st2basis"></div>
           <div class="folds">
 <details class="fold wide" id="foldWf">
-<summary><span class="fold-g" id="gWf" aria-hidden="true"></span><span class="fold-k">Show the arithmetic</span><svg class="fold-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"></line><line x1="4" y1="12" x2="20" y2="12"></line></svg></summary>
+<summary><span class="fold-g" id="gWf" aria-hidden="true"></span><span class="fold-k">Show the arithmetic</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
 <div class="fold-bd"><div class="fold-in">
       <p class="fold-lede">Four things add up to what your household&rsquo;s healthcare costs. Two of them appear on a paystub. The largest never does; it is spent on your behalf.</p>
       <div class="wf" id="wf" role="img"></div>
@@ -1496,7 +1526,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 </div></div>
 </details>
 <details class="fold wide" id="foldSlot">
-<summary><span class="fold-g" id="gSlot" aria-hidden="true"></span><span class="fold-k"><span id="slotK">The cliff</span></span><span class="vh" id="slotS"></span><svg class="fold-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"></line><line x1="4" y1="12" x2="20" y2="12"></line></svg></summary>
+<summary><span class="fold-g" id="gSlot" aria-hidden="true"></span><span class="fold-k"><span id="slotK">The cliff</span></span><span class="vh" id="slotS"></span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
 <div class="fold-bd"><div class="fold-in">
 <div id="cliff">
     <div class="slot" id="cliffView">
@@ -1584,7 +1614,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 </div></div>
 </details>
 <details class="fold wide" id="foldCmp">
-<summary><span class="fold-g" id="gCmp" aria-hidden="true"></span><span class="fold-k">Compare side by side</span><svg class="fold-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"></line><line x1="4" y1="12" x2="20" y2="12"></line></svg></summary>
+<summary><span class="fold-g" id="gCmp" aria-hidden="true"></span><span class="fold-k">Compare side by side</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
 <div class="fold-bd"><div class="fold-in">
       <div class="bars">
         <div class="bar-row">
@@ -1666,7 +1696,10 @@ section.paper.onteal{background:var(--paper);background-image:none}
         <button type="button" id="sPrev" disabled>Back</button>
         <button type="button" id="sNext" class="go">Next</button>
       </div>
-      <div class="sfoot">
+      <!-- The reader's "Step by step / All on one page" switch was withdrawn (owner,
+           2026-11-12). The one-page view lives on for print and for the suite, which
+           presses this hidden switch; nothing on screen offers it. -->
+      <div class="sfoot" hidden>
         <div class="viewpick" id="viewpick" role="group" aria-label="How to read this page">
           <button type="button" id="viewStory" class="on" aria-pressed="true">Step by step</button>
           <button type="button" id="viewAll" aria-pressed="false">All on one page</button>
@@ -1790,8 +1823,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 </details>
     </div>
 
-    <div class="rule" style="margin:48px 0 24px"></div>
-    <div class="row" style="justify-content:space-between;gap:20px;flex-wrap:wrap">
+    <div class="row" style="justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:32px">
       <a class="q" href="#/methodology" style="font-size:14px">Read the full methodology &rarr;</a>
     </div>
   </div>
@@ -2062,7 +2094,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     </div>
 
     <div class="stack" style="gap:16px;margin-bottom:56px">
-      <h3 id="rise">Who paid the rise</h3>
+      <h3 id="rise">How premiums have risen</h3>
       <p class="body" style="max-width:760px">The figure under the reveal sets the same household&rsquo;s premium in 2025, 2026 and 2027 on one scale and splits each year by who pays it. It shows premiums only: deductibles, copays and the payroll tax are left out, because the question is what happened to the price and who absorbed it.</p>
       <p class="body" style="max-width:760px"><b>Employer coverage</b> uses KFF&rsquo;s averages for each year, not the plan you entered: your own figures describe this year alone. 2025 is KFF&rsquo;s 2025 survey (published 22 October 2025): family $26,993, of which the worker pays $6,850; single $9,325, of which the worker pays $1,440. 2026 is the table above. KFF publishes 2027&rsquo;s averages in October 2027, so that column stays empty and says so.</p>
       <p class="body" style="max-width:760px"><b>Marketplace coverage</b> is computed the same way every year, with nothing modeled: that year&rsquo;s second-lowest-cost silver plan in your county, rated for your household at the ages you entered, and that year&rsquo;s poverty guideline and credit schedule. For 2025 those are the HHS 2024 guidelines ($15,060 plus $5,380 a person; higher in Alaska and Hawaii) and the enhanced schedule of Rev. Proc. 2024-35, with no cliff: no one paid more than 8.5% of income for the benchmark. The 2025 and 2026 benchmarks come entirely from CMS&rsquo;s files, including the state exchanges&rsquo; own plan files, which CMS posts the May after the plan year. We check them three ways: every HealthCare.gov county against CMS&rsquo;s landscape file to the cent; Vermont, the District and Rhode Island against KFF&rsquo;s published state averages; and our 2026 rebuild against the 2026 table this site shipped, which it reproduces exactly. Your income is held where you put it in every year, but the poverty line under the credit rises each year (plan year 2026 uses the 2025 guideline, 2027 the 2026 one), so an income just under 400% today can have been just over it in 2026; the figure says so when that happens, with both percentages. One exception, disclosed: CMS&rsquo;s 2025 Vermont service-area file is empty, so we take Vermont&rsquo;s one 2025 service area as statewide, as the 2026 file defines it. A state still priced on 2026 (see the table above) has no 2027 column.</p>
@@ -3408,7 +3440,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
       '" fill="#D99A3F" font-family="Inter, system-ui, sans-serif" font-size="' + fA +
       '" letter-spacing="1.3">' + aLabelTxt + '</text>' +
       '<text class="cliffAnnotTxt" x="' + aX.toFixed(1) + '" y="' + aNumY.toFixed(1) + '" text-anchor="' + aAnchor +
-      '" fill="#E8E6E1" font-family="Inter, system-ui, sans-serif" font-size="' + fB + '">' + aNumTxt + '</text>';
+      '" fill="#E8E6E1" font-family="Newsreader, Georgia, serif" font-size="' + fB + '">' + aNumTxt + '</text>';
 
     // where this household currently sits
     // Off either edge (under 150%, or past the 10x cap) the guide pins to that
@@ -3538,8 +3570,9 @@ section.paper.onteal{background:var(--paper);background-image:none}
   var pills = byId("pills");
   function renderPills(){
     for (var i = 0; i < pills.children.length; i++){
-      pills.children[i].className = "pill" + (W.MODELS[i].id === state.model ? " on" : "");
-      pills.children[i].setAttribute("aria-pressed", W.MODELS[i].id === state.model ? "true" : "false");
+      var mid = pills.children[i].getAttribute("data-m");
+      pills.children[i].className = "pill" + (mid === state.model ? " on" : "");
+      pills.children[i].setAttribute("aria-pressed", mid === state.model ? "true" : "false");
     }
     byId("modelPick").value = state.model;
   }
@@ -3770,7 +3803,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     var name = cut > -1 ? m.chip.slice(0, cut) : m.chip;
     var role = cut > -1 ? m.chip.slice(cut + 3) : "";
     var b = document.createElement("button");
-    b.className = "pill"; b.type = "button";
+    b.className = "pill"; b.type = "button"; b.setAttribute("data-m", m.id);
     b.innerHTML = '<span class="pill-n"></span><span class="pill-r"></span>';
     b.firstChild.textContent = name;
     b.lastChild.textContent = role;
@@ -4221,7 +4254,13 @@ section.paper.onteal{background:var(--paper);background-image:none}
     for (i = 0; i < on.length; i++) t += partBy(on[i]).value;
     return t;
   }
-  function storyScale(){ return Math.max(S.routeMax, S.universalRange.hi, S.universal.total); }
+  /* One scale for the route the reader is on and all six models, so every step and
+     every estimate is drawn to the same dollars per pixel. Not shared across routes:
+     only one route is ever on the bar, and borrowing another route's larger total
+     left an empty sliver above the whole bill (the comparison fold, which shows the
+     routes together, keeps its own shared scale). An uninsured bill keeps headroom
+     for its open top, which says there is no ceiling. */
+  function storyScale(){ return Math.max(S.breakdown.whole * (S.story && S.story.open ? 1.12 : 1), S.universalRange.hi, S.universal.total); }
   function renderStory(){
     var plan = S.story, scale = storyScale(), i, p, segs = [], html = "";
     for (i = 0; i < plan.order.length; i++){
@@ -4339,7 +4378,18 @@ section.paper.onteal{background:var(--paper);background-image:none}
       line.children[i].style.left = ((span > 0 ? (S.modelTotals[i] - S.universalRange.lo) / span : .5) * 100).toFixed(2) + "%";
       line.children[i].className = i === on ? "on" : "";
     }
-    var pill = byId("pills").children[on];
+    // the pills and the phone's picker run from the cheapest estimate for this
+    // household to the priciest; the order moves with income (Lancet is a formula)
+    var rank = W.MODELS.map(function(m, k){ return { id: m.id, t: S.modelTotals[k], k: k }; })
+      .sort(function(a, b){ return a.t - b.t || a.k - b.k; });
+    var pillBox = byId("pills"), sel = byId("modelPick");
+    if (rank.map(function(r){ return r.id; }).join() !== [].map.call(pillBox.children, function(b){ return b.getAttribute("data-m"); }).join()){
+      rank.forEach(function(r){
+        pillBox.appendChild(pillBox.querySelector('[data-m="' + r.id + '"]'));
+        sel.appendChild(sel.querySelector('option[value="' + r.id + '"]'));
+      });
+    }
+    var pill = pillBox.querySelector('[data-m="' + state.model + '"]');
     byId("mwho").innerHTML = "<b>" + pill.querySelector(".pill-n").textContent + "</b>, " + pill.querySelector(".pill-r").textContent.toLowerCase() +
       ": <b>" + fmt(S.universal.total) + "</b> " + WORDS.a[state.unit] + ", " + fmt(S.savings) + (S.savingsNegative ? " more than today." : " less than today.");
   }
@@ -4389,19 +4439,34 @@ section.paper.onteal{background:var(--paper);background-image:none}
       glyph("gSlot", '<rect x="20" y="24" width="16" height="9" fill="var(--c1)"></rect>' +
         '<line x1="20.75" y1="24" x2="20.75" y2="2" stroke="var(--c2)" stroke-width="1.5" stroke-dasharray="3 3"></line><line x1="35.25" y1="24" x2="35.25" y2="2" stroke="var(--c2)" stroke-width="1.5" stroke-dasharray="3 3"></line>');
     } else {
-      var cv = W.cliffCurve({ size: state.size, adults: opts.adults, ages: state.ages, bkey: state.bkey }, 36).points, hi = 0, lo = 1e12, pts = [];
-      for (i = 0; i < cv.length; i++){ hi = Math.max(hi, cv[i].household); lo = Math.min(lo, cv[i].household); }
-      for (i = 0; i < cv.length; i++)
-        pts.push((2 + i / (cv.length - 1) * 52).toFixed(1) + "," + (33 - (hi > lo ? (cv[i].household - lo) / (hi - lo) : 0) * 29).toFixed(1));
-      glyph("gSlot", '<polyline points="' + pts.join(" ") + '" fill="none" stroke="var(--c2)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>');
+      // the cliff chart in small: this household's cost over income from zero, the
+      // jump marked as the chart marks it (open dot under, filled dot over), and
+      // this household's own income as a teal dot on the curve
+      var cc = W.cliffCurve({ size: state.size, adults: opts.adults, ages: state.ages, bkey: state.bkey }, 36), cv = cc.points, hi = 0, pts = [], jmp = 1, big = -1, me = null;
+      for (i = 0; i < cv.length; i++) hi = Math.max(hi, cv[i].household);
+      var gx = function(k){ return 3 + k / (cv.length - 1) * 50; }, gy = function(v){ return 32 - (hi ? v / hi : 0) * 27; };
+      for (i = 0; i < cv.length; i++){
+        pts.push(gx(i).toFixed(1) + "," + gy(cv[i].household).toFixed(1));
+        if (i && cv[i].household - cv[i - 1].household > big){ big = cv[i].household - cv[i - 1].household; jmp = i; }
+      }
+      var lo0 = cv[0].income, hi0 = cv[cv.length - 1].income;
+      if (state.income >= lo0 && state.income <= hi0){
+        var fi = (state.income - lo0) / (hi0 - lo0) * (cv.length - 1), k0 = Math.floor(fi), k1 = Math.min(cv.length - 1, k0 + 1);
+        me = [3 + fi / (cv.length - 1) * 50, gy(cv[k0].household + (cv[k1].household - cv[k0].household) * (fi - k0))];
+      }
+      glyph("gSlot", '<line x1="2" y1="33" x2="54" y2="33" stroke="' + GREY + '" stroke-width="1.5"></line>' +
+        '<polyline points="' + pts.join(" ") + '" fill="none" stroke="var(--c2)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>' +
+        '<circle cx="' + gx(jmp - 1).toFixed(1) + '" cy="' + gy(cv[jmp - 1].household).toFixed(1) + '" r="2.2" fill="var(--ink)" stroke="var(--c2)" stroke-width="1.5"></circle>' +
+        '<circle cx="' + gx(jmp).toFixed(1) + '" cy="' + gy(cv[jmp].household).toFixed(1) + '" r="2.4" fill="var(--c2)"></circle>' +
+        (me ? '<circle cx="' + me[0].toFixed(1) + '" cy="' + me[1].toFixed(1) + '" r="2.6" fill="var(--teal)"></circle>' : ''));
     }
-    // whose estimate: where the six land, the chosen one filled
-    var span = S.universalRange.hi - S.universalRange.lo;
-    h = '<line x1="4" y1="18" x2="52" y2="18" stroke="' + GREY + '" stroke-width="1.5"></line>';
-    for (i = 0; i < W.MODELS.length; i++){
-      var mt = S.modelTotals[i];
-      var mx = 6 + (span > 0 ? (mt - S.universalRange.lo) / span : .5) * 44, on = W.MODELS[i].id === state.model;
-      h += '<circle cx="' + mx.toFixed(1) + '" cy="18" r="' + (on ? 5 : 3) + '" fill="' + (on ? "var(--teal)" : "var(--ink)") + '" stroke="' + (on ? "var(--teal)" : "currentColor") + '" stroke-width="1.5"></circle>';
+    // whose estimate: the six totals as bars from zero, cheapest first, the chosen one lit
+    var ranked = W.MODELS.map(function(m, k){ return { on: m.id === state.model, t: S.modelTotals[k] }; }).sort(function(a, b){ return a.t - b.t; });
+    var tmax = ranked[ranked.length - 1].t || 1;
+    h = '<line x1="2" y1="33" x2="54" y2="33" stroke="' + GREY + '" stroke-width="1.5"></line>';
+    for (i = 0; i < ranked.length; i++){
+      var bh = ranked[i].t / tmax * 28;
+      h += '<rect class="' + (ranked[i].on ? "on" : "") + '" data-v="' + Math.round(ranked[i].t) + '" x="' + (3 + i * 8.6).toFixed(1) + '" y="' + (32.25 - bh).toFixed(1) + '" width="6" height="' + bh.toFixed(1) + '" fill="' + (ranked[i].on ? "var(--ik)" : GREY) + '"' + (ranked[i].on ? '' : ' opacity=".7"') + '></rect>';
     }
     glyph("gProv", h);
     // side by side: the three figures the comparison prints, on one scale
@@ -4565,7 +4630,6 @@ section.paper.onteal{background:var(--paper);background-image:none}
     byId("viewAll").classList.toggle("on", all);    byId("viewAll").setAttribute("aria-pressed", all ? "true" : "false");
     if (all) byId("letterBd").classList.remove("clamp");
     else if (byId("letterMore").getAttribute("aria-expanded") !== "true") byId("letterBd").classList.add("clamp");
-    if (keep) { try { localStorage.setItem("wb-view", all ? "all" : "steps"); } catch (e) {} }
     applyCards();
     sizeStory(); if (S) { paintStory(); renderCliff(); } queueStory();
   }
@@ -4609,7 +4673,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
       d.open = false; byId("shade").hidden = !!sheetOf ? false : true;
       bd.removeAttribute("role"); bd.removeAttribute("aria-modal"); bd.removeAttribute("aria-label");
     };
-    if (now || !rootEl.classList.contains("motion")) end(); else sheetT = setTimeout(end, 340);
+    if (now || !rootEl.classList.contains("motion")) end(); else sheetT = setTimeout(end, 520);
     if (!now && sheetBack) sheetBack.focus({ preventScroll: true });
   }
   byId("shade").addEventListener("click", function(){ closeSheet(); });
@@ -4652,6 +4716,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     openSheet(f); sheetBack = byId("hhPill");
   });
   // the flyout shuts on Escape or a click anywhere else
+  byId("cue").addEventListener("click", function(){ document.querySelector('.sstep[data-step="0"]').scrollIntoView({ behavior:scrollBehavior(), block:"center" }); });
   document.addEventListener("click", function(e){ var f = byId("changed"); if (f.open && !f.contains(e.target)) f.open = false; });
   document.addEventListener("keydown", function(e){ var f = byId("changed"); if (e.key === "Escape" && f.open){ f.open = false; f.querySelector("summary").focus(); } });
 
@@ -4660,7 +4725,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   paint();
   route();
   sizeStory(); paintStory(); trackStory();
-  try { if (localStorage.getItem("wb-view") === "all") setView(true); } catch (e) {}
+  try { localStorage.removeItem("wb-view"); } catch (e) {}   // the reader's switch is gone; an old choice must not strand anyone in it
 })();
 </script>
 <script>

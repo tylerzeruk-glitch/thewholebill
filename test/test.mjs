@@ -475,8 +475,10 @@ test('comparison: the universal bar accounts for its whole figure', async b => {
   const p = await page(b,1440,900);
   // two formula models draw two bands; the four allocated models add a third.
   // 500ms wait: same-composition switches transition their widths over 350ms.
+  // by model id: the pills run cheapest first for this household, so position moves
+  const IDS = ['sanders1', 'galvani', 'rand', 'cbo5', 'blahous', 'urban'];
   for (const [model,bands] of [[0,2],[1,2],[2,3],[3,3],[4,3],[5,3]]) {
-    await p.locator('#pills button').nth(model).click();
+    await p.locator(`#pills button[data-m="${IDS[model]}"]`).click();
     await p.waitForTimeout(500);
     for (const unit of ['y','m']) {
       const r = await p.evaluate(()=>{
@@ -585,8 +587,9 @@ test('models: six pills spanning the published spectrum', async b => {
   const p = await page(b,1440,900);
   const pills = await p.evaluate(()=>[...document.querySelectorAll('#pills button')].map(e=>e.textContent));
   ok('six models on offer', pills.length === 6, pills.join(' | '));
+  // the pills run cheapest to priciest for this household: Sanders at one end, Urban at the other
   ok('the spectrum is labelled at both ends',
-     /Sanders/.test(pills[0]) && /peer-reviewed/.test(pills[1]) && /priciest/.test(pills[5]),
+     /Sanders/.test(pills[0]) && pills.some(x => /peer-reviewed/.test(x)) && /priciest/.test(pills[5]),
      pills.join(' | '));
 
   const totals = [], notes = new Set();
@@ -625,11 +628,15 @@ test('models: six circles on a line and six chips, a picker on phones', async b 
       return { rows:[...new Set(bs.map(x=>Math.round(x.getBoundingClientRect().top)))].length,
                minH: Math.min(...bs.map(x=>x.getBoundingClientRect().height)),
                clipped: bs.filter(x=>x.scrollWidth > x.clientWidth+1).length, names: bs.map(x=>x.querySelector('.pill-n').textContent).join(),
+               // each chip's model, placed by its circle on the line (the line keeps the models' own order)
+               order: bs.map(x=>{ const k=[...document.querySelectorAll('#pills button')].length && window.WholeBill ? window.WholeBill.MODELS.findIndex(m=>m.id===x.getAttribute('data-m')) : -1; return k < 0 ? NaN : parseFloat(dots[k].style.left); }),
+               idOrder: bs.map(x=>x.getAttribute('data-m')).join(), optOrder: [...document.querySelectorAll('#modelPick option')].map(o=>o.value).join(),
                dots: dots.length, on, pos: (dr.left+dr.width/2-line.left)/line.width, lo, hi,
                total: num(document.querySelector('.sstep[data-step="3"] .snum').textContent),
                who: document.getElementById('mwho').textContent, pick: getComputedStyle(document.getElementById('modelPick')).display };
     });
-    ok(`${w}px: six chips of 44px, one row or two, every name whole`, r.rows <= (w > 1000 ? 1 : 2) && r.minH >= 44 && r.clipped === 0 && /^Sanders,Lancet,RAND,CBO,Mercatus,Urban$/.test(r.names), `${r.rows} rows, ${r.minH}px, ${r.names}`);
+    ok(`${w}px: six chips of 44px, one row or two, every name whole`, r.rows <= (w > 1000 ? 1 : 2) && r.minH >= 44 && r.clipped === 0 && r.names.split(',').length === 6, `${r.rows} rows, ${r.minH}px, ${r.names}`);
+    ok(`${w}px: the chips run from the cheapest estimate for this household to the priciest`, r.order.every((v, i) => !i || v >= r.order[i - 1]) && r.optOrder === r.idOrder, `${r.names} at ${r.order.map(v => v.toFixed(0)).join(' ')}`);
     ok(`${w}px: six circles, the chosen one filled, at its place between the lowest and the highest`, r.dots === 6 && r.on === 0 && Math.abs(r.pos - (r.total - r.lo) / (r.hi - r.lo)) < 0.02, JSON.stringify([r.dots, r.on, r.pos.toFixed(3), r.total, r.lo, r.hi]));
     ok(`${w}px: the sentence under them names the model, its maker's role and both figures`, /^Sanders, .+: \$[\d,]+ a year, \$[\d,]+ (less|more) than today\.$/.test(r.who), r.who);
     ok(`${w}px: no picker at this width`, r.pick === 'none');
@@ -2977,7 +2984,7 @@ test('footer: copyright on every document, contact underline on the text', async
  * reading, Newsreader roman for reading. Newsreader loads without an italic, so any
  * italic left in the page would be a synthesized slant; none may render. */
 /* Newsroom type (2026-10): Newsreader for headlines and reading, with its real italic;
- * Inter for figures, labels and controls, roman only (Hanken Grotesk until 2026-11-12). So an italic is fine in
+ * Inter for labels and controls, roman only (Hanken Grotesk until 2026-11-12); figures in Newsreader since 2026-11-12. So an italic is fine in
  * the serif and a synthesized one in the sans. Buttons do not inherit the page font,
  * which is how the model pills once rendered in Arial: a third family fails here. */
 test('newsroom type: two font families, italic only where a real italic loads', async b => {
@@ -3192,12 +3199,21 @@ test('story: every segment of the pinned bar is drawn at its value', async b => 
   }
 });
 
-test('story: one scale across routes and models, and the units switch reaches the bar', async b => {
+test('story: one scale per route across its steps and models, and the units switch reaches the bar', async b => {
   const p = await page(b, 1280, 800, false, 'index.html', true);
   const perPx = async () => { const r = await barRead(p); const s = r.segs.reduce((a, x) => a.h > x.h ? a : x); return s.v / s.h; };
   const scales = [];
-  for (const route of ['employer', 'marketplace', 'none']) { await setRoute(p, route); await storyStep(p, 2); scales.push(await perPx()); }
-  ok('all three routes draw on the same dollars per pixel', Math.max(...scales) / Math.min(...scales) < 1.03, scales.map(x => x.toFixed(1)).join(' '));
+  // One scale per route, shared by its steps and all six models; the whole bill
+  // fills the bar unless an estimate costs more (or the bill has no ceiling).
+  for (const route of ['employer', 'marketplace']) {
+    await setRoute(p, route); await storyStep(p, 2);
+    const two = await barRead(p), s2 = await perPx();
+    const fill = await p.evaluate(() => { const t = document.getElementById('sbarTrack').getBoundingClientRect(); const top = Math.min(...[...document.querySelectorAll('#sbarTrack .sseg.on')].map(e => e.getBoundingClientRect().top)); return (t.bottom - top) / t.height; });
+    const uniHi = await p.evaluate(() => { const v = t => parseFloat(t.replace(/[^0-9.]/g, '')); return v(document.querySelector('.mends [data-fig="uni.rangeHi"]').textContent); });
+    ok(`${route}: the whole bill reaches the top of the bar unless an estimate costs more`, uniHi > two.run ? fill < 1 : fill > 0.995, `${(fill * 100).toFixed(1)}% full, bill ${two.run}, priciest estimate ${uniHi}`);
+    await storyStep(p, 3); scales.push(s2, await perPx());
+  }
+  ok('within a route, the bill and the estimate draw on the same dollars per pixel', scales[0] / scales[1] < 1.03 && scales[1] / scales[0] < 1.03 && scales[2] / scales[3] < 1.03 && scales[3] / scales[2] < 1.03, scales.map(x => x.toFixed(1)).join(' '));
   await setRoute(p, 'employer'); await storyStep(p, 3);
   const before = await barRead(p);
   await p.locator('#pills .pill').nth(5).click(); await p.waitForTimeout(250);
@@ -3296,7 +3312,7 @@ test('folds: shut at load; a wide one rises as a sheet and the page stays put', 
     ok(`${w}px: the fold opens as a sheet inside the viewport, its chart showing`, s.open && s.pos === 'fixed' && s.chart && s.top >= h * 0.08 && s.bottom <= s.vh + 1 && s.left >= -0.5 && s.right <= s.vw + 0.5,
        JSON.stringify([s.pos, s.top.toFixed(0), s.bottom.toFixed(0), s.left.toFixed(0), s.right.toFixed(0)]));
     ok(`${w}px: nothing underneath moved, and the bar is still there`, s.y === was.y && Math.abs(s.bar - was.bar) < 0.5 && !s.away, `scroll ${was.y} to ${s.y}, bar ${was.bar.toFixed(1)} to ${s.bar.toFixed(1)}`);
-    ok(`${w}px: it is a labelled dialog with a 44px close button holding focus`, s.role === 'dialog' && s.label === 'Who paid the rise' && s.shade && s.focusX && s.x >= 44, JSON.stringify([s.role, s.label, s.shade, s.focusX, s.x]));
+    ok(`${w}px: it is a labelled dialog with a 44px close button holding focus`, s.role === 'dialog' && s.label === 'How premiums have risen' && s.shade && s.focusX && s.x >= 44, JSON.stringify([s.role, s.label, s.shade, s.focusX, s.x]));
     await p.keyboard.press('Escape'); await p.waitForTimeout(250);
     const c = await read();
     ok(`${w}px: Escape closes it and hands focus back to where the reader was`, !c.open && !c.shade && c.focusSum && c.y === was.y, JSON.stringify([c.open, c.shade, c.focusSum, c.y]));
@@ -3312,7 +3328,7 @@ test('folds: shut at load; a wide one rises as a sheet and the page stays put', 
   }
 });
 
-test('views: one switch between step by step and all on one page', async b => {
+test('views: step by step for readers; the one-page view kept for print and the suite', async b => {
   for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
     const p = await page(b, w, h, m, 'index.html', true);
     const read = () => p.evaluate(() => ({ all: document.documentElement.classList.contains('onepage'),
@@ -3320,21 +3336,21 @@ test('views: one switch between step by step and all on one page', async b => {
       fixed: [...document.querySelectorAll('details.fold > .fold-bd')].filter(x => getComputedStyle(x).position === 'fixed').length,
       clamp: document.getElementById('letterBd').classList.contains('clamp'),
       pressed: [document.getElementById('viewStory'), document.getElementById('viewAll')].map(x => x.getAttribute('aria-pressed')).join(),
-      target: Math.min(...[...document.querySelectorAll('#viewpick button')].map(x => x.getBoundingClientRect().height)),
+      shown: !!document.getElementById('viewpick').offsetParent,
       wfW: document.getElementById('wf').getBoundingClientRect().width, wrapW: (() => { const e = document.querySelector('.story-in'), cs = getComputedStyle(e); return e.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); })(),
       dead: getComputedStyle(document.querySelector('#foldWf > summary')).pointerEvents }));
     const a = await read();
-    ok(`${w}px: step by step is the default, and the switch is a real target`, !a.all && a.open === 0 && a.pressed === 'true,false' && a.target >= 38, JSON.stringify(a));
-    await p.locator('#viewAll').click(); await p.waitForTimeout(350);
+    ok(`${w}px: step by step, with no switch on screen (the owner withdrew it)`, !a.all && a.open === 0 && !a.shown, JSON.stringify(a));
+    await p.evaluate(() => document.getElementById('viewAll').click()); await p.waitForTimeout(350);
     const o = await read();
     ok(`${w}px: all on one page opens every fold in the flow, none as a sheet`, o.all && o.open === o.n && o.fixed === 0 && !o.clamp && o.pressed === 'false,true', JSON.stringify(o));
     ok(`${w}px: charts get the full column, and the summaries become headings`, Math.abs(o.wfW - o.wrapW) < 2 && o.dead === 'none', `${o.wfW.toFixed(0)} of ${o.wrapW.toFixed(0)}`);
     await p.evaluate(() => { const r = document.querySelector('#foldWf .fold-bd').getBoundingClientRect(); scrollBy(0, r.top - innerHeight * 0.3); }); await p.waitForTimeout(260);
     ok(`${w}px: there the bar ${m ? 'is put away, since every chart is already in the flow' : 'steps aside for a chart that needs its space'}`, await p.evaluate(m => { const st = document.getElementById('stage'); return m ? !st.offsetHeight : st.classList.contains('yield'); }, m));
-    await p.reload(); await p.waitForTimeout(1200);
-    ok(`${w}px: the choice is remembered on the next visit`, (await read()).all);
-    await p.evaluate(() => document.getElementById('viewStory').scrollIntoView({ block: 'center' }));
-    await p.locator('#viewStory').click(); await p.waitForTimeout(350);
+    await p.evaluate(() => localStorage.setItem('wb-view', 'all')); await p.reload(); await p.waitForTimeout(1200);
+    ok(`${w}px: an old stored choice no longer strands a reader in it`, !(await read()).all);
+    await p.evaluate(() => document.getElementById('viewAll').click()); await p.waitForTimeout(350);
+    await p.evaluate(() => document.getElementById('viewStory').click()); await p.waitForTimeout(350);
     const z = await read();
     ok(`${w}px: and step by step shuts them again`, !z.all && z.open === 0 && z.clamp && z.pressed === 'true,false', JSON.stringify(z));
     await p.close();
@@ -3524,7 +3540,9 @@ test('glyphs: every story fold wears a drawing made from its own figures', async
       cmp, figs: ['emp.total', 'mkt.household', 'uni.total'].map(k => num(document.querySelector('.sticky [data-fig="' + k + '"]').textContent)),
       wfCols: new Set(n('#gWf rect').map(r => r.getAttribute('x'))).size, parts: document.querySelectorAll('#wf .wcol').length,
       jump: pts.length ? Math.max(...pts.slice(1).map((q, i) => pts[i][1] - q[1])) : 0, npts: pts.length,
-      models: n('#gProv circle').length, chosen: n('#gProv circle').filter(c => +c.getAttribute('r') > 4).length };
+      models: n('#gProv rect').length, chosen: n('#gProv rect.on').length,
+      provRise: n('#gProv rect').map(r => +r.getAttribute('height')).every((h, i, a) => !i || h >= a[i - 1] - 0.05),
+      provProp: (() => { const r = n('#gProv rect'), v = r.map(x => +x.getAttribute('data-v')), h = r.map(x => +x.getAttribute('height')); return Math.abs(h[0] / h[5] - v[0] / v[5]) < 0.01; })() };
   });
   let r = await read();
   ok('all eight are there, 56px wide and hidden from assistive tech', r.all);
@@ -3533,6 +3551,7 @@ test('glyphs: every story fold wears a drawing made from its own figures', async
   ok('the arithmetic glyph has the waterfall\'s columns', r.wfCols === r.parts, `${r.wfCols} vs ${r.parts}`);
   ok('the cliff glyph is this household\'s curve, with the cliff in it', r.npts > 20 && r.jump > 6, `${r.npts} points, biggest step ${r.jump.toFixed(1)}px`);
   ok('the estimate glyph marks six models and one choice', r.models === 6 && r.chosen === 1);
+  ok('its bars stand cheapest to priciest, in proportion from zero', r.provRise && r.provProp);
   await p.evaluate(() => { const f = document.getElementById('foldHh'); f.open = true; document.getElementById('sizeUp').click(); document.querySelector('#route button[data-r="none"]').click(); f.open = false; });
   await p.waitForTimeout(250);
   r = await read();

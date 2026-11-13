@@ -25,7 +25,7 @@ var UPDATES = [
     id: 'who-paid-the-rise', date: '2026-11-12', kind: 'site',
     title: 'New figure: who paid the rise. The same household&rsquo;s premium in 2025, 2026 and 2027 on one scale, split by who pays it.',
     body: 'It sits under the reveal and follows the route you pick. On the marketplace it prices your household on each year&rsquo;s own benchmark and credit schedule, from new 2025 and 2026 tables built entirely from CMS&rsquo;s files. For the example family of four in Dallas at $95,000, their share went from $5,807 in 2025 to $9,332 in 2026, when the enhanced credits expired, and to $9,350 in 2027, when the credit absorbed nearly all of a $2,963 rise in the premium. At work it uses KFF&rsquo;s averages, so 2027 stays empty until KFF&rsquo;s survey next October. Nothing in it is modeled.',
-    see: { id: 'rise', text: 'Who paid the rise' }
+    see: { id: 'rise', text: 'How premiums have risen' }
   },
   {
     id: 'plan-year-2027', date: '2026-11-11', kind: 'site', pin: true,

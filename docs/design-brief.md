@@ -849,3 +849,33 @@ site a little more room to breathe".
 - **Phone sheets** were driven in Chromium's phone emulation at 390 by 844: each wide fold opens
   as a fixed sheet over the card row without widening the page. Still not run in WebKit or on a
   real iPhone.
+
+## Same day, seventh pass: the owner's comments on the preview
+
+- **Opening.** The sub-line sits on two lines. "Scroll to add it up" became a bouncing arrow
+  centred at the foot of the opening. The bar's empty box waits out of sight until the story
+  starts. "What changed" moved out of the opening into a strip under the header's rule, beside
+  the plan year; on a phone the strip keeps the year and the moving line.
+- **The bar fills.** It used to share one scale with every route, so an employer household's
+  whole bill stopped short of the top under the marketplace's larger total. It now shares a
+  scale with its own route and all six models.
+- **Sheets look like sheets.** A fold that rises as a sheet wears a panel icon; a fold that
+  opens in place keeps the plus. Sheets sink back into the bottom the way they rose, at the
+  same pace (0.5s, eased), instead of leaving faster than they came.
+- **"Who paid the rise" is "How premiums have risen"**, which says what the reader will see.
+- **The six estimates run cheapest to priciest** for this household, in the chips and the
+  phone's picker. The order follows income (Lancet is a formula and moves).
+- **No view switch.** "All on one page" is gone from the screen; print and the suite still use
+  that view.
+- **Rows.** A fold's label sits on its glyph's centre line (the grid had a second row for a
+  sub-line no fold has any more). The objections end on one rule of the same weight as the rest,
+  with no second rule and empty row under them.
+- **Glyphs.** The cliff is the cliff chart in small: a baseline, this household's curve from
+  zero, the jump marked open and filled as the chart marks it, and the household's own income
+  as a teal dot. The estimates are six bars from zero, cheapest first, the chosen one lit.
+- **Figures in Newsreader.** Shown six faces side by side (Inter, IBM Plex Sans, Geist, Public
+  Sans, Source Sans 3, Newsreader), the owner chose Newsreader for the numbers. Measured first:
+  every digit one width with tabular figures on, comma 0.41 of a digit (Inter's was the same).
+  Labels and controls stay in Inter, so the page is still two families. The large figures are
+  set at the headlines' regular weight, with a little more line height for the taller dollar
+  sign.
