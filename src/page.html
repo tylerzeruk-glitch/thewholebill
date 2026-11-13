@@ -21,7 +21,7 @@
   --pk:#1A1815; --pb:#443E36; --pm:#6B6459; --plabel:#786E5B;
   --prule:#E3DDD2; --prule-soft:#EFEAE1; --pctrl:#988B76;
 
-  --r:10px; --r-s:4px; --r-lg:16px;   /* corners: every box, small marks, floating sheets; pills and round buttons keep their shapes; data marks stay square */
+  --r:10px; --r-s:4px; --r-lg:16px; --r-in:6px;   /* corners: every box, small marks, floating sheets, a thumb inside a track; pills and round buttons keep their shapes; data marks stay square */
   --ink:#12141A; --ink-surface:#171A22; --ink-raised:#1A1D26; --ink-chip:#232836;
   --irule:#1F2330; --irule-2:#262A35; --ictrl:#6C7383;   /* --ictrl was #5E6472: 2.84:1 against the raised surface, under the 3:1 boundary floor */
   --ik:#E8E6E1; --ib:#B9BCC4; --im:#8A8F9C; --ilabel:#8B92A4; --ifaint:#7C8395;
@@ -223,7 +223,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .fig .t{font-size:13px;color:var(--im)}
 .unit{position:relative;display:inline-flex;align-items:center;padding:3px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);cursor:pointer;flex-shrink:0;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
 .unit:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
-.unit-thumb{position:absolute;top:3px;left:3px;height:calc(100% - 6px);border-radius:999px;background:var(--c2);box-shadow:0 1px 8px -2px rgba(217,154,63,.75);transition:transform .28s cubic-bezier(.4,0,.2,1),width .28s cubic-bezier(.4,0,.2,1)}
+.unit-thumb{position:absolute;top:3px;left:3px;height:calc(100% - 6px);border-radius:999px;background:var(--c2);transition:transform .28s cubic-bezier(.4,0,.2,1),width .28s cubic-bezier(.4,0,.2,1)}
 .unit-l{position:relative;z-index:1;font-size:12.5px;line-height:1;padding:8px 15px;color:var(--im);transition:color .2s;white-space:nowrap;user-select:none}
 .unit-l.on{color:#1E1509;font-weight:500}
 
@@ -259,6 +259,13 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .seg{display:flex;gap:6px}
 .seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
 .seg > div.on,.seg > button.on{background:#2C3140;border-color:var(--ib);color:var(--ik);font-weight:500}
+/* A track, not three buttons: one boundary, a thumb that moves inside it, and
+   buttons with no fill or edge of their own. Three outlined buttons with a
+   highlight sliding behind them showed the slide through their gaps. */
+.track{--thumb:#3A4153;position:relative;isolation:isolate;display:flex;gap:0;padding:2px;background:var(--ink);border:1px solid var(--ictrl);border-radius:var(--r)}
+.seg.track > button{background:transparent;border:0;border-radius:var(--r-in);height:44px;color:var(--im)}
+@media (hover:hover){.seg.track > button:hover:not(.on){color:var(--ik)}}
+.seg.track > button.on{background:var(--thumb);color:var(--ik)}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;margin:6px 0 0;cursor:pointer;display:block}
 input[type=range]:focus{outline:none}
 input[type=range]:focus-visible{outline:2px solid var(--c2);outline-offset:6px;border-radius:2px}
@@ -272,12 +279,11 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
 /* The section-05 fold, in the ink palette. The summary line carries the state --
    survey averages or the user's own numbers -- because a fold only earns its keep
    when the disclosure stays outside it. */
-/* The teal-edged panel is this page's established idiom for an informational
-   aside -- "What you qualify for today", the provenance box -- and teal is the
-   colour of the thing you choose. Both fit a drawer of optional, user-supplied
-   numbers. Chosen over a plain raised panel and a dashed boundary: the dashed
-   convention belongs to other people's interfaces. */
-.adv{background:var(--ink-surface);border:1px solid var(--irule-2);border-left:2px solid var(--teal);border-radius:var(--r);padding:0 20px}
+/* A drawer of optional, user-supplied numbers: a plain hairline box, its title in
+   teal (the colour of the thing you choose). It once wore a thick coloured left
+   edge, as the asides did; the owner read that as templated (2026-11-13) and every
+   box now takes one even edge. */
+.adv{background:var(--ink-surface);border:1px solid var(--irule-2);border-radius:var(--r);padding:0 20px}
 /* Two rows at every width: title and chevron, then the state line with the whole
    fold to itself. Sharing a row with the title left the state line a leftover
    column, and its wrapping set the height of the box. */
@@ -315,7 +321,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .step:hover{background:var(--ink-chip);color:var(--ik)}
 .step:active{background:var(--ictrl);color:var(--ik)}
 .step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
-.warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:var(--r);padding:18px 22px;display:flex;flex-direction:column;gap:7px}
+.warn{background:#241A12;border:1px solid #5A4024;border-radius:var(--r);padding:18px 22px;display:flex;flex-direction:column;gap:7px}
 .bignum{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(56px,7.4vw,100px);line-height:.95;letter-spacing:-.02em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:var(--r);padding:20px 22px;display:flex;flex-direction:column;gap:7px}
@@ -323,7 +329,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .card-i.hi{border-color:#34302A} .card-i.hi .v,.card-i.hi .t{color:var(--c2)}
 .card-i .t{font-size:13px;color:var(--im)}
 .elig-t{font-size:14.5px;line-height:1.6;color:var(--ib)}
-.callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:var(--r);padding:20px 24px;display:flex;flex-direction:column;gap:8px}
+.callout-i{background:var(--ink-surface);border:1px solid var(--irule-2);border-radius:var(--r);padding:20px 24px;display:flex;flex-direction:column;gap:8px}
 
 /* ---------- waterfall ---------- */
 .wf{display:flex;align-items:flex-end;gap:clamp(14px,3vw,44px);margin-top:clamp(48px,8vw,120px);height:var(--chart-h)}
@@ -352,7 +358,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .wkick{color:var(--c2);margin-bottom:9px;text-wrap:balance}
 .wdiv{width:2px;background:var(--irule-2);height:var(--chart-h);flex-shrink:0;align-self:flex-end}
 .wcaps{display:flex;gap:clamp(14px,3vw,44px);margin-top:20px}
-.wcap{flex-grow:1;flex-basis:0;display:flex;gap:9px;align-items:flex-start;min-width:0}
+.wcap{flex-grow:1;flex-basis:0;display:flex;gap:9px;align-items:flex-start;min-width:0;text-wrap:balance}
 .sw{width:11px;height:11px;border-radius:var(--r-s);flex-shrink:0;margin-top:4px}
 .wcap span{font-size:13.5px;line-height:1.5;color:var(--im)}
 /* The total gets a wider share than the data columns -- its figure is set much
@@ -380,7 +386,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .rbar{border-radius:0}
 .rbar.top{border-radius:1px 1px 0 0;margin-bottom:2px}
 .rlab{display:flex;flex-direction:column;gap:3px;margin-bottom:12px;font-variant-numeric:tabular-nums}
-.rlab .rv{font-family:var(--sans);font-weight:500;font-size:clamp(17px,2vw,26px);letter-spacing:-.02em;color:var(--c1);white-space:nowrap}
+.rlab .rv{font-family:var(--fig);font-weight:400;font-size:clamp(20px,2.3vw,30px);line-height:1.1;color:var(--c1);white-space:nowrap}
 .rlab .rs{font-size:13px;color:var(--im);line-height:1.4}
 .rlab .rd{font-size:13px;color:var(--ib);line-height:1.4}
 .rnone{font-size:13px;line-height:1.5;color:var(--im);padding:0 0 14px;border-bottom:1px dashed var(--ictrl);margin-bottom:-1px}
@@ -418,7 +424,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .pill.on{background:var(--ik);color:#0C1F1E;border-color:var(--ik)}
 .pill.on .pill-r{color:#0C1F1E}
 #modelPick{display:none}
-.prov{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:var(--r);padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:44px;align-items:start}
+.prov{background:var(--ink-surface);border:1px solid var(--irule-2);border-radius:var(--r);padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:44px;align-items:start}
 .bars{display:flex;flex-direction:column;gap:19px}
 .bar-row{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:center}
 .bar-t{display:flex;flex-direction:column;gap:3px}
@@ -527,7 +533,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    themselves stay on the page: three of the four are concessions or funding
    disclosures, and folding those away would hide the parts this section exists
    to show. See docs/design-brief.md on provenance. */
-.card-p .fn{border-top:none;padding-top:0;margin-top:2px;padding-left:14px;border-left:1px solid var(--prule)}
+.card-p .fn{border-top:none;padding-top:0;margin-top:2px}
 .meth table{width:100%;border-collapse:collapse;font-size:14.5px}
 .meth th{text-align:left;color:var(--plabel);padding:0 16px 10px 0;border-bottom:1px solid var(--prule)}
 .meth td{padding:12px 16px 12px 0;border-bottom:1px solid var(--prule-soft);vertical-align:top;color:var(--pb);line-height:1.6}
@@ -690,7 +696,7 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .newsbar{animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) .3s both}
   .shero > :nth-child(2){animation-delay:.08s} .shero > :nth-child(3){animation-delay:.16s} .shero > :nth-child(4){animation-delay:.24s} .shero > :nth-child(n+5){animation-delay:.32s}
   /* a ring that breathes out from the pill until the reader has opened it once */
-  .hhpill:not(.seen)::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;animation:hh-pulse 2.6s ease-out 1.4s infinite}
+  .hhpill:not(.seen)::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;animation:hh-pulse 2.6s ease-out 1.4s 3}
   @keyframes hh-pulse{0%{box-shadow:0 0 0 0 rgba(217,154,63,.8)}35%{box-shadow:0 0 0 8px rgba(217,154,63,.35)}75%,100%{box-shadow:0 0 0 16px rgba(217,154,63,0)}}
   .hhpill,.hhpill-a{transition:background-color .2s ease,transform .18s cubic-bezier(.3,.7,.2,1)} .hhpill:active{transform:scale(.98)}
   .mline i{transition:transform .45s cubic-bezier(.34,1.56,.64,1),background-color .3s ease,left .6s cubic-bezier(.3,.75,.2,1)}
@@ -701,17 +707,14 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .snav button{transition:transform .18s cubic-bezier(.3,.7,.2,1),opacity .2s ease,background-color .2s ease}
   .snav button:active:not(:disabled){transform:scale(.97)}
   /* a sliding thumb under the segmented controls */
-  .motion .glides{position:relative}
   .motion .glides > button{position:relative;z-index:1}
   .motion .glides > button,.motion .glides > button.on{background:transparent}
-  .glide{position:absolute;left:0;top:0;z-index:0;pointer-events:none;box-sizing:border-box;border-radius:var(--r);transition:transform .42s cubic-bezier(.3,1.25,.4,1),width .42s cubic-bezier(.3,1.25,.4,1),height .3s ease}
-  #routeGlide{background:#2C3140;border:1px solid var(--ib)}
-  #pillsGlide{background:var(--ik);border-radius:999px}
-  #toneGlide{background:var(--pk);border-radius:var(--r)}
-  .motion #route > button.on,.motion #pills > .pill.on,.motion #tone > .tbtn.on{border-color:transparent}
+  .glide{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:var(--r-in);transition:transform .34s cubic-bezier(.25,.8,.3,1),width .34s cubic-bezier(.25,.8,.3,1),height .3s ease}
+  #routeGlide{background:var(--thumb)}
+  #toneGlide{background:var(--pk)}
   button{-webkit-tap-highlight-color:transparent}
   .btn-dark,.btn-ghost,.tbtn,.pill,.seg > button,.chk,.step,.adv-reset,.lmore{transition:transform .18s cubic-bezier(.3,.7,.2,1),background-color .18s ease,color .18s ease,border-color .18s ease}
-  .btn-dark:active,.btn-ghost:active,.tbtn:active,.pill:active,.seg > button:active,.chk:active,.adv-reset:active{transform:scale(.97)}
+  .btn-dark:active,.btn-ghost:active,.pill:active,.seg:not(.track) > button:active,.chk:active,.adv-reset:active{transform:scale(.97)}
   /* the tick draws itself */
   .motion .box.off svg{display:block}
   .motion .box svg polyline{stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .32s cubic-bezier(.3,.7,.2,1) .05s}
@@ -806,8 +809,9 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px;border-radius:var(--r-s)}
 .rec-hit:disabled{cursor:default}
 
 /* Tone picker, paper-side: .seg's buttons are ink-themed, and this sits on paper. */
-.tbtn{flex-grow:1;height:44px;background:var(--paper-card);border:1px solid var(--prule);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm);font-family:var(--sans);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
-.tbtn.on{background:var(--pk);border-color:var(--pk);color:var(--paper);font-weight:500}
+#tone{gap:0;padding:2px;background:var(--paper-card);border:1px solid var(--prule);border-radius:var(--r);position:relative;isolation:isolate}
+.tbtn{flex-grow:1;height:44px;background:transparent;border:0;border-radius:var(--r-in);display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm);font-family:var(--sans);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.tbtn.on{background:var(--pk);color:var(--paper);font-weight:500}
 .tbtn:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
 footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-height:1.6}
 
@@ -860,6 +864,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 /* "Your ZIP" labels the field, so the field's own ZIP prefix went; the area line sits
    with the place it describes, where a state held on last year's tables says so. */
 .hhzip .zipfield .k{display:none}
+/* In the household box the ZIP is one more field among the ages and the income, so
+   it takes their dark fill; a white slab there read as pasted in from another page. */
+.hhzip .zipfield{background:var(--ink-chip);border:1px solid var(--ictrl)}
+.hhzip .zipfield .v{color:var(--ik)} .hhzip .zipfield .v::placeholder{color:var(--im)}
+.hhzip .zipfield:focus-within{border-color:var(--ik);outline-color:var(--c2)}
 .hhzip #areaNote{margin-top:-4px}
 .field.placefield{display:none}
 /* the results bar waits out of sight while the opening has the screen */
@@ -1073,8 +1082,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .sheets:not(.onepage) .fold.wide[open] .instr{align-items:stretch;column-gap:clamp(20px,2.6vw,32px)}
 .sheets:not(.onepage) .fold.wide[open] .panel{align-content:start;background:var(--ink-surface);border:1px solid var(--irule-2);border-radius:var(--r);padding:16px 22px 20px;row-gap:18px}
 .sheets:not(.onepage) .fold.wide[open] .hhzip{border-bottom:none;padding-bottom:0;gap:8px}
-.sheets:not(.onepage) .fold.wide[open] .panel .ctrl,.sheets:not(.onepage) .fold.wide[open] .age input,.sheets:not(.onepage) .fold.wide[open] .seg > button{background:var(--ink-chip)}
-.sheets:not(.onepage) .fold.wide[open] .seg > button.on{background:#323849}
+.sheets:not(.onepage) .fold.wide[open] .panel .ctrl,.sheets:not(.onepage) .fold.wide[open] .age input,.sheets:not(.onepage) .fold.wide[open] .seg:not(.track) > button{background:var(--ink-chip)}
+.sheets:not(.onepage) .fold.wide[open] .seg:not(.track) > button.on{background:#323849}
 .sheets:not(.onepage) .fold.wide[open] .panel .adv{background:transparent}
 /* the county picker for a split ZIP takes no room until it has a choice to offer */
 .hhzip .areapick:not(:has(*)){display:none}
@@ -1108,7 +1117,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .fold.pp:not(.wide) .fold-in{max-width:46rem}
 #foldLives{margin-top:52px}
 #foldLives .fold-in{display:flex;flex-direction:column;gap:22px;padding-bottom:34px}
-.finding{display:flex;flex-direction:column;gap:16px;border-left:2px solid var(--amber-deep);padding-left:clamp(18px,2.4vw,30px)}
+.finding{display:flex;flex-direction:column;gap:16px}
 .finding .quote{font-size:clamp(22px,2.2vw,27px)}
 .objlist{border-bottom:1px solid var(--prule)}
 /* one row each on a wide screen: the question on the left, its short answer beside it */
@@ -1120,7 +1129,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .obj .fold-in{padding-left:calc(2.4rem + 14px)}
 .obj .fold-in{max-width:46rem;display:flex;flex-direction:column;gap:16px;padding:0 0 34px}
 .obj .fold-in .body{margin:0}
-.obj .fn{border-top:none;padding-top:0;margin:2px 0 0;padding-left:14px;border-left:1px solid var(--prule)}
+.obj .fn{border-top:none;padding-top:0;margin:2px 0 0}
 
 /* ---------- send: three steps, and the people are step one ---------- */
 .sendstep{display:flex;flex-direction:column;gap:18px;margin-bottom:48px}
@@ -1262,7 +1271,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .sheets:not(.onepage) .fold.wide[open] .elig-t{font-size:13px;line-height:1.5}
   /* TRICARE, Medicare and VA readers find the pointer in objection 05 and on the methodology page */
   .sheets:not(.onepage) .fold.wide[open] #otherCov{display:none}
-  .sheets:not(.onepage) .fold.wide[open] .hhzip > .lbl,.sheets:not(.onepage) .fold.wide[open] .adv-s{display:none}
+  .sheets:not(.onepage) .fold.wide[open] .hhzip > .lbl,.sheets:not(.onepage) .fold.wide[open] .adv-s,.sheets:not(.onepage) .fold.wide[open] .adv-opt{display:none}
   .sheets:not(.onepage) .fold.wide[open] .hhzip{gap:6px;padding-bottom:12px}
   .sheets:not(.onepage) .fold.wide[open] .hhzip .scope,.sheets:not(.onepage) .fold.wide[open] .hhzip .note-i,.sheets:not(.onepage) .fold.wide[open] #otherCov{font-size:12px;line-height:1.45}
   .sheets:not(.onepage) .fold.wide[open] .adv > summary{padding:10px 0}
@@ -1584,7 +1593,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
           <div class="note-i" id="agesNote" hidden aria-live="polite" style="margin-top:-18px">Anyone 65 or over is usually on Medicare, which this site does not price. They are counted here at the oldest marketplace rate, a 64-year-old&rsquo;s.</div>
           <div class="field">
             <div class="lbl" id="routeLbl">How you&rsquo;re covered now</div>
-            <div class="seg" id="route" role="group" aria-labelledby="routeLbl"><button type="button" data-r="employer" class="on" aria-pressed="true">Employer</button><button type="button" data-r="marketplace" aria-pressed="false">Marketplace</button><button type="button" data-r="none" aria-pressed="false">Uninsured</button></div>
+            <div class="seg track" id="route" role="group" aria-labelledby="routeLbl"><button type="button" data-r="employer" class="on" aria-pressed="true">Employer</button><button type="button" data-r="marketplace" aria-pressed="false">Marketplace</button><button type="button" data-r="none" aria-pressed="false">Uninsured</button></div>
             <div class="note-i" id="otherCov">On TRICARE, Medicare or VA care? This calculator prices employer, marketplace and uninsured households. <a class="term" href="#/methodology/other-coverage">What is different for yours</a>.</div>
           </div>
           <details class="adv" id="adv">
@@ -1772,7 +1781,6 @@ section.paper.onteal{background:var(--paper);background-image:none}
 <div class="fold-bd"><div class="fold-in">
       <div class="prov">
         <div class="stack" style="gap:7px">
-          <div class="lbl" style="color:var(--teal)">Who produced this estimate</div>
           <div style="font-size:14.5px;line-height:1.6;color:var(--ib)" id="who"></div>
         </div>
         <div class="stack" style="gap:7px">
@@ -1809,7 +1817,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
         </div>
       </div>
 
-      <p class="note-i" id="cmpNote" style="margin-top:-14px">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b>: employer money counts on both sides, a taxpayer subsidy on neither. No study published a per-household figure, so the universal numbers are our allocation; <a class="q" href="#/methodology/universal" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">the methodology page shows the arithmetic</a>.</p>
+      <p class="note-i" id="cmpNote">Bars show what <b style="color:var(--ib);font-weight:400">this household bears</b>: employer money counts on both sides, a taxpayer subsidy on neither. No study published a per-household figure, so the universal numbers are our allocation; <a class="q" href="#/methodology/universal" style="color:var(--teal);border-bottom-color:rgba(63,181,174,.4)">the methodology page shows the arithmetic</a>.</p>
       <div class="summary">
         <div class="save">
           <div class="stack" style="gap:5px">
@@ -2068,7 +2076,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 
         <div class="stack" style="gap:9px">
           <div class="lbl p" id="toneLbl">Tone</div>
-          <div class="row" style="gap:6px" id="tone" role="group" aria-labelledby="toneLbl">
+          <div class="row" id="tone" role="group" aria-labelledby="toneLbl">
             <button type="button" class="tbtn" data-tone="measured" aria-pressed="false">Measured</button>
             <button type="button" class="tbtn on" data-tone="direct" aria-pressed="true">Direct</button>
             <button type="button" class="tbtn" data-tone="personal" aria-pressed="false">Personal</button>
@@ -2133,7 +2141,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   <div class="wrap sec meth">
     <div class="split tie" style="margin-bottom:52px">
       <div class="stack" style="gap:20px">
-        <div class="eyebrow p">08 &middot; Methodology</div>
+        <div class="eyebrow p">Methodology</div>
         <h2>Check our work.</h2>
       </div>
       <p class="note" style="font-size:15px;line-height:1.65">This page exists because the argument on the rest of the site is only worth as much as the arithmetic behind it. Everything here is either a table you can look up or a sum you can redo.</p>
@@ -3199,16 +3207,16 @@ section.paper.onteal{background:var(--paper);background-image:none}
       html += '</div>';
 
       caps += '<div class="wcap"><span class="sw" style="background:' +
-              (p.ghost ? HATCH : TONE[p.tone]) + '"></span><span>' + p.caption + '</span></div>';
+              (p.ghost ? HATCH : TONE[p.tone]) + '"></span><span>' + p.caption.replace(/<br>/g, " ") + '</span></div>';   // authored breaks stranded a word in a narrow column; balance wraps instead
     }
 
     html += '<div class="wdiv"></div>';
     html += '<div class="wcol wcol-total"><div class="wlab total">' + fmt(whole) + '</div>' +
             '<div class="band top bot" style="height:' + (whole / scale * 100).toFixed(3) +
-            '%;background:linear-gradient(to bottom,#E8AC53,#C9832F)"></div></div>';
+            '%;background:var(--c2)"></div></div>';
     caps += '<div class="wf-gap"></div>' +
             '<div class="wcap wcap-total"><span style="color:var(--ik);font-weight:500">' +
-            (R.uninsured ? "What you spend<br>and what you risk" : "What your household<br>actually costs") + '</span></div>';
+            (R.uninsured ? "What you spend and what you risk" : "What your household actually costs") + '</span></div>';
 
     byId("wf").innerHTML = html;
     byId("wcaps").innerHTML = caps;
@@ -5114,11 +5122,12 @@ section.paper.onteal{background:var(--paper);background-image:none}
      whichever button carries .on, so the app never has to know it exists. */
   function glide(box, sel){
     if (!box || !box.parentNode) return;
-    var host = box.parentNode, g = document.createElement("span");
+    // The thumb sits inside the track it slides along, under buttons that have no
+    // fill of their own, so nothing moves behind an opaque control.
+    var host = box, g = document.createElement("span");
     g.className = "glide"; g.setAttribute("aria-hidden", "true");
-    host.style.position = "relative";
     box.classList.add("glides");
-    host.insertBefore(g, box);
+    box.insertBefore(g, box.firstChild);
     function move(){
       var on = box.querySelector(sel + ".on");
       if (!on || !on.offsetWidth){ g.style.opacity = 0; return; }
@@ -5128,7 +5137,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
       if (!k) k = 1;
       g.style.opacity = 1;
       g.style.width = a.width / k + "px"; g.style.height = a.height / k + "px";
-      g.style.transform = "translate(" + (a.left - h.left) / k + "px," + (a.top - h.top) / k + "px)";
+      g.style.transform = "translate(" + ((a.left - h.left) / k - host.clientLeft) + "px," + ((a.top - h.top) / k - host.clientTop) + "px)";
     }
     new MutationObserver(move).observe(box, { attributes: true, attributeFilter: ["class"], subtree: true });
     window.addEventListener("resize", move);
@@ -5138,7 +5147,6 @@ section.paper.onteal{background:var(--paper);background-image:none}
     return move;
   }
   glide(document.getElementById("route"), "button");
-  glide(document.getElementById("pills"), ".pill");
   glide(document.getElementById("tone"), ".tbtn");
 
   // The three portraits arrive one after another, once, when they are first seen.

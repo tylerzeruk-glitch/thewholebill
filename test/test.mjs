@@ -524,7 +524,7 @@ test('narrative: the cliff precedes the turn, and the turn wears teal', async b 
              teal: em ? getComputedStyle(em).color : 'missing' };
   });
   ok('no section wears a number any more (the order is the scroll)', r.seq === '', r.seq);
-  // the 08 eyebrow lives on /methodology now; the routing test asserts it
+  // the methodology eyebrow lives on /methodology now; the routing test asserts it
   ok('the cliff sits before the comparison', r.cliffFirst);
   ok('the universal figure wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
   await p.close();
@@ -1234,7 +1234,7 @@ test('rise: three years on one scale, each bar its own value', async b => {
          okc.map(total).map(v => v.toFixed(1)).join('/') + ' of ' + okc[0].H);
       ok(`${w}px ${route}: nothing overflows its column`, Math.max(...r.plots.flatMap(x => x.over)) <= 0.5, r.plots.map(x => x.over.join(',')).join(' | '));
       ok(`${w}px ${route}: labels stay clear of the intro`, okc.every(x => x.labTop >= r.introBottom + 8), `${okc.map(x => x.labTop.toFixed(0)).join('/')} vs ${r.introBottom.toFixed(0)}`);
-      ok(`${w}px ${route}: two key entries, figures in the sans`, r.key === 2 && /^Inter/.test(r.font), r.font);
+      ok(`${w}px ${route}: two key entries, figures in the serif like every other figure`, r.key === 2 && /^Newsreader/.test(r.font), r.font);
     }
     await p.close();
   }
@@ -1585,12 +1585,12 @@ test('routing: methodology is its own page; the artifact keeps the hash', async 
   const pm = await page(b,1440,900,false,'methodology/index.html');
   const m = await pm.evaluate(()=>({
     title: document.title,
-    eyebrow: [...document.querySelectorAll('.eyebrow')].some(e=>/^08/.test(e.textContent.trim())),
+    eyebrow: [...document.querySelectorAll('.eyebrow')].some(e=>/^Methodology$/.test(e.textContent.trim())),   // no section wears a number
     visible: !document.getElementById('methodology').hidden && !document.getElementById('methBack').hidden,
     back: (document.querySelector('#methBack a.q')||{}).getAttribute?.('href'),
     scripts: document.querySelectorAll('script:not([type="application/ld+json"])').length }));   // structured data is a data block, not a script
   ok('the page carries its own title', /^Methodology.*· The Whole Bill$/.test(m.title), m.title);
-  ok('the 08 eyebrow lives here', m.eyebrow);
+  ok('the methodology eyebrow lives here', m.eyebrow);
   ok('nothing is hidden and the back link goes home', m.visible && m.back === '/', m.back);
   ok('the document is fully static', m.scripts === 0, m.scripts + ' scripts');
   await pm.close();
@@ -3523,6 +3523,15 @@ test('sheets: with motion on, a box grows out of what was tapped and shrinks bac
     const g = await p.evaluate(() => { const a = document.getElementById('routeGlide').getBoundingClientRect(), o = document.querySelector('#route button.on').getBoundingClientRect();
       return [a.width - o.width, a.height - o.height, a.left - o.left, a.top - o.top].map(v => Math.round(Math.abs(v))); });
     ok(`${w}px: after the household box flies in, the route highlight sits on its button`, g.every(v => v <= 1), g.join(','));
+    // a switch is one track: its thumb lives inside it and its buttons carry no fill or edge
+    // of their own, so the slide never shows through gaps between opaque buttons (owner, 2026-11-13)
+    const tr = await p.evaluate(() => ['route', 'tone'].map(id => {
+      const t = document.getElementById(id), g = document.getElementById(id + 'Glide'), bs = [...t.querySelectorAll('button')];
+      const tb = t.getBoundingClientRect(), gb = g.getBoundingClientRect();
+      return { id, inside: g.parentNode === t && gb.left >= tb.left - 0.5 && gb.right <= tb.right + 0.5,
+        bare: bs.every(x => { const c = getComputedStyle(x); return c.backgroundColor === 'rgba(0, 0, 0, 0)' && parseFloat(c.borderTopWidth) === 0; }) };
+    }));
+    ok(`${w}px: the route and tone switches are tracks with the thumb inside and bare buttons`, tr.every(t => t.inside && t.bare), JSON.stringify(tr));
     await p.close();
   }
 });
@@ -3530,7 +3539,7 @@ test('corners: every box takes one of the site\'s corners; only data shapes stay
   // Owner, 13 November: "some boxes have squared edges, and some have rounded edges". The rule:
   // 10px for every box, 4px for small marks, 16px for a floating sheet, a pill or a circle for
   // round controls. Bars, bands and ranges are data, and their geometry stays square.
-  const OK = ['10px', '4px', '16px', '999px', '50%'], DATA = /\b(band|rbar|bar-bg|bar-fill|range|sbar-ghost|band-t)\b/;
+  const OK = ['10px', '4px', '16px', '6px', '999px', '50%'], DATA = /\b(band|rbar|bar-bg|bar-fill|range|sbar-ghost|band-t)\b/;
   for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
     const p = await page(b, w, h, m);
     const bad = await p.evaluate(([OK, DATA]) => { const re = new RegExp(DATA), out = new Set();

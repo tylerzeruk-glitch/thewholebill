@@ -242,8 +242,18 @@ until the font test caught it). Phone widths are checked for odd wrapping, not o
 One system since 2026-11-13 (owner: "some boxes have squared edges, and some have rounded edges"):
 `--r` (10px) for every box, control, card and panel; `--r-s` (4px) for small marks (checkboxes,
 tags, the text highlight); `--r-lg` (16px) for a floating sheet; a pill (999px) or a circle for
-round controls. Bars, bands and ranges are data and stay square. A sliding highlight takes its
-button's corner. The suite fails on any box outside the system.
+round controls; `--r-in` (6px) for a thumb inside a 10px track. Bars, bands and ranges are data
+and stay square. The suite fails on any box outside the system.
+
+**Things that read as AI-made, removed in the 2026-11-13 cleanup** (owner: "I do not want it to
+look like it's been AI-generated"). Don't bring them back:
+- A switch is one track (`.track`, `#tone`): one boundary, bare buttons, and the thumb sliding
+  *inside* it. Outlined buttons with a highlight sliding behind them showed the slide through the
+  gaps. The suite checks the thumb's parent and the buttons' empty fill.
+- No thick coloured left edge on a box (asides, the plan-numbers drawer, warnings, footnotes).
+  Every box takes one even hairline.
+- No glow (coloured box-shadow) on a control, no gradient on a data band, no endless pulse.
+- A box inside a fold does not repeat the fold's own title.
 
 ## Accessibility floors
 
