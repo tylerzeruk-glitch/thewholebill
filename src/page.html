@@ -1025,18 +1025,19 @@ section.paper.onteal{background:var(--paper);background-image:none}
 /* A floating box over the dimmed page (owner, 13 November: "fly out into hovering boxes
    and minimize back into the icon"). Centred by auto margins, not a transform, so the
    transform is free for the flight in and out of whatever the reader tapped. */
-.sheets:not(.onepage) .fold.wide[open] > .fold-bd{position:fixed;inset:0;margin:auto;z-index:60;width:min(1120px,calc(100% - 48px));height:fit-content;max-height:calc(100vh - 48px);max-height:calc(100svh - 48px);overflow-y:auto;overscroll-behavior:contain;
+.sheets:not(.onepage) .fold.wide[open] > .fold-bd{position:fixed;inset:0;margin:auto;z-index:60;width:min(1120px,calc(100% - 48px));height:fit-content;max-height:calc(100vh - 32px);max-height:calc(100svh - 32px);overflow-y:auto;overscroll-behavior:contain;
   background:var(--ink);color:var(--ik);border:1px solid var(--irule-2);border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.25);padding:0 clamp(18px,3vw,36px) 4px}
-.sheets:not(.onepage) .fold.wide .sheet-hd{display:flex;position:sticky;top:0;z-index:3;background:var(--ink);align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--irule-2)}
-.sheets:not(.onepage) .fold.wide .fold-in{padding:20px 0 22px}
+.sheets:not(.onepage) .fold.wide .sheet-hd{display:flex;position:sticky;top:0;z-index:3;background:var(--ink);align-items:center;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--irule-2)}
+.sheets:not(.onepage) .fold.wide .fold-in{padding:14px 0 14px}
 .sheet-t{font-family:var(--serif);font-size:22px;letter-spacing:-.01em;color:var(--ik)}
 .sheet-x{appearance:none;-webkit-appearance:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--ictrl);background:none;color:var(--ik);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .sheet-x:hover{background:var(--ink-raised)}
 .sheet-x:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
 /* One screen each (owner, 13 November: "fit into one page so we limit scrolling").
    Everything below is scoped to the open box, so the one-page view keeps its full-size
-   charts. Chart heights follow the screen's height, within limits. */
-.sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(200px,calc(100svh - 430px),460px);--rise-h:clamp(140px,calc(100svh - 560px),300px)}
+   charts. Chart heights follow the screen's height, within limits. Keep 30px or more to
+   spare at each checked size: CI's Linux text sets up to 27px taller than a Mac's. */
+.sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(200px,calc(100svh - 450px),460px);--rise-h:clamp(140px,calc(100svh - 560px),300px)}
 .sheets:not(.onepage) .fold.wide[open] .fold-lede{margin-bottom:0}
 .sheets:not(.onepage) .fold.wide[open] .wf{margin-top:64px}
 .sheets:not(.onepage) .fold.wide[open] .wcaps{margin-top:12px}
@@ -1214,12 +1215,12 @@ section.paper.onteal{background:var(--paper);background-image:none}
 }
 
 @media (max-width:760px){
-  .sheets:not(.onepage) .fold.wide[open] > .fold-bd{width:calc(100% - 20px);max-height:calc(100vh - 20px);max-height:calc(100svh - 20px);border-radius:16px;padding:0 16px 2px}
+  .sheets:not(.onepage) .fold.wide[open] > .fold-bd{width:calc(100% - 20px);max-height:calc(100vh - 12px);max-height:calc(100svh - 12px);border-radius:16px;padding:0 16px 2px}
   /* one screen on a phone too: shorter charts, the household as one column, the figures in rows */
-  .sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(140px,calc(100svh - 660px),240px);--rise-h:clamp(110px,calc(100svh - 640px),220px)}
+  .sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(140px,calc(100svh - 680px),240px);--rise-h:clamp(110px,calc(100svh - 640px),220px)}
   .sheets:not(.onepage) .fold.wide .sheet-hd{padding:8px 0}
   .sheets:not(.onepage) .fold.wide .sheet-t{font-size:19px}
-  .sheets:not(.onepage) .fold.wide .fold-in{padding:14px 0 16px}
+  .sheets:not(.onepage) .fold.wide .fold-in{padding:10px 0 10px}
   .sheets:not(.onepage) .fold.wide[open] .wf{margin-top:48px}
   .sheets:not(.onepage) .fold.wide[open] .instr{grid-template-columns:minmax(0,1fr)}
   .sheets:not(.onepage) .fold.wide[open] .panel{padding:0;border-right:none;gap:14px}
