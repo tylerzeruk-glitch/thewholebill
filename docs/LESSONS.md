@@ -80,3 +80,15 @@ cross-project rules (G-nnn), which are kept in a private log; the entry here sta
   headline and waterfall note branch on the same four conditions as the eligibility box; tests that fail on the old
   code (thewholebill#82).
 - **Rule:** → G-019, G-006
+
+### WB-006 · The sheets slid in from the side
+- **What happened:** step by step, a wide fold's sheet entered from the right and left by sinking, two rounds running.
+  The owner had asked for it to rise and sink. The previous round reported the slide as fixed after timing only the
+  close.
+- **Why:** the sheet's closing transition was already in force at the instant `[open]` made it `position:fixed`, so
+  the browser animated from its spot in the flow (half a screen to the right, under `left:50%`) to the parked spot
+  below the screen, and only then rose. Every check measured where the sheet ended up, none where it travelled.
+- **Fix:** `openSheet()` parks the sheet with transitions off before releasing it; a suite check with motion on
+  tracks the sheet frame by frame at 1280 and 390 and fails on any sideways travel while it is on screen. It fails
+  on the old page (624px and 195px of drift).
+- **Rule:** a motion the owner names is verified by sampling positions during it, not by its end state.

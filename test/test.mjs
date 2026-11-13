@@ -3410,6 +3410,30 @@ test('opening: the question, the empty bar, the household pill and one line of n
   ok('motion on: the news line drifts left, and holds still under the pointer', x1 < x0 - 3 && Math.abs(x3 - x2) < 0.6, JSON.stringify([x0, x1, x2, x3].map(v => +v.toFixed(1))));
   await q.close();
 });
+test('sheets: with motion on, a sheet rises straight up and sinks straight down', async b => {
+  // The first build released the closing transition at the moment the sheet became
+  // fixed, so it travelled from its spot in the flow (half a screen to the right)
+  // and the owner saw it slide in from the side, then sink on close.
+  for (const [w, h, mobile] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await b.newPage({ viewport: { width: w, height: h }, isMobile: mobile, hasTouch: mobile, reducedMotion: 'no-preference' });
+    await p.goto(URL); await p.waitForTimeout(900);
+    const r = await p.evaluate(async () => {
+      const d = document.querySelector('#foldMath') || document.querySelector('.fold.wide'), bd = d.querySelector('.fold-bd');
+      d.closest('.sstep').scrollIntoView({ block: 'center', inline: 'center' });
+      await new Promise(r => setTimeout(r, 900));
+      const track = async ms => { const out = [], t0 = performance.now();
+        while (performance.now() - t0 < ms) { await new Promise(r => requestAnimationFrame(r)); const q = bd.getBoundingClientRect(); if (q.top < innerHeight) out.push([q.left, q.top]); }
+        return out; };
+      d.querySelector('summary').click(); const open = await track(900);
+      d.querySelector('.sheet-x').click(); const close = await track(800);
+      const sum = a => ({ n: a.length, dx: a.length ? Math.max(...a.map(v => v[0])) - Math.min(...a.map(v => v[0])) : 0, first: a[0] && Math.round(a[0][1]), last: a.length && Math.round(a[a.length - 1][1]) });
+      return { open: sum(open), close: sum(close) };
+    });
+    ok(`${w}px: opening, the sheet only rises while on screen`, r.open.n > 3 && r.open.dx < 1 && r.open.first > r.open.last, JSON.stringify(r.open));
+    ok(`${w}px: closing, the sheet only sinks while on screen`, r.close.n > 3 && r.close.dx < 1 && r.close.first < r.close.last, JSON.stringify(r.close));
+    await p.close();
+  }
+});
 test('folds: with motion on, folds and sheets move over time and end clean', async b => {
   const p = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
   p.on('pageerror', e => ok('no page errors', false, e.message));

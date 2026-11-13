@@ -152,6 +152,9 @@ was "the bars cover half the screen". All on one page, on a phone, puts the bar 
 - **Absolute children escape a scroll row.** The visually hidden fold lines (`.vh`) sat in the
   phone card row with no positioned ancestor inside it, so they were placed against the page
   and widened it to 841px at 390. `.sstep` is `position:relative` for that reason.
+- **A transition in force when an element turns `position:fixed` animates from its old place.**
+  The sheets slid in from the right (their spot in the flow under `left:50%`) before rising.
+  Park a sheet with transitions off, then release it; the suite samples its path with motion on.
 - **A transition can be caught by print.** The ink-to-teal background change printed mid-colour
   until `@media print` turned transitions off.
 

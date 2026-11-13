@@ -4658,7 +4658,13 @@ section.paper.onteal{background:var(--paper);background-image:none}
     sheetBack = d.querySelector("summary");
     d.open = true; sheetOf = d;
     byId("shade").hidden = false;
+    // Park it below the screen with no transition: otherwise the closing transition
+    // carries it from its spot in the flow (half a screen to the right) down to the
+    // parked spot, and it reads as sliding in from the side.
+    bd.style.transition = "none";
     void bd.offsetWidth;                       // commit the off-screen state before releasing it
+    bd.style.transition = "";
+    void bd.offsetWidth;
     d.classList.add("shown"); byId("shade").classList.add("on");
     bd.scrollTop = 0;
     if (S) renderCliff();                      // the cliff chart draws to its container, which only now has a width
