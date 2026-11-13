@@ -1093,6 +1093,11 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .sheets:not(.onepage) .fold.wide[open] .callout-i,.sheets:not(.onepage) .fold.wide[open] .warn{padding:14px 18px;gap:6px}
 .sheets:not(.onepage) .fold.wide[open] .elig-t{font-size:14px;line-height:1.55}
 .sheets:not(.onepage) .fold.wide[open] #panelNote{font-size:12px;line-height:1.5}
+/* The household box holds one size whatever the route or income (owner, 2026-11-13):
+   it is centred, so a box that grew or shrank moved the route switch out from under
+   the pointer. Sized to the tallest state; the suite checks every route and income. */
+.sheets:not(.onepage) #foldHh[open] > .fold-bd{height:min(calc(100svh - 24px),760px)}
+.elig-t .nw{white-space:nowrap}
 /* compare: tighter legends and a smaller savings figure */
 .sheets:not(.onepage) .fold.wide[open] .bkey{margin-top:2px;line-height:1.45}
 .sheets:not(.onepage) .fold.wide[open] .bar-t{gap:1px}
@@ -1241,6 +1246,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 
 @media (max-width:760px){
   .sheets:not(.onepage) .fold.wide[open] > .fold-bd{width:calc(100% - 20px);max-height:calc(100vh - 12px);max-height:calc(100svh - 12px);padding:0 16px 16px}
+  .sheets:not(.onepage) #foldHh[open] > .fold-bd{height:calc(100svh - 12px)}
   /* one screen on a phone too: shorter charts, the household as one column, the figures in rows */
   .sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(140px,calc(100svh - 680px),240px);--rise-h:clamp(110px,calc(100svh - 640px),220px)}
   .sheets:not(.onepage) .fold.wide .sheet-hd{padding:12px 0 4px}
@@ -1259,7 +1265,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   /* household: ages get the full row; the estimate keeps its total and its label, and
      the breakdown cards (the arithmetic sheet shows the same four figures) stay off */
   /* the count and the ages share a row when both fit, and the ages drop below when not */
-  .sheets:not(.onepage) .fold.wide[open] .panel{display:flex;flex-direction:row;flex-wrap:wrap;align-items:flex-start;column-gap:12px;row-gap:12px}
+  .sheets:not(.onepage) .fold.wide[open] .panel{display:flex;flex-direction:row;flex-wrap:wrap;align-items:flex-start;column-gap:12px;row-gap:10px}
   .sheets:not(.onepage) .fold.wide[open] .panel > *{flex:1 1 100%;min-width:0}
   .sheets:not(.onepage) .fold.wide[open] .panel > .f-size{flex:0 0 112px;width:112px}
   .sheets:not(.onepage) .fold.wide[open] .f-size .step{width:34px}
@@ -3727,9 +3733,9 @@ section.paper.onteal{background:var(--paper);background-image:none}
       html = '<div class="callout-i"><div class="lbl" style="color:var(--teal)">What you qualify for today</div>' +
         '<div class="elig-t">At <b>' + pct + '%</b> of the poverty line, the law expects this household to pay <b>' +
         (m.applicablePercentage * 100).toFixed(2) + '%</b> of its income for the ' +
-        'benchmark plan, the second-lowest-cost silver plan where you live. ' +
-        'The rest is a credit of <b>' + money(m.subsidy) + '</b> a year.' +
-        (m.chipLikely ? ' The children may also qualify for CHIP, which reaches further up the income scale.' : '') +
+        'benchmark plan, the <span class="nw">second-lowest-cost</span> silver plan where you live. ' +
+        'The rest is a credit of <span class="nw"><b>' + money(m.subsidy) + '</b> a year</span>.' +
+        (m.chipLikely ? ' The children may also qualify for CHIP.' : '') +
         '</div></div>';
     }
     byId("elig").innerHTML = html;

@@ -93,7 +93,8 @@ withdrew the on-screen switch on 2026-11-12, and an old stored choice is cleared
   view keeps its full-size charts; on a phone the household box drops its four breakdown cards
   and the TRICARE pointer (objection 05 carries it), and compare drops the model strip. In the
   household box the inputs sit on their own panel with filled fields and the estimate reads off
-  the ground beside it: inputs on the left, results on the right (owner, 2026-11-13). New copy in
+  the ground beside it: inputs on the left, results on the right (owner, 2026-11-13). The household box holds one height in every route and at every income (it is
+  centred, so a growing box moved the route switch under the pointer); the suite checks. New copy in
   the eligibility box (`#elig`) has to fit that box; the subtitle under the total already says
   "full price", so the warnings do not repeat it.
   Folds that hold only a paragraph open in place, with the plus.
