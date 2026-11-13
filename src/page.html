@@ -214,7 +214,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
    overflow-x, pushing the Year/Month switch off the right edge. The row has very
    little slack between 900px and ~1100px: it fit on macOS and overflowed on Linux,
    where the same labels set a few px wider. The context line gives way instead. */
-.sticky .who{color:var(--im);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sticky .who{color:var(--im);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:13px;letter-spacing:.08em}   /* larger than the shared label (owner, 13 November) */
 .figs{display:flex;gap:clamp(16px,2.6vw,38px);align-items:center}
 .fig{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
@@ -235,6 +235,8 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .panel{border-right:1px solid var(--irule);padding:44px clamp(24px,3vw,40px) 52px 0;display:flex;flex-direction:column;gap:30px}
 .out{padding:44px 0 52px clamp(24px,3.4vw,48px);display:flex;flex-direction:column;gap:26px;min-width:0}
 .field{display:flex;flex-direction:column;gap:9px}
+.out-top{padding-bottom:26px;border-bottom:1px solid var(--irule)}
+.out-k,.out-s{font-size:14px;color:var(--im)} .out-s{margin-top:8px}
 .ctrl{height:46px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;font-size:15px}
 .ctrl.mono{font-family:var(--mono);font-size:16px}
 /* Divided cells, not floating chips. A filled chip inside an outlined control
@@ -465,6 +467,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
    display:flex beats every stylesheet rule including [hidden]{display:none},
    and with it both views rendered at once. */
 #cliffView,#badYear{display:flex;flex-direction:column;gap:32px}
+.cliff-intro{font-size:16.5px;line-height:1.6;color:var(--im)}
 #cliffView[hidden],#badYear[hidden]{display:none}
 /* Same trap, same fix: both rep-card blocks are .stack (display:flex), which beat
    [hidden]. A Georgia split ZIP kept Texas's senators on screen under it. */
@@ -663,15 +666,14 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .motion .fresh .bar-bg{transition:none;clip-path:inset(0 100% 0 0)}
   .motion .fresh .range{transition:none;clip-path:inset(-12px 100% -12px 0)}
   /* sheets rise from the bottom with a little spring and sink back the same way */
-  .motion .fold.wide > .fold-bd{transition:transform .5s cubic-bezier(.5,0,.7,.4)}
-  .motion .fold.wide.shown > .fold-bd{transition:transform .62s cubic-bezier(.2,1.05,.3,1)}
   .motion .shade{transition:opacity .4s ease}
   .motion .fold.wide.shown .fold-in > *{animation:fold-rise .6s cubic-bezier(.2,.7,.2,1) .12s both}
   .motion .fold.wide.shown .fold-in > :nth-child(2){animation-delay:.2s}
   .motion .fold.wide.shown .fold-in > :nth-child(n+3){animation-delay:.28s}
   .sheet-x svg{transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
   .sheet-x:hover svg{transform:rotate(90deg)}
-  .sheets:not(.onepage) .fold.wide > summary:hover .fold-x{transform:translateY(-3px)}
+  .sheets:not(.onepage) .fold.wide > summary .fold-x{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .sheets:not(.onepage) .fold.wide > summary:hover .fold-x{transform:scale(1.18)}
   .viewpick button{transition:background-color .25s ease,color .25s ease}
   .flyout[open] > .fly-bd{animation:fly-in .32s cubic-bezier(.2,.9,.3,1) both;transform-origin:100% 0}
   .flyout .fold-x{transition:transform .45s cubic-bezier(.34,1.56,.64,1),background-color .25s ease,border-color .25s ease,color .25s ease}
@@ -685,6 +687,9 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   @keyframes cue-bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
   .newsbar{animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) .3s both}
   .shero > :nth-child(2){animation-delay:.08s} .shero > :nth-child(3){animation-delay:.16s} .shero > :nth-child(4){animation-delay:.24s} .shero > :nth-child(n+5){animation-delay:.32s}
+  /* a ring that breathes out from the pill until the reader has opened it once */
+  .hhpill:not(.seen)::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;animation:hh-pulse 2.6s ease-out 1.4s infinite}
+  @keyframes hh-pulse{0%{box-shadow:0 0 0 0 rgba(217,154,63,.8)}35%{box-shadow:0 0 0 8px rgba(217,154,63,.35)}75%,100%{box-shadow:0 0 0 16px rgba(217,154,63,0)}}
   .hhpill,.hhpill-a{transition:background-color .2s ease,transform .18s cubic-bezier(.3,.7,.2,1)} .hhpill:active{transform:scale(.98)}
   .mline i{transition:transform .45s cubic-bezier(.34,1.56,.64,1),background-color .3s ease,left .6s cubic-bezier(.3,.75,.2,1)}
   @keyframes fly-in{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:none}}
@@ -842,9 +847,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .newsbar{display:flex;align-items:center;gap:18px;min-width:0;border-bottom:1px solid var(--irule-2)}
 .newsbar-py{flex-shrink:0;color:var(--teal)}
 /* the household, as a button: it opens the sheet with the ZIP and everything else */
-.hhfield{display:flex;flex-direction:column;align-items:flex-start;gap:10px;max-width:100%}
-.hhfield-k{font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ilabel)}
-.hhpill{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;gap:16px;max-width:100%;min-height:56px;padding:6px 6px 6px 22px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);color:var(--ik);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;text-align:left}
+.hhpill{position:relative;appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;gap:16px;max-width:100%;min-height:56px;padding:6px 6px 6px 22px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);color:var(--ik);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;text-align:left}
 .hhpill:hover{background:var(--ink-raised)} .hhpill:hover .hhpill-a{background:var(--c1)}
 .hhpill:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
 .hhpill-t{min-width:0}
@@ -962,6 +965,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .fold-in{padding:10px 0 44px}
 .story .fold.wide > .fold-bd{width:calc(100% / 1.1 * 2 + var(--sgap))}
 #foldCmp .fold-in{display:flex;flex-direction:column;gap:30px}
+.cmp-range{gap:11px;border-top:1px solid var(--irule);padding-top:22px}
 #foldHh .fold-in{padding-top:6px}
 .sheets:not(.onepage) #foldHh > summary{display:none}
 .sfoot{grid-column:1 / -1;grid-row:5;display:flex;align-items:center;gap:14px;padding-top:8px}
@@ -1018,15 +1022,59 @@ section.paper.onteal{background:var(--paper);background-image:none}
    which makes that hidden box the containing block for anything fixed inside
    it. A shut sheet styled as fixed was laid out against its own card and
    widened the page on phones. */
-.sheets:not(.onepage) .fold.wide[open] > .fold-bd{position:fixed;left:50%;bottom:0;z-index:60;width:min(1248px,100%);max-height:88vh;max-height:88svh;overflow-y:auto;overscroll-behavior:contain;
-  background:var(--ink);color:var(--ik);border-top:2px solid var(--teal);box-shadow:0 -28px 80px rgba(0,0,0,.55);padding:0 var(--pad) max(20px,env(safe-area-inset-bottom,0px));transform:translate(-50%,103%)}
-.sheets:not(.onepage) .fold.wide.shown > .fold-bd{transform:translate(-50%,0)}
-.sheets:not(.onepage) .fold.wide .sheet-hd{display:flex;position:sticky;top:0;z-index:3;background:var(--ink);align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--irule-2)}
-.sheets:not(.onepage) .fold.wide .fold-in{padding:26px 0 30px}
+/* A floating box over the dimmed page (owner, 13 November: "fly out into hovering boxes
+   and minimize back into the icon"). Centred by auto margins, not a transform, so the
+   transform is free for the flight in and out of whatever the reader tapped. */
+.sheets:not(.onepage) .fold.wide[open] > .fold-bd{position:fixed;inset:0;margin:auto;z-index:60;width:min(1120px,calc(100% - 48px));height:fit-content;max-height:calc(100vh - 48px);max-height:calc(100svh - 48px);overflow-y:auto;overscroll-behavior:contain;
+  background:var(--ink);color:var(--ik);border:1px solid var(--irule-2);border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.25);padding:0 clamp(18px,3vw,36px) 4px}
+.sheets:not(.onepage) .fold.wide .sheet-hd{display:flex;position:sticky;top:0;z-index:3;background:var(--ink);align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--irule-2)}
+.sheets:not(.onepage) .fold.wide .fold-in{padding:20px 0 22px}
 .sheet-t{font-family:var(--serif);font-size:22px;letter-spacing:-.01em;color:var(--ik)}
 .sheet-x{appearance:none;-webkit-appearance:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--ictrl);background:none;color:var(--ik);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .sheet-x:hover{background:var(--ink-raised)}
 .sheet-x:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
+/* One screen each (owner, 13 November: "fit into one page so we limit scrolling").
+   Everything below is scoped to the open box, so the one-page view keeps its full-size
+   charts. Chart heights follow the screen's height, within limits. */
+.sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(200px,calc(100svh - 430px),460px);--rise-h:clamp(140px,calc(100svh - 560px),300px)}
+.sheets:not(.onepage) .fold.wide[open] .fold-lede{margin-bottom:0}
+.sheets:not(.onepage) .fold.wide[open] .wf{margin-top:64px}
+.sheets:not(.onepage) .fold.wide[open] .wcaps{margin-top:12px}
+.sheets:not(.onepage) .fold.wide[open] #cliffView,.sheets:not(.onepage) .fold.wide[open] #badYear{gap:18px}
+.sheets:not(.onepage) .fold.wide[open] .cliffstats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sheets:not(.onepage) .fold.wide[open] .cstat{padding:14px 20px;border-right:1px solid var(--irule);border-bottom:none}
+.sheets:not(.onepage) .fold.wide[open] .cstat:last-child{border-right:none}
+.sheets:not(.onepage) .fold.wide[open] .cstat .v{font-size:clamp(26px,3vw,40px)}
+.sheets:not(.onepage) .fold.wide[open] .chartbox{padding:12px 16px}
+.sheets:not(.onepage) .fold.wide[open] .bars{gap:8px}
+.sheets:not(.onepage) .fold.wide[open] .summary{grid-template-columns:minmax(0,1fr) minmax(0,.62fr)}
+.sheets:not(.onepage) .fold.wide[open] .save{padding:16px 22px;gap:22px}
+.sheets:not(.onepage) .fold.wide[open] .save .v{font-size:clamp(40px,4.4vw,56px)}
+.sheets:not(.onepage) .fold.wide[open] .cobra{padding:16px 20px;gap:6px}
+.sheets:not(.onepage) .fold.wide[open] .instr{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.sheets:not(.onepage) .fold.wide[open] .panel{padding:0 clamp(20px,2.6vw,36px) 0 0;gap:18px;border-right:1px solid var(--irule);border-bottom:none}
+.sheets:not(.onepage) .fold.wide[open] .out{padding:0 0 0 clamp(20px,3vw,40px);gap:18px}
+.sheets:not(.onepage) .fold.wide[open] .hhzip{padding-bottom:16px;margin-bottom:0}
+.sheets:not(.onepage) .fold.wide[open] .bignum{font-size:clamp(48px,5.4vw,76px)}
+.sheets:not(.onepage) .fold.wide[open] .out-top{padding-bottom:16px}
+.sheets:not(.onepage) .fold.wide[open] .card-i{padding:14px 18px}
+.sheets:not(.onepage) .fold.wide[open] .card-i .v{font-size:26px}
+/* household: the count and the ages share a row; the ZIP row is shorter */
+.sheets:not(.onepage) .fold.wide[open] .panel{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:22px}
+.sheets:not(.onepage) .fold.wide[open] .panel > *{grid-column:1 / -1}
+.sheets:not(.onepage) .fold.wide[open] .panel > .f-size{grid-column:1;width:128px}
+.sheets:not(.onepage) .fold.wide[open] .ages{grid-template-columns:repeat(auto-fill,minmax(54px,1fr))}
+.sheets:not(.onepage) .fold.wide[open] .panel > .f-ages{grid-column:2}
+.sheets:not(.onepage) .fold.wide[open] .hhzip .zipfield .v{height:48px;font-size:19px}
+.sheets:not(.onepage) .fold.wide[open] .hhzip .btn-dark{height:48px;padding:0 24px}
+/* compare: tighter legends and a smaller savings figure */
+.sheets:not(.onepage) .fold.wide[open] .bkey{margin-top:2px;line-height:1.45}
+.sheets:not(.onepage) .fold.wide[open] .bar-t{gap:1px}
+.sheets:not(.onepage) .fold.wide[open] .bar-bg{height:36px}
+.sheets:not(.onepage) .fold.wide[open] .save .v{font-size:clamp(36px,3.8vw,48px)}
+.sheets:not(.onepage) .fold.wide[open] .save .v2{font-size:clamp(26px,2.6vw,34px)}
+.sheets:not(.onepage) .fold.wide[open] .cmp-range{gap:8px;padding-top:14px}
+.sheets:not(.onepage) #foldCmp[open] .fold-in{gap:12px}
 /* a fold that opens a sheet points outward, not down */
 .sheets:not(.onepage) .fold.wide > summary .fold-x{transform:none;color:var(--im)}
 
@@ -1166,6 +1214,60 @@ section.paper.onteal{background:var(--paper);background-image:none}
 }
 
 @media (max-width:760px){
+  .sheets:not(.onepage) .fold.wide[open] > .fold-bd{width:calc(100% - 20px);max-height:calc(100vh - 20px);max-height:calc(100svh - 20px);border-radius:16px;padding:0 16px 2px}
+  /* one screen on a phone too: shorter charts, the household as one column, the figures in rows */
+  .sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(140px,calc(100svh - 660px),240px);--rise-h:clamp(110px,calc(100svh - 640px),220px)}
+  .sheets:not(.onepage) .fold.wide .sheet-hd{padding:8px 0}
+  .sheets:not(.onepage) .fold.wide .sheet-t{font-size:19px}
+  .sheets:not(.onepage) .fold.wide .fold-in{padding:14px 0 16px}
+  .sheets:not(.onepage) .fold.wide[open] .wf{margin-top:48px}
+  .sheets:not(.onepage) .fold.wide[open] .instr{grid-template-columns:minmax(0,1fr)}
+  .sheets:not(.onepage) .fold.wide[open] .panel{padding:0;border-right:none;gap:14px}
+  .sheets:not(.onepage) .fold.wide[open] .out{padding:14px 0 0;border-top:1px solid var(--irule);margin-top:14px;gap:10px}
+  .sheets:not(.onepage) .fold.wide[open] .cstat{padding:10px 10px}
+  .sheets:not(.onepage) .fold.wide[open] .cstat .t{font-size:11.5px;line-height:1.3}
+  .sheets:not(.onepage) .fold.wide[open] .cstat .v{font-size:21px}
+  .sheets:not(.onepage) .fold.wide[open] .cstat .s{font-size:11px;line-height:1.3}
+  .sheets:not(.onepage) .fold.wide[open] .chartbox{padding:8px 6px}
+  .sheets:not(.onepage) .fold.wide[open] .summary{grid-template-columns:minmax(0,1fr)}
+  /* household: ages get the full row; the estimate keeps its total and its label, and
+     the breakdown cards (the arithmetic sheet shows the same four figures) stay off */
+  /* the count and the ages share a row when both fit, and the ages drop below when not */
+  .sheets:not(.onepage) .fold.wide[open] .panel{display:flex;flex-direction:row;flex-wrap:wrap;align-items:flex-start;column-gap:12px;row-gap:12px}
+  .sheets:not(.onepage) .fold.wide[open] .panel > *{flex:1 1 100%;min-width:0}
+  .sheets:not(.onepage) .fold.wide[open] .panel > .f-size{flex:0 0 120px;width:120px}
+  .sheets:not(.onepage) .fold.wide[open] .panel > .f-ages{flex:1 1 190px}
+  .sheets:not(.onepage) .fold.wide[open] .ages{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+  .sheets:not(.onepage) .fold.wide[open] .hhzip > .lbl,.sheets:not(.onepage) .fold.wide[open] .adv-s{display:none}
+  .sheets:not(.onepage) .fold.wide[open] .hhzip{gap:6px;padding-bottom:12px}
+  .sheets:not(.onepage) .fold.wide[open] .hhzip .scope,.sheets:not(.onepage) .fold.wide[open] .hhzip .note-i,.sheets:not(.onepage) .fold.wide[open] #otherCov{font-size:12px;line-height:1.45}
+  .sheets:not(.onepage) .fold.wide[open] .adv > summary{padding:10px 0}
+  /* the estimate as one line: what it is on the left, the total on the right */
+  .sheets:not(.onepage) .fold.wide[open] .out-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px}
+  .sheets:not(.onepage) .fold.wide[open] .out-k{font-size:13px}
+  .sheets:not(.onepage) .fold.wide[open] .out-s{grid-column:1 / -1;margin-top:2px;font-size:12.5px}
+  .sheets:not(.onepage) .fold.wide[open] .out .cards,.sheets:not(.onepage) .fold.wide[open] #panelNote{display:none}
+  .sheets:not(.onepage) .fold.wide[open] .out-top{border-bottom:none;padding-bottom:0}
+  .sheets:not(.onepage) .fold.wide[open] .bignum{font-size:36px}
+  /* compare: each legend runs on as one paragraph; the two savings figures share a row;
+     the strip of where every model lands is what step 3's dot line already shows */
+  .sheets:not(.onepage) .fold.wide[open] .bkey br{display:none}
+  .sheets:not(.onepage) .fold.wide[open] .bkey .bk{white-space:nowrap;margin-right:12px}
+  .sheets:not(.onepage) .fold.wide[open] .bar-t{display:block}
+  .sheets:not(.onepage) .fold.wide[open] .bar-t .a{display:inline}
+  .sheets:not(.onepage) .fold.wide[open] .bar-t .b:not(.bkey){display:inline;margin-left:8px}
+  .sheets:not(.onepage) .fold.wide[open] .save{display:grid;grid-template-columns:auto auto;justify-content:start;gap:4px 22px;padding:12px 14px}
+  .sheets:not(.onepage) .fold.wide[open] .save .vsep{display:none}
+  .sheets:not(.onepage) .fold.wide[open] .save .v{font-size:34px}
+  .sheets:not(.onepage) .fold.wide[open] .save .v2{font-size:24px}
+  .sheets:not(.onepage) .fold.wide[open] .cobra{padding:12px 14px}
+  .sheets:not(.onepage) .fold.wide[open] .cmp-range{display:none}
+  .sheets:not(.onepage) .fold.wide[open] .bars{gap:6px}
+  .sheets:not(.onepage) #foldCmp[open] .fold-in{gap:10px}
+  .sheets:not(.onepage) .fold.wide[open] .bar-bg{height:28px}
+  /* the cliff: a smaller headline and intro */
+  .sheets:not(.onepage) .fold.wide[open] #cliffView h2{font-size:30px}
+  .sheets:not(.onepage) .fold.wide[open] .cliff-intro{font-size:15px;line-height:1.5}
   /* the story as cards */
   .cards{--card-h:max(430px,calc(100svh - var(--sticky-h) - 112px))}
   .cards .sticky .figs{display:none}
@@ -1377,10 +1479,10 @@ section.paper.onteal{background:var(--paper);background-image:none}
       <div class="shero" id="shero">
         <h1>What does your healthcare <em>actually</em> cost?</h1>
         <p class="lede"><span>Not the number on your paystub.</span> <span>The whole number.</span></p>
-        <!-- A field, not a tag (owner, 13 November): a label over a filled box, and an amber
-             button. The label says the figures are an example until the reader changes one. -->
-        <div class="hhfield"><span class="hhfield-k" id="hhPillK">Example household</span>
-        <button type="button" class="hhpill" id="hhPill" aria-haspopup="dialog" aria-describedby="hhPillK"><span class="hhpill-t" id="hhPillT">Household of 4</span><span class="hhpill-a" id="hhPillA">Enter yours</span></button></div>
+        <!-- A field, not a tag (owner, 13 November): a filled box and an amber button. It says
+             "Example household" until the reader changes something, then names their household,
+             and it pulses until it has been opened once. -->
+        <button type="button" class="hhpill" id="hhPill" aria-haspopup="dialog"><span class="hhpill-t" id="hhPillT">Example household</span><span class="hhpill-a" id="hhPillA">Enter yours</span></button>
         <!-- the way down: an arrow, not a sentence; it leaves once the story starts -->
         <button type="button" class="cue" id="cue" aria-label="Scroll to add it up"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="19"></line><polyline points="6 13 12 19 18 13"></polyline></svg></button>
       </div>
@@ -1404,34 +1506,34 @@ section.paper.onteal{background:var(--paper);background-image:none}
           <div class="btags" id="st0basis"></div>
           <div class="folds">
 <details class="fold wide" id="foldHh">
-<summary><span class="fold-g" id="gHh" aria-hidden="true"></span><span class="fold-k">Change the household</span><span class="vh" id="hhSum"></span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
+<summary><span class="fold-g" id="gHh" aria-hidden="true"></span><span class="fold-k">Change the household</span><span class="vh" id="hhSum"></span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 4 20 4 20 10"></polyline><line x1="20" y1="4" x2="13.5" y2="10.5"></line><polyline points="10 20 4 20 4 14"></polyline><line x1="4" y1="20" x2="10.5" y2="13.5"></line></svg></summary>
 <div class="fold-bd"><div class="fold-in">
-      <div class="hhzip">
-        <div class="lbl">Your ZIP</div>
-      <div class="zipbar">
-        <div class="zipfield">
-          <div class="k">Zip</div>
-          <input class="v" id="zip" inputmode="numeric" maxlength="5" placeholder="75201" value="75201" aria-label="ZIP code" autocomplete="postal-code" aria-describedby="scope" aria-invalid="false">
-        </div>
-        <button class="btn-dark" id="zipGo">Update</button>
-      </div>
-      <div class="scope" id="scope" role="status"></div>
-      <div class="note-i" id="areaNote"></div>
-      <div class="areapick" id="areapick"></div>
-      </div>
       <div class="instr">
         <div class="panel">
+      <div class="hhzip">
+            <div class="lbl">Your ZIP</div>
+          <div class="zipbar">
+            <div class="zipfield">
+              <div class="k">Zip</div>
+              <input class="v" id="zip" inputmode="numeric" maxlength="5" placeholder="75201" value="75201" aria-label="ZIP code" autocomplete="postal-code" aria-describedby="scope" aria-invalid="false">
+            </div>
+            <button class="btn-dark" id="zipGo">Update</button>
+          </div>
+          <div class="scope" id="scope" role="status"></div>
+          <div class="note-i" id="areaNote"></div>
+          <div class="areapick" id="areapick"></div>
+          </div>
           <!-- The sheet's own title and the ZIP row above already say what this is and
                where; the old "Tell it about you" header and a read-only place box repeated
                both. The place name stays in the DOM for the household line. -->
           <div class="field placefield">
             <div class="ctrl" id="placeCtrl" style="cursor:default"><span id="placeName"></span><span class="note-i" style="font-size:11px">from your ZIP</span></div>
           </div>
-          <div class="field" style="max-width:220px">
+          <div class="field f-size" style="max-width:220px">
             <div class="lbl">Household</div>
             <div class="ctrl" style="padding-right:0;overflow:hidden"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="steps"><button type="button" class="step" id="sizeDown" aria-label="Fewer people">&minus;</button><button type="button" class="step" id="sizeUp" aria-label="More people">+</button></span></div>
           </div>
-          <div class="field">
+          <div class="field f-ages">
             <div class="lbl" id="agesLbl">Ages</div>
             <!-- One box per person, built by the script from state.ages. The stepper is the
                  only control that changes how many; the phone keypad is the right keyboard
@@ -1508,11 +1610,11 @@ section.paper.onteal{background:var(--paper);background-image:none}
             <div class="lbl">Live estimate</div>
             <div class="note-i"><a class="term" href="#/methodology/kinds">Modeled</a> &middot; not a quote</div>
           </div>
-          <div class="stack" style="gap:4px;padding-bottom:26px;border-bottom:1px solid var(--irule)">
-            <div style="font-size:14px;color:var(--im)">What your household&rsquo;s healthcare costs, <span data-uw="per">per year</span></div>
+          <div class="stack out-top" style="gap:4px">
+            <div class="out-k">What your household&rsquo;s healthcare costs, <span data-uw="per">per year</span></div>
             <div class="bignum" data-fig="route.whole">$32,171</div>
             <div class="vh" id="liveFig" aria-live="polite" aria-atomic="true"></div>
-            <div style="font-size:14px;color:var(--im);margin-top:8px" id="bigSub"></div>
+            <div class="out-s" id="bigSub"></div>
           </div>
           <div class="cards" id="cards"></div>
           <div id="elig"></div>
@@ -1538,7 +1640,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 </div></div>
 </details>
 <details class="fold wide" id="foldRise">
-<summary><span class="fold-g" id="gRise" aria-hidden="true"></span><span class="fold-k">How premiums have risen</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
+<summary><span class="fold-g" id="gRise" aria-hidden="true"></span><span class="fold-k">How premiums have risen</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 4 20 4 20 10"></polyline><line x1="20" y1="4" x2="13.5" y2="10.5"></line><polyline points="10 20 4 20 4 14"></polyline><line x1="4" y1="20" x2="10.5" y2="13.5"></line></svg></summary>
 <div class="fold-bd"><div class="fold-in">
       <!-- The rise: the same premium in 2025, 2026 and 2027, split by who pays it.
            Premiums only. Built from W.riseSeries; empty years say why. -->
@@ -1560,7 +1662,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
           <div class="btags" id="st2basis"></div>
           <div class="folds">
 <details class="fold wide" id="foldWf">
-<summary><span class="fold-g" id="gWf" aria-hidden="true"></span><span class="fold-k">Show the arithmetic</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
+<summary><span class="fold-g" id="gWf" aria-hidden="true"></span><span class="fold-k">Show the arithmetic</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 4 20 4 20 10"></polyline><line x1="20" y1="4" x2="13.5" y2="10.5"></line><polyline points="10 20 4 20 4 14"></polyline><line x1="4" y1="20" x2="10.5" y2="13.5"></line></svg></summary>
 <div class="fold-bd"><div class="fold-in">
       <p class="fold-lede">Four things add up to what your household&rsquo;s healthcare costs. Two of them appear on a paystub. The largest never does; it is spent on your behalf.</p>
       <div class="wf" id="wf" role="img"></div>
@@ -1569,7 +1671,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 </div></div>
 </details>
 <details class="fold wide" id="foldSlot">
-<summary><span class="fold-g" id="gSlot" aria-hidden="true"></span><span class="fold-k"><span id="slotK">The cliff</span></span><span class="vh" id="slotS"></span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
+<summary><span class="fold-g" id="gSlot" aria-hidden="true"></span><span class="fold-k"><span id="slotK">The cliff</span></span><span class="vh" id="slotS"></span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 4 20 4 20 10"></polyline><line x1="20" y1="4" x2="13.5" y2="10.5"></line><polyline points="10 20 4 20 4 14"></polyline><line x1="4" y1="20" x2="10.5" y2="13.5"></line></svg></summary>
 <div class="fold-bd"><div class="fold-in">
 <div id="cliff">
     <div class="slot" id="cliffView">
@@ -1577,7 +1679,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
         <div class="stack" style="gap:15px">
           <h2>One dollar, <em style="color:var(--c2)" data-fig="cliff.drop">$12,980</em>.</h2>
         </div>
-        <p style="font-size:16.5px;line-height:1.6;color:var(--im)" id="cliffIntro">Nothing in this section is modeled. The <a class="term" href="#/methodology/credit">premium tax credit</a> does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.</p>
+        <p class="cliff-intro" id="cliffIntro">Nothing in this section is modeled. The <a class="term" href="#/methodology/credit">premium tax credit</a> does not taper at the top. It stops. This is what the statute does to a household that earns one dollar too much.</p>
       </div>
 
       <div class="cliffstats">
@@ -1657,7 +1759,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 </div></div>
 </details>
 <details class="fold wide" id="foldCmp">
-<summary><span class="fold-g" id="gCmp" aria-hidden="true"></span><span class="fold-k">Compare side by side</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"></rect><line x1="3.5" y1="14" x2="20.5" y2="14"></line><polyline points="8.5 10 12 6.5 15.5 10"></polyline></svg></summary>
+<summary><span class="fold-g" id="gCmp" aria-hidden="true"></span><span class="fold-k">Compare side by side</span><svg class="fold-x fold-up" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 4 20 4 20 10"></polyline><line x1="20" y1="4" x2="13.5" y2="10.5"></line><polyline points="10 20 4 20 4 14"></polyline><line x1="4" y1="20" x2="10.5" y2="13.5"></line></svg></summary>
 <div class="fold-bd"><div class="fold-in">
       <div class="bars">
         <div class="bar-row">
@@ -1707,7 +1809,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
           <div class="note-i">The employer share does not disappear. It moves onto your bill.</div>
         </div>
       </div>
-      <div class="stack" style="gap:11px;border-top:1px solid var(--irule);padding-top:22px">
+      <div class="stack cmp-range">
         <div class="row" style="justify-content:space-between;align-items:baseline;gap:16px">
           <div class="lbl">Where every model lands</div>
           <div class="note-i">All six estimates, against what you pay now</div>
@@ -3234,8 +3336,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
       p = ordered[i];
       host.children[i].style.width = (p.value / max * 100).toFixed(2) + "%";
       bg = p.ghost ? HATCH : (p.tone ? TONE[p.tone] : p.colour);
-      keys += '<span class="usw" style="background:' + bg + '"></span>' +
-              fmt(p.value) + " " + (CMP_SHORT[p.key] || p.label) + "<br>";
+      keys += '<span class="bk"><span class="usw" style="background:' + bg + '"></span>' +
+              fmt(p.value) + " " + (CMP_SHORT[p.key] || p.label) + "</span><br>";
     }
     byId(subId).innerHTML = keys;
   }
@@ -3394,6 +3496,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
     // their gutter, and 920 rendered it at 7.3px in a 641px container at 768px wide.
     // Do not hard-code this again; it is the defect docs/design-brief.md opens with.
     var Wd = Math.max(260, Math.round(cw)), Ht = narrow ? 268 : 352;
+    // in its box the chart gives up height so the whole sheet fits one screen
+    if (host.closest(".fold.wide.shown")) Ht = Math.max(narrow ? 180 : 200, Math.min(Ht, innerHeight - (narrow ? 610 : 520)));
     var mL = narrow ? 42 : 74, mR = narrow ? 10 : 26, mT = narrow ? 36 : 18, mB = narrow ? 44 : 62;
     var fA = narrow ? 11 : 11, fB = narrow ? 16 : 19, gridN = narrow ? 3 : 5;
     var X = function(v){ return mL + (v - lo) / (hi - lo) * (Wd - mL - mR); };
@@ -4378,10 +4482,10 @@ section.paper.onteal{background:var(--paper);background-image:none}
     byId("sbarGapK").textContent = S.savingsNegative ? "more than today" : "no longer paid";
     byId("st3basis").innerHTML = '<span class="btag">' + (/allocation/i.test(S.universal.basis) ? "Includes our allocation" : "Published formula") + '</span>';
     var a = S.marketplace.place;
-    byId("hhPillK").textContent = state.mine ? "Your household" : "Example household";
     byId("hhPillA").textContent = state.mine ? "Change" : "Enter yours";
     var phone = window.matchMedia("(max-width:520px)").matches;
-    byId("hhPillT").textContent = (phone ? "" : "Household of " + state.size + " \u00b7 ") + (phone
+    if (state.mine) byId("hhPill").classList.add("seen");
+    byId("hhPillT").textContent = !state.mine ? "Example household" : (phone ? "" : "Household of " + state.size + " \u00b7 ") + (phone
       ? state.size + (state.size === 1 ? "\u00a0person" : "\u00a0people") + "\u00a0\u00b7 " + a.county + "\u00a0\u00b7 $" + Math.round(state.income / 1000) + "k"   // short on a phone; a dot never starts a line
       : countyLabel(a) + " \u00b7 " + money(state.income));
     byId("hhSum").textContent = "Household of " + state.size + " · " + countyLabel(a) + " · " + money(state.income) + " · " +
@@ -4728,27 +4832,37 @@ section.paper.onteal{background:var(--paper);background-image:none}
     d.querySelector("summary").addEventListener("click", function(e){
       if (isOnePage()) return;
       e.preventDefault();
-      if (sheetOf === d) closeSheet(); else openSheet(d);
+      if (sheetOf === d) closeSheet(); else openSheet(d, d.querySelector("summary .fold-x"));
     });
   });
-  function openSheet(d){
+  // The box grows out of the point the reader tapped and shrinks back into it. The
+  // origin is that point in the box's own frame, so the tapped spot stays put while
+  // the box scales about it. Under reduced motion it simply appears and goes.
+  var sheetFrom = null;
+  function flyPoint(el, bd){
+    var o = el && el.getBoundingClientRect(), r = bd.getBoundingClientRect();
+    if (!o || !o.width || o.bottom < 0 || o.top > innerHeight) return null;   // nothing on screen to fly to
+    return (o.left + o.width / 2 - r.left) + "px " + (o.top + o.height / 2 - r.top) + "px";
+  }
+  function openSheet(d, from){
     closeSheet(true);
     var bd = d.querySelector(".fold-bd"), title = d.querySelector(".fold-k").textContent;
     d.querySelector(".sheet-t").textContent = title;
     bd.setAttribute("role", "dialog"); bd.setAttribute("aria-modal", "true"); bd.setAttribute("aria-label", title);
-    sheetBack = d.querySelector("summary");
+    sheetBack = d.querySelector("summary"); sheetFrom = from || null;
     d.open = true; sheetOf = d;
     byId("shade").hidden = false;
-    // Park it below the screen with no transition: otherwise the closing transition
-    // carries it from its spot in the flow (half a screen to the right) down to the
-    // parked spot, and it reads as sliding in from the side.
-    bd.style.transition = "none";
-    void bd.offsetWidth;                       // commit the off-screen state before releasing it
-    bd.style.transition = "";
+    bd.getAnimations().forEach(function(a){ a.cancel(); });
     void bd.offsetWidth;
     d.classList.add("shown"); byId("shade").classList.add("on");
     bd.scrollTop = 0;
     if (S) renderCliff();                      // the cliff chart draws to its container, which only now has a width
+    if (rootEl.classList.contains("motion") && bd.animate){
+      var at = flyPoint(sheetFrom, bd);
+      bd.style.transformOrigin = at || "50% 50%";
+      bd.animate([{ transform:"scale(" + (at ? .03 : .92) + ")", opacity:0 }, { opacity:1, offset:.28 }, { transform:"scale(1)", opacity:1 }],
+                 { duration: at ? 560 : 300, easing:"cubic-bezier(.16,.9,.24,1)" });
+    }
     d.querySelector(".sheet-x").focus({ preventScroll: true });
   }
   function closeSheet(now){
@@ -4757,10 +4871,20 @@ section.paper.onteal{background:var(--paper);background-image:none}
     var bd = d.querySelector(".fold-bd");
     d.classList.remove("shown"); byId("shade").classList.remove("on");
     var end = function(){
+      clearTimeout(sheetT);
+      bd.getAnimations().forEach(function(a){ a.cancel(); });
       d.open = false; byId("shade").hidden = !!sheetOf ? false : true;
       bd.removeAttribute("role"); bd.removeAttribute("aria-modal"); bd.removeAttribute("aria-label");
     };
-    if (now || !rootEl.classList.contains("motion")) end(); else sheetT = setTimeout(end, 520);
+    if (now || !rootEl.classList.contains("motion") || !bd.animate) end();
+    else {
+      var at = flyPoint(sheetFrom, bd);
+      bd.getAnimations().forEach(function(a){ a.cancel(); });
+      bd.style.transformOrigin = at || "50% 50%";
+      var fly = bd.animate([{ transform:"scale(1)", opacity:1 }, { opacity:1, offset:.6 }, { transform:"scale(" + (at ? .03 : .92) + ")", opacity:0 }],
+                           { duration: at ? 420 : 220, easing:"cubic-bezier(.55,0,.8,.3)", fill:"forwards" });
+      fly.onfinish = end; sheetT = setTimeout(end, 700);
+    }
     if (!now && sheetBack) sheetBack.focus({ preventScroll: true });
   }
   byId("shade").addEventListener("click", function(){ closeSheet(); });
@@ -4794,14 +4918,15 @@ section.paper.onteal{background:var(--paper);background-image:none}
   })();
   byId("who-line").setAttribute("role", "button"); byId("who-line").setAttribute("tabindex", "0");
   byId("who-line").setAttribute("aria-label", "Change the household");
-  byId("who-line").addEventListener("click", function(){ if (!isOnePage()){ openSheet(byId("foldHh")); sheetBack = byId("who-line"); } });
+  byId("who-line").addEventListener("click", function(){ if (!isOnePage()){ openSheet(byId("foldHh"), byId("who-line")); sheetBack = byId("who-line"); } });
   byId("who-line").addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); byId("who-line").click(); } });
   // capture, so the flag is set before the field's own handler repaints
   ["input", "change"].forEach(function(t){ byId("foldHh").addEventListener(t, function(){ state.mine = true; }, true); });
   byId("hhPill").addEventListener("click", function(){
+    this.classList.add("seen");
     var f = byId("foldHh");
     if (isOnePage()){ f.scrollIntoView({ behavior:scrollBehavior(), block:"start" }); return; }
-    openSheet(f); sheetBack = byId("hhPill");
+    openSheet(f, byId("hhPillA")); sheetBack = byId("hhPill");
   });
   // the flyout shuts on Escape or a click anywhere else
   byId("cue").addEventListener("click", function(){ document.querySelector('.sstep[data-step="0"]').scrollIntoView({ behavior:scrollBehavior(), block:"center" }); });
@@ -4999,9 +5124,12 @@ section.paper.onteal{background:var(--paper);background-image:none}
       var on = box.querySelector(sel + ".on");
       if (!on || !on.offsetWidth){ g.style.opacity = 0; return; }
       var a = on.getBoundingClientRect(), h = host.getBoundingClientRect();
+      // a sheet in flight is scaled; measure in the host's own pixels so the highlight never freezes small
+      var k = host.offsetWidth ? h.width / host.offsetWidth : 1;
+      if (!k) k = 1;
       g.style.opacity = 1;
-      g.style.width = a.width + "px"; g.style.height = a.height + "px";
-      g.style.transform = "translate(" + (a.left - h.left) + "px," + (a.top - h.top) + "px)";
+      g.style.width = a.width / k + "px"; g.style.height = a.height / k + "px";
+      g.style.transform = "translate(" + (a.left - h.left) / k + "px," + (a.top - h.top) / k + "px)";
     }
     new MutationObserver(move).observe(box, { attributes: true, attributeFilter: ["class"], subtree: true });
     window.addEventListener("resize", move);

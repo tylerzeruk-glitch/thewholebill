@@ -81,11 +81,16 @@ year, side-by-side comparison) is a real `<details class="fold">` under the step
 and the page has two views of them (`setView()`). Readers get only the first: the owner
 withdrew the on-screen switch on 2026-11-12, and an old stored choice is cleared on load.
 
-- **Step by step** (default, `html.sheets`): a `.wide` fold rises over the page as a sheet
-  (`openSheet()`), a labelled dialog with a shade, Escape and a close button. Nothing underneath
-  moves. The first build opened wide folds in the flow; the owner found that unnatural (a screen
-  of chart pushed in under the step, and the bar left to make room). A sheet row wears a
-  panel icon instead of the plus, and the sheet sinks back into the bottom the way it rose.
+- **Step by step** (default, `html.sheets`): a `.wide` fold opens as a floating box over a
+  dimmed page (`openSheet(d, from)`), a labelled dialog with Escape and a close button. Nothing
+  underneath moves. The first build opened wide folds in the flow; the owner found that unnatural
+  (a screen of chart pushed in under the step, and the bar left to make room). Since 2026-11-13
+  the box grows out of whatever was tapped (the row's corner-arrows icon, the household pill's
+  button, the results bar's pencil) and shrinks back into it, and **each box fits one screen**
+  at 1280x800, 1440x900, 1024x768 and 390x844 (the suite checks; a 360x740 phone may scroll
+  three of them a little). The fit rules are scoped to `.fold.wide[open]` in the sheets view, so
+  the one-page view keeps its full-size charts; on a phone the household box drops its four
+  breakdown cards and compare drops the model strip (both repeat what the page shows elsewhere).
   Folds that hold only a paragraph open in place, with the plus.
 - **All on one page** (`html.onepage`): every fold stands open in the flow at full width, the
   summaries become headings, and the bar steps aside (`.stage.yield`) where a wide chart needs

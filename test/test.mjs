@@ -3346,7 +3346,7 @@ test('story: text holds its contrast on the teal ground', async b => {
  * the flow, which pushed a screen of chart under the step and sent the bar away,
  * and the owner called it unnatural. So the thing measured here is that NOTHING
  * underneath moves: not the scroll position, not the bar. */
-test('folds: shut at load; a wide one rises as a sheet and the page stays put', async b => {
+test('folds: shut at load; a wide one opens as a floating box and the page stays put', async b => {
   for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
     const p = await page(b, w, h, m, 'index.html', true);
     const at = await p.evaluate(() => ({
@@ -3358,7 +3358,7 @@ test('folds: shut at load; a wide one rises as a sheet and the page stays put', 
     ok(`${w}px: the page a reader meets is far shorter than the old one`, at.screens < (m ? 13 : 11), at.screens.toFixed(1) + ' screens');   // was 15.3 at 1280 by 800
     await storyStep(p, 1);
     const read = () => p.evaluate(() => { const d = document.getElementById('foldRise'), bd = d.querySelector('.fold-bd'), r = bd.getBoundingClientRect(), x = d.querySelector('.sheet-x').getBoundingClientRect();
-      return { open: d.open, pos: getComputedStyle(bd).position, top: r.top, bottom: r.bottom, left: r.left, right: r.right, vw: innerWidth, vh: innerHeight, y: scrollY,
+      return { open: d.open, pos: getComputedStyle(bd).position, round: parseFloat(getComputedStyle(bd).borderTopLeftRadius), top: r.top, bottom: r.bottom, left: r.left, right: r.right, vw: innerWidth, vh: innerHeight, y: scrollY,
         role: bd.getAttribute('role'), label: bd.getAttribute('aria-label'), shade: !document.getElementById('shade').hidden,
         focusX: document.activeElement === d.querySelector('.sheet-x'), focusSum: document.activeElement === d.querySelector('summary'),
         away: document.getElementById('stage').classList.contains('yield'), bar: document.getElementById('sbarTrack').getBoundingClientRect().top,
@@ -3368,8 +3368,8 @@ test('folds: shut at load; a wide one rises as a sheet and the page stays put', 
     const was = await read();
     await p.locator('#foldRise > summary').click(); await p.waitForTimeout(300);
     const s = await read();
-    ok(`${w}px: the fold opens as a sheet inside the viewport, its chart showing`, s.open && s.pos === 'fixed' && s.chart && s.top >= h * 0.08 && s.bottom <= s.vh + 1 && s.left >= -0.5 && s.right <= s.vw + 0.5,
-       JSON.stringify([s.pos, s.top.toFixed(0), s.bottom.toFixed(0), s.left.toFixed(0), s.right.toFixed(0)]));
+    ok(`${w}px: the fold opens as a box floating clear of every edge, its chart showing`, s.open && s.pos === 'fixed' && s.chart && s.round > 0 && s.top >= 9 && s.bottom <= s.vh - 9 && s.left >= 9 && s.right <= s.vw - 9,
+       JSON.stringify([s.pos, s.round, s.top.toFixed(0), s.bottom.toFixed(0), s.left.toFixed(0), s.right.toFixed(0)]));
     ok(`${w}px: nothing underneath moved, and the bar is still there`, s.y === was.y && Math.abs(s.bar - was.bar) < 0.5 && !s.away, `scroll ${was.y} to ${s.y}, bar ${was.bar.toFixed(1)} to ${s.bar.toFixed(1)}`);
     ok(`${w}px: it is a labelled dialog with a 44px close button holding focus`, s.role === 'dialog' && s.label === 'How premiums have risen' && s.shade && s.focusX && s.x >= 44, JSON.stringify([s.role, s.label, s.shade, s.focusX, s.x]));
     await p.keyboard.press('Escape'); await p.waitForTimeout(250);
@@ -3442,7 +3442,7 @@ test('opening: the question, the empty bar, the household pill and one line of n
       return { words: sh.innerText.split(/\s+/).filter(Boolean).length - tk.innerText.split(/\s+/).filter(Boolean).length, h: sh.offsetHeight, bottom: r.bottom, vh: innerHeight, vw: innerWidth,
         ground: rgb, intro: zone.classList.contains('intro'), segs: document.querySelectorAll('.sseg.on').length, track: document.getElementById('sbarTrack').getBoundingClientRect().height,
         cap: +getComputedStyle(document.querySelector('.sbar-cap')).opacity, sticky: +getComputedStyle(document.querySelector('.sticky')).opacity,
-        pill: document.getElementById('hhPillT').textContent.replace(/\u00a0/g, ' '), pillK: document.getElementById('hhPillK').textContent, pillA: document.getElementById('hhPillA').textContent, pillH: pill.height, pillBottom: pill.bottom, zipVisible: document.getElementById('zip').checkVisibility(),
+        pill: document.getElementById('hhPillT').textContent.replace(/\u00a0/g, ' '), pillA: document.getElementById('hhPillA').textContent, pillH: pill.height, pillBottom: pill.bottom, zipVisible: document.getElementById('zip').checkVisibility(),
         open: f.open, k: f.querySelector('.fly-k').textContent, items: tk.querySelectorAll('span').length, entries: f.querySelectorAll('.upd-when').length,
         moving: getComputedStyle(tk).animationName, tickW: tk.scrollWidth, stripW: tk.parentElement.clientWidth, sumH: f.querySelector('summary').getBoundingClientRect().height,
         fly: [fr.left, fr.right], vis: bd.checkVisibility(), docW: document.documentElement.scrollWidth }; });
@@ -3450,8 +3450,7 @@ test('opening: the question, the empty bar, the household pill and one line of n
     ok(`${w}px: the page opens on the dark ground with the pill on the first screen`, r.ground === 'rgb(18, 20, 26)' && r.intro && r.pillBottom <= r.vh, `${r.ground}, pill ends ${r.pillBottom.toFixed(0)} of ${r.vh}`);
     ok(`${w}px: about forty words of its own, where the first hero had 174`, r.words < 45, r.words + ' words');
     ok(`${w}px: the bar ${m ? 'is not drawn yet' : 'stands empty beside it'}, with no total, and the results bar waits out of sight`, r.segs === 0 && r.cap === 0 && r.sticky === 0 && (m || r.track > 200), JSON.stringify([r.segs, r.cap, r.sticky, r.track]));
-    ok(`${w}px: the pill names the household and is a 44px target`, (m ? /^4 people · Dallas · \$95k$/ : /^Household of 4 · Dallas County · \$95,000$/).test(r.pill) && r.pillH >= 44 && !r.zipVisible, r.pill);
-    ok(`${w}px: until the reader changes something, the field says it holds an example`, r.pillK === 'Example household' && r.pillA === 'Enter yours', JSON.stringify([r.pillK, r.pillA]));
+    ok(`${w}px: until the reader changes something, the pill says it holds an example, and is a 44px target`, r.pill === 'Example household' && r.pillA === 'Enter yours' && r.pillH >= 44 && !r.zipVisible, JSON.stringify([r.pill, r.pillA, r.pillH]));
     ok(`${w}px: the news line carries the six entries twice over, in a 44px control`, !r.open && r.k === 'What changed' && r.items === 12 && r.entries === 6 && r.sumH >= 44 && r.tickW > r.stripW && r.docW <= w, JSON.stringify([r.items, r.tickW, r.stripW, r.docW]));
     ok(`${w}px: it holds still when the reader has asked for less motion`, r.moving === 'none', r.moving);
     await p.locator('#changed > summary').click(); await p.waitForTimeout(250);
@@ -3464,9 +3463,9 @@ test('opening: the question, the empty bar, the household pill and one line of n
     const s = await p.evaluate(() => { const d = document.getElementById('foldHh'), bd = d.querySelector('.fold-bd'); return { open: d.open, pos: getComputedStyle(bd).position, zip: document.getElementById('zip').checkVisibility(), route: document.getElementById('route').checkVisibility(), y: scrollY, label: bd.getAttribute('aria-label') }; });
     ok(`${w}px: the pill opens the household sheet with the ZIP and the family details together`, s.open && s.pos === 'fixed' && s.zip && s.route && s.label === 'Change the household', JSON.stringify(s));
     await p.locator('#zip').fill('60601'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
-    const z = await p.evaluate(() => ({ k: document.getElementById('hhPillK').textContent, a: document.getElementById('hhPillA').textContent, pill: document.getElementById('hhPillT').textContent, open: document.getElementById('foldHh').open, y: scrollY, scope: document.getElementById('scope').textContent }));
+    const z = await p.evaluate(() => ({ a: document.getElementById('hhPillA').textContent, pill: document.getElementById('hhPillT').textContent, open: document.getElementById('foldHh').open, y: scrollY, scope: document.getElementById('scope').textContent }));
     ok(`${w}px: a new ZIP reprices in place: the sheet stays, the page does not move, the pill follows`, z.open && z.y === s.y && /Cook/.test(z.pill) && /^Showing Cook County, Illinois/.test(z.scope), JSON.stringify(z));
-    ok(`${w}px: once the reader enters a ZIP, the field is theirs`, z.k === 'Your household' && z.a === 'Change', JSON.stringify([z.k, z.a]));
+    ok(`${w}px: once the reader enters a ZIP, the pill names their household`, (m ? /^4 people · Cook · \$95k$/ : /^Household of 4 · Cook County · \$95,000$/).test(z.pill.replace(/\u00a0/g, ' ')) && z.a === 'Change', JSON.stringify([z.pill, z.a]));
     await p.locator('#zip').fill('00000'); await p.locator('#zipGo').click(); await p.waitForTimeout(250);
     ok(`${w}px: a ZIP we cannot price offers the sample cities`, await p.evaluate(() => document.querySelectorAll('#areapick button[data-z]').length === 5 && /try a city/.test(document.getElementById('scope').textContent)));
     await p.keyboard.press('Escape'); await p.waitForTimeout(250);
@@ -3474,6 +3473,17 @@ test('opening: the question, the empty bar, the household pill and one line of n
     await p.close();
   }
   // with motion on, the line moves, and stops under the pointer
+  {
+    // the pill pulses with motion on, until it has been opened once; never under reduced motion
+    const pm = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
+    await pm.goto('file://' + process.cwd() + '/dist/index.html'); await pm.waitForTimeout(400);
+    const pulse = () => pm.evaluate(() => getComputedStyle(document.getElementById('hhPill'), '::after').animationName);
+    const before = await pulse();
+    await pm.locator('#hhPill').click(); await pm.waitForTimeout(300); await pm.keyboard.press('Escape'); await pm.waitForTimeout(300);
+    const after = await pulse(); await pm.close();
+    const pr = await page(b, 1280, 800, false, 'index.html', true), still = await pr.evaluate(() => getComputedStyle(document.getElementById('hhPill'), '::after').animationName); await pr.close();
+    ok('the household pill pulses until it is opened, and holds still under reduced motion', before === 'hh-pulse' && after === 'none' && still === 'none', JSON.stringify([before, after, still]));
+  }
   const q = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
   await q.goto(URL); await q.waitForTimeout(1500);
   const x = () => q.evaluate(() => document.getElementById('tickIn').getBoundingClientRect().left);
@@ -3482,27 +3492,52 @@ test('opening: the question, the empty bar, the household pill and one line of n
   ok('motion on: the news line drifts left, and holds still under the pointer', x1 < x0 - 3 && Math.abs(x3 - x2) < 0.6, JSON.stringify([x0, x1, x2, x3].map(v => +v.toFixed(1))));
   await q.close();
 });
-test('sheets: with motion on, a sheet rises straight up and sinks straight down', async b => {
-  // The first build released the closing transition at the moment the sheet became
-  // fixed, so it travelled from its spot in the flow (half a screen to the right)
-  // and the owner saw it slide in from the side, then sink on close.
+test('sheets: with motion on, a box grows out of what was tapped and shrinks back into it', async b => {
+  // The owner asked for boxes that "fly out" of their icon and "minimize back into" it.
+  // Sampled frame by frame: the first frames are small and centred near the tapped point,
+  // the box only grows, and closing ends small near the same point.
   for (const [w, h, mobile] of [[1280, 800, false], [390, 844, true]]) {
     const p = await b.newPage({ viewport: { width: w, height: h }, isMobile: mobile, hasTouch: mobile, reducedMotion: 'no-preference' });
     await p.goto(URL); await p.waitForTimeout(900);
     const r = await p.evaluate(async () => {
-      const d = document.querySelector('#foldMath') || document.querySelector('.fold.wide'), bd = d.querySelector('.fold-bd');
+      const d = document.getElementById('foldWf'), bd = d.querySelector('.fold-bd'), icon = d.querySelector('summary .fold-x');
       d.closest('.sstep').scrollIntoView({ block: 'center', inline: 'center' });
       await new Promise(r => setTimeout(r, 900));
+      const ic = icon.getBoundingClientRect(), at = [ic.left + ic.width / 2, ic.top + ic.height / 2];
       const track = async ms => { const out = [], t0 = performance.now();
-        while (performance.now() - t0 < ms) { await new Promise(r => requestAnimationFrame(r)); const q = bd.getBoundingClientRect(); if (q.top < innerHeight) out.push([q.left, q.top]); }
+        while (performance.now() - t0 < ms) { await new Promise(r => requestAnimationFrame(r)); const q = bd.getBoundingClientRect(); if (d.open && q.width) out.push([q.left + q.width / 2, q.top + q.height / 2, q.width]); }   // a shut <details> still reports its in-flow size
         return out; };
-      d.querySelector('summary').click(); const open = await track(900);
-      d.querySelector('.sheet-x').click(); const close = await track(800);
-      const sum = a => ({ n: a.length, dx: a.length ? Math.max(...a.map(v => v[0])) - Math.min(...a.map(v => v[0])) : 0, first: a[0] && Math.round(a[0][1]), last: a.length && Math.round(a[a.length - 1][1]) });
-      return { open: sum(open), close: sum(close) };
+      d.querySelector('summary').click(); const open = await track(800);
+      const full = bd.getBoundingClientRect().width;
+      d.querySelector('.sheet-x').click(); const close = await track(700);
+      const near = f => Math.hypot(f[0] - at[0], f[1] - at[1]);
+      const grows = open.every((f, i) => i === 0 || f[2] >= open[i - 1][2] - 0.5), shrinks = close.every((f, i) => i === 0 || f[2] <= close[i - 1][2] + 0.5);
+      return { n: open.length, first: open[0] && { w: Math.round(open[0][2]), off: Math.round(near(open[0])) }, full: Math.round(full), grows,
+               shut: close.length && { w: Math.round(close[close.length - 1][2]), off: Math.round(near(close[close.length - 1])) }, shrinks, open: d.open };
     });
-    ok(`${w}px: opening, the sheet only rises while on screen`, r.open.n > 3 && r.open.dx < 1 && r.open.first > r.open.last, JSON.stringify(r.open));
-    ok(`${w}px: closing, the sheet only sinks while on screen`, r.close.n > 3 && r.close.dx < 1 && r.close.first < r.close.last, JSON.stringify(r.close));
+    ok(`${w}px: opening, the box starts small at the tapped icon and only grows`, r.n > 5 && r.first.w < r.full * 0.25 && r.first.off < 80 && r.grows, JSON.stringify(r));
+    ok(`${w}px: closing, it shrinks back into the icon, then is gone`, r.shrinks && r.shut.w < r.full * 0.25 && r.shut.off < 80 && !r.open, JSON.stringify(r));
+    // controls that measure themselves (the route switch's highlight) must not keep the in-flight size
+    await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(400);
+    await p.evaluate(() => document.getElementById('hhPill').click()); await p.waitForTimeout(900);
+    const g = await p.evaluate(() => { const a = document.getElementById('routeGlide').getBoundingClientRect(), o = document.querySelector('#route button.on').getBoundingClientRect();
+      return [a.width - o.width, a.height - o.height, a.left - o.left, a.top - o.top].map(v => Math.round(Math.abs(v))); });
+    ok(`${w}px: after the household box flies in, the route highlight sits on its button`, g.every(v => v <= 1), g.join(','));
+    await p.close();
+  }
+});
+test('sheets: each one fits a single screen, with nothing to scroll inside it', async b => {
+  // Owner, 13 November: "ideally the information and data on the flyouts also fit into one page".
+  // Short phones (360 by 740) are allowed to scroll; these sizes are not.
+  for (const [w, h, m] of [[1280, 800, false], [1440, 900, false], [1024, 768, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true), over = [];
+    for (const id of ['foldHh', 'foldWf', 'foldRise', 'foldSlot', 'foldCmp']) {
+      await p.evaluate(id => document.getElementById(id).querySelector('summary').click(), id); await p.waitForTimeout(250);
+      const r = await p.evaluate(id => { const bd = document.getElementById(id).querySelector('.fold-bd'); return [bd.scrollHeight - bd.clientHeight, bd.scrollWidth - bd.clientWidth]; }, id);
+      if (r[0] > 0 || r[1] > 0) over.push(id + ' ' + r.join('/'));
+      await p.keyboard.press('Escape'); await p.waitForTimeout(150);
+    }
+    ok(`${w}x${h}: all five sheets fit without scrolling inside`, over.length === 0, over.join(', '));
     await p.close();
   }
 });
@@ -3561,22 +3596,22 @@ test('folds: with motion on, folds and sheets move over time and end clean', asy
   await p.locator('#obj1 > summary').click(); await p.waitForTimeout(80);
   await p.locator('#obj1 > summary').click(); await p.waitForTimeout(1300);
   ok('a second click mid-close reopens the fold', await p.evaluate(() => { const d = document.getElementById('obj1'); return d.open && d.className.indexOf('closing') < 0; }));
-  // the sheet: on its way up at once, settled at the bottom edge, and still in the page while it leaves
+  // the sheet: growing at once, settled as a centred box over a dimmed, unmoved page, and still in the page while it leaves
   await p.evaluate(() => document.querySelector('#foldWf').scrollIntoView({ block: 'center' })); await p.waitForTimeout(500);
   const y0 = await p.evaluate(() => scrollY);
   await p.locator('#foldWf > summary').click(); await p.waitForTimeout(60);
   const rise = () => p.evaluate(() => { const d = document.getElementById('foldWf'), r = d.querySelector('.fold-bd').getBoundingClientRect();
-    return { open: d.open, shown: d.classList.contains('shown'), top: r.top, bottom: r.bottom, vh: innerHeight, y: scrollY, shade: +getComputedStyle(document.getElementById('shade')).opacity }; });
+    return { open: d.open, shown: d.classList.contains('shown'), w: r.width, top: r.top, bottom: r.bottom, vh: innerHeight, y: scrollY, shade: +getComputedStyle(document.getElementById('shade')).opacity }; });
   const up = await rise();
   await p.waitForTimeout(1000);
   const there = await rise();
-  ok('the sheet starts below the screen and rises', up.open && up.shown && up.top > there.top + 20, `${up.top.toFixed(0)} to ${there.top.toFixed(0)}`);
-  ok('it settles on the bottom edge with the page dimmed and unmoved', Math.abs(there.bottom - there.vh) < 1.5 && there.shade === 1 && there.y === y0, JSON.stringify(there));
+  ok('the box starts small and grows', up.open && up.shown && up.w < there.w * 0.6, `${up.w.toFixed(0)} to ${there.w.toFixed(0)}`);
+  ok('it settles centred with the page dimmed and unmoved', Math.abs((there.vh - there.bottom) - there.top) < 1.5 && there.shade === 1 && there.y === y0, JSON.stringify(there));
   await p.keyboard.press('Escape'); await p.waitForTimeout(80);
   const leaving = await rise();
   await p.waitForTimeout(600);
   const gone = await rise();
-  ok('closing, it is still in the page on its way down, then shut', leaving.open && !leaving.shown && !gone.open && gone.y === y0, JSON.stringify([leaving.open, gone.open]));
+  ok('closing, it is still in the page as it shrinks, then shut', leaving.open && !leaving.shown && !gone.open && gone.y === y0, JSON.stringify([leaving.open, gone.open]));
   await p.close();
 });
 test('send: three portraits are the recipient control', async b => {
