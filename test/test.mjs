@@ -3526,6 +3526,28 @@ test('sheets: with motion on, a box grows out of what was tapped and shrinks bac
     await p.close();
   }
 });
+test('corners: every box takes one of the site\'s corners; only data shapes stay square', async b => {
+  // Owner, 13 November: "some boxes have squared edges, and some have rounded edges". The rule:
+  // 10px for every box, 4px for small marks, 16px for a floating sheet, a pill or a circle for
+  // round controls. Bars, bands and ranges are data, and their geometry stays square.
+  const OK = ['10px', '4px', '16px', '999px', '50%'], DATA = /\b(band|rbar|bar-bg|bar-fill|range|sbar-ghost|band-t)\b/;
+  for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m);
+    const bad = await p.evaluate(([OK, DATA]) => { const re = new RegExp(DATA), out = new Set();
+      document.querySelectorAll('details').forEach(d => d.open = true);
+      for (const e of document.querySelectorAll('body *')) {
+        if (e.closest('svg') || !e.checkVisibility()) continue;
+        const cs = getComputedStyle(e), q = e.getBoundingClientRect(); if (q.width < 20 || q.height < 16 || q.width > innerWidth - 8) continue;
+        const bord = parseFloat(cs.borderTopWidth) > 0 && parseFloat(cs.borderRightWidth) > 0;
+        const pb = e.parentElement ? getComputedStyle(e.parentElement).backgroundColor : '';
+        const fill = cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== pb;
+        if ((bord || fill) && !OK.includes(cs.borderRadius) && !re.test(e.className)) out.add(e.tagName.toLowerCase() + '.' + [...e.classList].join('.') + ' ' + cs.borderRadius);
+      }
+      return [...out]; }, [OK, DATA.source]);
+    ok(`${w}px: no box outside the corner system`, bad.length === 0, bad.slice(0, 6).join(' | '));
+    await p.close();
+  }
+});
 test('sheets: each one fits a single screen, with nothing to scroll inside it', async b => {
   // Owner, 13 November: "ideally the information and data on the flyouts also fit into one page".
   // Short phones (360 by 740) are allowed to scroll; these sizes are not.

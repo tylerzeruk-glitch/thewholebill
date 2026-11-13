@@ -235,6 +235,14 @@ until the font test caught it). Phone widths are checked for odd wrapping, not o
 `body` inherits `text-wrap:pretty` so labels and notes do not end on one word. Details:
 `docs/design-brief.md`.
 
+## Corners
+
+One system since 2026-11-13 (owner: "some boxes have squared edges, and some have rounded edges"):
+`--r` (10px) for every box, control, card and panel; `--r-s` (4px) for small marks (checkboxes,
+tags, the text highlight); `--r-lg` (16px) for a floating sheet; a pill (999px) or a circle for
+round controls. Bars, bands and ranges are data and stay square. A sliding highlight takes its
+button's corner. The suite fails on any box outside the system.
+
 ## Accessibility floors
 
 4.5:1 for text, 3:1 for graphics and control boundaries, 44px touch targets. The palette table is

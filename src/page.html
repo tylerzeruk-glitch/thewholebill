@@ -21,6 +21,7 @@
   --pk:#1A1815; --pb:#443E36; --pm:#6B6459; --plabel:#786E5B;
   --prule:#E3DDD2; --prule-soft:#EFEAE1; --pctrl:#988B76;
 
+  --r:10px; --r-s:4px; --r-lg:16px;   /* corners: every box, small marks, floating sheets; pills and round buttons keep their shapes; data marks stay square */
   --ink:#12141A; --ink-surface:#171A22; --ink-raised:#1A1D26; --ink-chip:#232836;
   --irule:#1F2330; --irule-2:#262A35; --ictrl:#6C7383;   /* --ictrl was #5E6472: 2.84:1 against the raised surface, under the 3:1 boundary floor */
   --ik:#E8E6E1; --ib:#B9BCC4; --im:#8A8F9C; --ilabel:#8B92A4; --ifaint:#7C8395;
@@ -138,7 +139,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 /* an outward arrow, not a chevron: the list leads off to the updates page, so it never flips */
 /* open, the arrow turns to point down at the list it opened */
 .flyout[open] .fold-x{transform:rotate(135deg);background:var(--teal);border-color:var(--teal);color:#0C1F1E}
-.fly-bd{position:absolute;right:0;top:calc(100% + 10px);z-index:30;width:min(460px,100%);max-height:min(56vh,480px);overflow-y:auto;overscroll-behavior:contain;background:var(--paper-card);color:var(--pk);border:1px solid var(--pk);box-shadow:0 26px 60px -18px rgba(0,0,0,.7);padding:22px 24px}
+.fly-bd{border-radius:var(--r);position:absolute;right:0;top:calc(100% + 10px);z-index:30;width:min(460px,100%);max-height:min(56vh,480px);overflow-y:auto;overscroll-behavior:contain;background:var(--paper-card);color:var(--pk);border:1px solid var(--pk);box-shadow:0 26px 60px -18px rgba(0,0,0,.7);padding:22px 24px}
 .dateline p{margin:0}
 .dateline b{font-weight:500;color:var(--pk)}
 /* the pop-out: one row per entry, its date and a short headline, the whole row a link */
@@ -155,16 +156,16 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .scope{margin-top:18px;font-size:13.5px;line-height:1.6;color:var(--pm);max-width:540px}
 .scope b{font-weight:500;color:var(--pk)}
 .areapick{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-.areapick button{font-family:var(--sans);font-size:13px;padding:8px 13px;border-radius:0;border:1px solid var(--pctrl);background:var(--paper-card);color:var(--pk);cursor:pointer}
+.areapick button{font-family:var(--sans);font-size:13px;padding:8px 13px;border-radius:var(--r);border:1px solid var(--pctrl);background:var(--paper-card);color:var(--pk);cursor:pointer}
 .areapick button:hover{background:var(--paper-tint)}
 .zipbar{display:flex;gap:12px;align-items:center;margin-top:28px;flex-wrap:wrap}
-.zipfield{display:flex;align-items:center;border:2px solid var(--pk);border-radius:0;overflow:hidden;background:var(--paper-card)}
+.zipfield{display:flex;align-items:center;border:2px solid var(--pk);border-radius:var(--r);overflow:hidden;background:var(--paper-card)}
 .zipfield .k{padding:0 20px;height:60px;display:flex;align-items:center;color:var(--pk);border-right:1px solid var(--prule)}
 .zipfield .v{width:180px;height:60px;display:flex;align-items:center;padding:0 20px;font-family:var(--fig);font-size:22px;letter-spacing:.06em;color:var(--pk);border:none;outline:none;background:transparent;font-variant-numeric:lining-nums tabular-nums}
 .zipfield .v::placeholder{color:#A79A85}
 .zipfield:focus-within{outline:2px solid var(--amber-deep);outline-offset:2px}
-.btn-dark{height:62px;padding:0 34px;background:var(--c2);color:#1E1509;border:none;border-radius:0;font-family:var(--sans);font-size:16px;font-weight:500;letter-spacing:0;cursor:pointer}
-.btn-ghost{height:50px;padding:0 24px;background:var(--paper-card);color:var(--pk);border:1px solid var(--pctrl);border-radius:0;font-family:var(--sans);font-size:15px;cursor:pointer}
+.btn-dark{height:62px;padding:0 34px;background:var(--c2);color:#1E1509;border:none;border-radius:var(--r);font-family:var(--sans);font-size:16px;font-weight:500;letter-spacing:0;cursor:pointer}
+.btn-ghost{height:50px;padding:0 24px;background:var(--paper-card);color:var(--pk);border:1px solid var(--pctrl);border-radius:var(--r);font-family:var(--sans);font-size:15px;cursor:pointer}
 
 /* ---------- narrative ---------- */
 /* Block longhands only. The `padding` SHORTHAND here silently reset .wrap's
@@ -237,7 +238,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .field{display:flex;flex-direction:column;gap:9px}
 .out-top{padding-bottom:26px;border-bottom:1px solid var(--irule)}
 .out-k,.out-s{font-size:14px;color:var(--im)} .out-s{margin-top:8px}
-.ctrl{height:46px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;font-size:15px}
+.ctrl{height:46px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:var(--r);overflow:hidden;display:flex;align-items:center;justify-content:space-between;padding:0 15px;font-size:15px}
 .ctrl.mono{font-family:var(--mono);font-size:16px}
 /* Divided cells, not floating chips. A filled chip inside an outlined control
    reads as a box in a box, and the two glyphs had no shared edge to sit on. These
@@ -252,11 +253,11 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
    decides the rows. Eight people is two rows on a phone. */
 .ages{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
 .age{display:flex;flex-direction:column;gap:5px;min-width:0}
-.age input{height:46px;width:100%;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:2px;color:var(--ik);font-family:var(--mono);font-size:16px;text-align:center;padding:0;font-variant-numeric:tabular-nums;outline:none;-webkit-appearance:none;appearance:none}
+.age input{height:46px;width:100%;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:var(--r);color:var(--ik);font-family:var(--mono);font-size:16px;text-align:center;padding:0;font-variant-numeric:tabular-nums;outline:none;-webkit-appearance:none;appearance:none}
 .age input:focus-visible{border-color:var(--c2)}
 .age-k{font-size:10.5px;color:var(--im);text-align:center;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .seg{display:flex;gap:6px}
-.seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:0;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
+.seg > div,.seg > button{flex-grow:1;height:44px;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--im);font-family:var(--sans);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
 .seg > div.on,.seg > button.on{background:#2C3140;border-color:var(--ib);color:var(--ik);font-weight:500}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;margin:6px 0 0;cursor:pointer;display:block}
 input[type=range]:focus{outline:none}
@@ -276,7 +277,7 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
    colour of the thing you choose. Both fit a drawer of optional, user-supplied
    numbers. Chosen over a plain raised panel and a dashed boundary: the dashed
    convention belongs to other people's interfaces. */
-.adv{background:var(--ink-surface);border:1px solid var(--irule-2);border-left:2px solid var(--teal);border-radius:0;padding:0 20px}
+.adv{background:var(--ink-surface);border:1px solid var(--irule-2);border-left:2px solid var(--teal);border-radius:var(--r);padding:0 20px}
 /* Two rows at every width: title and chevron, then the state line with the whole
    fold to itself. Sharing a row with the title left the state line a leftover
    column, and its wrapping set the height of the box. */
@@ -297,7 +298,7 @@ input.ctrl{color:var(--ik);width:100%;outline:none}
    so the check is aria-hidden. */
 .ovk{display:none;align-items:center;color:var(--c2)}
 .ovk.on{display:flex}
-.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--c2);border-radius:0;color:var(--c2);font-family:var(--sans);font-weight:500;text-transform:uppercase;letter-spacing:.07em;font-size:13px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.adv-reset{align-self:flex-start;min-height:44px;padding:0 18px;background:none;border:1px solid var(--c2);border-radius:var(--r);color:var(--c2);font-family:var(--sans);font-weight:500;text-transform:uppercase;letter-spacing:.07em;font-size:13px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
 .adv-reset:hover{color:var(--ink);background:var(--c2)}
 .adv-reset:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
 input.ctrl:focus-visible{border-color:var(--c2)}
@@ -310,19 +311,19 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .qmark:hover .qmark-c{color:var(--ink);background:var(--c2)}
 .qmark:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
 .qmark[aria-expanded="true"] .qmark-c{color:var(--ink);background:var(--c2)}
-.qpop{position:absolute;top:30px;left:0;right:0;z-index:6;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:3px;padding:16px 18px;font-size:12.5px;line-height:1.6;color:var(--ib);box-shadow:0 14px 34px -14px rgba(0,0,0,.8)}
+.qpop{position:absolute;top:30px;left:0;right:0;z-index:6;background:var(--ink-raised);border:1px solid var(--ictrl);border-radius:var(--r);padding:16px 18px;font-size:12.5px;line-height:1.6;color:var(--ib);box-shadow:0 14px 34px -14px rgba(0,0,0,.8)}
 .step:hover{background:var(--ink-chip);color:var(--ik)}
 .step:active{background:var(--ictrl);color:var(--ik)}
 .step:focus-visible{outline:2px solid var(--c2);outline-offset:-2px}
-.warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:0;padding:18px 22px;display:flex;flex-direction:column;gap:7px}
+.warn{background:#241A12;border:1px solid #4A3520;border-left:2px solid var(--c2);border-radius:var(--r);padding:18px 22px;display:flex;flex-direction:column;gap:7px}
 .bignum{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(56px,7.4vw,100px);line-height:.95;letter-spacing:-.02em;color:var(--c2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:20px 22px;display:flex;flex-direction:column;gap:7px}
+.card-i{background:var(--ink-surface);border:1px solid var(--irule);border-radius:var(--r);padding:20px 22px;display:flex;flex-direction:column;gap:7px}
 .card-i .v{font-family:var(--fig);font-weight:500;font-size:30px;letter-spacing:-.02em;font-variant-numeric:lining-nums tabular-nums}
 .card-i.hi{border-color:#34302A} .card-i.hi .v,.card-i.hi .t{color:var(--c2)}
 .card-i .t{font-size:13px;color:var(--im)}
 .elig-t{font-size:14.5px;line-height:1.6;color:var(--ib)}
-.callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:0;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
+.callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:var(--r);padding:20px 24px;display:flex;flex-direction:column;gap:8px}
 
 /* ---------- waterfall ---------- */
 .wf{display:flex;align-items:flex-end;gap:clamp(14px,3vw,44px);margin-top:clamp(48px,8vw,120px);height:var(--chart-h)}
@@ -352,7 +353,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .wdiv{width:2px;background:var(--irule-2);height:var(--chart-h);flex-shrink:0;align-self:flex-end}
 .wcaps{display:flex;gap:clamp(14px,3vw,44px);margin-top:20px}
 .wcap{flex-grow:1;flex-basis:0;display:flex;gap:9px;align-items:flex-start;min-width:0}
-.sw{width:11px;height:11px;border-radius:2px;flex-shrink:0;margin-top:4px}
+.sw{width:11px;height:11px;border-radius:var(--r-s);flex-shrink:0;margin-top:4px}
 .wcap span{font-size:13.5px;line-height:1.5;color:var(--im)}
 /* The total gets a wider share than the data columns -- its figure is set much
    larger and an equal fifth cannot hold it. Declared here rather than inline so
@@ -417,7 +418,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .pill.on{background:var(--ik);color:#0C1F1E;border-color:var(--ik)}
 .pill.on .pill-r{color:#0C1F1E}
 #modelPick{display:none}
-.prov{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:0;padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:44px;align-items:start}
+.prov{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:var(--r);padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:44px;align-items:start}
 .bars{display:flex;flex-direction:column;gap:19px}
 .bar-row{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:center}
 .bar-t{display:flex;flex-direction:column;gap:3px}
@@ -427,7 +428,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .bar-t .a{font-size:14.5px;font-weight:500} .bar-t .b{font-size:12.5px;color:var(--ifaint)}
 /* The two bands need a key, and the caption already names them in bar order, so
    the swatch goes on the caption rather than adding a separate legend. */
-.usw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;vertical-align:baseline}
+.usw{display:inline-block;width:8px;height:8px;border-radius:var(--r-s);margin-right:7px;vertical-align:baseline}
 .bar-w{display:flex;align-items:center;gap:16px;min-width:0}
 .bar-bg{flex-grow:1;height:44px;background:var(--ink-raised);border-radius:1px;min-width:0;display:flex;align-items:stretch;overflow:hidden}
 /* Full height, and the caption carries the distinction instead. The hatch does
@@ -439,7 +440,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .bar-fill{height:100%;flex-shrink:0;border-radius:1px;transition:width .35s cubic-bezier(.4,0,.2,1)}
 .bar-v{width:112px;flex-shrink:0;font-family:var(--fig);font-weight:500;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.02em;text-align:right;font-variant-numeric:lining-nums tabular-nums}
 .summary{display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px}
-.save{background:var(--ink-surface);border:1px solid #24382F;border-radius:0;padding:24px 26px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
+.save{background:var(--ink-surface);border:1px solid #24382F;border-radius:var(--r);padding:24px 26px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
 /* Uninsured households come out BEHIND under every model here, because they are
    currently buying almost no care. The panel has to be able to say so: teal and a
    green border for a saving, amber for a loss. */
@@ -448,7 +449,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .save .v{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(48px,6vw,74px);line-height:1;letter-spacing:-.02em;color:var(--teal)}
 .save .v2{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(30px,3.4vw,42px);line-height:1;letter-spacing:-.02em}
 .vsep{width:1px;align-self:stretch;background:var(--irule)}
-.cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px;display:flex;flex-direction:column;gap:9px}
+.cobra{background:var(--ink-surface);border:1px solid var(--irule);border-radius:var(--r);padding:22px 24px;display:flex;flex-direction:column;gap:9px}
 .cobra .num{font-family:var(--fig);font-weight:500}
 .range{height:26px;background:var(--ink-raised);border-radius:1px;position:relative}
 .range .band-t{position:absolute;top:0;bottom:0;background:rgba(63,181,174,.30);border-left:2px solid var(--teal);border-right:2px solid var(--teal)}
@@ -473,12 +474,12 @@ button.step{cursor:pointer;font-family:var(--sans)}
 /* Same trap, same fix: both rep-card blocks are .stack (display:flex), which beat
    [hidden]. A Georgia split ZIP kept Texas's senators on screen under it. */
 #repPick[hidden],#senBlock[hidden]{display:none}
-.cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:0;background:var(--ink-surface);overflow:hidden}
+.cliffstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--irule);border-radius:var(--r);background:var(--ink-surface);overflow:hidden}
 .cstat{padding:24px 28px;border-right:1px solid var(--irule);display:flex;flex-direction:column;gap:7px}
 .cstat .t{font-size:13.5px;color:var(--im)}
 .cstat .v{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(32px,4vw,52px);letter-spacing:-.02em;line-height:1}
 .cstat .s{font-size:12.5px;color:var(--ifaint)}
-.chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:0;padding:22px 24px}
+.chartbox{background:var(--ink-surface);border:1px solid var(--irule);border-radius:var(--r);padding:22px 24px}
 .chartbox svg{display:block;width:100%;height:auto}
 
 /* ---------- lives ---------- */
@@ -519,7 +520,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 /* ---------- critics / act ---------- */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
 #objections .grid2 > .card-p:nth-child(5){grid-column:1/-1}   /* five objections: the last takes the row */
-.card-p{background:var(--paper-card);border:1px solid var(--pk);border-radius:0;padding:34px 36px;display:flex;flex-direction:column;gap:16px}
+.card-p{background:var(--paper-card);border:1px solid var(--pk);border-radius:var(--r);padding:34px 36px;display:flex;flex-direction:column;gap:16px}
 /* Inside a card the note is an aside, not a second paragraph. Four cards each
    drawing a full-width rule put four horizontal lines through one grid; a short
    left rule subordinates the note without cutting across the card. The notes
@@ -533,7 +534,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .meth td.num{font-family:var(--fig);font-variant-numeric:lining-nums tabular-nums;color:var(--pk);white-space:nowrap}
 .meth h3{font-family:var(--serif);font-size:clamp(22px,2.2vw,27px);font-weight:400;margin:0;letter-spacing:-.01em}
 .meth .card-p{gap:14px}
-.tag{display:inline-block;padding:4px 8px;border-radius:2px;white-space:nowrap}
+.tag{display:inline-block;padding:4px 8px;border-radius:var(--r-s);white-space:nowrap}
 .tag.stat{background:#DDE9DF;color:#245239}
 .tag.surv{background:#E4E0EC;color:#413659}
 .tag.mod{background:#F5E7CE;color:#7A4E0C}
@@ -575,7 +576,7 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
 .fnm{color:var(--plabel);font-weight:500;margin-right:5px}
 .fnr{font-size:.7em;line-height:0;vertical-align:super;color:var(--plabel);font-weight:500;margin-left:1px}
 .actgrid{display:grid;grid-template-columns:392px minmax(0,1fr);gap:36px;align-items:start}
-.letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:0;display:flex;flex-direction:column}
+.letter{background:var(--paper-card);border:1px solid var(--prule);border-radius:var(--r);display:flex;flex-direction:column}
 .letter .hd{display:flex;justify-content:space-between;gap:16px;padding:20px 36px;border-bottom:1px solid var(--prule-soft)}
 .letter .bd{padding:36px clamp(24px,3vw,44px);display:flex;flex-direction:column;gap:17px;font-family:var(--serif);font-size:17.5px;line-height:1.72;color:#2A2620}
 .letter .ft{display:flex;gap:10px;padding:22px 36px;border-top:1px solid var(--prule-soft);align-items:center;flex-wrap:wrap}
@@ -607,7 +608,7 @@ a.q:hover{border-bottom-color:var(--amber-deep)}
    plain Ctrl+P still prints the whole page, which is the reader's own choice.
    display:none, not visibility: the visibility version left the whole 10,000px
    document in layout and printed the letter followed by ten blank pages. */
-.skip{position:absolute;left:24px;top:8px;z-index:50;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);background:var(--paper-card);color:var(--pk);padding:10px 14px;border:1px solid var(--pk);border-radius:2px;font-size:14px;text-decoration:none}
+.skip{position:absolute;left:24px;top:8px;z-index:50;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);background:var(--paper-card);color:var(--pk);padding:10px 14px;border:1px solid var(--pk);border-radius:var(--r-s);font-size:14px;text-decoration:none}
 .skip:focus{width:auto;height:auto;overflow:visible;clip:auto;outline:2px solid var(--amber-deep);outline-offset:2px}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Row headers in the methodology tables: real <th scope="row"> for assistive tech, styled as the body cells they replaced */
@@ -703,10 +704,10 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .motion .glides{position:relative}
   .motion .glides > button{position:relative;z-index:1}
   .motion .glides > button,.motion .glides > button.on{background:transparent}
-  .glide{position:absolute;left:0;top:0;z-index:0;pointer-events:none;box-sizing:border-box;transition:transform .42s cubic-bezier(.3,1.25,.4,1),width .42s cubic-bezier(.3,1.25,.4,1),height .3s ease}
+  .glide{position:absolute;left:0;top:0;z-index:0;pointer-events:none;box-sizing:border-box;border-radius:var(--r);transition:transform .42s cubic-bezier(.3,1.25,.4,1),width .42s cubic-bezier(.3,1.25,.4,1),height .3s ease}
   #routeGlide{background:#2C3140;border:1px solid var(--ib)}
   #pillsGlide{background:var(--ik);border-radius:999px}
-  #toneGlide{background:var(--pk);border-radius:2px}
+  #toneGlide{background:var(--pk);border-radius:var(--r)}
   .motion #route > button.on,.motion #pills > .pill.on,.motion #tone > .tbtn.on{border-color:transparent}
   button{-webkit-tap-highlight-color:transparent}
   .btn-dark,.btn-ghost,.tbtn,.pill,.seg > button,.chk,.step,.adv-reset,.lmore{transition:transform .18s cubic-bezier(.3,.7,.2,1),background-color .18s ease,color .18s ease,border-color .18s ease}
@@ -761,13 +762,13 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   body.print-letter .letter{border:none;margin:0;max-width:none}
   body.print-letter .letter .hd,body.print-letter .letter .ft{display:none}
 }
-mark{background:#F7EDDC;color:inherit;padding:1px 4px}
-.chk{display:flex;align-items:center;gap:11px;text-wrap:balance;padding:12px 14px;border:1px solid var(--prule);border-radius:0;font-size:14px;font-family:var(--sans);width:100%;text-align:left;cursor:pointer;min-height:44px;color:inherit;transition:background .15s,border-color .15s}
+mark{background:#F7EDDC;color:inherit;padding:1px 4px;border-radius:var(--r-s)}
+.chk{display:flex;align-items:center;gap:11px;text-wrap:balance;padding:12px 14px;border:1px solid var(--prule);border-radius:var(--r);font-size:14px;font-family:var(--sans);width:100%;text-align:left;cursor:pointer;min-height:44px;color:inherit;transition:background .15s,border-color .15s}
 .chk.on{background:var(--paper-tint)} .chk.off{background:var(--paper-card);color:var(--pm)}
 .chk:hover:not(:disabled){border-color:var(--pctrl)}
 .chk:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
 .chk:disabled{opacity:.45;cursor:not-allowed}
-.box{width:15px;height:15px;border-radius:2px;flex-shrink:0}
+.box{width:15px;height:15px;border-radius:var(--r-s);flex-shrink:0}
 .box.on{background:var(--amber-deep);display:flex;align-items:center;justify-content:center}
 .box.off{border:1px solid var(--pctrl)}
 .box.off svg{display:none}
@@ -778,7 +779,7 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
    cropped by a square. The silhouette sits underneath as the fallback for
    vacancies, splits, missing photos, and hosts that block third-party images
    (the artifact preview does). The img's display lives HERE so [hidden] wins. */
-.repph{width:62px;height:77px;border-radius:2px;background:var(--prule-soft);border:1px solid var(--prule);flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.repph{width:62px;height:77px;border-radius:var(--r);background:var(--prule-soft);border:1px solid var(--prule);flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .repph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .repph img[hidden]{display:none}
 /* The senators' smaller portraits keep the same 4:5 and fallback behaviour. */
@@ -795,7 +796,7 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
    box each side plus the 2px ring leaves 1px of true clearance between a
    neighbour's hover tint and the selected ring. 6px made them overlap. The
    hit still clears 44px (42px portrait + 6). */
-.rec-hit{appearance:none;-webkit-appearance:none;background:none;border:0;padding:3px 6px;margin:-3px -6px;border-radius:3px;font:inherit;color:inherit;cursor:pointer;transition:box-shadow .15s}
+.rec-hit{appearance:none;-webkit-appearance:none;background:none;border:0;padding:3px 6px;margin:-3px -6px;border-radius:var(--r);font:inherit;color:inherit;cursor:pointer;transition:box-shadow .15s}
 .rec-hit:hover:not(:disabled){background:var(--paper-tint)}
 /* The inflated hit areas of adjacent rows overlap by a few pixels, so the
    selected ring must stack above a neighbour's hover tint or hovering one
@@ -805,7 +806,7 @@ mark{background:#F7EDDC;color:inherit;padding:1px 4px}
 .rec-hit:disabled{cursor:default}
 
 /* Tone picker, paper-side: .seg's buttons are ink-themed, and this sits on paper. */
-.tbtn{flex-grow:1;height:44px;background:var(--paper-card);border:1px solid var(--prule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm);font-family:var(--sans);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.tbtn{flex-grow:1;height:44px;background:var(--paper-card);border:1px solid var(--prule);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:13.5px;color:var(--pm);font-family:var(--sans);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
 .tbtn.on{background:var(--pk);border-color:var(--pk);color:var(--paper);font-weight:500}
 .tbtn:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
 footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-height:1.6}
@@ -1026,10 +1027,10 @@ section.paper.onteal{background:var(--paper);background-image:none}
 /* A floating box over the dimmed page (owner, 13 November: "fly out into hovering boxes
    and minimize back into the icon"). Centred by auto margins, not a transform, so the
    transform is free for the flight in and out of whatever the reader tapped. */
-.sheets:not(.onepage) .fold.wide[open] > .fold-bd{position:fixed;inset:0;margin:auto;z-index:60;width:min(1120px,calc(100% - 48px));height:fit-content;max-height:calc(100vh - 32px);max-height:calc(100svh - 32px);overflow-y:auto;overscroll-behavior:contain;
-  background:var(--ink);color:var(--ik);border:1px solid var(--irule-2);border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.25);padding:0 clamp(18px,3vw,36px) 4px}
-.sheets:not(.onepage) .fold.wide .sheet-hd{display:flex;position:sticky;top:0;z-index:3;background:var(--ink);align-items:center;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--irule-2)}
-.sheets:not(.onepage) .fold.wide .fold-in{padding:14px 0 14px}
+.sheets:not(.onepage) .fold.wide[open] > .fold-bd{position:fixed;inset:0;margin:auto;z-index:60;width:min(1120px,calc(100% - 48px));height:fit-content;max-height:calc(100vh - 24px);max-height:calc(100svh - 24px);overflow-y:auto;overscroll-behavior:contain;
+  background:var(--ink);color:var(--ik);border:1px solid var(--irule-2);border-radius:var(--r-lg);box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.25);padding:0 clamp(24px,3vw,36px) clamp(18px,3svh,34px)}
+.sheets:not(.onepage) .fold.wide .sheet-hd{display:flex;position:sticky;top:0;z-index:3;background:var(--ink);align-items:center;justify-content:space-between;gap:16px;padding:clamp(14px,2.4svh,26px) 0 10px}
+.sheets:not(.onepage) .fold.wide .fold-in{padding:2px 0 0}
 .sheet-t{font-family:var(--serif);font-size:22px;letter-spacing:-.01em;color:var(--ik)}
 .sheet-x{appearance:none;-webkit-appearance:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--ictrl);background:none;color:var(--ik);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .sheet-x:hover{background:var(--ink-raised)}
@@ -1071,8 +1072,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .sheets:not(.onepage) .fold.wide[open] .hhzip .btn-dark{height:48px;padding:0 24px}
 /* the inputs sit on their own panel with filled fields; the estimate reads off the ground beside it.
    Both columns start at the top: the shorter one no longer stretches to the taller one's height. */
-.sheets:not(.onepage) .fold.wide[open] .instr{align-items:start;column-gap:clamp(20px,2.6vw,32px)}
-.sheets:not(.onepage) .fold.wide[open] .panel{align-content:start;background:var(--ink-surface);border:1px solid var(--irule-2);border-radius:12px;padding:18px 22px 20px;row-gap:18px}
+.sheets:not(.onepage) .fold.wide[open] .instr{align-items:stretch;column-gap:clamp(20px,2.6vw,32px)}
+.sheets:not(.onepage) .fold.wide[open] .panel{align-content:start;background:var(--ink-surface);border:1px solid var(--irule-2);border-radius:var(--r);padding:16px 22px 20px;row-gap:18px}
 .sheets:not(.onepage) .fold.wide[open] .hhzip{border-bottom:none;padding-bottom:0;gap:8px}
 .sheets:not(.onepage) .fold.wide[open] .panel .ctrl,.sheets:not(.onepage) .fold.wide[open] .age input,.sheets:not(.onepage) .fold.wide[open] .seg > button{background:var(--ink-chip)}
 .sheets:not(.onepage) .fold.wide[open] .seg > button.on{background:#323849}
@@ -1080,7 +1081,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
 /* the county picker for a split ZIP takes no room until it has a choice to offer */
 .hhzip .areapick:not(:has(*)){display:none}
 .sheets:not(.onepage) .fold.wide[open] .out-s{margin-top:4px}
-.sheets:not(.onepage) .fold.wide[open] .out{padding:4px 0 0;gap:16px}
+/* the inputs panel runs the height of its row and the estimate starts level with the panel's first label */
+.sheets:not(.onepage) .fold.wide[open] .out{padding:15px 0 0 4px;gap:16px}
 .sheets:not(.onepage) .fold.wide[open] .callout-i,.sheets:not(.onepage) .fold.wide[open] .warn{padding:14px 18px;gap:6px}
 .sheets:not(.onepage) .fold.wide[open] .elig-t{font-size:14px;line-height:1.55}
 .sheets:not(.onepage) .fold.wide[open] #panelNote{font-size:12px;line-height:1.5}
@@ -1128,7 +1130,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .sendn{width:28px;height:28px;border-radius:50%;border:1px solid var(--pk);display:flex;align-items:center;justify-content:center;font-size:13.5px;flex-shrink:0}
 .recips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .senrows{display:contents}
-.rtile.rec-hit{display:flex;align-items:center;gap:18px;padding:14px;margin:0;background:var(--paper-card);border:1px solid var(--prule);border-radius:3px;text-align:left;position:relative;min-height:44px;width:100%}
+.rtile.rec-hit{display:flex;align-items:center;gap:18px;padding:14px;margin:0;background:var(--paper-card);border:1px solid var(--prule);border-radius:var(--r);text-align:left;position:relative;min-height:44px;width:100%}
 .rtile.rec-hit:hover:not(:disabled){background:var(--paper-card);border-color:var(--pctrl)}
 .rtile .repph{width:104px;height:130px}
 /* the portrait comes up in colour for the one the letter is going to */
@@ -1231,15 +1233,15 @@ section.paper.onteal{background:var(--paper);background-image:none}
 }
 
 @media (max-width:760px){
-  .sheets:not(.onepage) .fold.wide[open] > .fold-bd{width:calc(100% - 20px);max-height:calc(100vh - 12px);max-height:calc(100svh - 12px);border-radius:16px;padding:0 16px 2px}
+  .sheets:not(.onepage) .fold.wide[open] > .fold-bd{width:calc(100% - 20px);max-height:calc(100vh - 12px);max-height:calc(100svh - 12px);padding:0 16px 16px}
   /* one screen on a phone too: shorter charts, the household as one column, the figures in rows */
   .sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(140px,calc(100svh - 680px),240px);--rise-h:clamp(110px,calc(100svh - 640px),220px)}
-  .sheets:not(.onepage) .fold.wide .sheet-hd{padding:8px 0}
+  .sheets:not(.onepage) .fold.wide .sheet-hd{padding:12px 0 4px}
   .sheets:not(.onepage) .fold.wide .sheet-t{font-size:19px}
-  .sheets:not(.onepage) .fold.wide .fold-in{padding:10px 0 10px}
+  .sheets:not(.onepage) .fold.wide .fold-in{padding:4px 0 0}
   .sheets:not(.onepage) .fold.wide[open] .wf{margin-top:48px}
   .sheets:not(.onepage) .fold.wide[open] .instr{grid-template-columns:minmax(0,1fr)}
-  .sheets:not(.onepage) .fold.wide[open] .panel{padding:14px 14px 14px;border-radius:10px;gap:12px}
+  .sheets:not(.onepage) .fold.wide[open] .panel{padding:14px 14px 14px;gap:12px}
   .sheets:not(.onepage) .fold.wide[open] .out{padding:2px 0 0;border-top:none;margin-top:10px;gap:8px}
   .sheets:not(.onepage) .fold.wide[open] .cstat{padding:10px 10px}
   .sheets:not(.onepage) .fold.wide[open] .cstat .t{font-size:11.5px;line-height:1.3}
@@ -1555,7 +1557,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
           </div>
           <div class="field f-size" style="max-width:220px">
             <div class="lbl">Household</div>
-            <div class="ctrl" style="padding-right:0;overflow:hidden"><span class="num" style="font-size:16px" id="sizeVal">4</span><span class="steps"><button type="button" class="step" id="sizeDown" aria-label="Fewer people">&minus;</button><button type="button" class="step" id="sizeUp" aria-label="More people">+</button></span></div>
+            <div class="ctrl" style="padding-right:0;overflow:hidden"><span class="num" style="font-family:var(--mono);font-size:16px;line-height:1" id="sizeVal">4</span><span class="steps"><button type="button" class="step" id="sizeDown" aria-label="Fewer people">&minus;</button><button type="button" class="step" id="sizeUp" aria-label="More people">+</button></span></div>
           </div>
           <div class="field f-ages">
             <div class="lbl" id="agesLbl">Ages</div>
@@ -4878,7 +4880,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
       // long, even deceleration (no overshoot), and the header and body fade up once it has room.
       var at = flyPoint(sheetFrom, bd);
       bd.style.transformOrigin = at || "50% 50%";
-      bd.animate([{ transform:"scale(" + (at ? .06 : .94) + ")", opacity:0, borderRadius:"28px" }, { opacity:1, offset:.16 }, { transform:"scale(1)", opacity:1, borderRadius:"18px" }],
+      bd.animate([{ transform:"scale(" + (at ? .06 : .94) + ")", opacity:0, borderRadius:"24px" }, { opacity:1, offset:.16 }, { transform:"scale(1)", opacity:1, borderRadius:"16px" }],
                  { duration: at ? 460 : 260, easing:"cubic-bezier(.2,.85,.25,1)" });
       sheetParts(bd).forEach(function(x, i){
         x.animate([{ opacity:0, transform:"translateY(10px)" }, { opacity:1, transform:"none" }],
@@ -4908,7 +4910,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
       sheetParts(bd).forEach(function(x){
         x.animate([{ opacity:1 }, { opacity:0 }], { duration:120, easing:"linear", fill:"forwards" });
       });
-      var fly = bd.animate([{ transform:"scale(1)", opacity:1, borderRadius:"18px" }, { opacity:1, offset:.7 }, { transform:"scale(" + (at ? .06 : .94) + ")", opacity:0, borderRadius:"28px" }],
+      var fly = bd.animate([{ transform:"scale(1)", opacity:1, borderRadius:"16px" }, { opacity:1, offset:.7 }, { transform:"scale(" + (at ? .06 : .94) + ")", opacity:0, borderRadius:"24px" }],
                            { duration: at ? 340 : 200, easing:"cubic-bezier(.45,0,.7,.4)", fill:"forwards" });
       fly.onfinish = end; sheetT = setTimeout(end, 700);
     }
