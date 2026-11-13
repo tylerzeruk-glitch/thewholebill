@@ -3538,6 +3538,20 @@ test('sheets: each one fits a single screen, with nothing to scroll inside it', 
       await p.keyboard.press('Escape'); await p.waitForTimeout(150);
     }
     ok(`${w}x${h}: all five sheets fit without scrolling inside`, over.length === 0, over.join(', '));
+    // The household box changes with the route and the income: the marketplace credit box, the
+    // cliff and Medicaid warnings, the uninsured bad year. Owner, 13 November: the marketplace
+    // view "is causing a slight scroll".
+    const hh = [];
+    await p.evaluate(() => document.getElementById('foldHh').querySelector('summary').click()); await p.waitForTimeout(250);
+    for (const [route, inc] of [['employer', 95000], ['marketplace', 95000], ['marketplace', 150000], ['marketplace', 30000], ['none', 95000]]) {
+      const r = await p.evaluate(([route, inc]) => {
+        document.querySelector(`#route button[data-r="${route}"]`).click();
+        const s = document.getElementById('income'); s.value = inc; s.dispatchEvent(new Event('input', { bubbles: true }));
+        const bd = document.getElementById('foldHh').querySelector('.fold-bd'); return bd.scrollHeight - bd.clientHeight; }, [route, inc]);
+      if (r > 0) hh.push(route + ' ' + inc + ' +' + r);
+    }
+    ok(`${w}x${h}: the household box fits in every route, including the cliff and Medicaid warnings`, hh.length === 0, hh.join(', '));
+    await p.keyboard.press('Escape');
     await p.close();
   }
 });

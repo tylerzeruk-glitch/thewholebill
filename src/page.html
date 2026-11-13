@@ -321,6 +321,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .card-i .v{font-family:var(--fig);font-weight:500;font-size:30px;letter-spacing:-.02em;font-variant-numeric:lining-nums tabular-nums}
 .card-i.hi{border-color:#34302A} .card-i.hi .v,.card-i.hi .t{color:var(--c2)}
 .card-i .t{font-size:13px;color:var(--im)}
+.elig-t{font-size:14.5px;line-height:1.6;color:var(--ib)}
 .callout-i{background:var(--ink-surface);border:1px solid var(--irule);border-left:2px solid var(--teal);border-radius:0;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
 
 /* ---------- waterfall ---------- */
@@ -666,7 +667,7 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .motion .fresh .bar-bg{transition:none;clip-path:inset(0 100% 0 0)}
   .motion .fresh .range{transition:none;clip-path:inset(-12px 100% -12px 0)}
   /* sheets rise from the bottom with a little spring and sink back the same way */
-  .motion .shade{transition:opacity .4s ease}
+  .motion .shade{transition:opacity .34s cubic-bezier(.2,.8,.2,1)}
   .motion .fold.wide.shown .fold-in > *{animation:fold-rise .6s cubic-bezier(.2,.7,.2,1) .12s both}
   .motion .fold.wide.shown .fold-in > :nth-child(2){animation-delay:.2s}
   .motion .fold.wide.shown .fold-in > :nth-child(n+3){animation-delay:.28s}
@@ -1068,6 +1069,21 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .sheets:not(.onepage) .fold.wide[open] .panel > .f-ages{grid-column:2}
 .sheets:not(.onepage) .fold.wide[open] .hhzip .zipfield .v{height:48px;font-size:19px}
 .sheets:not(.onepage) .fold.wide[open] .hhzip .btn-dark{height:48px;padding:0 24px}
+/* the inputs sit on their own panel with filled fields; the estimate reads off the ground beside it.
+   Both columns start at the top: the shorter one no longer stretches to the taller one's height. */
+.sheets:not(.onepage) .fold.wide[open] .instr{align-items:start;column-gap:clamp(20px,2.6vw,32px)}
+.sheets:not(.onepage) .fold.wide[open] .panel{align-content:start;background:var(--ink-surface);border:1px solid var(--irule-2);border-radius:12px;padding:18px 22px 20px;row-gap:18px}
+.sheets:not(.onepage) .fold.wide[open] .hhzip{border-bottom:none;padding-bottom:0;gap:8px}
+.sheets:not(.onepage) .fold.wide[open] .panel .ctrl,.sheets:not(.onepage) .fold.wide[open] .age input,.sheets:not(.onepage) .fold.wide[open] .seg > button{background:var(--ink-chip)}
+.sheets:not(.onepage) .fold.wide[open] .seg > button.on{background:#323849}
+.sheets:not(.onepage) .fold.wide[open] .panel .adv{background:transparent}
+/* the county picker for a split ZIP takes no room until it has a choice to offer */
+.hhzip .areapick:not(:has(*)){display:none}
+.sheets:not(.onepage) .fold.wide[open] .out-s{margin-top:4px}
+.sheets:not(.onepage) .fold.wide[open] .out{padding:4px 0 0;gap:16px}
+.sheets:not(.onepage) .fold.wide[open] .callout-i,.sheets:not(.onepage) .fold.wide[open] .warn{padding:14px 18px;gap:6px}
+.sheets:not(.onepage) .fold.wide[open] .elig-t{font-size:14px;line-height:1.55}
+.sheets:not(.onepage) .fold.wide[open] #panelNote{font-size:12px;line-height:1.5}
 /* compare: tighter legends and a smaller savings figure */
 .sheets:not(.onepage) .fold.wide[open] .bkey{margin-top:2px;line-height:1.45}
 .sheets:not(.onepage) .fold.wide[open] .bar-t{gap:1px}
@@ -1223,8 +1239,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .sheets:not(.onepage) .fold.wide .fold-in{padding:10px 0 10px}
   .sheets:not(.onepage) .fold.wide[open] .wf{margin-top:48px}
   .sheets:not(.onepage) .fold.wide[open] .instr{grid-template-columns:minmax(0,1fr)}
-  .sheets:not(.onepage) .fold.wide[open] .panel{padding:0;border-right:none;gap:14px}
-  .sheets:not(.onepage) .fold.wide[open] .out{padding:14px 0 0;border-top:1px solid var(--irule);margin-top:14px;gap:10px}
+  .sheets:not(.onepage) .fold.wide[open] .panel{padding:14px 14px 14px;border-radius:10px;gap:12px}
+  .sheets:not(.onepage) .fold.wide[open] .out{padding:2px 0 0;border-top:none;margin-top:10px;gap:8px}
   .sheets:not(.onepage) .fold.wide[open] .cstat{padding:10px 10px}
   .sheets:not(.onepage) .fold.wide[open] .cstat .t{font-size:11.5px;line-height:1.3}
   .sheets:not(.onepage) .fold.wide[open] .cstat .v{font-size:21px}
@@ -1236,9 +1252,16 @@ section.paper.onteal{background:var(--paper);background-image:none}
   /* the count and the ages share a row when both fit, and the ages drop below when not */
   .sheets:not(.onepage) .fold.wide[open] .panel{display:flex;flex-direction:row;flex-wrap:wrap;align-items:flex-start;column-gap:12px;row-gap:12px}
   .sheets:not(.onepage) .fold.wide[open] .panel > *{flex:1 1 100%;min-width:0}
-  .sheets:not(.onepage) .fold.wide[open] .panel > .f-size{flex:0 0 120px;width:120px}
-  .sheets:not(.onepage) .fold.wide[open] .panel > .f-ages{flex:1 1 190px}
-  .sheets:not(.onepage) .fold.wide[open] .ages{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+  .sheets:not(.onepage) .fold.wide[open] .panel > .f-size{flex:0 0 112px;width:112px}
+  .sheets:not(.onepage) .fold.wide[open] .f-size .step{width:34px}
+  .sheets:not(.onepage) .fold.wide[open] .panel > .f-ages{flex:1 1 176px}
+  .sheets:not(.onepage) .fold.wide[open] .ages{grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px}
+  /* the slider keeps its 44px touch band but stops pushing its neighbours apart */
+  .sheets:not(.onepage) .fold.wide[open] input[type=range]{margin:-10px 0 -12px}
+  .sheets:not(.onepage) .fold.wide[open] .callout-i,.sheets:not(.onepage) .fold.wide[open] .warn{padding:10px 14px 11px;gap:4px}
+  .sheets:not(.onepage) .fold.wide[open] .elig-t{font-size:13px;line-height:1.5}
+  /* TRICARE, Medicare and VA readers find the pointer in objection 05 and on the methodology page */
+  .sheets:not(.onepage) .fold.wide[open] #otherCov{display:none}
   .sheets:not(.onepage) .fold.wide[open] .hhzip > .lbl,.sheets:not(.onepage) .fold.wide[open] .adv-s{display:none}
   .sheets:not(.onepage) .fold.wide[open] .hhzip{gap:6px;padding-bottom:12px}
   .sheets:not(.onepage) .fold.wide[open] .hhzip .scope,.sheets:not(.onepage) .fold.wide[open] .hhzip .note-i,.sheets:not(.onepage) .fold.wide[open] #otherCov{font-size:12px;line-height:1.45}
@@ -1619,7 +1642,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
           </div>
           <div class="cards" id="cards"></div>
           <div id="elig"></div>
-          <p class="note-i" id="panelNote">Employer premiums are <a class="term" href="#/methodology/employer">KFF 2026 survey averages</a>. Subsidy math follows the IRS <span data-py>2027</span> applicable-percentage table exactly. The benchmark premium is your county&rsquo;s second-lowest-cost silver plan in the <span data-py>2027</span> rates named beside your ZIP, priced at each person&rsquo;s age on your state&rsquo;s own curve. Out-of-pocket spend is still a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
+          <p class="note-i" id="panelNote">Employer premiums: <a class="term" href="#/methodology/employer">KFF 2026 survey averages</a>. Marketplace: your county&rsquo;s <span data-py>2027</span> rates, priced at each person&rsquo;s age, and the IRS <span data-py>2027</span> applicable-percentage table. Out-of-pocket: a <b style="color:var(--c2);font-weight:400">modeled average</b>.</p>
         </div>
       </div>
 </div></div>
@@ -3667,46 +3690,37 @@ section.paper.onteal{background:var(--paper);background-image:none}
     if (state.route === "employer") return;
     if (state.route === "none"){
       html = '<div class="warn"><div class="lbl" style="color:var(--c2)">Nothing caps a bad year</div>' +
-        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">Every insured plan has a legal ' +
-        'out-of-pocket maximum. Without coverage there is no ceiling at all. One hospital ' +
-        'admission can cost more than a year of premiums. The figure above is what a household ' +
-        'this size typically spends in an <i>ordinary</i> year, and it is low mainly because ' +
-        'uninsured people skip care.</div></div>';
+        '<div class="elig-t">An insured plan has a legal out-of-pocket maximum; going without has none, ' +
+        'and one hospital stay can cost more than a year of premiums. The figure above is an <i>ordinary</i> ' +
+        'year, low mainly because uninsured people skip care.</div></div>';
       byId("elig").innerHTML = html;
       return;
     }
     if (m.overCliff){
       html = '<div class="warn"><div class="lbl" style="color:var(--c2)">You are over the subsidy cliff</div>' +
-        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
-        'poverty line this household is above 400% and gets <b>no premium tax credit at all</b>, not a ' +
-        'reduced one. The enhanced credits that smoothed this cliff expired on 31 December 2025. Earning ' +
-        'one dollar less could be worth thousands.</div></div>';
+        '<div class="elig-t">At <b>' + pct + '%</b> of the poverty line, over 400%, this household gets ' +
+        '<b>no premium tax credit at all</b>, not a smaller one. The enhanced credits that softened the cliff ' +
+        'ended on 31 December 2025, so a dollar less of income could be worth thousands.</div></div>';
     } else if (m.belowFloor){
       var stn = STATE_NAMES[m.place.state] || m.place.state;
-      html = '<div class="warn"><div class="lbl" style="color:var(--c2)">Below the credit\u2019s floor</div>' +
-        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
-        'poverty line this household is under 100%, where the marketplace tax credit begins, so it gets ' +
-        '<b>no credit at all</b>. ' +
+      html = '<div class="warn"><div class="lbl" style="color:var(--c2)">Below the credit’s floor</div>' +
+        '<div class="elig-t">Under 100% of the poverty line: <b>no credit at all</b>. ' +
         (m.place.expanded
-          ? stn + ' has <a class="term" href="#/methodology/credit-floor">expanded Medicaid</a>, so adults at this income qualify for Medicaid rather than a marketplace plan, and children for Medicaid or CHIP.'
-          : stn + ' has not expanded Medicaid, so adults here usually fall in the <a class="term" href="#/methodology/credit-floor">coverage gap</a>: too poor for the credit, and over the state\u2019s Medicaid limit for parents. Children may still qualify for Medicaid or CHIP.') +
-        ' The marketplace figure above is the benchmark plan at full price, which is what the marketplace would charge, not what this household is expected to pay.</div></div>';
+          ? stn + ' has <a class="term" href="#/methodology/credit-floor">expanded Medicaid</a>, so adults here qualify for it instead, and children for Medicaid or CHIP.'
+          : stn + ' has not expanded Medicaid, so adults here usually fall in the <a class="term" href="#/methodology/credit-floor">coverage gap</a>: too poor for the credit, over the state’s Medicaid limit for parents. Children may still get Medicaid or CHIP.') +
+        '</div></div>';
     } else if (m.medicaidLikely){
       var stn2 = STATE_NAMES[m.place.state] || m.place.state;
-      html = '<div class="warn"><div class="lbl" style="color:var(--c2)">In Medicaid\u2019s range, not the marketplace\u2019s</div>' +
-        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
-        'poverty line, adults in this household qualify for Medicaid in ' + stn2 + ', which covers adults to ' +
-        Math.round(m.medicaidCeiling * 100) + '% of the poverty line. The law gives <b>no marketplace credit</b> to anyone ' +
-        'eligible for Medicaid, so the marketplace figure above is the benchmark plan at full price. Medicaid itself ' +
-        'would cost far less; this calculator does not model it.</div></div>';
+      html = '<div class="warn"><div class="lbl" style="color:var(--c2)">In Medicaid’s range, not the marketplace’s</div>' +
+        '<div class="elig-t">At <b>' + pct + '%</b> of the poverty line, adults here qualify for Medicaid in ' + stn2 +
+        ' (to ' + Math.round(m.medicaidCeiling * 100) + '% of the line), and the law gives <b>no marketplace credit</b> ' +
+        'to anyone eligible for it. This calculator does not model Medicaid itself.</div></div>';
     } else {
       html = '<div class="callout-i"><div class="lbl" style="color:var(--teal)">What you qualify for today</div>' +
-        '<div style="font-size:14.5px;line-height:1.6;color:var(--ib)">At <b>' + pct + '%</b> of the federal ' +
-        'poverty line, this household is expected to contribute <b>' +
-        (m.applicablePercentage * 100).toFixed(2) + '%</b> of income toward a benchmark silver plan: a ' +
-        'credit of ' + money(m.subsidy) + ' a year. The benchmark is the law’s, not ours: the ' +
-        'second-lowest-cost silver plan where you live, chosen so at least two plans cost you no ' +
-        'more than your expected share and no single cut-rate plan can drag every credit down.' +
+        '<div class="elig-t">At <b>' + pct + '%</b> of the poverty line, the law expects this household to pay <b>' +
+        (m.applicablePercentage * 100).toFixed(2) + '%</b> of its income for the ' +
+        'benchmark plan, the second-lowest-cost silver plan where you live. ' +
+        'The rest is a credit of <b>' + money(m.subsidy) + '</b> a year.' +
         (m.chipLikely ? ' The children may also qualify for CHIP, which reaches further up the income scale.' : '') +
         '</div></div>';
     }
@@ -4840,6 +4854,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   // origin is that point in the box's own frame, so the tapped spot stays put while
   // the box scales about it. Under reduced motion it simply appears and goes.
   var sheetFrom = null;
+  function sheetParts(bd){ return [].filter.call(bd.children, function(x){ return x.offsetHeight; }); }
   function flyPoint(el, bd){
     var o = el && el.getBoundingClientRect(), r = bd.getBoundingClientRect();
     if (!o || !o.width || o.bottom < 0 || o.top > innerHeight) return null;   // nothing on screen to fly to
@@ -4853,16 +4868,22 @@ section.paper.onteal{background:var(--paper);background-image:none}
     sheetBack = d.querySelector("summary"); sheetFrom = from || null;
     d.open = true; sheetOf = d;
     byId("shade").hidden = false;
-    bd.getAnimations().forEach(function(a){ a.cancel(); });
+    bd.getAnimations({ subtree: true }).forEach(function(a){ a.cancel(); });
     void bd.offsetWidth;
     d.classList.add("shown"); byId("shade").classList.add("on");
     bd.scrollTop = 0;
     if (S) renderCliff();                      // the cliff chart draws to its container, which only now has a width
     if (rootEl.classList.contains("motion") && bd.animate){
+      // The box leads and its content follows: the frame grows out of the tapped point on one
+      // long, even deceleration (no overshoot), and the header and body fade up once it has room.
       var at = flyPoint(sheetFrom, bd);
       bd.style.transformOrigin = at || "50% 50%";
-      bd.animate([{ transform:"scale(" + (at ? .03 : .92) + ")", opacity:0 }, { opacity:1, offset:.28 }, { transform:"scale(1)", opacity:1 }],
-                 { duration: at ? 560 : 300, easing:"cubic-bezier(.16,.9,.24,1)" });
+      bd.animate([{ transform:"scale(" + (at ? .06 : .94) + ")", opacity:0, borderRadius:"28px" }, { opacity:1, offset:.16 }, { transform:"scale(1)", opacity:1, borderRadius:"18px" }],
+                 { duration: at ? 460 : 260, easing:"cubic-bezier(.2,.85,.25,1)" });
+      sheetParts(bd).forEach(function(x, i){
+        x.animate([{ opacity:0, transform:"translateY(10px)" }, { opacity:1, transform:"none" }],
+                  { duration:300, delay:(at ? 150 : 60) + i * 40, easing:"cubic-bezier(.2,.8,.2,1)", fill:"backwards" });
+      });
     }
     d.querySelector(".sheet-x").focus({ preventScroll: true });
   }
@@ -4873,17 +4894,22 @@ section.paper.onteal{background:var(--paper);background-image:none}
     d.classList.remove("shown"); byId("shade").classList.remove("on");
     var end = function(){
       clearTimeout(sheetT);
-      bd.getAnimations().forEach(function(a){ a.cancel(); });
+      bd.getAnimations({ subtree: true }).forEach(function(a){ a.cancel(); });
       d.open = false; byId("shade").hidden = !!sheetOf ? false : true;
       bd.removeAttribute("role"); bd.removeAttribute("aria-modal"); bd.removeAttribute("aria-label");
     };
     if (now || !rootEl.classList.contains("motion") || !bd.animate) end();
     else {
       var at = flyPoint(sheetFrom, bd);
-      bd.getAnimations().forEach(function(a){ a.cancel(); });
+      bd.getAnimations({ subtree: true }).forEach(function(a){ a.cancel(); });
       bd.style.transformOrigin = at || "50% 50%";
-      var fly = bd.animate([{ transform:"scale(1)", opacity:1 }, { opacity:1, offset:.6 }, { transform:"scale(" + (at ? .03 : .92) + ")", opacity:0 }],
-                           { duration: at ? 420 : 220, easing:"cubic-bezier(.55,0,.8,.3)", fill:"forwards" });
+      // closing runs the opening backwards and quicker: the content goes first, then the frame
+      // shrinks into the point it came from, fading only as it arrives
+      sheetParts(bd).forEach(function(x){
+        x.animate([{ opacity:1 }, { opacity:0 }], { duration:120, easing:"linear", fill:"forwards" });
+      });
+      var fly = bd.animate([{ transform:"scale(1)", opacity:1, borderRadius:"18px" }, { opacity:1, offset:.7 }, { transform:"scale(" + (at ? .06 : .94) + ")", opacity:0, borderRadius:"28px" }],
+                           { duration: at ? 340 : 200, easing:"cubic-bezier(.45,0,.7,.4)", fill:"forwards" });
       fly.onfinish = end; sheetT = setTimeout(end, 700);
     }
     if (!now && sheetBack) sheetBack.focus({ preventScroll: true });

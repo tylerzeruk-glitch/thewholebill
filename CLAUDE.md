@@ -87,10 +87,15 @@ withdrew the on-screen switch on 2026-11-12, and an old stored choice is cleared
   (a screen of chart pushed in under the step, and the bar left to make room). Since 2026-11-13
   the box grows out of whatever was tapped (the row's corner-arrows icon, the household pill's
   button, the results bar's pencil) and shrinks back into it, and **each box fits one screen**
-  at 1280x800, 1440x900, 1024x768 and 390x844 (the suite checks; a 360x740 phone may scroll
-  three of them a little). The fit rules are scoped to `.fold.wide[open]` in the sheets view, so
-  the one-page view keeps its full-size charts; on a phone the household box drops its four
-  breakdown cards and compare drops the model strip (both repeat what the page shows elsewhere).
+  at 1280x800, 1440x900, 1024x768 and 390x844 (the suite checks, and checks the household box in
+  every route and at the cliff, floor and Medicaid incomes; a 360x740 phone may scroll three boxes
+  a little). The fit rules are scoped to `.fold.wide[open]` in the sheets view, so the one-page
+  view keeps its full-size charts; on a phone the household box drops its four breakdown cards
+  and the TRICARE pointer (objection 05 carries it), and compare drops the model strip. In the
+  household box the inputs sit on their own panel with filled fields and the estimate reads off
+  the ground beside it: inputs on the left, results on the right (owner, 2026-11-13). New copy in
+  the eligibility box (`#elig`) has to fit that box; the subtitle under the total already says
+  "full price", so the warnings do not repeat it.
   Folds that hold only a paragraph open in place, with the plus.
 - **All on one page** (`html.onepage`): every fold stands open in the flow at full width, the
   summaries become headings, and the bar steps aside (`.stage.yield`) where a wide chart needs
