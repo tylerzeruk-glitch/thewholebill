@@ -479,7 +479,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 
 /* ---------- lives ---------- */
 .bigstat .n{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(64px,9vw,120px);line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
-.bigstat .l{font-family:var(--serif);font-size:clamp(28px,3.4vw,44px);line-height:1.12;letter-spacing:-.01em;color:var(--pk);margin-top:10px}
+.bigstat .l{font-family:var(--serif);font-size:clamp(28px,3.4vw,44px);line-height:1.12;letter-spacing:-.01em;color:var(--pk);margin-top:10px;max-width:19em;text-wrap:balance}
 .bigstat .by{font-size:14px;line-height:1.5;color:var(--pm);margin-top:18px}
 .lives-q{margin:0 0 26px;font-size:clamp(20px,2vw,25px);color:var(--pk);max-width:34em}
 /* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
@@ -685,8 +685,7 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   @keyframes cue-bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
   .newsbar{animation:pn-rise .9s cubic-bezier(.2,.7,.2,1) .3s both}
   .shero > :nth-child(2){animation-delay:.08s} .shero > :nth-child(3){animation-delay:.16s} .shero > :nth-child(4){animation-delay:.24s} .shero > :nth-child(n+5){animation-delay:.32s}
-  .hhpill{transition:background-color .2s ease,transform .18s cubic-bezier(.3,.7,.2,1)} .hhpill:active{transform:scale(.98)}
-  .hhpill:hover .fold-x{transform:rotate(-90deg) translateY(3px)}
+  .hhpill,.hhpill-a{transition:background-color .2s ease,transform .18s cubic-bezier(.3,.7,.2,1)} .hhpill:active{transform:scale(.98)}
   .mline i{transition:transform .45s cubic-bezier(.34,1.56,.64,1),background-color .3s ease,left .6s cubic-bezier(.3,.75,.2,1)}
   @keyframes fly-in{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:none}}
   .fold-g{transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
@@ -843,12 +842,13 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .newsbar{display:flex;align-items:center;gap:18px;min-width:0;border-bottom:1px solid var(--irule-2)}
 .newsbar-py{flex-shrink:0;color:var(--teal)}
 /* the household, as a button: it opens the sheet with the ZIP and everything else */
-.hhpill{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;gap:14px;max-width:100%;min-height:52px;padding:6px 8px 6px 22px;border:1px solid var(--ictrl);border-radius:999px;background:none;color:var(--ik);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;text-align:left}
-.hhpill:hover{background:var(--ink-raised)}
+.hhfield{display:flex;flex-direction:column;align-items:flex-start;gap:10px;max-width:100%}
+.hhfield-k{font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ilabel)}
+.hhpill{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;gap:16px;max-width:100%;min-height:56px;padding:6px 6px 6px 22px;border:1px solid var(--ictrl);border-radius:999px;background:var(--ink-chip);color:var(--ik);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;text-align:left}
+.hhpill:hover{background:var(--ink-raised)} .hhpill:hover .hhpill-a{background:var(--c1)}
 .hhpill:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
 .hhpill-t{min-width:0}
-.hhpill-a{color:var(--c2);white-space:nowrap}
-.hhpill .fold-x{width:14px;height:14px;transform:rotate(-90deg);border:1px solid var(--ictrl);border-radius:50%;color:var(--ib);padding:7px}
+.hhpill-a{flex-shrink:0;display:inline-flex;align-items:center;height:44px;padding:0 20px;border-radius:999px;background:var(--c2);color:var(--ink);font-weight:600;white-space:nowrap}
 .hhzip{display:flex;flex-direction:column;gap:10px;padding-bottom:26px;margin-bottom:26px;border-bottom:1px solid var(--irule-2)}
 .hhzip .zipbar{margin-top:0}
 .hhzip .scope{margin-top:4px;color:var(--im)} .hhzip .scope b{color:var(--ik)}
@@ -1289,6 +1289,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
    figures give up a little type and the switch gives up horizontal padding only --
    its 44px height is a touch-target floor, not a style choice. */
 @media (max-width:440px){
+  .hhpill{gap:12px;padding-left:18px} .hhpill-a{padding:0 16px}
   .sticky-in{gap:5px 10px}
   /* "Per year / Per month" leaves no room for the whole household on the narrowest
      phones; the line wraps to two rather than cutting off the income */
@@ -1376,7 +1377,10 @@ section.paper.onteal{background:var(--paper);background-image:none}
       <div class="shero" id="shero">
         <h1>What does your healthcare <em>actually</em> cost?</h1>
         <p class="lede"><span>Not the number on your paystub.</span> <span>The whole number.</span></p>
-        <button type="button" class="hhpill" id="hhPill" aria-haspopup="dialog"><span class="hhpill-t" id="hhPillT">Household of 4</span><span class="hhpill-a">Make it yours</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+        <!-- A field, not a tag (owner, 13 November): a label over a filled box, and an amber
+             button. The label says the figures are an example until the reader changes one. -->
+        <div class="hhfield"><span class="hhfield-k" id="hhPillK">Example household</span>
+        <button type="button" class="hhpill" id="hhPill" aria-haspopup="dialog" aria-describedby="hhPillK"><span class="hhpill-t" id="hhPillT">Household of 4</span><span class="hhpill-a" id="hhPillA">Enter yours</span></button></div>
         <!-- the way down: an arrow, not a sentence; it leaves once the story starts -->
         <button type="button" class="cue" id="cue" aria-label="Scroll to add it up"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="19"></line><polyline points="6 13 12 19 18 13"></polyline></svg></button>
       </div>
@@ -1765,7 +1769,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
          November: "I don't think we need more text. Just clean this up."). -->
     <div class="bigstat">
       <div class="n">114,174</div>
-      <div class="l">deaths a year prevented</div>
+      <div class="l">deaths a year prevented by moving to universal healthcare</div>
       <div class="by">Projected by the Yale School of Public Health <span style="white-space:nowrap">&middot; July 2026</span></div>
     </div>
 
@@ -3733,6 +3737,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     var rep = { zip5: r.zip, recipient: "rep",
                 district: ds.length === 1 ? ds[0]
                   : ds.indexOf(state.district) > -1 ? state.district : null };
+    state.mine = true;
     if (r.st === "covered"){
       applyRep(rep);
       state.bkey = r.key;
@@ -4373,8 +4378,11 @@ section.paper.onteal{background:var(--paper);background-image:none}
     byId("sbarGapK").textContent = S.savingsNegative ? "more than today" : "no longer paid";
     byId("st3basis").innerHTML = '<span class="btag">' + (/allocation/i.test(S.universal.basis) ? "Includes our allocation" : "Published formula") + '</span>';
     var a = S.marketplace.place;
-    byId("hhPillT").textContent = "Household of " + state.size + " \u00b7 " + (window.matchMedia("(max-width:520px)").matches
-      ? a.county + " \u00b7 $" + Math.round(state.income / 1000) + "k"          // one line on a phone
+    byId("hhPillK").textContent = state.mine ? "Your household" : "Example household";
+    byId("hhPillA").textContent = state.mine ? "Change" : "Enter yours";
+    var phone = window.matchMedia("(max-width:520px)").matches;
+    byId("hhPillT").textContent = (phone ? "" : "Household of " + state.size + " \u00b7 ") + (phone
+      ? state.size + (state.size === 1 ? "\u00a0person" : "\u00a0people") + "\u00a0\u00b7 " + a.county + "\u00a0\u00b7 $" + Math.round(state.income / 1000) + "k"   // short on a phone; a dot never starts a line
       : countyLabel(a) + " \u00b7 " + money(state.income));
     byId("hhSum").textContent = "Household of " + state.size + " · " + countyLabel(a) + " · " + money(state.income) + " · " +
       (state.route === "employer" ? "employer coverage" : state.route === "marketplace" ? "marketplace plan" : "uninsured");
@@ -4788,6 +4796,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
   byId("who-line").setAttribute("aria-label", "Change the household");
   byId("who-line").addEventListener("click", function(){ if (!isOnePage()){ openSheet(byId("foldHh")); sheetBack = byId("who-line"); } });
   byId("who-line").addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); byId("who-line").click(); } });
+  // capture, so the flag is set before the field's own handler repaints
+  ["input", "change"].forEach(function(t){ byId("foldHh").addEventListener(t, function(){ state.mine = true; }, true); });
   byId("hhPill").addEventListener("click", function(){
     var f = byId("foldHh");
     if (isOnePage()){ f.scrollIntoView({ behavior:scrollBehavior(), block:"start" }); return; }

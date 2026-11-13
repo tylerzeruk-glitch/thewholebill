@@ -3442,7 +3442,7 @@ test('opening: the question, the empty bar, the household pill and one line of n
       return { words: sh.innerText.split(/\s+/).filter(Boolean).length - tk.innerText.split(/\s+/).filter(Boolean).length, h: sh.offsetHeight, bottom: r.bottom, vh: innerHeight, vw: innerWidth,
         ground: rgb, intro: zone.classList.contains('intro'), segs: document.querySelectorAll('.sseg.on').length, track: document.getElementById('sbarTrack').getBoundingClientRect().height,
         cap: +getComputedStyle(document.querySelector('.sbar-cap')).opacity, sticky: +getComputedStyle(document.querySelector('.sticky')).opacity,
-        pill: document.getElementById('hhPillT').textContent, pillH: pill.height, pillBottom: pill.bottom, zipVisible: document.getElementById('zip').checkVisibility(),
+        pill: document.getElementById('hhPillT').textContent.replace(/\u00a0/g, ' '), pillK: document.getElementById('hhPillK').textContent, pillA: document.getElementById('hhPillA').textContent, pillH: pill.height, pillBottom: pill.bottom, zipVisible: document.getElementById('zip').checkVisibility(),
         open: f.open, k: f.querySelector('.fly-k').textContent, items: tk.querySelectorAll('span').length, entries: f.querySelectorAll('.upd-when').length,
         moving: getComputedStyle(tk).animationName, tickW: tk.scrollWidth, stripW: tk.parentElement.clientWidth, sumH: f.querySelector('summary').getBoundingClientRect().height,
         fly: [fr.left, fr.right], vis: bd.checkVisibility(), docW: document.documentElement.scrollWidth }; });
@@ -3450,7 +3450,8 @@ test('opening: the question, the empty bar, the household pill and one line of n
     ok(`${w}px: the page opens on the dark ground with the pill on the first screen`, r.ground === 'rgb(18, 20, 26)' && r.intro && r.pillBottom <= r.vh, `${r.ground}, pill ends ${r.pillBottom.toFixed(0)} of ${r.vh}`);
     ok(`${w}px: about forty words of its own, where the first hero had 174`, r.words < 45, r.words + ' words');
     ok(`${w}px: the bar ${m ? 'is not drawn yet' : 'stands empty beside it'}, with no total, and the results bar waits out of sight`, r.segs === 0 && r.cap === 0 && r.sticky === 0 && (m || r.track > 200), JSON.stringify([r.segs, r.cap, r.sticky, r.track]));
-    ok(`${w}px: the pill names the household and is a 44px target`, (m ? /^Household of 4 · Dallas · \$95k$/ : /^Household of 4 · Dallas County · \$95,000$/).test(r.pill) && r.pillH >= 44 && !r.zipVisible, r.pill);
+    ok(`${w}px: the pill names the household and is a 44px target`, (m ? /^4 people · Dallas · \$95k$/ : /^Household of 4 · Dallas County · \$95,000$/).test(r.pill) && r.pillH >= 44 && !r.zipVisible, r.pill);
+    ok(`${w}px: until the reader changes something, the field says it holds an example`, r.pillK === 'Example household' && r.pillA === 'Enter yours', JSON.stringify([r.pillK, r.pillA]));
     ok(`${w}px: the news line carries the six entries twice over, in a 44px control`, !r.open && r.k === 'What changed' && r.items === 12 && r.entries === 6 && r.sumH >= 44 && r.tickW > r.stripW && r.docW <= w, JSON.stringify([r.items, r.tickW, r.stripW, r.docW]));
     ok(`${w}px: it holds still when the reader has asked for less motion`, r.moving === 'none', r.moving);
     await p.locator('#changed > summary').click(); await p.waitForTimeout(250);
@@ -3463,8 +3464,9 @@ test('opening: the question, the empty bar, the household pill and one line of n
     const s = await p.evaluate(() => { const d = document.getElementById('foldHh'), bd = d.querySelector('.fold-bd'); return { open: d.open, pos: getComputedStyle(bd).position, zip: document.getElementById('zip').checkVisibility(), route: document.getElementById('route').checkVisibility(), y: scrollY, label: bd.getAttribute('aria-label') }; });
     ok(`${w}px: the pill opens the household sheet with the ZIP and the family details together`, s.open && s.pos === 'fixed' && s.zip && s.route && s.label === 'Change the household', JSON.stringify(s));
     await p.locator('#zip').fill('60601'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
-    const z = await p.evaluate(() => ({ pill: document.getElementById('hhPillT').textContent, open: document.getElementById('foldHh').open, y: scrollY, scope: document.getElementById('scope').textContent }));
+    const z = await p.evaluate(() => ({ k: document.getElementById('hhPillK').textContent, a: document.getElementById('hhPillA').textContent, pill: document.getElementById('hhPillT').textContent, open: document.getElementById('foldHh').open, y: scrollY, scope: document.getElementById('scope').textContent }));
     ok(`${w}px: a new ZIP reprices in place: the sheet stays, the page does not move, the pill follows`, z.open && z.y === s.y && /Cook/.test(z.pill) && /^Showing Cook County, Illinois/.test(z.scope), JSON.stringify(z));
+    ok(`${w}px: once the reader enters a ZIP, the field is theirs`, z.k === 'Your household' && z.a === 'Change', JSON.stringify([z.k, z.a]));
     await p.locator('#zip').fill('00000'); await p.locator('#zipGo').click(); await p.waitForTimeout(250);
     ok(`${w}px: a ZIP we cannot price offers the sample cities`, await p.evaluate(() => document.querySelectorAll('#areapick button[data-z]').length === 5 && /try a city/.test(document.getElementById('scope').textContent)));
     await p.keyboard.press('Escape'); await p.waitForTimeout(250);
