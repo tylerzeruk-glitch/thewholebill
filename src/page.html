@@ -127,6 +127,7 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .flyout > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;min-height:44px;padding:0;white-space:nowrap}
 .flyout > summary::-webkit-details-marker{display:none}
 .flyout > summary:hover .fold-x{border-color:var(--ib)}
+.flyout:not([open]) > summary:hover .fold-x{transform:translate(1.5px,-1.5px)}
 .flyout > summary:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
 .fly-k{color:var(--im);flex-shrink:0}
 .tick{flex:1 1 auto;min-width:0;overflow:hidden;font-family:var(--sans);font-size:13.5px;color:var(--ib);-webkit-mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 24px),transparent)}
@@ -135,8 +136,9 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .tick-in span{margin-right:44px}
 .flyout .fold-x{width:14px;height:14px;padding:6px;border:1px solid var(--ictrl);border-radius:50%;color:var(--ib);flex-shrink:0}
 /* an outward arrow, not a chevron: the list leads off to the updates page, so it never flips */
-.flyout[open] .fold-x{transform:none;background:var(--teal);border-color:var(--teal);color:#0C1F1E}
-.fly-bd{position:absolute;left:0;top:calc(100% + 10px);z-index:30;width:min(460px,100%);max-height:min(56vh,480px);overflow-y:auto;overscroll-behavior:contain;background:var(--paper-card);color:var(--pk);border:1px solid var(--pk);box-shadow:0 26px 60px -18px rgba(0,0,0,.7);padding:22px 24px}
+/* open, the arrow turns to point down at the list it opened */
+.flyout[open] .fold-x{transform:rotate(135deg);background:var(--teal);border-color:var(--teal);color:#0C1F1E}
+.fly-bd{position:absolute;right:0;top:calc(100% + 10px);z-index:30;width:min(460px,100%);max-height:min(56vh,480px);overflow-y:auto;overscroll-behavior:contain;background:var(--paper-card);color:var(--pk);border:1px solid var(--pk);box-shadow:0 26px 60px -18px rgba(0,0,0,.7);padding:22px 24px}
 .dateline p{margin:0}
 .dateline b{font-weight:500;color:var(--pk)}
 /* the pop-out: one row per entry, its date and a short headline, the whole row a link */
@@ -671,7 +673,8 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .sheet-x:hover svg{transform:rotate(90deg)}
   .sheets:not(.onepage) .fold.wide > summary:hover .fold-x{transform:translateY(-3px)}
   .viewpick button{transition:background-color .25s ease,color .25s ease}
-  .flyout[open] > .fly-bd{animation:fly-in .32s cubic-bezier(.2,.9,.3,1) both;transform-origin:0 0}
+  .flyout[open] > .fly-bd{animation:fly-in .32s cubic-bezier(.2,.9,.3,1) both;transform-origin:100% 0}
+  .flyout .fold-x{transition:transform .45s cubic-bezier(.34,1.56,.64,1),background-color .25s ease,border-color .25s ease,color .25s ease}
   .motion .tick-in.go{animation:tick var(--tick-s,48s) linear infinite}
   .flyout > summary:hover .tick-in,.flyout > summary:focus-visible .tick-in,.flyout[open] .tick-in{animation-play-state:paused}
   @keyframes tick{to{transform:translateX(-50%)}}
@@ -814,7 +817,10 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .story-in{max-width:1180px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);column-gap:var(--sgap);padding-bottom:clamp(40px,6vw,72px)}
 .stage{grid-column:2;grid-row:2 / span 2;position:sticky;top:var(--sticky-h);height:calc(100vh - var(--sticky-h));height:calc(100svh - var(--sticky-h));display:flex;align-items:center;justify-content:center;z-index:1;--H:300px}
 .ssteps{grid-column:1;grid-row:3;min-width:0}
-.story .top{grid-column:1 / -1;grid-row:1;min-width:0}
+.story .top{grid-column:1 / -1;grid-row:1;min-width:0;position:relative;z-index:40}
+/* z-index 40: the strip's entrance animation makes it a stacking context, so the
+   pop-out's own z-index counted only inside the strip, and the headline (animated
+   the same way, later in the page) painted over it. The whole strip sits above. */
 .story .masthead{border-bottom-color:var(--irule-2)}
 .story .nav{color:var(--im)}
 /* The opening: the question on the dark ground, the empty bar beside it. */
@@ -884,7 +890,7 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .stage.yield{pointer-events:none}
 .stage.yield .sbar{opacity:0;transform:translateX(18px)}
 .sbar-cap{position:absolute;left:0;right:0;top:0;display:flex;justify-content:flex-end;align-items:baseline;gap:10px;font-size:13px;color:var(--im);white-space:nowrap}
-.sbar-cap b{font-size:24px;color:var(--ik);letter-spacing:-.01em}
+.sbar-cap b{font-size:24px;color:var(--ik);letter-spacing:-.01em;line-height:1.3}
 .sbar-track{position:absolute;right:0;bottom:0;width:104px;height:var(--H);display:flex;flex-direction:column-reverse;box-shadow:inset 0 0 0 1px var(--irule-2)}
 .sseg{position:relative;flex-shrink:0;height:0}
 .sseg.on{height:calc(var(--H) * var(--f))}
@@ -899,7 +905,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .sbar-open span{position:absolute;right:100%;bottom:22%;padding-right:14px;white-space:nowrap;font-size:13px;line-height:16px;color:var(--c2)}
 .sbar.open .sbar-open{opacity:1}
 .sbar-gap{position:absolute;right:118px;transform:translateY(50%);display:flex;flex-direction:column;align-items:flex-end;font-size:13px;color:var(--im);white-space:nowrap;opacity:0;pointer-events:none}
-.sbar-gap b{font-size:22px;color:var(--ik)}
+.sbar-gap b{font-size:22px;color:var(--ik);line-height:1.3}
+/* line-height 1.3, not normal: Newsreader's "$" inks about 1px above a normal line box,
+   and this label slides (its bottom moves), so Chrome repainted the box each frame and
+   left that sliver behind: a dotted trail through the dollar sign (owner, 13 November).
+   The bar's total gets the same room. */
 .sbar.uni .sbar-gap{opacity:1}
 .sprog{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--c2);transform-origin:0 50%;transform:scaleX(var(--p,0))}
 .inkzone.uni .sprog{background:var(--teal)}
@@ -1170,6 +1180,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .cards .ssteps::-webkit-scrollbar{display:none}
   .cards .sstep{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;height:100%;min-height:0;overflow-y:auto;justify-content:flex-start;gap:14px;padding:16px 2px 10px 0}
   .cards .sstep.send-card{display:flex}
+  .cards .sstep[data-step="3"]{gap:10px}   /* the fullest card: its chip is always there, so it packs a little tighter */
   .cards .stage{grid-column:2;grid-row:4;position:static;height:var(--card-h);min-height:0;margin:0;padding:10px 0 6px;background:none;border:0;z-index:auto;align-items:flex-end}
   .cards .snav{display:flex;gap:8px;grid-column:1 / -1;grid-row:5;padding-top:10px}
   .cards .sfoot{grid-row:6;padding-top:22px}
@@ -2810,6 +2821,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     // figure itself stays a plain positive amount.
     var sav = W.savingsFor(state.route, opts);
     S.savings = Math.abs(sav.delta);
+    S.borneNow = sav.borne;
     S.decade  = Math.abs(sav.delta) * 10;
     S.savingsNegative = sav.delta < 0;
 
@@ -4343,11 +4355,23 @@ section.paper.onteal{background:var(--paper);background-image:none}
       // a chip only where the figure leans on our own estimate; survey and statute are spelled out in the arithmetic
       byId("st" + i + "basis").innerHTML = /estimate/i.test(plan.steps[i].tag) ? '<span class="btag">' + plan.steps[i].tag + '</span>' : "";
     }
-    byId("st3say").textContent = "No premiums. Nothing due at the doctor. " + (S.savingsNegative
-      ? "Under this estimate your household would pay " + fmt(S.savings) + " more " + WORDS.a[state.unit] + " than it bears today."
-      : fmt(S.savings) + " " + WORDS.a[state.unit] + " stays with your household.");
+    // Picking another estimate moves the bar and nothing else (owner, 13 November): where
+    // the estimates fall on both sides of today, the sentence holds the height of its
+    // longer phrasing; and the chip is always there,
+    // naming a formula or our allocation, so no line appears or goes.
+    var say3 = byId("st3say"), lead3 = "No premiums. Nothing due at the doctor. ",
+        less3 = lead3 + fmt(Math.abs(S.savings)) + " " + WORDS.a[state.unit] + " stays with your household.",
+        more3 = lead3 + "Under this estimate your household would pay " + fmt(Math.abs(S.savings)) + " more " + WORDS.a[state.unit] + " than it bears today.";
+    say3.style.minHeight = "";
+    // only a household whose priciest estimate costs more than today can see both phrasings
+    if (say3.offsetWidth && S.universalRange.hi > S.borneNow){
+      say3.textContent = less3; var h3 = say3.offsetHeight;
+      say3.textContent = more3; h3 = Math.max(h3, say3.offsetHeight);
+      say3.style.minHeight = h3 + "px";
+    }
+    say3.textContent = S.savingsNegative ? more3 : less3;
     byId("sbarGapK").textContent = S.savingsNegative ? "more than today" : "no longer paid";
-    byId("st3basis").innerHTML = /allocation/i.test(S.universal.basis) ? '<span class="btag">Includes our allocation</span>' : "";
+    byId("st3basis").innerHTML = '<span class="btag">' + (/allocation/i.test(S.universal.basis) ? "Includes our allocation" : "Published formula") + '</span>';
     var a = S.marketplace.place;
     byId("hhPillT").textContent = "Household of " + state.size + " \u00b7 " + (window.matchMedia("(max-width:520px)").matches
       ? a.county + " \u00b7 $" + Math.round(state.income / 1000) + "k"          // one line on a phone

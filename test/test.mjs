@@ -617,6 +617,38 @@ test('models: six pills spanning the published spectrum', async b => {
  * columns, every label inside its pill -- and below 900px (measured: the
  * longest role line needs ~106px and a 901px viewport gives ~112px per pill)
  * the native select takes over and drives the same state. */
+test('models: picking another estimate moves the bar and nothing else in step 3', async b => {
+  // A chip that came and went with the estimate shifted the whole step by 14px (28 on a phone).
+  // $250,000: the estimates fall on both sides of today, so both phrasings of the sentence occur
+  for (const [w, h, m, inc] of [[1280, 800, false, 0], [390, 844, true, 0], [1280, 800, false, 250000]]) {
+    const p = inc ? await page(b, w, h, m) : await page(b, w, h, m, 'index.html', true);
+    if (inc) await setIncome(p, inc);
+    await p.evaluate(() => document.querySelector('.sstep[data-step="3"]').scrollIntoView({ block: 'center', inline: 'center' })); await p.waitForTimeout(700);
+    const seen = [], said = new Set();
+    for (const id of ['sanders1', 'galvani', 'rand', 'cbo5', 'blahous', 'urban', 'sanders1']) {
+      await p.evaluate(id => { const s = document.getElementById('modelPick'); s.value = id; s.dispatchEvent(new Event('change')); }, id);
+      await p.waitForTimeout(250);
+      said.add(await p.evaluate(() => /more/.test(document.getElementById('st3say').textContent)));
+      seen.push(await p.evaluate(inc => ['st3k', 'st3say', 'st3basis', 'mline', 'mwho'].map(i => { const r = document.getElementById(i).getBoundingClientRect(); return Math.round(r.top) + '/' + Math.round(r.height); })
+        .concat([...document.querySelectorAll('.sstep[data-step="3"] .folds > details > summary')].slice(0, inc ? 1 : 9).map(x => Math.round(x.getBoundingClientRect().top))).join(' '), inc));   // all on one page the first fold stands open and its text is the estimate's own
+    }
+    ok(`${w}px${inc ? ' at $' + inc : ''}: the step's blocks stand still through all six estimates`, new Set(seen).size === 1 && (!inc || said.size === 2), JSON.stringify([...new Set(seen), [...said]]));
+    ok(`${w}px: every estimate wears one basis chip`, await p.evaluate(() => document.querySelectorAll('#st3basis .btag').length === 1));
+    await p.close();
+  }
+});
+test('bar: a sliding figure label holds the ink of its dollar sign', async b => {
+  // Newsreader's "$" inks above a normal line box; a label that slides by layout left that
+  // sliver behind each frame, a dotted trail through the "$".
+  const p = await page(b, 1280, 800, false, 'index.html', true);
+  const r = await p.evaluate(async () => { await document.fonts.ready;
+    return ['#sbarGap b', '.sbar-cap b'].map(sel => { const el = document.querySelector(sel), cs = getComputedStyle(el), c = document.createElement('canvas').getContext('2d');
+      c.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; const m = c.measureText('$'), lh = parseFloat(cs.lineHeight);
+      const room = (lh - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + m.fontBoundingBoxAscent;
+      return { sel, room: +room.toFixed(2), ink: +m.actualBoundingBoxAscent.toFixed(2) }; }); });
+  ok('the "no longer paid" figure and the bar total have room above their "$"', r.every(x => x.room >= x.ink + 0.5), JSON.stringify(r));
+  await p.close();
+});
 test('models: the dots on the line are taps too, with a finger-sized band', async b => {
   for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
     const p = await page(b, w, h, m);
@@ -3469,6 +3501,23 @@ test('sheets: with motion on, a sheet rises straight up and sinks straight down'
     });
     ok(`${w}px: opening, the sheet only rises while on screen`, r.open.n > 3 && r.open.dx < 1 && r.open.first > r.open.last, JSON.stringify(r.open));
     ok(`${w}px: closing, the sheet only sinks while on screen`, r.close.n > 3 && r.close.dx < 1 && r.close.first < r.close.last, JSON.stringify(r.close));
+    await p.close();
+  }
+});
+test('news: with motion on, the pop-out hangs from the arrow, over the headline, and the arrow turns', async b => {
+  // The strip's entrance animation made it a stacking context, so the headline painted
+  // over the open list; the suite reads with reduced motion and never saw it.
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await b.newPage({ viewport: { width: w, height: h }, isMobile: m, hasTouch: m, reducedMotion: 'no-preference' });
+    await p.goto(URL); await p.waitForTimeout(1800);
+    await p.locator('#changed > summary').click(); await p.waitForTimeout(700);
+    const r = await p.evaluate(() => { const bd = document.querySelector('#changed .fly-bd'), q = bd.getBoundingClientRect(), sum = document.querySelector('#changed > summary').getBoundingClientRect();
+      let hid = 0, n = 0; for (let y = q.top + 6; y < q.bottom - 6; y += 14) for (let x = q.left + 6; x < q.right - 6; x += 14) { n++; if (!bd.contains(document.elementFromPoint(x, y))) hid++; }
+      const t = getComputedStyle(document.querySelector('#changed .fold-x')).transform.match(/-?[\d.]+/g).map(Number);
+      return { hid, n, right: q.right, sumRight: sum.right, deg: Math.round(Math.atan2(t[1], t[0]) * 180 / Math.PI) }; });
+    ok(`${w}px: nothing covers the open list`, r.hid === 0 && r.n > 100, JSON.stringify(r));
+    ok(`${w}px: the list hangs from the arrow's edge`, Math.abs(r.right - r.sumRight) < 1, JSON.stringify(r));
+    ok(`${w}px: open, the arrow has turned to point down`, r.deg === 135, JSON.stringify(r));
     await p.close();
   }
 });

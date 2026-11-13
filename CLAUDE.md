@@ -157,6 +157,10 @@ was "the bars cover half the screen". All on one page, on a phone, puts the bar 
 - **A transition in force when an element turns `position:fixed` animates from its old place.**
   The sheets slid in from the right (their spot in the flow under `left:50%`) before rising.
   Park a sheet with transitions off, then release it; the suite samples its path with motion on.
+- **An entrance animation makes a stacking context.** The news strip rises in with a transform,
+  so its pop-out's z-index counted only inside the strip and the headline painted over the open
+  list. The suite reads with reduced motion and missed it; `.top` now sits at z-index 40, and a
+  check with motion on samples the open list for anything covering it.
 - **A transition can be caught by print.** The ink-to-teal background change printed mid-colour
   until `@media print` turned transitions off.
 
