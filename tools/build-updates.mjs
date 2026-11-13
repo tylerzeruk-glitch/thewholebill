@@ -1,5 +1,5 @@
 // Renders src/updates.js three ways, for build.sh:
-//   box    the hero's "What changed" entries (pins, then newest, three in all)
+//   box    the hero's "What changed" entries (pins, then newest, six in all): date and headline
 //   list   every entry, for the /updates page
 //   rss    /updates.xml
 //   count  how many entries, so the build can refuse an empty log
@@ -21,10 +21,17 @@ const xml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&
 
 const entries = U.slice().sort((a, b) => b.date.localeCompare(a.date));
 const pins = entries.filter(e => e.pin);
-const box = pins.concat(entries.filter(e => !e.pin)).slice(0, 3).sort((a, b) => b.date.localeCompare(a.date));
+const BOX = 6;
+const box = pins.concat(entries.filter(e => !e.pin)).slice(0, BOX).sort((a, b) => b.date.localeCompare(a.date));
+// The box is a date and a short headline per entry; the full title and body live on /updates.
+const noHead = box.filter(e => !e.head || strip(e.head).length > 48);
+if (noHead.length) { console.error('build-updates: a hero box entry needs a head of 48 characters or fewer: ' + noHead.map(e => e.id).join(', ')); process.exit(1); }
+const ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const newestYear = box[0].date.slice(0, 4);
+const short = iso => { const [y, m, d] = iso.split('-').map(Number); return `${d} ${ABBR[m - 1]}` + (String(y) === newestYear ? '' : ` ${y}`); };
 
 const boxHtml = box.map(e =>
-  `<p><a class="upd-when" href="#/updates/u-${e.id}">${long(e.date)} &middot; ${kindWord(e.kind)}</a>${e.title}</p>`).join('\n        ');
+  `<a class="upd-when" href="#/updates/u-${e.id}"><time datetime="${e.date}">${short(e.date)}</time><span class="upd-t">${e.head}</span></a>`).join('\n        ');
 
 const listHtml = entries.map(e => {
   const src = e.source ? `Source: <a class="srclink" href="${e.source.url}" rel="noopener">${e.source.title}</a>.` : '';

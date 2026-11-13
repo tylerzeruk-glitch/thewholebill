@@ -134,7 +134,9 @@ was "the bars cover half the screen". All on one page, on a phone, puts the bar 
 - **The six estimates are circles on a line** (`renderModelLine()`), each at the calculator's
   own total for that model and this household, with name chips under it. The chips (and the
   phone's picker) run cheapest to priciest for this household, so their order moves with
-  income; address a pill by `data-m`, never by index.
+  income; address a pill by `data-m`, never by index. The dots are taps too (a 44px band; a tap
+  picks the nearest dot within 24px); the chips stay the keyboard and screen-reader control, so the
+  line stays aria-hidden.
 
 ## Traps that have bitten this codebase
 
@@ -293,7 +295,7 @@ Ops hygiene (small, anytime):
     law or data under it moves, add an entry to `src/updates.js` (the rules, the source
     calendar and the watcher: `docs/WHAT-CHANGED.md`; `node tools/watch-sources.mjs` prints
     the leads). It renders the hero's
-    "What changed" box (pins plus the newest, three in all), `/updates` and `/updates.xml`;
+    "What changed" box (pins plus the newest, six in all, each a date and a short `head`), `/updates` and `/updates.xml`;
     the suite holds entries to the site's rules (world entries need a primary source, no
     dashes, anchors must exist). A log that goes quiet reads as abandonment, so a benchmark
     or reps regeneration is an entry too. Never edit the hero box by hand.

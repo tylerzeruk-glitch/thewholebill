@@ -617,6 +617,23 @@ test('models: six pills spanning the published spectrum', async b => {
  * columns, every label inside its pill -- and below 900px (measured: the
  * longest role line needs ~106px and a 901px viewport gives ~112px per pill)
  * the native select takes over and drives the same state. */
+test('models: the dots on the line are taps too, with a finger-sized band', async b => {
+  for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m);
+    const before = await p.evaluate(() => ({ band: document.getElementById('mline').getBoundingClientRect().height }));
+    for (const id of ['urban', 'rand', 'sanders1']) {
+      const c = await p.evaluate(id => { const d = document.querySelector('#mline i[data-m="' + id + '"]'); d.scrollIntoView({ block: 'center', inline: 'center' }); const r = d.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, id);
+      await p.waitForTimeout(200);
+      const c2 = await p.evaluate(id => { const r = document.querySelector('#mline i[data-m="' + id + '"]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, id);
+      if (m) await p.touchscreen.tap(c2.x, c2.y + 12); else await p.mouse.click(c2.x, c2.y + 12);   // 12px below the dot: inside the band, off the dot
+      await p.waitForTimeout(300);
+      const r = await p.evaluate(id => ({ on: document.querySelector('#mline i.on').getAttribute('data-m'), pill: document.querySelector('#pills .pill.on')?.getAttribute('data-m'), pick: document.getElementById('modelPick').value }), id);
+      ok(`${w}px: tapping the ${id} dot picks it, and the chips and picker follow`, r.on === id && r.pick === id && (r.pill === id || r.pill === undefined), JSON.stringify(r));
+    }
+    ok(`${w}px: the line is a 44px band for a finger`, before.band >= 44, JSON.stringify(before));
+    await p.close();
+  }
+});
 test('models: six circles on a line and six chips, a picker on phones', async b => {
   for (const w of [1440, 1100, 901]) {
     const p = await page(b,w,900);
@@ -2525,8 +2542,15 @@ test('accessibility: reduced motion, whole-page print, sticky at 1024, structure
   const q = await page(b, 1024, 900);
   await q.evaluate(() => window.scrollTo(0, 2400)); await q.waitForTimeout(300);
   const who = await q.evaluate(() => { const e = document.getElementById('who-line'); return { sw: e.scrollWidth, cw: e.clientWidth, t: e.textContent }; });
-  ok('sticky context line is not truncated at 1024', who.sw <= who.cw + 1 && /^4 · /.test(who.t), JSON.stringify(who));
+  ok('sticky context line is not truncated at 1024', who.sw <= who.cw + 1 && /^4\s· /.test(who.t), JSON.stringify(who));
   await q.close();
+  // and at 320, beside "Per year / Per month", it wraps rather than losing the income
+  const n = await page(b, 320, 640, true, 'index.html', true);
+  await n.evaluate(() => document.querySelector('.sstep[data-step="1"]').scrollIntoView({ block: 'center', inline: 'center' })); await n.waitForTimeout(400);
+  const wn = await n.evaluate(() => { const e = document.getElementById('who-line'), u = document.getElementById('unit').getBoundingClientRect(), r = e.getBoundingClientRect();
+    return { sw: e.scrollWidth, cw: e.clientWidth, sh: e.scrollHeight, ch: e.clientHeight, gap: u.left - r.right, t: e.textContent, ln: [...document.querySelectorAll('.unit-l')].map(l => l.textContent) }; });
+  ok('320px: the whole household line shows beside the Per year switch', wn.sw <= wn.cw + 1 && wn.sh <= wn.ch + 1 && wn.gap >= 0 && /k$/.test(wn.t) && wn.ln.join('|') === 'Per year|Per month', JSON.stringify(wn));
+  await n.close();
   // A10: the methodology document and the 404
   const m = await page(b, 1280, 900, false, 'methodology/index.html');
   const ms = await m.evaluate(() => ({ h1: [...document.querySelectorAll('h1')].map(h => h.textContent), main: !!document.querySelector('main'),
@@ -2844,17 +2868,20 @@ test('updates: the log renders the hero box, its own page and the feed', async b
   ok('every document advertises the feed', [index, doc, readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8')].every(h => /rel="alternate" type="application\/rss\+xml"/.test(h)));
   ok('the headers file types the feed and keeps /updates scriptless', /\n\/updates\.xml\n\s+Content-Type: application\/rss\+xml/.test(readFileSync(resolve(HERE, '../dist/_headers'), 'utf8')) && /\n\/updates\/\n\s+Content-Security-Policy: default-src 'none'; style-src/.test(readFileSync(resolve(HERE, '../dist/_headers'), 'utf8')));
 
-  // the hero box: pins plus the newest, three in all, each a real entry, in date order
+  // the hero box: pins plus the newest, six in all, each a real entry, in date order, a date and a short headline
   const sorted = U.slice().sort((a, b2) => b2.date.localeCompare(a.date));
-  const want = sorted.filter(e => e.pin).concat(sorted.filter(e => !e.pin)).slice(0, 3).sort((a, b2) => b2.date.localeCompare(a.date)).map(e => e.id);
+  const want = sorted.filter(e => e.pin).concat(sorted.filter(e => !e.pin)).slice(0, 6).sort((a, b2) => b2.date.localeCompare(a.date)).map(e => e.id);
+  ok('every entry in the box has a head of 48 characters or fewer, with no dashes', want.every(id => { const e = U.find(x => x.id === id); return e.head && e.head.replace(/&\w+;/g, 'x').length <= 48 && !/[–—]/.test(e.head); }));
   const p = await page(b, 1280, 900);
   const box = await p.evaluate(() => ({
     k: document.querySelector('#changed .fly-k').textContent,
     ids: [...document.querySelectorAll('.dateline .upd-when')].map(a => a.getAttribute('href')),
     more: (document.querySelector('.dateline .more') || {}).getAttribute?.('href'),
+    rows: [...document.querySelectorAll('.dateline .upd-when')].map(a => [a.querySelector('time').textContent, a.querySelector('.upd-t').textContent]),
     nav: [...document.querySelectorAll('.nav a')].map(a => a.getAttribute('href')),
     foot: [...document.querySelectorAll('footer a')].map(a => a.getAttribute('href')) }));
   ok('the hero box is titled What changed and shows the pins plus the newest', box.k === 'What changed' && JSON.stringify(box.ids) === JSON.stringify(want.map(id => '/updates/#u-' + id)), JSON.stringify(box.ids));
+  ok('each row is a short date and a headline, and nothing else', box.rows.length === 6 && box.rows.every(([d, t]) => /^\d{1,2} [A-Z][a-z]{2}( \d{4})?$/.test(d) && t.length > 8 && t.length <= 48), JSON.stringify(box.rows));
   ok('it links to the full log, as do the header and footer', box.more === '/updates' && box.nav.includes('/updates') && box.foot.includes('/updates') && box.foot.includes('/updates.xml'), JSON.stringify([box.more, box.nav, box.foot]));
   await p.close();
   const m = await page(b, 390, 800, true);
@@ -3363,6 +3390,17 @@ test('views: step by step for readers; the one-page view kept for print and the 
  * empty bar beside it, and the household as a pill that opens the sheet where
  * the ZIP and the family details live together. The change log is one slow
  * line of news that pops out the dated list. */
+test('opening: the line under the question is two sentences on two lines, neither broken', async b => {
+  // Owner, 12 November: "make these two lines"; 13 November: the first "should not wrap, we have room".
+  for (const [w, h, m] of [[1440, 900, false], [1000, 760, false], [768, 900, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const r = await p.evaluate(() => { const ss = [...document.querySelectorAll('.shero .lede span')], lh = parseFloat(getComputedStyle(ss[0]).lineHeight);
+      return { t: ss.map(x => x.textContent), lines: ss.map(x => Math.round(x.getBoundingClientRect().height / lh)), tops: ss.map(x => Math.round(x.getBoundingClientRect().top)),
+        right: Math.max(...ss.map(x => { const g = document.createRange(); g.selectNodeContents(x); return g.getBoundingClientRect().right; })), vw: innerWidth }; });
+    ok(`${w}px: two lines, one sentence each, each whole, on screen`, r.t.join('|') === 'Not the number on your paystub.|The whole number.' && r.lines.every(n => n === 1) && r.tops[1] > r.tops[0] && r.right <= r.vw - 8, JSON.stringify(r));
+    await p.close();
+  }
+});
 test('opening: the question, the empty bar, the household pill and one line of news', async b => {
   for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
     const p = await page(b, w, h, m, 'index.html', true);
@@ -3381,7 +3419,7 @@ test('opening: the question, the empty bar, the household pill and one line of n
     ok(`${w}px: about forty words of its own, where the first hero had 174`, r.words < 45, r.words + ' words');
     ok(`${w}px: the bar ${m ? 'is not drawn yet' : 'stands empty beside it'}, with no total, and the results bar waits out of sight`, r.segs === 0 && r.cap === 0 && r.sticky === 0 && (m || r.track > 200), JSON.stringify([r.segs, r.cap, r.sticky, r.track]));
     ok(`${w}px: the pill names the household and is a 44px target`, (m ? /^Household of 4 · Dallas · \$95k$/ : /^Household of 4 · Dallas County · \$95,000$/).test(r.pill) && r.pillH >= 44 && !r.zipVisible, r.pill);
-    ok(`${w}px: the news line carries the three entries twice over, in a 44px control`, !r.open && r.k === 'What changed' && r.items === 6 && r.entries === 3 && r.sumH >= 44 && r.tickW > r.stripW && r.docW <= w, JSON.stringify([r.items, r.tickW, r.stripW, r.docW]));
+    ok(`${w}px: the news line carries the six entries twice over, in a 44px control`, !r.open && r.k === 'What changed' && r.items === 12 && r.entries === 6 && r.sumH >= 44 && r.tickW > r.stripW && r.docW <= w, JSON.stringify([r.items, r.tickW, r.stripW, r.docW]));
     ok(`${w}px: it holds still when the reader has asked for less motion`, r.moving === 'none', r.moving);
     await p.locator('#changed > summary').click(); await p.waitForTimeout(250);
     const o = await read();

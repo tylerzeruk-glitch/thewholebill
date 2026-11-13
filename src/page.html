@@ -134,12 +134,19 @@ footer a.q.mail:hover{text-decoration-color:currentColor}
 .tick-in b{font-weight:500;color:var(--ik);margin-right:8px;font-variant-numeric:tabular-nums}
 .tick-in span{margin-right:44px}
 .flyout .fold-x{width:14px;height:14px;padding:6px;border:1px solid var(--ictrl);border-radius:50%;color:var(--ib);flex-shrink:0}
-.flyout[open] .fold-x{transform:rotate(180deg);background:var(--teal);border-color:var(--teal);color:#0C1F1E}
+/* an outward arrow, not a chevron: the list leads off to the updates page, so it never flips */
+.flyout[open] .fold-x{transform:none;background:var(--teal);border-color:var(--teal);color:#0C1F1E}
 .fly-bd{position:absolute;left:0;top:calc(100% + 10px);z-index:30;width:min(460px,100%);max-height:min(56vh,480px);overflow-y:auto;overscroll-behavior:contain;background:var(--paper-card);color:var(--pk);border:1px solid var(--pk);box-shadow:0 26px 60px -18px rgba(0,0,0,.7);padding:22px 24px}
 .dateline p{margin:0}
 .dateline b{font-weight:500;color:var(--pk)}
-.dateline .upd-when{display:block;font-family:var(--sans);font-size:12px;letter-spacing:.02em;color:var(--pm);font-variant-numeric:tabular-nums;text-decoration:none;margin-bottom:3px}
-.dateline .upd-when:hover,.dateline .upd-when:focus-visible{color:var(--amber-deep);text-decoration:underline}
+/* the pop-out: one row per entry, its date and a short headline, the whole row a link */
+.fly-bd .dateline{gap:0}
+.dateline .upd-when{display:grid;grid-template-columns:4.2em 1fr;gap:14px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--prule);text-decoration:none;color:var(--pk);font-size:15px;line-height:1.4}
+.dateline .upd-when:first-of-type{padding-top:0}
+.dateline .upd-when time{font-family:var(--sans);font-size:12px;letter-spacing:.02em;color:var(--pm);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dateline .upd-when:hover .upd-t,.dateline .upd-when:focus-visible .upd-t{color:var(--amber-deep);text-decoration:underline;text-underline-offset:3px}
+.dateline .upd-when:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
+.fly-bd .dateline .more{margin-top:14px}
 .dateline .more{font-size:13.5px;align-self:flex-start}
 .dateline .k{color:var(--amber-deep)}
 .dateline p{font-size:14.5px;line-height:1.6;color:var(--pb)}
@@ -378,10 +385,16 @@ button.step{cursor:pointer;font-family:var(--sans)}
 
 /* ---------- comparison ---------- */
 .pills{display:flex;flex-wrap:wrap;gap:6px}
-.mline{position:relative;height:24px;margin:2px 9px 0}
-.mline::before{content:"";position:absolute;left:-9px;right:-9px;top:11px;height:2px;background:var(--ictrl)}
-.mline i{position:absolute;top:5px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--ink);box-shadow:inset 0 0 0 2px var(--ik)}
+/* The dots are taps too (owner, 13 November). The band is 44px tall for a finger,
+   drawn exactly as before; a tap picks the nearest dot, so two estimates that sit
+   close together never fight over overlapping targets. The chips stay the keyboard
+   and screen-reader control, so the line itself stays aria-hidden. */
+.mline{position:relative;height:44px;margin:-8px 9px -10px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.mline::before{content:"";position:absolute;left:-9px;right:-9px;top:21px;height:2px;background:var(--ictrl)}
+.mline i{position:absolute;top:15px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--ink);box-shadow:inset 0 0 0 2px var(--ik)}
 .mline i.on{background:var(--teal);box-shadow:none;transform:scale(1.5)}
+.mline::after{content:"";position:absolute;top:0;bottom:0;left:-16px;right:-16px}   /* the end dots sit half past the line; their taps count too */
+.mline i.near:not(.on){background:var(--ik);transform:scale(1.25)}
 .mends{display:flex;justify-content:space-between;font-size:13px;color:var(--im);margin-top:-4px}
 .mwho{margin:0;font-family:var(--sans);font-size:14.5px;line-height:1.5;color:var(--im)}
 .mwho b{font-weight:500;color:var(--ik)}
@@ -463,9 +476,10 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .chartbox svg{display:block;width:100%;height:auto}
 
 /* ---------- lives ---------- */
-.livesgrid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
 .bigstat .n{font-family:var(--fig);font-weight:500;font-variant-numeric:lining-nums tabular-nums;font-size:clamp(64px,9vw,120px);line-height:1;letter-spacing:-.02em;color:var(--amber-deep)}
-.bigstat .l{font-size:15px;line-height:1.6;color:var(--pb);margin-top:16px;max-width:350px}
+.bigstat .l{font-family:var(--serif);font-size:clamp(28px,3.4vw,44px);line-height:1.12;letter-spacing:-.01em;color:var(--pk);margin-top:10px}
+.bigstat .by{font-size:14px;line-height:1.5;color:var(--pm);margin-top:18px}
+.lives-q{margin:0 0 26px;font-size:clamp(20px,2vw,25px);color:var(--pk);max-width:34em}
 /* 62,863 + 51,311 = 114,174 exactly: the two figures below the headline number
    ARE that number, split in two. Set as a sum -- operator in its own column so the
    digits stay aligned -- because a relationship the arithmetic already has is
@@ -807,7 +821,11 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .shero{grid-column:1;grid-row:2;min-width:0;min-height:calc(100vh - 194px);min-height:calc(100svh - 194px);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:24px;padding:36px 0 72px}
 .shero h1{font-size:clamp(44px,min(6.4vw,11vh),88px);max-width:11em}
 .shero h1 em{color:var(--c2)}
-.shero .lede{margin:0;font-family:var(--serif);font-size:clamp(20px,2.1vw,26px);line-height:1.35;color:var(--ik);max-width:22em}
+.shero .lede{margin:0;font-family:var(--serif);font-size:clamp(20px,2.1vw,26px);line-height:1.35;color:var(--ik)}
+/* Two lines, one sentence each (owner, 12 November), and neither sentence ever breaks
+   inside itself (owner, 13 November: "should not wrap, we have room"). The old 22em cap
+   broke the first line in a narrow window. */
+.shero .lede span{display:block;white-space:nowrap}
 /* the way down: centred on the whole opening (the shero is the first of two columns,
    so its centre is half of both columns and the gap), bouncing while it waits */
 .shero{position:relative}
@@ -941,6 +959,12 @@ section.paper.onteal{background:var(--paper);background-image:none}
 /* step by step, the results bar is only the household and the unit: the three totals are what the steps reveal */
 .sheets:not(.onepage) .sticky .figs{display:none}
 .sticky .who{cursor:pointer}
+/* a pencil after the household says it can be changed from here too (owner, 13 November);
+   drawn in CSS because the script rewrites the line's text on every paint */
+.sticky .who::after{content:"";display:inline-block;width:13px;height:13px;margin-left:9px;vertical-align:-2px;background:var(--c2);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") no-repeat center/contain;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") no-repeat center/contain}
+.sticky .who:hover{color:var(--ik)}
+.sticky .who:focus-visible{outline:2px solid var(--c2);outline-offset:3px;border-radius:2px}
 .slot + .slot{margin-top:0}
 
 
@@ -1065,7 +1089,6 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .prov,.summary,.actgrid{grid-template-columns:minmax(0,1fr)}
   .split{grid-template-columns:minmax(0,1fr);gap:28px}
   .grid2{grid-template-columns:minmax(0,1fr);gap:20px}
-  .livesgrid{grid-template-columns:minmax(0,1fr);gap:34px}
   .cliffstats{grid-template-columns:minmax(0,1fr)}
   .cstat{border-right:none;border-bottom:1px solid var(--irule)}
   .sticky-in{gap:16px}          /* still the one-row bar down to 900px */
@@ -1139,6 +1162,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .cards .story-in{display:grid;grid-template-columns:minmax(0,1fr) 56px;column-gap:14px;padding-bottom:30px}
   .cards .shero{grid-column:1 / -1;min-height:calc(100svh - 164px)}
   .cards .cue{left:50%}
+  /* the pop-out spans the whole strip on a phone, not the space right of the plan year */
+  .newsbar{position:relative} .newsbar .flyout{position:static} .newsbar .fly-bd{left:0;right:0;width:auto}
   .newsbar{gap:12px} .newsbar .fly-k{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .cards .sticks{display:flex;gap:4px;grid-column:1 / -1;grid-row:3;padding:14px 0 4px}
   .cards .ssteps{grid-column:1;grid-row:4;display:flex;height:var(--card-h);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
@@ -1254,6 +1279,9 @@ section.paper.onteal{background:var(--paper);background-image:none}
    its 44px height is a touch-target floor, not a style choice. */
 @media (max-width:440px){
   .sticky-in{gap:5px 10px}
+  /* "Per year / Per month" leaves no room for the whole household on the narrowest
+     phones; the line wraps to two rather than cutting off the income */
+  .sticky .who{white-space:normal;text-overflow:clip;line-height:1.35}
   .figs{gap:2px 10px}
   /* Scaled, not stepped: "Marketplace" is one word, so a grid column holding it
      cannot shrink below its own width. Below ~360px that word is what would push
@@ -1290,8 +1318,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
       </div>
       <button class="unit" id="unit" type="button" role="switch" aria-checked="false" aria-label="Show monthly figures">
         <span class="unit-thumb" aria-hidden="true"></span>
-        <span class="unit-l on" data-u="y">Year</span>
-        <span class="unit-l" data-u="m">Month</span>
+        <span class="unit-l on" data-u="y">Per year</span>
+        <span class="unit-l" data-u="m">Per month</span>
       </button>
     </div>
   </div>
@@ -1321,7 +1349,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
       <div class="newsbar">
         <span class="eyebrow i newsbar-py">Plan year <span data-py>2027</span></span>
         <details class="flyout" id="changed">
-          <summary><span class="fly-k">What changed</span><span class="vh" id="changedS"></span><span class="tick" aria-hidden="true"><span class="tick-in" id="tickIn"></span></span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+          <summary><span class="fly-k">What changed</span><span class="vh" id="changedS"></span><span class="tick" aria-hidden="true"><span class="tick-in" id="tickIn"></span></span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="8 7 17 7 17 16"></polyline></svg></summary>
           <div class="fly-bd">
             <aside class="dateline">
               <!-- UPDATES:BOX -->
@@ -1336,7 +1364,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
            together, in the same sheet as the rest of the calculator. -->
       <div class="shero" id="shero">
         <h1>What does your healthcare <em>actually</em> cost?</h1>
-        <p class="lede">Not the number on your paystub.<br>The whole number.</p>
+        <p class="lede"><span>Not the number on your paystub.</span> <span>The whole number.</span></p>
         <button type="button" class="hhpill" id="hhPill" aria-haspopup="dialog"><span class="hhpill-t" id="hhPillT">Household of 4</span><span class="hhpill-a">Make it yours</span><svg class="fold-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
         <!-- the way down: an arrow, not a sentence; it leaves once the story starts -->
         <button type="button" class="cue" id="cue" aria-label="Scroll to add it up"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="19"></line><polyline points="6 13 12 19 18 13"></polyline></svg></button>
@@ -1719,24 +1747,21 @@ section.paper.onteal{background:var(--paper);background-image:none}
       </div>
     </div>
 
-    <div class="livesgrid">
-      <div class="bigstat">
-          <!-- The dateline carries the recency; the source fold right below
-               carries the not-peer-reviewed disclosure at equal volume. One
-               without the other would be spin. -->
-          <div class="lbl p" style="margin-bottom:14px">Yale School of Public Health &middot; July 2026</div>
-          <div class="n">114,174</div>
-          <div class="l">deaths a year that its researchers now project universal coverage would prevent</div>
-      </div>
-      <div class="finding">
-        <div class="lbl p">The finding that matters most here</div>
-        <div class="quote">Nearly half of the coverage-related deaths prevented, <span style="color:var(--amber-deep)">29,631</span> of them, would be among people who already have insurance.</div>
-      </div>
+    <!-- The number and what it counts, large; the source and its date in one quiet
+         line under them, worded as the projection it is. The source fold right below
+         carries the not-peer-reviewed disclosure at equal volume: one without the other
+         would be spin. The finding about the insured moved into the fold (owner, 13
+         November: "I don't think we need more text. Just clean this up."). -->
+    <div class="bigstat">
+      <div class="n">114,174</div>
+      <div class="l">deaths a year prevented</div>
+      <div class="by">Projected by the Yale School of Public Health <span style="white-space:nowrap">&middot; July 2026</span></div>
     </div>
 
     <details class="fold pp" id="foldLives">
     <summary><span class="fold-g" id="gLives" aria-hidden="true"></span><span class="fold-k">What the number is made of</span><svg class="fold-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"></line><line x1="4" y1="12" x2="20" y2="12"></line></svg></summary>
     <div class="fold-bd"><div class="fold-in">
+        <p class="quote lives-q">Nearly half of the coverage-related deaths prevented, <span style="color:var(--amber-deep)">29,631</span> of them, would be among people who already have insurance.</p>
         <div class="stack" style="gap:13px">
           <div class="lbl p">Made up of</div>
           <div class="tally">
@@ -1835,7 +1860,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     <div class="split tie" style="margin-bottom:46px">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">Do something with it</div>
-        <h2>Send them your number.</h2>
+        <h2>Tell Congress what your healthcare costs.</h2>
       </div>
     </div>
 
@@ -2928,7 +2953,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     // in the stylesheet; this only shortens the words.
     var tight = window.matchMedia("(max-width:1100px)").matches;
     byId("who-line").textContent = tight
-      ? state.size + " \u00b7 " + a.county + " \u00b7 $" + Math.round(state.income / 1000) + "k"
+      ? state.size + "\u00a0\u00b7 " + a.county + "\u00a0\u00b7 $" + Math.round(state.income / 1000) + "k"   // the dots stay with the word before them when a narrow phone wraps it
       : "Household of " + state.size + " \u00b7 " + a.county + " \u00b7 " + money(state.income);
     var plEl = byId("letterPlace"), blEl = byId("letterBill");
     if (plEl) plEl.textContent = countyLabel(a);
@@ -3819,6 +3844,29 @@ section.paper.onteal{background:var(--paper);background-image:none}
     state.model = this.value;
     paint();
   });
+  // the line's dots pick a model too: the nearest dot to the pointer, within 24px
+  (function(){
+    var line = byId("mline");
+    function nearest(x){
+      var best = null, d = 25;
+      [].forEach.call(line.children, function(dot){
+        var r = dot.getBoundingClientRect(), dd = Math.abs(r.left + r.width / 2 - x);
+        if (dd < d){ d = dd; best = dot; }
+      });
+      return best;
+    }
+    line.addEventListener("click", function(e){
+      var dot = nearest(e.clientX);
+      if (dot && dot.getAttribute("data-m") !== state.model){ state.model = dot.getAttribute("data-m"); paint(); }
+    });
+    line.addEventListener("pointermove", function(e){
+      if (e.pointerType !== "mouse") return;
+      var dot = nearest(e.clientX);
+      [].forEach.call(line.children, function(x){ x.classList.toggle("near", x === dot); });
+      line.style.cursor = dot ? "pointer" : "default";
+    });
+    line.addEventListener("pointerleave", function(){ [].forEach.call(line.children, function(x){ x.classList.remove("near"); }); });
+  })();
 
   var routeEl = byId("route");
   [].forEach.call(routeEl.querySelectorAll("button"), function(b){
@@ -4371,12 +4419,13 @@ section.paper.onteal{background:var(--paper);background-image:none}
     }
     var line = byId("mline");
     if (line.children.length !== W.MODELS.length){
-      for (i = 0; i < W.MODELS.length; i++) html += "<i></i>";
+      for (i = 0; i < W.MODELS.length; i++) html += '<i data-m="' + W.MODELS[i].id + '"></i>';
       line.innerHTML = html;
     }
     for (i = 0; i < W.MODELS.length; i++){
       line.children[i].style.left = ((span > 0 ? (S.modelTotals[i] - S.universalRange.lo) / span : .5) * 100).toFixed(2) + "%";
-      line.children[i].className = i === on ? "on" : "";
+      line.children[i].classList.toggle("on", i === on);
+      line.children[i].title = W.MODELS[i].chip.split(" \u00b7 ")[0];
     }
     // the pills and the phone's picker run from the cheapest estimate for this
     // household to the priciest; the order moves with income (Lancet is a formula)
@@ -4697,15 +4746,14 @@ section.paper.onteal{background:var(--paper);background-image:none}
     else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
   });
   // the newest entry's date rides the hero's one line
-  var newest = document.querySelector("#changed .upd-when");
-  if (newest) byId("changedS").textContent = ", latest " + newest.textContent.split("\u00b7")[0].trim();
+  var newest = document.querySelector("#changed .upd-when time");
+  if (newest) byId("changedS").textContent = ", latest " + newest.textContent;
   // the moving line: date and headline of each entry in the box, twice over so the loop has no seam
   (function(){
-    var ps = document.querySelectorAll("#changed .dateline p"), html = "", i;
+    var ps = document.querySelectorAll("#changed .upd-when"), html = "", i;
     for (i = 0; i < ps.length; i++){
-      var when = ps[i].querySelector(".upd-when"), d = when ? when.textContent.split("\u00b7")[0].trim() : "";
-      var t = ps[i].textContent.replace(when ? when.textContent : "", "").trim();
-      html += "<span><b>" + d.replace(/ \d{4}$/, "") + "</b>" + t.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</span>";
+      var d = ps[i].querySelector("time").textContent, t = ps[i].querySelector(".upd-t").textContent;
+      html += "<span><b>" + d + "</b>" + t.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</span>";
     }
     var el = byId("tickIn");
     el.innerHTML = html + html;
