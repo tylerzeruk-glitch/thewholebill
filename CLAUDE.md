@@ -123,10 +123,12 @@ was "the bars cover half the screen". All on one page, on a phone, puts the bar 
   `storyPlan()`: "Survey average", "Set in law", "Includes our estimate"), not a sentence with
   links. Detail and links belong inside the fold. Before adding a note, ask whether a chip, a
   glyph or the fold can carry it.
-- **Fold glyphs** (`renderGlyphs()`) are 56 by 36 drawings made from the page's own figures:
-  the household as dots, the cliff as this household's curve, the arithmetic as the waterfall's
-  columns. Icons, so aria-hidden, but never an invented shape; the suite checks the ones that
-  carry proportion.
+- **Fold icons** (`renderGlyphs()`) are 56 by 36 engraved pictograms, one idea per fold (owner's
+  choice, 2026-11-13, after rejecting charts-in-miniature): a home, a paystub with the sheet behind
+  it, a climbing price tag, a receipt, a ledge, a bill with no top, a seal, a balance, a pulse. One
+  hairline weight with hatching for shade; amber marks the household's money and teal only the
+  universal side. Two stay live and the suite checks them: the house holds a figure a person
+  (children smaller), and on the uninsured route the cliff becomes the bill with no top.
 - **The opening is the story's first rows** (`.shero`), on the dark ground with the empty bar
   beside it. While it has the screen the zone is `.intro`: the bar's empty box, the running
   total and the results bar all wait out of sight, and a bouncing arrow (`#cue`) is the way down. There is no ZIP field on it. The household pill

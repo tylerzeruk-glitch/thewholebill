@@ -947,10 +947,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
    script only adds the motion. .wide folds open across the whole wrap (the charts
    inside were drawn for that width), which is why the bar steps aside for them. */
 .fold > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"g k x";gap:4px 16px;align-items:center;padding:14px 0;min-height:44px;border-top:1px solid var(--irule-2)}
-/* The glyph: a small live drawing of what the fold holds (the household as dots,
-   the cliff as its own curve, the arithmetic as its own columns), built by
-   renderGlyphs() from the same figures as the chart behind it. An icon, so
-   aria-hidden, but never a made-up shape. */
+/* The glyph: a small engraved pictogram of what the fold is about, built by
+   renderGlyphs(). An icon, so aria-hidden. The house holds one figure a person. */
 .fold-g{grid-area:g;width:56px;height:36px;display:block;color:var(--ib)}
 .fold-g svg{display:block;width:56px;height:36px;overflow:visible}
 .fold > summary::-webkit-details-marker{display:none}
@@ -3132,7 +3130,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 
     renderStory();
     renderModelLine(opts);
-    renderGlyphs(opts);
+    renderGlyphs();
     renderElig();
     renderPills();
     // the provenance fold's one line: whose estimate it is and what kind of figure
@@ -4599,86 +4597,58 @@ section.paper.onteal{background:var(--paper);background-image:none}
     var el = byId(id);
     if (el) el.innerHTML = '<svg viewBox="0 0 56 36" focusable="false">' + inner + '</svg>';
   }
-  function renderGlyphs(opts){
-    var i, h = "", R = S.breakdown, GREY = "var(--ictrl)";
-    // the household: one dot a person, children smaller
-    var n = state.ages.length;
-    for (i = 0; i < n; i++){
-      var kid = state.ages[i] < 21, r = kid ? 3.2 : 4.6;
-      h += '<circle cx="' + (6 + (i % 4) * 12) + '" cy="' + ((n > 4 ? (i < 4 ? 15 : 33) : 28) - r).toFixed(1) + '" r="' + r + '" fill="currentColor"></circle>';
-    }
+  /* The fold icons (owner, 13 November, "Engraved line"): one idea per fold, drawn in
+     one hairline weight with hatching for shade. Amber marks the household's money and teal
+     only the universal side. Two stay live: the house holds one figure a person (children
+     smaller), and on the uninsured route the cliff becomes a bill with no top. */
+  var GS = 'stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"',
+      GA = 'stroke="var(--c2)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"';
+  function gHatch(x1, y1, x2, y2, n, dx, dy, c){
+    var h = "", k;
+    for (k = 0; k < n; k++) h += '<line x1="' + (x1 + k * dx) + '" y1="' + (y1 + k * dy) + '" x2="' + (x2 + k * dx) + '" y2="' + (y2 + k * dy) + '" stroke="' + (c || "currentColor") + '" stroke-width=".8" opacity=".55" stroke-linecap="round"></line>';
+    return h;
+  }
+  function gPerson(x, base, kid){
+    var s = kid ? .72 : 1;
+    return '<circle class="gp' + (kid ? ' kid' : '') + '" cx="' + x.toFixed(1) + '" cy="' + (base - 8.6 * s).toFixed(1) + '" r="' + (1.6 * s).toFixed(2) + '" fill="currentColor"></circle>' +
+      '<path d="M' + (x - 2.4 * s).toFixed(1) + ' ' + base + ' V' + (base - 4.4 * s).toFixed(1) + ' Q' + x.toFixed(1) + ' ' + (base - 6.6 * s).toFixed(1) + ' ' + (x + 2.4 * s).toFixed(1) + ' ' + (base - 4.4 * s).toFixed(1) + ' V' + base + '" fill="currentColor"></path>';
+  }
+  function renderGlyphs(){
+    var i, n = state.ages.length;
+    // the household: a home a little wider for every person in it
+    var w = Math.max(24, Math.min(46, n * 5 + 6)), L = 28 - w / 2, R2 = 28 + w / 2, h =
+      '<path d="M' + (L - 3) + ' 17 L28 6 L' + (R2 + 3) + ' 17" ' + GS + '></path><path d="M' + L + ' 15 V32 H' + R2 + ' V15" ' + GS + '></path>' +
+      '<path d="M' + (R2 - 5) + ' 9.6 V6 H' + (R2 - 2) + ' V11.8" ' + GS + '></path>';
+    for (i = 0; i < n; i++) h += gPerson(28 - (n - 1) * 2.5 + i * 5, 32, state.ages[i] < 21);
     glyph("gHh", h);
-    // why it counts as yours: a paystub, and the block that never appears on it
-    glyph("gWhy", '<rect x="2.5" y="4.5" width="28" height="27" fill="none" stroke="currentColor" stroke-width="1.5"></rect>' +
-      '<line x1="7" y1="11" x2="26" y2="11" stroke="currentColor" stroke-width="1.5"></line><line x1="7" y1="17" x2="21" y2="17" stroke="currentColor" stroke-width="1.5"></line>' +
-      '<rect x="7" y="22" width="9" height="5" fill="var(--c1)"></rect><rect x="38" y="6" width="14" height="25.5" fill="var(--c2)"></rect>');
-    // the rise: the same three years the chart draws, on its scale
-    var ser = W.riseSeries(state.route === "employer" ? "employer" : "marketplace", opts), top = 0;
-    for (i = 0; i < ser.length; i++) if (ser[i].status === "ok") top = Math.max(top, ser[i].total);
-    h = "";
-    for (i = 0; i < ser.length; i++){
-      var bx = 4 + i * 17;
-      if (ser[i].status !== "ok" || !top){ h += '<rect x="' + (bx + .75) + '" y="12" width="11.5" height="21" fill="none" stroke="' + GREY + '" stroke-width="1.5" stroke-dasharray="3 3"></rect>'; continue; }
-      var hy = ser[i].you / top * 30, ho = ser[i].other / top * 30;
-      h += '<rect x="' + bx + '" y="' + (33 - hy).toFixed(1) + '" width="13" height="' + hy.toFixed(1) + '" fill="var(--c1)"></rect>' +
-           '<rect x="' + bx + '" y="' + (33 - hy - ho).toFixed(1) + '" width="13" height="' + Math.max(0, ho - .8).toFixed(1) + '" fill="' + (state.route === "employer" ? "var(--c2)" : GREY) + '"></rect>';
-    }
-    glyph("gRise", h);
-    // the arithmetic: the waterfall's own columns
-    h = ""; var acc = 0, cw = Math.min(11, 52 / (R.parts.length + 1) - 2.5);
-    for (i = 0; i < R.parts.length; i++){
-      var px = 2 + i * (cw + 2.5), j, base = 33;
-      for (j = 0; j <= i; j++){
-        var ph = R.parts[j].value / R.whole * 30;
-        h += '<rect x="' + px.toFixed(1) + '" y="' + (base - ph).toFixed(1) + '" width="' + cw.toFixed(1) + '" height="' + ph.toFixed(1) + '" fill="' + (R.parts[j].ghost ? GREY : TONE[R.parts[j].tone]) + '"></rect>';
-        base -= ph;
-      }
-    }
-    h += '<rect x="' + (2 + R.parts.length * (cw + 2.5) + 1).toFixed(1) + '" y="3" width="' + cw.toFixed(1) + '" height="30" fill="var(--c2)"></rect>';
-    glyph("gWf", h);
-    // the cliff: this household's curve, credit and all; or, uninsured, a bar with no top
-    if (state.route === "none"){
-      glyph("gSlot", '<rect x="20" y="24" width="16" height="9" fill="var(--c1)"></rect>' +
-        '<line x1="20.75" y1="24" x2="20.75" y2="2" stroke="var(--c2)" stroke-width="1.5" stroke-dasharray="3 3"></line><line x1="35.25" y1="24" x2="35.25" y2="2" stroke="var(--c2)" stroke-width="1.5" stroke-dasharray="3 3"></line>');
-    } else {
-      // the cliff chart in small: this household's cost over income from zero, the
-      // jump marked as the chart marks it (open dot under, filled dot over), and
-      // this household's own income as a teal dot on the curve
-      var cc = W.cliffCurve({ size: state.size, adults: opts.adults, ages: state.ages, bkey: state.bkey }, 36), cv = cc.points, hi = 0, pts = [], jmp = 1, big = -1, me = null;
-      for (i = 0; i < cv.length; i++) hi = Math.max(hi, cv[i].household);
-      var gx = function(k){ return 3 + k / (cv.length - 1) * 50; }, gy = function(v){ return 32 - (hi ? v / hi : 0) * 27; };
-      for (i = 0; i < cv.length; i++){
-        pts.push(gx(i).toFixed(1) + "," + gy(cv[i].household).toFixed(1));
-        if (i && cv[i].household - cv[i - 1].household > big){ big = cv[i].household - cv[i - 1].household; jmp = i; }
-      }
-      var lo0 = cv[0].income, hi0 = cv[cv.length - 1].income;
-      if (state.income >= lo0 && state.income <= hi0){
-        var fi = (state.income - lo0) / (hi0 - lo0) * (cv.length - 1), k0 = Math.floor(fi), k1 = Math.min(cv.length - 1, k0 + 1);
-        me = [3 + fi / (cv.length - 1) * 50, gy(cv[k0].household + (cv[k1].household - cv[k0].household) * (fi - k0))];
-      }
-      glyph("gSlot", '<line x1="2" y1="33" x2="54" y2="33" stroke="' + GREY + '" stroke-width="1.5"></line>' +
-        '<polyline points="' + pts.join(" ") + '" fill="none" stroke="var(--c2)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>' +
-        '<circle cx="' + gx(jmp - 1).toFixed(1) + '" cy="' + gy(cv[jmp - 1].household).toFixed(1) + '" r="2.2" fill="var(--ink)" stroke="var(--c2)" stroke-width="1.5"></circle>' +
-        '<circle cx="' + gx(jmp).toFixed(1) + '" cy="' + gy(cv[jmp].household).toFixed(1) + '" r="2.4" fill="var(--c2)"></circle>' +
-        (me ? '<circle cx="' + me[0].toFixed(1) + '" cy="' + me[1].toFixed(1) + '" r="2.6" fill="var(--teal)"></circle>' : ''));
-    }
-    // whose estimate: the six totals as bars from zero, cheapest first, the chosen one lit
-    var ranked = W.MODELS.map(function(m, k){ return { on: m.id === state.model, t: S.modelTotals[k] }; }).sort(function(a, b){ return a.t - b.t; });
-    var tmax = ranked[ranked.length - 1].t || 1;
-    h = '<line x1="2" y1="33" x2="54" y2="33" stroke="' + GREY + '" stroke-width="1.5"></line>';
-    for (i = 0; i < ranked.length; i++){
-      var bh = ranked[i].t / tmax * 28;
-      h += '<rect class="' + (ranked[i].on ? "on" : "") + '" data-v="' + Math.round(ranked[i].t) + '" x="' + (3 + i * 8.6).toFixed(1) + '" y="' + (32.25 - bh).toFixed(1) + '" width="6" height="' + bh.toFixed(1) + '" fill="' + (ranked[i].on ? "var(--ik)" : GREY) + '"' + (ranked[i].on ? '' : ' opacity=".7"') + '></rect>';
-    }
-    glyph("gProv", h);
-    // side by side: the three figures the comparison prints, on one scale
-    var mxv = Math.max(S.employer.total, S.marketplace.household, S.universal.total);
-    glyph("gCmp", '<rect x="2" y="5" width="' + (S.employer.total / mxv * 52).toFixed(1) + '" height="6.5" fill="var(--c2)"></rect>' +
-      '<rect x="2" y="14.75" width="' + (S.marketplace.household / mxv * 52).toFixed(1) + '" height="6.5" fill="' + GREY + '"></rect>' +
-      '<rect x="2" y="24.5" width="' + (S.universal.total / mxv * 52).toFixed(1) + '" height="6.5" fill="var(--teal)"></rect>');
-    // the lives figure's two parts, in proportion
-    glyph("gLives", '<rect x="2" y="12" width="' + (62863 / 114174 * 52).toFixed(1) + '" height="12" fill="var(--amber-deep)"></rect>' +
-      '<rect x="' + (2 + 62863 / 114174 * 52 + 1.5).toFixed(1) + '" y="12" width="' + (51311 / 114174 * 52 - 1.5).toFixed(1) + '" height="12" fill="var(--pctrl)"></rect>');
+    // why it counts as yours: the paystub, and the amber sheet behind it that never appears on it
+    glyph("gWhy", '<rect x="25" y="4" width="17" height="24" rx="1" stroke="var(--c2)" stroke-width="1.3" fill="none"></rect>' + gHatch(27, 26, 40, 13, 5, 0, -2.6, "var(--c2)") +
+      '<rect x="14" y="8" width="17" height="24" rx="1" fill="var(--ink)" stroke="currentColor" stroke-width="1.3"></rect>' +
+      '<path d="M17.5 13 H27.5 M17.5 17 H25 M17.5 21 H27.5" ' + GS + '></path><path d="M17.5 27 H22" stroke="var(--c1)" stroke-width="2.2" stroke-linecap="round"></path>');
+    // the rise: a price tag, climbing
+    glyph("gRise", '<path d="M13 11 H31 L42 20 L31 29 H13 Z" ' + GS + '></path><circle cx="17.5" cy="20" r="1.7" ' + GS + '></circle>' +
+      '<path d="M22 25 H25.5 V22 H29 V18.5 H33" ' + GA + '></path><path d="M31 16.5 L33.5 18.5 L31 20.5" ' + GA + '></path>');
+    // the arithmetic: a receipt, its total in amber
+    glyph("gWf", '<path d="M19 4 H37 V30 L34.75 32.4 L32.5 30 L30.25 32.4 L28 30 L25.75 32.4 L23.5 30 L21.25 32.4 L19 30 Z" ' + GS + '></path>' +
+      '<path d="M22 9 H34 M22 13 H31 M22 17 H33" ' + GS + ' opacity=".7"></path><path d="M22 21.5 H34" stroke="currentColor" stroke-width=".9" stroke-dasharray="1.6 1.6"></path>' +
+      '<path d="M22 25.5 H34" stroke="var(--c2)" stroke-width="2.4" stroke-linecap="round"></path>');
+    // the cliff: a ledge and the drop; uninsured, a bill with no top
+    glyph("gSlot", state.route === "none"
+      ? '<path class="g-bad" d="M20 9 V32 H36 V9" ' + GS + '></path><rect x="20.65" y="21" width="14.7" height="10.35" fill="var(--c2)" opacity=".9"></rect>' +
+        '<path d="M24 16 V5.5 M32 16 V5.5" stroke="var(--c2)" stroke-width="1.3" stroke-dasharray="2 2" stroke-linecap="round"></path><path d="M22 7.6 L24 5.3 L26 7.6 M30 7.6 L32 5.3 L34 7.6" ' + GA + '></path>'
+      : '<path class="g-cliff" d="M5 15 H27 L28.5 19 L27.5 24 L30 33 H51" ' + GS + '></path>' + gHatch(28.5, 21, 31, 23.5, 4, .6, 2.6) +
+        '<circle cx="22" cy="7.2" r="1.6" fill="currentColor"></circle><path d="M22 9 V12.6 M20 15 L22 12.6 L24 15 M20.2 10.6 H23.8" ' + GS + '></path>' +
+        '<path d="M35 15 V29" stroke="var(--c2)" stroke-width="1.3" stroke-dasharray="2 2" stroke-linecap="round"></path><path d="M32.7 26.8 L35 29.4 L37.3 26.8" ' + GA + '></path>');
+    // who produced the estimate: a seal on the source
+    glyph("gProv", '<circle cx="28" cy="15" r="9.5" ' + GS + '></circle><circle cx="28" cy="15" r="6.2" stroke="currentColor" stroke-width=".9" stroke-dasharray="1.4 1.4" fill="none"></circle>' +
+      '<path d="M24.5 15.4 L27 17.8 L31.6 12.6" ' + GA + '></path><path d="M22.5 22.6 L19.5 32 L23 30 L25 33.4 L27 24.4 M33.5 22.6 L36.5 32 L33 30 L31 33.4 L29 24.4" ' + GS + '></path>');
+    // side by side: a balance, today's bill in amber against universal coverage in teal
+    glyph("gCmp", '<path d="M28 7 V31 M22 31.5 H34" ' + GS + '></path><path d="M13 13 L43 8" ' + GS + '></path><circle cx="28" cy="10.5" r="1.4" fill="currentColor"></circle>' +
+      '<path d="M13 13 L10 22 M13 13 L16 22" ' + GS + ' opacity=".8"></path><path d="M9 22 H17 Q13 26.5 9 22 Z" fill="var(--c2)" stroke="var(--c2)" stroke-width="1"></path>' +
+      '<path d="M43 8 L40 17 M43 8 L46 17" ' + GS + ' opacity=".8"></path><path d="M39 17 H47 Q43 21.5 39 17 Z" fill="var(--teal)" stroke="var(--teal)" stroke-width="1"></path>');
+    // the lives figure: a quiet pulse
+    glyph("gLives", '<path d="M28 31.5 C 16.5 24 12.5 16.5 17.5 11.5 C 21.5 7.8 26 9.6 28 13 C 30 9.6 34.5 7.8 38.5 11.5 C 43.5 16.5 39.5 24 28 31.5 Z" ' + GS + '></path>' +
+      '<path d="M17 19.5 H23 L25 15 L28.4 24.4 L30.6 19.5 H39" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>');
   }
   var stageEl = byId("stage"), storyEl = byId("story");
   function sizeStory(){

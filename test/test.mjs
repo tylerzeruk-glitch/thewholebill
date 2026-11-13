@@ -3709,37 +3709,28 @@ test('story: the universal step follows the savings sign and the unit', async b 
   await p.close();
 });
 
-/* The fold glyphs are drawn from the page's own figures. They are icons, but an
- * icon of a chart that disagreed with the chart would be a small lie, so the two
- * that carry proportion are measured against the numbers. */
-test('glyphs: every story fold wears a drawing made from its own figures', async b => {
-  const p = await page(b, 1280, 800);   // all on one page, where the household fold has a row of its own
+/* The fold icons (owner, 13 November: "Engraved line"): one idea per fold, in one
+ * hairline weight. Two stay live and are checked: the house holds a figure a person,
+ * the children smaller, and on the uninsured route the cliff becomes a bill with no top. */
+test('glyphs: every story fold wears its icon, and the live ones follow the household', async b => {
+  const p = await page(b, 1280, 800);
   const read = () => p.evaluate(() => {
-    const g = id => document.getElementById(id), n = sel => [...document.querySelectorAll(sel)];
-    const num = t => parseFloat(t.replace(/[^0-9.]/g, ''));
-    const cmp = n('#gCmp rect').map(r => parseFloat(r.getAttribute('width')));
-    const pts = (g('gSlot').querySelector('polyline') || { getAttribute: () => '' }).getAttribute('points').split(' ').filter(Boolean).map(q => q.split(',').map(Number));
-    return { all: ['gHh', 'gWhy', 'gRise', 'gWf', 'gSlot', 'gProv', 'gCmp', 'gLives'].every(id => g(id) && g(id).querySelector('svg') && g(id).getAttribute('aria-hidden') === 'true' && g(id).getBoundingClientRect().width === 56),
-      people: n('#gHh circle').length, small: n('#gHh circle').filter(c => +c.getAttribute('r') < 4).length,
-      cmp, figs: ['emp.total', 'mkt.household', 'uni.total'].map(k => num(document.querySelector('.sticky [data-fig="' + k + '"]').textContent)),
-      wfCols: new Set(n('#gWf rect').map(r => r.getAttribute('x'))).size, parts: document.querySelectorAll('#wf .wcol').length,
-      jump: pts.length ? Math.max(...pts.slice(1).map((q, i) => pts[i][1] - q[1])) : 0, npts: pts.length,
-      models: n('#gProv rect').length, chosen: n('#gProv rect.on').length,
-      provRise: n('#gProv rect').map(r => +r.getAttribute('height')).every((h, i, a) => !i || h >= a[i - 1] - 0.05),
-      provProp: (() => { const r = n('#gProv rect'), v = r.map(x => +x.getAttribute('data-v')), h = r.map(x => +x.getAttribute('height')); return Math.abs(h[0] / h[5] - v[0] / v[5]) < 0.01; })() };
+    const g = id => document.getElementById(id);
+    return { all: ['gHh', 'gWhy', 'gRise', 'gWf', 'gSlot', 'gProv', 'gCmp', 'gLives'].every(id => g(id) && g(id).querySelector('svg path, svg circle') && g(id).getAttribute('aria-hidden') === 'true' && g(id).getBoundingClientRect().width === 56),
+      people: document.querySelectorAll('#gHh circle.gp').length, kids: document.querySelectorAll('#gHh circle.gp.kid').length,
+      inside: (() => { const h = g('gHh').querySelector('svg').getBBox(); return h.x >= 0 && h.x + h.width <= 56; })(),
+      cliff: !!g('gSlot').querySelector('.g-cliff'), bad: !!g('gSlot').querySelector('.g-bad'),
+      weights: [...new Set([...document.querySelectorAll('.fold-g svg [stroke-width]')].map(e => +e.getAttribute('stroke-width')))].sort() };
   });
   let r = await read();
   ok('all eight are there, 56px wide and hidden from assistive tech', r.all);
-  ok('the household glyph has a dot a person, the children smaller', r.people === 4 && r.small === 2, `${r.people} dots, ${r.small} small`);
-  ok('the comparison glyph\'s bars are in the proportion of the three figures', Math.abs(r.cmp[1] / r.cmp[0] - r.figs[1] / r.figs[0]) < 0.01 && Math.abs(r.cmp[2] / r.cmp[0] - r.figs[2] / r.figs[0]) < 0.01, JSON.stringify([r.cmp, r.figs]));
-  ok('the arithmetic glyph has the waterfall\'s columns', r.wfCols === r.parts, `${r.wfCols} vs ${r.parts}`);
-  ok('the cliff glyph is this household\'s curve, with the cliff in it', r.npts > 20 && r.jump > 6, `${r.npts} points, biggest step ${r.jump.toFixed(1)}px`);
-  ok('the estimate glyph marks six models and one choice', r.models === 6 && r.chosen === 1);
-  ok('its bars stand cheapest to priciest, in proportion from zero', r.provRise && r.provProp);
-  await p.evaluate(() => { const f = document.getElementById('foldHh'); f.open = true; document.getElementById('sizeUp').click(); document.querySelector('#route button[data-r="none"]').click(); f.open = false; });
+  ok('the house holds a figure a person, the children smaller', r.people === 4 && r.kids === 2, `${r.people} figures, ${r.kids} children`);
+  ok('marketplace and employer readers see the cliff', r.cliff && !r.bad);
+  ok('one hairline weight, plus the fine hatching and the amber totals', r.weights.every(w => [.8, .9, 1, 1.1, 1.2, 1.3, 2.2, 2.4].includes(w)), r.weights.join(', '));
+  await p.evaluate(() => { const f = document.getElementById('foldHh'); f.open = true; for (let k = 0; k < 4; k++) document.getElementById('sizeUp').click(); document.querySelector('#route button[data-r="none"]').click(); f.open = false; });
   await p.waitForTimeout(250);
   r = await read();
-  ok('they follow the household and the route', r.people === 5 && r.npts === 0 && r.wfCols === r.parts, JSON.stringify([r.people, r.npts, r.wfCols, r.parts]));
+  ok('they follow the household and the route: eight figures inside a wider house, and a bill with no top', r.people === 8 && r.inside && r.bad && !r.cliff, JSON.stringify([r.people, r.inside, r.bad]));
   await p.close();
 });
 
