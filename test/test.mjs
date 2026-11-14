@@ -3747,6 +3747,34 @@ test('glyphs: every story fold wears its icon, and the live ones follow the hous
   await p.close();
 });
 
+/* The household box (owner, 14 November): Enter did not seem to apply a ZIP (a
+ * browser's address autofill can swallow it), nothing said the change had taken,
+ * and there was no Done. Five digits now apply on their own, the ZIP button and
+ * the title bar say Saved, and Done closes the box. */
+test('household box: a ZIP applies at five digits, says Saved, and Done closes', async b => {
+  for (const [w, h] of [[1280, 800], [390, 844]]) {
+    const p = await page(b, w, h, w < 500, 'index.html', true);
+    await p.evaluate(() => document.querySelector('#foldHh > summary').click()); await p.waitForTimeout(700);
+    const st = () => p.evaluate(() => ({ btn: document.getElementById('zipGo').textContent.trim(), saved: !document.getElementById('hhSaved').hidden,
+      place: document.getElementById('hhSum').textContent, open: document.getElementById('foldHh').open,
+      done: (() => { const d = document.querySelector('#foldHh .sheet-done'), r = d.getBoundingClientRect(); return d.textContent === 'Done' && r.height >= 44 && r.right <= innerWidth; })() }));
+    let r = await st();
+    ok(`${w}px: the box opens with Update, no Saved mark, and a Done button`, r.btn === 'Update' && !r.saved && r.done, JSON.stringify(r));
+    await p.locator('#zip').fill('0646'); await p.waitForTimeout(200);
+    r = await st();
+    ok(`${w}px: four digits change nothing`, /Dallas/.test(r.place) && r.btn === 'Update' && !r.saved, JSON.stringify(r));
+    await p.locator('#zip').pressSequentially('8'); await p.waitForTimeout(500);
+    r = await st();
+    ok(`${w}px: the fifth digit applies the ZIP with no Enter and no button, and both say Saved`, /Fairfield/.test(r.place) && r.btn === 'Saved' && r.saved, JSON.stringify(r));
+    await p.locator('#zip').fill('0646'); await p.waitForTimeout(200);
+    ok(`${w}px: editing the ZIP again turns the button back to Update`, (await st()).btn === 'Update');
+    await p.click('#foldHh .sheet-done'); await p.waitForTimeout(700);
+    r = await st();
+    ok(`${w}px: Done closes the box and the household stays changed`, !r.open && /Fairfield/.test(r.place), JSON.stringify(r));
+    await p.close();
+  }
+});
+
 /* Who pays the rest. The universal bar drops far below the whole bill, and readers
  * ask where the difference went (owner, 14 November). The fold answers in words and
  * adds no figure of its own: each number it prints is one the bar already shows. */

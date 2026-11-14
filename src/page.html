@@ -1078,6 +1078,21 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .sheets:not(.onepage) .fold.wide[open] .panel > .f-ages{grid-column:2}
 .sheets:not(.onepage) .fold.wide[open] .hhzip .zipfield .v{height:48px;font-size:19px}
 .sheets:not(.onepage) .fold.wide[open] .hhzip .btn-dark{height:48px;padding:0 24px}
+/* The ZIP button: amber while the field holds a ZIP the page is not using, a quiet
+   "Saved" once it is. Same width either way, so nothing beside it moves. */
+.hhzip .btn-dark{min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0}
+.hhzip .btn-dark.saved{background:transparent;color:var(--ik);box-shadow:inset 0 0 0 1px var(--ictrl);cursor:default}
+.hhzip .btn-dark.saved svg{color:var(--c2)}
+/* The household box's title bar: a "Saved" mark once anything differs from how the
+   box opened, and Done in place of the close cross */
+.sheet-acts{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.hh-saved{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:14px;color:var(--im)}
+.hh-saved[hidden]{display:none}
+.hh-saved svg{color:var(--c2)}
+.sheet-x.sheet-done{width:auto;padding:0 22px;border-radius:999px;border-color:transparent;background:var(--c2);color:#1E1509;font-family:var(--sans);font-size:15px;font-weight:500}
+.sheet-x.sheet-done:hover{background:var(--c1)}
+@keyframes savedIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.motion .hh-saved.pop{animation:savedIn .32s cubic-bezier(.2,.8,.2,1)}
 /* the inputs sit on their own panel with filled fields; the estimate reads off the ground beside it.
    Both columns start at the top: the shorter one no longer stretches to the taller one's height. */
 .sheets:not(.onepage) .fold.wide[open] .instr{align-items:stretch;column-gap:clamp(20px,2.6vw,32px)}
@@ -1402,6 +1417,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
    caption row and becomes a list, because aligning to a 56px column is worth
    nothing if the words do not fit inside it. */
 @media (max-width:500px){
+  .hh-saved .w{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .sheet-x.sheet-done{padding:0 18px}
   /* The column, not the type, is where the headroom comes from: at 320px five
      columns share 272px, so every pixel of gap is worth a fifth of a pixel to each
      of them. CI caught a 1px overflow here that macOS did not -- Linux sets the
@@ -3171,6 +3188,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
     renderCliff();
     paintUnit();
     updateLetterMeta();
+    zipBtnPaint();
+    if (typeof hhSaved === "function") hhSaved();
   }
 
 
@@ -4082,7 +4101,20 @@ section.paper.onteal{background:var(--paper);background-image:none}
 
   byId("zipGo").addEventListener("click", submitZip);
   byId("zip").addEventListener("keydown", function(e){ if (e.key === "Enter") submitZip(); });
-  byId("zip").addEventListener("input", function(){ var d = this.value.replace(/\D/g, ""); if (d !== this.value) this.value = d; });
+  // Five digits apply on their own: Enter can be eaten by the browser's address
+  // autofill (owner, 14 November: "I have to actually hit the update button")
+  byId("zip").addEventListener("input", function(){
+    var d = this.value.replace(/\D/g, ""); if (d !== this.value) this.value = d;
+    if (d.length === 5 && !(state.mine && d === state.zip5 && !state.bChoices)) submitZip();
+    zipBtnPaint();
+  });
+  // The button says whether the ZIP in the field is the one the page is using
+  function zipBtnPaint(){
+    var b = byId("zipGo"), on = state.mine && !state.bChoices && byId("zip").value === state.zip5;
+    if (b.classList.contains("saved") === on && b.innerHTML) return;
+    b.classList.toggle("saved", on);
+    b.innerHTML = on ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Saved</span>' : "Update";
+  }
   byId("income").addEventListener("input", function(){ state.income = +this.value; paint(); });
   // One box per person. The stepper is the only thing that changes the count;
   // typing in a box never does, so the two cannot disagree. Boxes are rebuilt only
@@ -4860,6 +4892,14 @@ section.paper.onteal{background:var(--paper);background-image:none}
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg></button>';
     bd.insertBefore(hd, bd.firstChild);
     hd.querySelector(".sheet-x").addEventListener("click", function(){ closeSheet(); });
+    if (d.id === "foldHh"){
+      // every change applies as it is made; Done says so, and closes the box
+      var x = hd.querySelector(".sheet-x"), acts = document.createElement("span");
+      acts.className = "sheet-acts";
+      acts.innerHTML = '<span class="hh-saved" id="hhSaved" role="status" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="w">Saved</span></span>';
+      hd.insertBefore(acts, x); acts.appendChild(x);
+      x.classList.add("sheet-done"); x.removeAttribute("aria-label"); x.textContent = "Done";
+    }
     d.querySelector("summary").addEventListener("click", function(e){
       if (isOnePage()) return;
       e.preventDefault();
@@ -4883,6 +4923,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     bd.setAttribute("role", "dialog"); bd.setAttribute("aria-modal", "true"); bd.setAttribute("aria-label", title);
     sheetBack = d.querySelector("summary"); sheetFrom = from || null;
     d.open = true; sheetOf = d;
+    if (d.id === "foldHh"){ hhAtOpen = hhSig(); hhShown = null; byId("hhSaved").hidden = true; }
     byId("shade").hidden = false;
     bd.getAnimations({ subtree: true }).forEach(function(a){ a.cancel(); });
     void bd.offsetWidth;
@@ -4902,6 +4943,21 @@ section.paper.onteal{background:var(--paper);background-image:none}
       });
     }
     d.querySelector(".sheet-x").focus({ preventScroll: true });
+  }
+  // "Saved" appears once the household differs from how the box opened, and rises in
+  // again each time the reader settles on a new one (a slider drag is one change)
+  var hhAtOpen = null, hhShown = null, hhT = 0;
+  function hhSig(){ return JSON.stringify([state.mine, state.bkey, state.zip5, state.ages, state.income, state.route, state.deductPer, state.period, state.totPrem, state.oopOwn, state.district]); }
+  function hhSaved(){
+    if (!sheetOf || sheetOf.id !== "foldHh") return;
+    var el = byId("hhSaved"), s = hhSig();
+    clearTimeout(hhT);
+    if (s === hhAtOpen){ el.hidden = true; hhShown = null; return; }
+    if (s === hhShown) return;
+    hhT = setTimeout(function(){
+      hhShown = s; el.hidden = false;
+      el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+    }, el.hidden ? 0 : 300);
   }
   function closeSheet(now){
     var d = sheetOf; if (!d) return;
