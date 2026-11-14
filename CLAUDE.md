@@ -121,8 +121,8 @@ sections dissolve with `display:contents`; each objection card shows its questio
 its one-line answer (`.obj-c`, aria-hidden), and the full answer opens as a sheet (the deck's folds
 take `.wide` only while cards are on). Past the last card Next goes to the letter, which stays a
 scrolling page on purpose: editing text in a swipe row fights the swipe. The other number's card
-tightens in two levels like the story's. Opening "Who produced this number" there still scrolls
-the card.
+tightens in two levels like the story's, and its "Who produced this number" opens as a sheet
+too (`.src.wide`). No card scrolls inside in either direction; the suite checks both.
 
 - **The suite reads the page all on one page** (`page()` in `test/test.mjs` clicks the hidden
   switch), because most checks measure what is inside the folds. Checks about the story,

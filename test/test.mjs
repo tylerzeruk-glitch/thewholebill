@@ -3784,9 +3784,9 @@ test('cards: no card scrolls inside, the dots sit whole, and a tap names a part 
     for (const r of ['employer', 'marketplace', 'none']) {
       await p.evaluate(r => { const f = document.getElementById('foldHh'); f.open = true; document.querySelector('#route button[data-r="' + r + '"]').click(); f.open = false; }, r);
       await p.waitForTimeout(200);
-      over.push(...await p.evaluate(() => [...document.querySelectorAll('.sstep')].filter(e => e.offsetHeight).map(e => e.scrollHeight - e.clientHeight)));
+      over.push(...await p.evaluate(() => [...document.querySelectorAll('.sstep, #lives > .wrap, .ob-hd, .obj')].filter(e => e.offsetHeight).map(e => Math.max(e.scrollHeight - e.clientHeight, e.scrollWidth - e.clientWidth))));
     }
-    ok(`${w}x${h}: no card scrolls inside, in any route`, over.every(o => o <= 1), over.join(' '));
+    ok(`${w}x${h}: no card scrolls inside, up and down or side to side, in any route`, over.every(o => o <= 1), over.join(' '));
     await storyStep(p, 3); await p.waitForTimeout(300);
     const dots = await p.evaluate(() => { const l = document.getElementById('mline'); if (!l.checkVisibility()) return 'hidden';
       const c = document.querySelector('.sstep[data-step="3"]').getBoundingClientRect(); return [...l.children].every(i => { const r = i.getBoundingClientRect(); return r.left >= c.left - .5 && r.right <= c.right + .5; }); });
@@ -3823,6 +3823,12 @@ test('deck: on a phone the other number and the objections are cards, then the l
       return { open: d.open, fixed: getComputedStyle(bd).position === 'fixed', inside: r.top >= 0 && r.bottom <= innerHeight + 1, title: d.querySelector('.sheet-t').textContent, body: d.querySelector('.body').checkVisibility() }; });
     ok(`${w}x${h}: the full answer opens over the page, titled by its question`, sh.open && sh.fixed && sh.inside && sh.body && /taxes/.test(sh.title), JSON.stringify(sh));
     await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+    await p.evaluate(() => { const r = document.getElementById('drow'); r.scrollTo({ left: 0 }); }); await p.waitForTimeout(400);
+    await p.click('#lives details.src > summary'); await p.waitForTimeout(500);
+    const src = await p.evaluate(() => { const d = document.querySelector('#lives details.src'), bd = d.querySelector('.src-bd'), r = bd.getBoundingClientRect(), c = document.querySelector('#lives > .wrap');
+      return { open: d.open, fixed: getComputedStyle(bd).position === 'fixed', inside: r.top >= 0 && r.bottom <= innerHeight + 1, title: d.querySelector('.sheet-t').textContent, card: c.scrollHeight - c.clientHeight }; });
+    ok(`${w}x${h}: who produced the number opens over the page too, and its card never scrolls`, src.open && src.fixed && src.inside && /Who produced/i.test(src.title) && src.card <= 1, JSON.stringify(src));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(400);
     await p.evaluate(() => { const r = document.getElementById('drow'); r.scrollTo({ left: 6 * r.clientWidth }); }); await p.waitForTimeout(500);
     ok(`${w}x${h}: the last card's Next says it goes to the letter`, /Write to them/.test(await p.textContent('#dNext')));
     await p.click('#dNext'); await p.waitForTimeout(900);
@@ -3833,6 +3839,8 @@ test('deck: on a phone the other number and the objections are cards, then the l
   const p = await page(b, 1280, 800, false, 'index.html', true);
   const d = await p.evaluate(() => { const o = document.getElementById('obj1'); o.querySelector('summary').click(); return { open: o.open, pos: getComputedStyle(o.querySelector('.fold-bd')).position, nav: document.getElementById('dnav').checkVisibility(), card: document.querySelector('.obj-c').checkVisibility() }; });
   ok('1280: objections still open in place, with no deck controls', d.open && d.pos !== 'fixed' && !d.nav && !d.card, JSON.stringify(d));
+  const sd = await p.evaluate(() => { const o = document.querySelector('#lives details.src'); o.querySelector('summary').click(); return new Promise(r => setTimeout(() => r({ open: o.open, pos: getComputedStyle(o.querySelector('.src-bd')).position, hd: o.querySelector('.sheet-hd').checkVisibility() }), 500)); });
+  ok('1280: who produced the number still opens in place, with no title bar', sd.open && sd.pos !== 'fixed' && !sd.hd, JSON.stringify(sd));
   await p.close();
 });
 

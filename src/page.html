@@ -405,7 +405,7 @@ button.step{cursor:pointer;font-family:var(--sans)}
 .mline::before{content:"";position:absolute;left:-12px;right:-12px;top:21px;height:2px;background:var(--ictrl)}
 .mline i{position:absolute;top:15px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--ink);box-shadow:inset 0 0 0 2px var(--ik)}
 .mline i.on{background:var(--teal);box-shadow:none;transform:scale(1.5)}
-.mline::after{content:"";position:absolute;top:0;bottom:0;left:-16px;right:-16px}   /* the end dots sit half past the line; their taps count too */
+.mline::after{content:"";position:absolute;top:0;bottom:0;left:-12px;right:-12px}   /* the end dots sit half past the line; their taps count too */
 .mline i.near:not(.on){background:var(--ik);transform:scale(1.25)}
 .mends{display:flex;justify-content:space-between;font-size:13px;color:var(--im);margin-top:-4px}
 .mwho{margin:0;font-family:var(--sans);font-size:14.5px;line-height:1.5;color:var(--im)}
@@ -1035,9 +1035,9 @@ section.paper.onteal{background:var(--paper);background-image:none}
 /* A floating box over the dimmed page (owner, 13 November: "fly out into hovering boxes
    and minimize back into the icon"). Centred by auto margins, not a transform, so the
    transform is free for the flight in and out of whatever the reader tapped. */
-.sheets:not(.onepage) .fold.wide[open] > .fold-bd{position:fixed;inset:0;margin:auto;z-index:60;width:min(1120px,calc(100% - 48px));height:fit-content;max-height:calc(100vh - 24px);max-height:calc(100svh - 24px);overflow-y:auto;overscroll-behavior:contain;
+.sheets:not(.onepage) .fold.wide[open] > .fold-bd,.sheets:not(.onepage) .src.wide[open] > .fold-bd{position:fixed;inset:0;margin:auto;z-index:60;width:min(1120px,calc(100% - 48px));height:fit-content;max-height:calc(100vh - 24px);max-height:calc(100svh - 24px);overflow-y:auto;overscroll-behavior:contain;
   background:var(--ink);color:var(--ik);border:1px solid var(--irule-2);border-radius:var(--r-lg);box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.25);padding:0 clamp(24px,3vw,36px) clamp(18px,3svh,34px)}
-.sheets:not(.onepage) .fold.wide .sheet-hd{display:flex;position:sticky;top:0;z-index:3;background:var(--ink);align-items:center;justify-content:space-between;gap:16px;padding:clamp(14px,2.4svh,26px) 0 10px}
+.sheets:not(.onepage) .fold.wide .sheet-hd,.sheets:not(.onepage) .src.wide .sheet-hd{display:flex;position:sticky;top:0;z-index:3;background:var(--ink);align-items:center;justify-content:space-between;gap:16px;padding:clamp(14px,2.4svh,26px) 0 10px}
 .sheets:not(.onepage) .fold.wide .fold-in{padding:2px 0 0}
 .sheet-t{font-family:var(--serif);font-size:22px;letter-spacing:-.01em;color:var(--ik)}
 .sheet-x{appearance:none;-webkit-appearance:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--ictrl);background:none;color:var(--ik);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
@@ -1263,12 +1263,12 @@ section.paper.onteal{background:var(--paper);background-image:none}
 }
 
 @media (max-width:760px){
-  .sheets:not(.onepage) .fold.wide[open] > .fold-bd{width:calc(100% - 20px);max-height:calc(100vh - 12px);max-height:calc(100svh - 12px);padding:0 16px 16px}
+  .sheets:not(.onepage) .fold.wide[open] > .fold-bd,.sheets:not(.onepage) .src.wide[open] > .fold-bd{width:calc(100% - 20px);max-height:calc(100vh - 12px);max-height:calc(100svh - 12px);padding:0 16px 16px}
   .sheets:not(.onepage) #foldHh[open] > .fold-bd{height:calc(100svh - 12px)}
   /* one screen on a phone too: shorter charts, the household as one column, the figures in rows */
   .sheets:not(.onepage) .fold.wide[open]{--chart-h:clamp(140px,calc(100svh - 680px),240px);--rise-h:clamp(110px,calc(100svh - 640px),220px)}
-  .sheets:not(.onepage) .fold.wide .sheet-hd{padding:12px 0 4px}
-  .sheets:not(.onepage) .fold.wide .sheet-t{font-size:19px}
+  .sheets:not(.onepage) .fold.wide .sheet-hd,.sheets:not(.onepage) .src.wide .sheet-hd{padding:12px 0 4px}
+  .sheets:not(.onepage) .fold.wide .sheet-t,.sheets:not(.onepage) .src.wide .sheet-t{font-size:19px}
   .sheets:not(.onepage) .fold.wide .fold-in{padding:4px 0 0}
   .sheets:not(.onepage) .fold.wide[open] .wf{margin-top:48px}
   .sheets:not(.onepage) .fold.wide[open] .instr{grid-template-columns:minmax(0,1fr)}
@@ -1337,7 +1337,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .cards .sticks{display:flex;gap:4px;grid-column:1 / -1;grid-row:3;padding:14px 0 4px}
   .cards .ssteps{grid-column:1;grid-row:4;display:flex;height:var(--card-h);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
   .cards .ssteps::-webkit-scrollbar{display:none}
-  .cards .sstep{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;height:100%;min-height:0;overflow-y:auto;justify-content:flex-start;gap:14px;padding:16px 2px 10px 0}
+  .cards .sstep{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;height:100%;min-height:0;overflow-y:auto;overflow-x:hidden;justify-content:flex-start;gap:14px;padding:16px 2px 10px 0}
   .cards .sstep.send-card{display:flex}
   .cards .sstep[data-step="3"]{gap:10px}   /* the fullest card: its chip is always there, so it packs a little tighter */
   .cards .stage{grid-column:2;grid-row:4;position:static;height:var(--card-h);min-height:0;margin:0;padding:10px 0 6px;background:none;border:0;z-index:auto;align-items:flex-end}
@@ -1379,7 +1379,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .cards .drow::-webkit-scrollbar{display:none}
   .cards .drow > section,.cards #objections > .wrap,.cards .objlist{display:contents}
   .cards .ob-meth{display:none}
-  .cards #lives > .wrap,.cards .ob-hd,.cards .obj{flex:0 0 100%;box-sizing:border-box;height:100%;min-height:0;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;margin:0;padding:12px 0 8px;position:relative}
+  .cards #lives > .wrap,.cards .ob-hd,.cards .obj{flex:0 0 100%;box-sizing:border-box;height:100%;min-height:0;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;overflow-x:hidden;margin:0;padding:12px 0 8px;position:relative}
   .cards #lives > .wrap{display:flex;flex-direction:column;justify-content:center;gap:20px;max-width:none}
   .cards .ob-hd{display:flex;flex-direction:column;justify-content:center}
   .cards #foldLives{margin-top:0}
@@ -5064,7 +5064,9 @@ section.paper.onteal{background:var(--paper);background-image:none}
   });
   // every wide fold gets a title bar and a close button for its life as a sheet; so do
   // the deck's folds, which are sheets only while the page is in cards (applyCards)
-  [].forEach.call(document.querySelectorAll("details.fold.wide, details.obj, #foldLives"), function(d){
+  var livesSrc = document.querySelector("#lives details.src");
+  livesSrc.querySelector(".src-bd").classList.add("fold-bd");
+  [].forEach.call(document.querySelectorAll("details.fold.wide, details.obj, #foldLives, #lives details.src"), function(d){
     var deckFold = !d.classList.contains("wide");
     if (deckFold) d.classList.add("deckfold");
     var bd = d.querySelector(".fold-bd"), hd = document.createElement("div");
@@ -5084,7 +5086,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     d.querySelector("summary").addEventListener("click", function(e){
       if (isOnePage() || (deckFold && !d.classList.contains("wide"))) return;
       e.preventDefault();
-      if (sheetOf === d) closeSheet(); else openSheet(d, d.querySelector("summary .obj-more") || d.querySelector("summary .fold-x"));
+      if (sheetOf === d) closeSheet(); else openSheet(d, d.querySelector("summary .obj-more") || d.querySelector("summary .fold-x, summary .src-x"));
     });
   });
   // The box grows out of the point the reader tapped and shrinks back into it. The
@@ -5099,7 +5101,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   }
   function openSheet(d, from){
     closeSheet(true);
-    var bd = d.querySelector(".fold-bd"), title = (d.querySelector("summary .quote") || d.querySelector(".fold-k")).textContent;
+    var bd = d.querySelector(".fold-bd"), title = (d.querySelector("summary .quote") || d.querySelector(".fold-k, .src-k")).textContent;
     d.querySelector(".sheet-t").textContent = title;
     bd.setAttribute("role", "dialog"); bd.setAttribute("aria-modal", "true"); bd.setAttribute("aria-label", title);
     sheetBack = d.querySelector("summary"); sheetFrom = from || null;
