@@ -1354,7 +1354,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   /* A card never scrolls inside (owner, 14 November). The universal card is the fullest,
      so fitCards() tightens it a level at a time until it fits: smaller fold rows, then
      smaller type, then the picker's label, then the dot line (the picker still names
-     every estimate). The basis chip always stays. */
+     every estimate), then the sentence a size smaller again. The basis chip always stays. */
   .cards .sstep.fit1 .mends{display:none}
   .cards .sstep.fit1 .fold-g,.cards .sstep.fit1 .fold-g svg{width:44px;height:28px}
   .cards .sstep.fit1 .fold > summary{padding:4px 0}
@@ -1364,6 +1364,10 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .cards .sstep.fit3 #modelLbl{display:none}
   .cards .sstep.fit4 .mline{display:none}
   .cards .sstep.fit4{gap:5px}
+  /* CI's Linux text wraps the sentence to one more line than a Mac's at 360 wide */
+  .cards .sstep.fit5{gap:3px}
+  .cards .sstep.fit5 .snum{font-size:clamp(32px,10vw,40px)}
+  .cards .sstep.fit5 .ssay{font-size:16px;line-height:1.35}
   /* Tap the bar to read a part of it: the label beside it, the other parts dimmed */
   .cards .sbar{position:relative}
   .cards .sbar-track{cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -4567,14 +4571,10 @@ section.paper.onteal{background:var(--paper);background-image:none}
     var say3 = byId("st3say"), lead3 = "No premiums. Nothing due at the doctor. ",
         less3 = lead3 + fmt(Math.abs(S.savings)) + " " + WORDS.a[state.unit] + " stays with your household.",
         more3 = lead3 + "Under this estimate your household would pay " + fmt(Math.abs(S.savings)) + " more " + WORDS.a[state.unit] + " than it bears today.";
-    say3.style.minHeight = "";
     // only a household whose priciest estimate costs more than today can see both phrasings
-    if (say3.offsetWidth && S.universalRange.hi > S.borneNow){
-      say3.textContent = less3; var h3 = say3.offsetHeight;
-      say3.textContent = more3; h3 = Math.max(h3, say3.offsetHeight);
-      say3.style.minHeight = h3 + "px";
-    }
+    say3Alts = S.universalRange.hi > S.borneNow ? [less3, more3] : null;
     say3.textContent = S.savingsNegative ? more3 : less3;
+    holdSay3();
     byId("sbarGapK").textContent = S.savingsNegative ? "more than today" : "no longer paid";
     // Who pays the rest: what this household no longer pays, and where it comes from instead
     var U = fmt(S.universal.total), yr = " " + WORDS.a[state.unit], own = byId("restOwn"), cr = partBy("subsidy").value, emp = partBy("employer").value;
@@ -4759,12 +4759,26 @@ section.paper.onteal{background:var(--paper);background-image:none}
     glyph("gLives", '<path d="M28 31.5 C 16.5 24 12.5 16.5 17.5 11.5 C 21.5 7.8 26 9.6 28 13 C 30 9.6 34.5 7.8 38.5 11.5 C 43.5 16.5 39.5 24 28 31.5 Z" ' + GS + '></path>' +
       '<path d="M17 19.5 H23 L25 15 L28.4 24.4 L30.6 19.5 H39" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>');
   }
+  /* The universal sentence holds the height of its longer phrasing. Measured at the
+     type size in force, so it is measured again whenever a fit level changes that size:
+     a height kept from larger type left the card scrolling on CI at 360 wide. */
+  var say3Alts = null;
+  function holdSay3(){
+    var say3 = byId("st3say"), now = say3.textContent, h = 0, i;
+    say3.style.minHeight = "";
+    if (!say3Alts || !say3.offsetWidth) return;
+    for (i = 0; i < say3Alts.length; i++){ say3.textContent = say3Alts[i]; h = Math.max(h, say3.offsetHeight); }
+    say3.textContent = now;
+    say3.style.minHeight = h + "px";
+  }
   function fitCards(){
-    var cs = document.querySelectorAll(".sstep"), i, L;
+    var cs = document.querySelectorAll(".sstep"), i, L, has3;
     for (i = 0; i < cs.length; i++){
-      cs[i].classList.remove("fit1", "fit2", "fit3", "fit4");
+      has3 = cs[i].contains(byId("st3say"));
+      cs[i].classList.remove("fit1", "fit2", "fit3", "fit4", "fit5");
+      if (has3) holdSay3();
       if (!cardsOn() || !cs[i].offsetHeight) continue;
-      for (L = 1; L <= 4 && cs[i].scrollHeight > cs[i].clientHeight + 1; L++) cs[i].classList.add("fit" + L);
+      for (L = 1; L <= 5 && cs[i].scrollHeight > cs[i].clientHeight + 1; L++){ cs[i].classList.add("fit" + L); if (has3) holdSay3(); }
     }
   }
   /* Tap the bar (cards only): the part under the finger shows its name and value beside
