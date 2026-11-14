@@ -3801,6 +3801,41 @@ test('cards: no card scrolls inside, the dots sit whole, and a tap names a part 
   }
 });
 
+/* The second deck (owner, 14 November: "Story and objections"). On a phone the other
+ * number and the five objections are cards like the story's; each objection shows its
+ * question and one-line answer, and the full answer opens over the page. Past the last
+ * card, Next goes to the letter. Elsewhere the page is unchanged. */
+test('deck: on a phone the other number and the objections are cards, then the letter', async b => {
+  for (const [w, h] of [[430, 720], [375, 600], [360, 640]]) {
+    const p = await page(b, w, h, true, 'index.html', true);
+    await p.evaluate(() => document.getElementById('deck').scrollIntoView({ block: 'start' })); await p.waitForTimeout(300);
+    const r = await p.evaluate(() => { const cs = [...document.querySelectorAll('#lives > .wrap, .ob-hd, .obj')], row = document.getElementById('drow').getBoundingClientRect();
+      return { n: cs.length, over: cs.map(c => c.scrollHeight - c.clientHeight), wide: cs.every(c => Math.abs(c.getBoundingClientRect().width - row.width) < 1),
+        ticks: document.querySelectorAll('#dticks i').length, page: document.documentElement.scrollWidth <= innerWidth,
+        short: [...document.querySelectorAll('.obj')].every(o => o.querySelector('.obj-a2').textContent === o.querySelector('.obj-a').textContent && o.querySelector('.obj-a2').checkVisibility()) }; });
+    ok(`${w}x${h}: seven cards a screen wide, one tick each, nothing scrolls inside or sideways`, r.n === 7 && r.ticks === 7 && r.wide && r.page && r.over.every(o => o <= 1), JSON.stringify(r.over));
+    ok(`${w}x${h}: each objection card shows its question and its one-line answer`, r.short);
+    await p.click('#dNext'); await p.waitForTimeout(600); await p.click('#dNext'); await p.waitForTimeout(600);
+    const at = await p.evaluate(() => [document.querySelectorAll('#dticks i.on').length, !document.getElementById('dPrev').disabled]);
+    ok(`${w}x${h}: Next moves a card at a time and the ticks follow`, at[0] === 3 && at[1], at.join());
+    await p.click('#obj1 .obj-more'); await p.waitForTimeout(500);
+    const sh = await p.evaluate(() => { const d = document.getElementById('obj1'), bd = d.querySelector('.fold-bd'), r = bd.getBoundingClientRect();
+      return { open: d.open, fixed: getComputedStyle(bd).position === 'fixed', inside: r.top >= 0 && r.bottom <= innerHeight + 1, title: d.querySelector('.sheet-t').textContent, body: d.querySelector('.body').checkVisibility() }; });
+    ok(`${w}x${h}: the full answer opens over the page, titled by its question`, sh.open && sh.fixed && sh.inside && sh.body && /taxes/.test(sh.title), JSON.stringify(sh));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+    await p.evaluate(() => { const r = document.getElementById('drow'); r.scrollTo({ left: 6 * r.clientWidth }); }); await p.waitForTimeout(500);
+    ok(`${w}x${h}: the last card's Next says it goes to the letter`, /Write to them/.test(await p.textContent('#dNext')));
+    await p.click('#dNext'); await p.waitForTimeout(900);
+    const sendTop = await p.evaluate(() => document.getElementById('send').getBoundingClientRect().top);
+    ok(`${w}x${h}: and it does`, Math.abs(sendTop) < 140, String(sendTop));
+    await p.close();
+  }
+  const p = await page(b, 1280, 800, false, 'index.html', true);
+  const d = await p.evaluate(() => { const o = document.getElementById('obj1'); o.querySelector('summary').click(); return { open: o.open, pos: getComputedStyle(o.querySelector('.fold-bd')).position, nav: document.getElementById('dnav').checkVisibility(), card: document.querySelector('.obj-c').checkVisibility() }; });
+  ok('1280: objections still open in place, with no deck controls', d.open && d.pos !== 'fixed' && !d.nav && !d.card, JSON.stringify(d));
+  await p.close();
+});
+
 /* Who pays the rest. The universal bar drops far below the whole bill, and readers
  * ask where the difference went (owner, 14 November). The fold answers in words and
  * adds no figure of its own: each number it prints is one the bar already shows. */

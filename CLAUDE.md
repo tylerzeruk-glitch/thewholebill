@@ -115,6 +115,15 @@ fullest card in up to five levels (`.fit1` to `.fit5`), and the suite checks dow
 375x600. The slim bar answers a tap (`#stip`): the part under the finger shows its name and value
 beside the bar and the rest dims; it names the hidden part once by itself, the first time. All on one page, on a phone, puts the bar away entirely.
 
+**After the story, a second deck** (owner, 2026-11-14, "Story and objections"): on a phone the
+other number and the five objections are cards too (`#deck`, `#drow`, `#dticks`, `#dnav`). The
+sections dissolve with `display:contents`; each objection card shows its question and a copy of
+its one-line answer (`.obj-c`, aria-hidden), and the full answer opens as a sheet (the deck's folds
+take `.wide` only while cards are on). Past the last card Next goes to the letter, which stays a
+scrolling page on purpose: editing text in a swipe row fights the swipe. The other number's card
+tightens in two levels like the story's. Opening "Who produced this number" there still scrolls
+the card.
+
 - **The suite reads the page all on one page** (`page()` in `test/test.mjs` clicks the hidden
   switch), because most checks measure what is inside the folds. Checks about the story,
   the sheets and the hero pass `shut = true` to get the page as a reader first meets it.

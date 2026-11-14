@@ -1141,6 +1141,8 @@ section.paper.onteal{background:var(--paper);background-image:none}
 .finding{display:flex;flex-direction:column;gap:16px}
 .finding .quote{font-size:clamp(22px,2.2vw,27px)}
 .objlist{border-bottom:1px solid var(--prule)}
+.lv-hd{margin-bottom:48px} .ob-hd{margin-bottom:52px}
+.obj-c{display:none}
 /* one row each on a wide screen: the question on the left, its short answer beside it */
 .obj > summary{border-top:1px solid var(--pk);grid-template-columns:2.4rem minmax(0,1fr) auto;grid-template-areas:"k q x";gap:0 14px;padding:20px 0;align-items:baseline}
 .obj .fold-k{grid-row:auto;font-variant-numeric:tabular-nums;font-size:13px;color:var(--plabel)}
@@ -1364,6 +1366,31 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .cards .sstep.fit3 #modelLbl{display:none}
   .cards .sstep.fit4 .mline{display:none}
   .cards .sstep.fit4{gap:5px}
+  /* The second deck: the other number, a title card, then one objection a card. The
+     sections and lists dissolve (display:contents) so their parts line up in one row. */
+  .cards .deck{padding:8px var(--pad) 36px;scroll-margin-top:var(--sticky-h)}
+  .cards #lives h2{font-size:27px}
+  .cards #lives .bigstat .l{font-size:21px}
+  .cards #lives > .wrap.fit1{gap:14px}
+  .cards #lives > .wrap.fit1 .bigstat .n{font-size:56px}
+  .cards #lives > .wrap.fit2 .lv-hd{display:none}   /* the number and its label still say what it is */
+  .cards .dticks{padding:6px 0 4px}
+  .cards .drow{display:flex;height:var(--card-h);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
+  .cards .drow::-webkit-scrollbar{display:none}
+  .cards .drow > section,.cards #objections > .wrap,.cards .objlist{display:contents}
+  .cards .ob-meth{display:none}
+  .cards #lives > .wrap,.cards .ob-hd,.cards .obj{flex:0 0 100%;box-sizing:border-box;height:100%;min-height:0;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;margin:0;padding:12px 0 8px;position:relative}
+  .cards #lives > .wrap{display:flex;flex-direction:column;justify-content:center;gap:20px;max-width:none}
+  .cards .ob-hd{display:flex;flex-direction:column;justify-content:center}
+  .cards #foldLives{margin-top:0}
+  .cards .obj > summary{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:18px;height:100%;box-sizing:border-box;border-top:0;padding:0}
+  .cards .obj .fold-k{font-size:13px}
+  .cards .obj .quote{font-size:27px;line-height:1.3}
+  .cards .obj .fold-x{display:none}
+  .cards .obj-c{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+  .cards .obj-a2{font-family:var(--serif);font-size:19px;line-height:1.45;color:var(--pk)}
+  .cards .obj-more{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid var(--prule);border-radius:999px;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--pk)}
+  .cards .dnav{display:flex;padding-top:10px}
   /* CI's Linux text wraps the sentence to one more line than a Mac's at 360 wide */
   .cards .sstep.fit5{gap:3px}
   .cards .sstep.fit5 .snum{font-size:clamp(32px,10vw,40px)}
@@ -1948,10 +1975,16 @@ section.paper.onteal{background:var(--paper);background-image:none}
     </div>
   </section>
 
+<!-- The other number and the objections. On a phone (html.cards) these become a second
+     deck of cards like the story's: one swipe or tap each, full answers over the page.
+     Elsewhere the wrapper is a plain block and changes nothing. -->
+<div class="deck" id="deck">
+<div class="sticks dticks" id="dticks" aria-hidden="true"></div>
+<div class="drow" id="drow">
 <!-- ============ 05 IN LIVES ============ -->
 <section class="paper onteal" id="lives">
   <div class="wrap sec">
-    <div class="split tie" style="margin-bottom:48px">
+    <div class="split tie lv-hd">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">The other number</div>
         <h2>Cost is not the only thing being measured.</h2>
@@ -2009,7 +2042,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
 <!-- ============ 06 THE OBJECTIONS -->
 <section class="paper onteal" id="objections">
   <div class="wrap sec">
-    <div class="split tie" style="margin-bottom:52px">
+    <div class="split tie ob-hd">
       <div class="stack" style="gap:20px">
         <div class="eyebrow p">The other side</div>
         <h2>The objections, taken seriously.</h2>
@@ -2059,11 +2092,17 @@ section.paper.onteal{background:var(--paper);background-image:none}
 </details>
     </div>
 
-    <div class="row" style="justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:32px">
+    <div class="row ob-meth" style="justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:32px">
       <a class="q" href="#/methodology" style="font-size:14px">Read the full methodology &rarr;</a>
     </div>
   </div>
 </section>
+</div>
+<div class="snav dnav" id="dnav">
+  <button type="button" id="dPrev" disabled>Back</button>
+  <button type="button" id="dNext" class="go">Next</button>
+</div>
+</div>
 
 <!-- ============ 07 WRITE YOUR REP ============ -->
 <section class="paper onteal" id="send">
@@ -4772,13 +4811,13 @@ section.paper.onteal{background:var(--paper);background-image:none}
     say3.style.minHeight = h + "px";
   }
   function fitCards(){
-    var cs = document.querySelectorAll(".sstep"), i, L, has3;
+    var cs = document.querySelectorAll(".sstep, #lives > .wrap"), i, L, has3;
     for (i = 0; i < cs.length; i++){
       has3 = cs[i].contains(byId("st3say"));
       cs[i].classList.remove("fit1", "fit2", "fit3", "fit4", "fit5");
       if (has3) holdSay3();
       if (!cardsOn() || !cs[i].offsetHeight) continue;
-      for (L = 1; L <= 5 && cs[i].scrollHeight > cs[i].clientHeight + 1; L++){ cs[i].classList.add("fit" + L); if (has3) holdSay3(); }
+      for (L = 1; L <= (cs[i].matches(".sstep") ? 5 : 2) && cs[i].scrollHeight > cs[i].clientHeight + 1; L++){ cs[i].classList.add("fit" + L); if (has3) holdSay3(); }
     }
   }
   /* Tap the bar (cards only): the part under the finger shows its name and value beside
@@ -4852,6 +4891,11 @@ section.paper.onteal{background:var(--paper);background-image:none}
   function applyCards(){
     var on = mqCards.matches && !document.documentElement.classList.contains("onepage"), was = cardsOn();
     if (on === was) return;
+    [].forEach.call(document.querySelectorAll(".deckfold"), function(d){
+      if (sheetOf === d) closeSheet(true);
+      if (on) d.open = false;   // one open in place would come up as a sheet; leaving cards keeps what the view opened
+      d.classList.toggle("wide", on);
+    });
     document.documentElement.classList.toggle("cards", on);
     sizeStory();
     sstepsEl.scrollLeft = on ? Math.min(storyStep, 3) * sstepsEl.clientWidth : 0;
@@ -4868,7 +4912,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   byId("sPrev").addEventListener("click", function(){ goCard(storyStep - 1); });
   byId("sNext").addEventListener("click", function(){
     // past the last card the story is over: Next carries on down the page
-    if (storyStep >= cardCount() - 1) byId("lives").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
+    if (storyStep >= cardCount() - 1) byId("deck").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
     else goCard(storyStep + 1);
   });
   sstepsEl.addEventListener("keydown", function(e){
@@ -4876,6 +4920,34 @@ section.paper.onteal{background:var(--paper);background-image:none}
     if (e.key === "ArrowRight"){ e.preventDefault(); goCard(storyStep + 1); }
     if (e.key === "ArrowLeft"){ e.preventDefault(); goCard(storyStep - 1); }
   });
+  /* The second deck works like the story's cards: its own row scrolls, its ticks and
+     Back and Next follow, and past the last objection Next carries on to the letter. */
+  var drowEl = byId("drow"), deckAt = 0;
+  function deckCards(){ return [].filter.call(drowEl.querySelectorAll("#lives > .wrap, .ob-hd, .obj"), function(e){ return true; }); }
+  function paintDeck(){
+    var n = deckCards().length, t = byId("dticks"), i;
+    if (t.children.length !== n){ t.innerHTML = ""; for (i = 0; i < n; i++) t.appendChild(document.createElement("i")); }
+    for (i = 0; i < n; i++) t.children[i].className = i <= deckAt ? "on" : "";
+    byId("dPrev").disabled = deckAt === 0;
+    byId("dNext").innerHTML = deckAt >= n - 1 ? "Write to them &darr;" : "Next";
+  }
+  drowEl.addEventListener("scroll", function(){
+    if (!cardsOn()) return;
+    var i = Math.round(drowEl.scrollLeft / Math.max(1, drowEl.clientWidth));
+    if (i !== deckAt){ deckAt = i; paintDeck(); }
+  }, { passive:true });
+  function goDeck(i){ drowEl.scrollTo({ left: Math.max(0, Math.min(deckCards().length - 1, i)) * drowEl.clientWidth, behavior: scrollBehavior() }); }
+  byId("dPrev").addEventListener("click", function(){ goDeck(deckAt - 1); });
+  byId("dNext").addEventListener("click", function(){
+    if (deckAt >= deckCards().length - 1) byId("send").scrollIntoView({ behavior:scrollBehavior(), block:"start" });
+    else goDeck(deckAt + 1);
+  });
+  drowEl.addEventListener("keydown", function(e){
+    if (!cardsOn()) return;
+    if (e.key === "ArrowRight"){ e.preventDefault(); goDeck(deckAt + 1); }
+    if (e.key === "ArrowLeft"){ e.preventDefault(); goDeck(deckAt - 1); }
+  });
+  paintDeck();
   byId("toSend").addEventListener("click", function(){ byId("send").scrollIntoView({ behavior:scrollBehavior(), block:"start" }); });
   function trackStory(){
     var sb0 = storyEl.getBoundingClientRect(), past = sb0.bottom < window.innerHeight * 0.5;
@@ -4980,8 +5052,21 @@ section.paper.onteal{background:var(--paper);background-image:none}
   byId("viewStory").addEventListener("click", function(){ setView(false, true); });
   byId("viewAll").addEventListener("click", function(){ setView(true, true); });
 
-  // every wide fold gets a title bar and a close button for its life as a sheet
-  [].forEach.call(document.querySelectorAll("details.fold.wide"), function(d){
+  // On a phone card an objection shows its question and its one-line answer, and the
+  // full answer opens over the page. The card's copy of the answer is for the eye; the
+  // answer itself stays in the fold, where a screen reader finds it.
+  [].forEach.call(document.querySelectorAll("details.obj"), function(d){
+    var c = document.createElement("span");
+    c.className = "obj-c"; c.setAttribute("aria-hidden", "true");
+    c.innerHTML = '<span class="obj-a2"></span><span class="obj-more">The full answer <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14 4 20 4 20 10"></polyline><line x1="20" y1="4" x2="13.5" y2="10.5"></line><polyline points="10 20 4 20 4 14"></polyline><line x1="4" y1="20" x2="10.5" y2="13.5"></line></svg></span>';
+    c.querySelector(".obj-a2").textContent = d.querySelector(".obj-a").textContent;
+    d.querySelector("summary").insertBefore(c, d.querySelector("summary .fold-x"));
+  });
+  // every wide fold gets a title bar and a close button for its life as a sheet; so do
+  // the deck's folds, which are sheets only while the page is in cards (applyCards)
+  [].forEach.call(document.querySelectorAll("details.fold.wide, details.obj, #foldLives"), function(d){
+    var deckFold = !d.classList.contains("wide");
+    if (deckFold) d.classList.add("deckfold");
     var bd = d.querySelector(".fold-bd"), hd = document.createElement("div");
     hd.className = "sheet-hd";
     hd.innerHTML = '<span class="sheet-t"></span><button type="button" class="sheet-x" aria-label="Close">' +
@@ -4997,9 +5082,9 @@ section.paper.onteal{background:var(--paper);background-image:none}
       x.classList.add("sheet-done"); x.removeAttribute("aria-label"); x.textContent = "Done";
     }
     d.querySelector("summary").addEventListener("click", function(e){
-      if (isOnePage()) return;
+      if (isOnePage() || (deckFold && !d.classList.contains("wide"))) return;
       e.preventDefault();
-      if (sheetOf === d) closeSheet(); else openSheet(d, d.querySelector("summary .fold-x"));
+      if (sheetOf === d) closeSheet(); else openSheet(d, d.querySelector("summary .obj-more") || d.querySelector("summary .fold-x"));
     });
   });
   // The box grows out of the point the reader tapped and shrinks back into it. The
@@ -5014,7 +5099,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   }
   function openSheet(d, from){
     closeSheet(true);
-    var bd = d.querySelector(".fold-bd"), title = d.querySelector(".fold-k").textContent;
+    var bd = d.querySelector(".fold-bd"), title = (d.querySelector("summary .quote") || d.querySelector(".fold-k")).textContent;
     d.querySelector(".sheet-t").textContent = title;
     bd.setAttribute("role", "dialog"); bd.setAttribute("aria-modal", "true"); bd.setAttribute("aria-label", title);
     sheetBack = d.querySelector("summary"); sheetFrom = from || null;
@@ -5219,7 +5304,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   }, { threshold: 0.6 });
   targets.forEach(function(el){ figIO.observe(el); });
 
-  var sections = all("main > section, .inkzone > section");
+  var sections = all("main > section, .inkzone > section, .drow > section");
   sections.forEach(function(sec){ sec.classList.add("reveal"); });
   var secIO = new IntersectionObserver(function(es){
     es.forEach(function(e){
