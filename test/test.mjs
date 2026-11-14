@@ -3775,6 +3775,32 @@ test('household box: a ZIP applies at five digits, says Saved, and Done closes',
   }
 });
 
+/* Phone cards (owner, 14 November): the universal card scrolled inside itself, its
+ * first dot was cut off, and the slim bar had no way to say what its parts are. */
+test('cards: no card scrolls inside, the dots sit whole, and a tap names a part of the bar', async b => {
+  for (const [w, h] of [[430, 720], [390, 690], [375, 600], [360, 640]]) {
+    const p = await page(b, w, h, true, 'index.html', true);
+    const over = [];
+    for (const r of ['employer', 'marketplace', 'none']) {
+      await p.evaluate(r => { const f = document.getElementById('foldHh'); f.open = true; document.querySelector('#route button[data-r="' + r + '"]').click(); f.open = false; }, r);
+      await p.waitForTimeout(200);
+      over.push(...await p.evaluate(() => [...document.querySelectorAll('.sstep')].filter(e => e.offsetHeight).map(e => e.scrollHeight - e.clientHeight)));
+    }
+    ok(`${w}x${h}: no card scrolls inside, in any route`, over.every(o => o <= 1), over.join(' '));
+    await storyStep(p, 3); await p.waitForTimeout(300);
+    const dots = await p.evaluate(() => { const l = document.getElementById('mline'); if (!l.checkVisibility()) return 'hidden';
+      const c = document.querySelector('.sstep[data-step="3"]').getBoundingClientRect(); return [...l.children].every(i => { const r = i.getBoundingClientRect(); return r.left >= c.left - .5 && r.right <= c.right + .5; }); });
+    ok(`${w}x${h}: every estimate's dot is whole inside the card`, dots === true || dots === 'hidden', String(dots));
+    const at = await p.evaluate(() => { const e = [...document.querySelectorAll('.sseg.on')].pop(), r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, k: e.querySelector('.sseg-t').textContent, v: e.querySelector('b').textContent }; });
+    await p.mouse.click(at.x, at.y); await p.waitForTimeout(150);
+    const tip = await p.evaluate(() => { const t = document.getElementById('stip'), r = t.getBoundingClientRect(); return { on: !t.hidden, text: t.textContent, inside: r.left >= 0 && r.right <= innerWidth, dim: document.getElementById('sbar').classList.contains('tipping') }; });
+    ok(`${w}x${h}: tapping a part of the bar names it and its value, on screen`, tip.on && tip.text === at.k + at.v && tip.inside && tip.dim, JSON.stringify(tip));
+    await p.mouse.click(20, 20); await p.waitForTimeout(150);
+    ok(`${w}x${h}: a tap anywhere else puts it away`, await p.evaluate(() => document.getElementById('stip').hidden));
+    await p.close();
+  }
+});
+
 /* Who pays the rest. The universal bar drops far below the whole bill, and readers
  * ask where the difference went (owner, 14 November). The fold answers in words and
  * adds no figure of its own: each number it prints is one the bar already shows. */
@@ -3831,7 +3857,7 @@ test('cards: on a phone the story is tapped or swiped through, one step a screen
       r = await read(); fit.push(r.yOver);
       ok(`${w}px: Next goes to card ${i + 1}, ticks follow, teal from the universal card on`, r.on === i && r.ticks === i + 1 && r.uni === (i >= 3) && Math.abs(r.left) < 1 && r.y === y0, JSON.stringify([r.on, r.ticks, r.uni, r.left, r.y]));
     }
-    ok(`${w}px: every card fits without scrolling inside it${h < 700 ? ' (a short phone may scroll one a little)' : ''}`, fit.every(o => o <= (h < 700 ? 150 : 0)), fit.join(' '));
+    ok(`${w}px: every card fits without scrolling inside it, even on a short phone`, fit.every(o => o <= 1), fit.join(' '));
     ok(`${w}px: the last card says the story is done and Next carries on`, /Keep reading/.test(r.next), r.next);
     await p.locator('#sPrev').click(); await p.waitForTimeout(350);
     ok(`${w}px: Back returns`, (await read()).on === 3);

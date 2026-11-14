@@ -110,7 +110,10 @@ step-by-step view): `.ssteps` becomes a native scroll-snap row, the bar a slim c
 without labels, with ticks above and Back and Next below, and a fifth closing card. The step in
 focus comes from the row's own scroll position, so swiping is the browser's scrolling and nothing
 is hijacked. The first build pinned the bar across the top third of a phone; the owner's verdict
-was "the bars cover half the screen". All on one page, on a phone, puts the bar away entirely.
+was "the bars cover half the screen". No card scrolls inside itself (owner, 2026-11-14): `fitCards()` tightens the
+fullest card in up to four levels (`.fit1` to `.fit4`), and the suite checks down to 360x640 and
+375x600. The slim bar answers a tap (`#stip`): the part under the finger shows its name and value
+beside the bar and the rest dims; it names the hidden part once by itself, the first time. All on one page, on a phone, puts the bar away entirely.
 
 - **The suite reads the page all on one page** (`page()` in `test/test.mjs` clicks the hidden
   switch), because most checks measure what is inside the folds. Checks about the story,

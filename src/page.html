@@ -401,8 +401,8 @@ button.step{cursor:pointer;font-family:var(--sans)}
    drawn exactly as before; a tap picks the nearest dot, so two estimates that sit
    close together never fight over overlapping targets. The chips stay the keyboard
    and screen-reader control, so the line itself stays aria-hidden. */
-.mline{position:relative;height:44px;margin:-8px 9px -10px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.mline::before{content:"";position:absolute;left:-9px;right:-9px;top:21px;height:2px;background:var(--ictrl)}
+.mline{position:relative;height:44px;margin:-8px 12px -10px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.mline::before{content:"";position:absolute;left:-12px;right:-12px;top:21px;height:2px;background:var(--ictrl)}
 .mline i{position:absolute;top:15px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--ink);box-shadow:inset 0 0 0 2px var(--ik)}
 .mline i.on{background:var(--teal);box-shadow:none;transform:scale(1.5)}
 .mline::after{content:"";position:absolute;top:0;bottom:0;left:-16px;right:-16px}   /* the end dots sit half past the line; their taps count too */
@@ -1351,6 +1351,26 @@ section.paper.onteal{background:var(--paper);background-image:none}
   .cards .fold-s{display:none}
   .cards .fold > summary{padding:8px 0}
   .cards #mwho{display:none}   /* the picker names the estimate, the figure and the sentence above say the rest */
+  /* A card never scrolls inside (owner, 14 November). The universal card is the fullest,
+     so fitCards() tightens it a level at a time until it fits: smaller fold rows, then
+     smaller type, then the picker's label, then the dot line (the picker still names
+     every estimate). The basis chip always stays. */
+  .cards .sstep.fit1 .mends{display:none}
+  .cards .sstep.fit1 .fold-g,.cards .sstep.fit1 .fold-g svg{width:44px;height:28px}
+  .cards .sstep.fit1 .fold > summary{padding:4px 0}
+  .cards .sstep.fit2{gap:7px}
+  .cards .sstep.fit2 .snum{font-size:clamp(36px,11vw,46px)}
+  .cards .sstep.fit2 .ssay{font-size:17px;line-height:1.4}
+  .cards .sstep.fit3 #modelLbl{display:none}
+  .cards .sstep.fit4 .mline{display:none}
+  .cards .sstep.fit4{gap:5px}
+  /* Tap the bar to read a part of it: the label beside it, the other parts dimmed */
+  .cards .sbar{position:relative}
+  .cards .sbar-track{cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .stip{display:none}
+  .cards .stip:not([hidden]){display:flex;flex-direction:column;align-items:flex-end;gap:1px;position:absolute;right:calc(100% + 10px);z-index:6;width:max-content;max-width:min(62vw,240px);padding:8px 12px;background:var(--ink-chip);border:1px solid var(--ictrl);border-radius:var(--r);font-family:var(--sans);font-size:13px;line-height:1.3;color:var(--ib);text-align:right;transform:translateY(-50%);pointer-events:none}
+  .cards .stip b{font-family:var(--fig);font-weight:400;font-size:19px;color:var(--ik)}
+  .cards .sbar.tipping .sseg.on:not(.tip){opacity:.4}
   .cards .sstep > .folds{margin-top:auto}   /* the actions sit low on the card, by the thumb */
   .cards .send-card .btn-dark{align-self:flex-start;height:54px;padding:0 24px}
   /* all on one page, on a phone: the charts are all in the flow, so the pinned bar would only cover them */
@@ -1548,6 +1568,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
         <div class="sbar" id="sbar" role="img" aria-label="">
           <div class="sbar-cap"><span id="sbarCapK">On a paystub</span><b class="num" id="sbarRun" data-fig="story.run">$8,849</b></div>
           <div class="sbar-track" id="sbarTrack"></div>
+          <div class="stip" id="stip" aria-hidden="true" hidden><span id="stipK"></span><b class="num" id="stipV"></b></div>
           <div class="sbar-gap" id="sbarGap"><b class="num" data-fig="uni.savings">$23,884</b><span id="sbarGapK">no longer paid</span></div>
         </div>
       </div>
@@ -4566,6 +4587,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
       ? " more than it bears today; for many households it comes to less."
       : " less than it bears today; for some households it comes to more.");
     byId("restTax").textContent = partBy("tax").value > 0 ? " (" + fmt(partBy("tax").value) + ")" : "";
+    requestAnimationFrame(fitCards);
     byId("st3basis").innerHTML = '<span class="btag">' + (/allocation/i.test(S.universal.basis) ? "Includes our allocation" : "Published formula") + '</span>';
     var a = S.marketplace.place;
     byId("hhPillA").textContent = state.mine ? "Change" : "Enter yours";
@@ -4587,6 +4609,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
   // The step-dependent half: which segments stand, the running total, the ground.
   function paintStory(){
     if (!S || !S.story) return;
+    hideTip();
     var plan = S.story, uni = storyStep >= 3 && !storyIntro, on = storyOn(), scale = storyScale();
     var segs = byId("sbarTrack").querySelectorAll(".sseg"), i, H = parseFloat(byId("stage").style.getPropertyValue("--H")) || 300;
     // labels sit beside their segment's middle; thin neighbours would print on
@@ -4619,6 +4642,16 @@ section.paper.onteal{background:var(--paper);background-image:none}
     var steps = document.querySelectorAll(".sstep");
     for (i = 0; i < steps.length; i++) steps[i].classList.toggle("on", i === storyStep && !storyIntro);
     if (cardsOn()) paintCards();
+    // the first time a reader reaches the part they never see, the bar names it once,
+    // which is how they learn the bar answers a tap
+    if (cardsOn() && !tipTaught && storyStep === 1 && !storyIntro){
+      tipTaught = true;
+      setTimeout(function(){
+        if (storyStep !== 1 || tipOn) return;
+        var k = S.story.steps[1].on[S.story.steps[1].on.length - 1], ps = tipParts(), i;
+        for (i = 0; i < ps.length; i++) if (ps[i].el && ps[i].el.getAttribute("data-k") === k) showTip(ps[i]);
+      }, 650);
+    }
   }
 
   /* ---------- fold glyphs ----------
@@ -4726,6 +4759,54 @@ section.paper.onteal{background:var(--paper);background-image:none}
     glyph("gLives", '<path d="M28 31.5 C 16.5 24 12.5 16.5 17.5 11.5 C 21.5 7.8 26 9.6 28 13 C 30 9.6 34.5 7.8 38.5 11.5 C 43.5 16.5 39.5 24 28 31.5 Z" ' + GS + '></path>' +
       '<path d="M17 19.5 H23 L25 15 L28.4 24.4 L30.6 19.5 H39" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>');
   }
+  function fitCards(){
+    var cs = document.querySelectorAll(".sstep"), i, L;
+    for (i = 0; i < cs.length; i++){
+      cs[i].classList.remove("fit1", "fit2", "fit3", "fit4");
+      if (!cardsOn() || !cs[i].offsetHeight) continue;
+      for (L = 1; L <= 4 && cs[i].scrollHeight > cs[i].clientHeight + 1; L++) cs[i].classList.add("fit" + L);
+    }
+  }
+  /* Tap the bar (cards only): the part under the finger shows its name and value beside
+     the bar, the rest dims. On the universal step the dashed gap answers too. The bar's
+     own label already reads every part aloud, so the tip is for the eye only. */
+  var tipOn = null, tipTaught = false;
+  function hideTip(){
+    if (!tipOn) return;
+    tipOn = null; byId("stip").hidden = true; byId("sbar").classList.remove("tipping");
+    [].forEach.call(document.querySelectorAll(".sseg.tip"), function(e){ e.classList.remove("tip"); });
+  }
+  function tipParts(){
+    var out = [], segs = byId("sbarTrack").querySelectorAll(".sseg.on"), i, r, top = Infinity;
+    for (i = 0; i < segs.length; i++){
+      r = segs[i].getBoundingClientRect(); if (r.height <= 0) continue;
+      top = Math.min(top, r.top);
+      out.push({ el: segs[i], top: r.top, bottom: r.bottom, k: segs[i].querySelector(".sseg-t").textContent, v: segs[i].querySelector("b").textContent });
+    }
+    if (byId("sbar").classList.contains("uni")){
+      var g = byId("sbarGhost").getBoundingClientRect();
+      if (g.height > 0 && g.top < top - 2) out.push({ el: null, top: g.top, bottom: top, k: byId("sbarGapK").textContent.replace(/^./, function(c){ return c.toUpperCase(); }), v: byId("sbarGap").querySelector("b").textContent });
+    }
+    return out;
+  }
+  function showTip(part){
+    hideTip();
+    var bar = byId("sbar"), tip = byId("stip"), br = bar.getBoundingClientRect();
+    tipOn = part; byId("stipK").textContent = part.k; byId("stipV").textContent = part.v;
+    tip.hidden = false; tip.style.top = ((part.top + part.bottom) / 2 - br.top) + "px";
+    bar.classList.add("tipping"); if (part.el) part.el.classList.add("tip");
+  }
+  byId("sbarTrack").addEventListener("click", function(e){
+    if (!cardsOn()) return;
+    var ps = tipParts(), i, best = null, d, bd = 28;
+    for (i = 0; i < ps.length; i++){
+      d = e.clientY < ps[i].top ? ps[i].top - e.clientY : e.clientY > ps[i].bottom ? e.clientY - ps[i].bottom : 0;
+      if (d < bd){ bd = d; best = ps[i]; }
+    }
+    if (!best || (tipOn && tipOn.el === best.el && tipOn.k === best.k)){ hideTip(); return; }
+    e.stopPropagation(); showTip(best);
+  });
+  document.addEventListener("click", function(e){ if (tipOn && !byId("sbarTrack").contains(e.target)) hideTip(); });
   var stageEl = byId("stage"), storyEl = byId("story");
   function sizeStory(){
     var sb = document.querySelector(".sticky");
@@ -4734,6 +4815,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     var room = cardsOn() ? 16 + 48 : 30 + 48;
     var H = Math.max(150, Math.min(560, stageEl.clientHeight - room));
     stageEl.style.setProperty("--H", H + "px");
+    fitCards();
   }
   /* Cards: on a phone, in the step-by-step view, the steps sit side by side in a
      native scroll-snap row. Swiping is the browser's own scrolling, so nothing
