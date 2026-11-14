@@ -20,7 +20,7 @@ const ok = (name, cond, detail='') => {
 // doc picks which built document loads: the calculator by default, the
 // artifact build (which lives OUTSIDE dist so it never deploys) for
 // hash-router coverage, /methodology for its own page.
-const page = async (browser, w, h, mobile=false, doc='index.html') => {
+const page = async (browser, w, h, mobile=false, doc='index.html', shut=false) => {
   // reducedMotion: the suite measures settled values and geometry, not animation frames.
   // The motion itself has its own test, which opts back in.
   const p = await browser.newPage({ viewport:{width:w,height:h}, deviceScaleFactor:1, isMobile:mobile, hasTouch:mobile, reducedMotion:'reduce' });
@@ -28,6 +28,13 @@ const page = async (browser, w, h, mobile=false, doc='index.html') => {
   p.on('console', m => { if (m.type()==='error' && !/TUNNEL|ERR_|net::/.test(m.text())) ok('no console errors', false, m.text()); });
   const base = doc === 'artifact.html' ? '../preview/' : '../dist/';
   await p.goto(pathToFileURL(resolve(HERE, base + doc)).href); await p.waitForTimeout(1200);
+  // The charts live in folds now. Most checks measure what is inside them, so the
+  // page opens with every fold open and the letter unfolded; the checks about the
+  // folds and the story themselves ask for the page as a reader first sees it.
+  if (!shut && doc !== 'methodology/index.html' && doc !== 'updates/index.html') await p.evaluate(() => {
+    const all = document.getElementById('viewAll'); if (all) all.click();   // the reader's own "All on one page" switch
+    window.dispatchEvent(new Event('resize'));
+  }).then(() => p.waitForTimeout(350));
   return p;
 };
 // The age boxes: the stepper sets the count, then each box takes its age.
@@ -155,7 +162,7 @@ test('plan year: every dated figure belongs to the same year', async () => {
 
   const index = readFileSync(resolve(HERE, '../dist/index.html'), 'utf8');
   const meth = readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8');
-  ok(`the notice strip says plan year ${W.YEAR}`, index.includes(`Plan year ${W.YEAR} &middot;`));
+  ok('the notice strip is gone from the page', !/pn-strip/.test(index));   // removed 2026-11-12; the plan year rides the notes, checked below
   const named = [...(index + meth).matchAll(/(?:CMS|IRS|published) (?:<span data-py>)?(\d{4})(?:<\/span>)? (?:plan files|applicable-percentage|federal plan files)/g)].map(m => +m[1]);
   ok(`every "CMS/IRS <year>" in the copy is ${W.YEAR}`, named.length >= 2 && named.every(y => y === W.YEAR), named.join(', '));
 
@@ -320,7 +327,7 @@ test('layout: every section keeps its gutter', async b => {
     const bad = await p.evaluate(min => {
       const vw = innerWidth, out = [];
       document.querySelectorAll('body *').forEach(e => {
-        if (e.closest('[hidden]')) return;
+        if (e.closest('[hidden], .tick')) return;   // the news line scrolls inside its own clipped strip
         const cs = getComputedStyle(e);
         if (cs.position === 'fixed' || cs.overflowX === 'auto' || cs.overflowX === 'scroll') return;
         const hasText = [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
@@ -337,63 +344,6 @@ test('layout: every section keeps its gutter', async b => {
   }
 });
 
-/* The narrative's two bars are a comparison, so their geometry has to carry the
- * true ratio in BOTH dimensions. They previously did neither: unequal figure
- * widths left the tracks 529px and 483px, so length read 3.56x against a true
- * 3.91x, while heights of 52px and 64px made area read 4.38x. Understated one
- * way, overstated the other. */
-test('narrative: the two bars encode their values truthfully', async b => {
-  for (const [w,h,m] of [[1440,900,false],[900,900,false],[390,844,true]]) {
-    const p = await page(b,w,h,m);
-    const r = await p.evaluate(()=>{
-      const rows=[...document.querySelectorAll('.cmp .cmp-row')].map(row=>{
-        const t=row.querySelector('.track'), f=[...t.children], tb=t.getBoundingClientRect();
-        return { trackW:tb.width, h:Math.max(...f.map(x=>x.getBoundingClientRect().height)),
-                 filled:f.reduce((a,x)=>a+x.getBoundingClientRect().width,0),
-                 value:+row.querySelector('.num').textContent.replace(/[^0-9]/g,'') };
-      });
-      const [a,b2]=rows;
-      return { trackDelta:Math.abs(a.trackW-b2.trackW), heightDelta:Math.abs(a.h-b2.h),
-               trueRatio:b2.value/a.value, lengthRatio:b2.filled/a.filled };
-    });
-    ok(`${w}px: both bars share one height`, r.heightDelta < 0.5, `Δ${r.heightDelta.toFixed(1)}px`);
-    ok(`${w}px: both bars share one baseline`, r.trackDelta < 0.5, `Δ${r.trackDelta.toFixed(1)}px`);
-    ok(`${w}px: bar length matches the value ratio`, Math.abs(r.lengthRatio - r.trueRatio) < 0.05,
-       `drawn ${r.lengthRatio.toFixed(2)}x vs true ${r.trueRatio.toFixed(2)}x`);
-    await p.close();
-  }
-});
-
-/* The one-row bar has very little slack between its 900px breakpoint and ~1100px.
- * It fit on macOS and overflowed on Linux, where the same labels set a few pixels
- * wider -- so this asserts the row absorbs the squeeze at every width rather than
- * pushing the Year/Month switch out through overflow-x. */
-/* Each figure is parked at the end of its own bar rather than in a right-hand
- * column, so the short bar's number is not stranded across the page from the mark
- * it labels. The number is positioned by percentage against the same box the fill
- * uses, so this asserts the two edges actually coincide at every width. */
-test('narrative: each figure sits at the end of its own bar', async b => {
-  for (const [w,h,m] of [[1440,900,false],[900,900,false],[390,844,true]]) {
-    const p = await page(b,w,h,m);
-    const r = await p.evaluate(()=>[...document.querySelectorAll('.cmp .cmp-row')].map(row=>{
-      const fills=[...row.querySelector('.track').children];
-      const end=Math.max(...fills.map(f=>f.getBoundingClientRect().right));
-      const n=row.querySelector('.num').getBoundingClientRect();
-      return { gap:n.left-end, right:n.right };
-    }));
-    const [a,b2]=r;
-    ok(`${w}px: small figure follows its bar`, Math.abs(a.gap-16) < 1, `${a.gap.toFixed(1)}px from the bar end`);
-    ok(`${w}px: total figure follows its bar`, Math.abs(b2.gap-16) < 1, `${b2.gap.toFixed(1)}px from the bar end`);
-    await p.close();
-  }
-});
-
-/* Notes take the width of what they annotate. These carried a 56ch measure cap
- * for a day (the readability pass); a narrow ragged column under a full-width
- * chart read as a layout accident, and one-to-three-line captions do not pay
- * the long-measure penalty paragraphs do. Deliberate reversal, 2026-08-31 --
- * this asserts the six notes from that comment round actually span their
- * containers, so a reintroduced cap fails loudly rather than quietly. */
 test('readability: chart notes span the width of what they annotate', async b => {
   for (const w of [1440,1100]) {
     const p = await page(b,w,900);
@@ -458,31 +408,6 @@ test('splits: heading and supporting line share a baseline', async b => {
   }
 });
 
-/* The dateline's amber rule and the area-picker buttons opposite it are both real
- * edges, so they align edge to edge. A 6px margin used to hold them apart, which
- * read as a mistake rather than a decision. Only meaningful while the hero is two
- * columns -- below 1101px the dateline stacks underneath. */
-test('hero: the dateline ends on the same line as the controls', async b => {
-  for (const w of [1101,1250,1440,1920]) {
-    const p = await page(b,w,1000);
-    const d = await p.evaluate(()=>{
-      const hero=document.querySelector('.hero-inner');
-      if (getComputedStyle(hero).gridTemplateColumns.split(' ').length < 2) return null;
-      const bot=e=>document.querySelector(e).getBoundingClientRect().bottom;
-      return +(bot('.dateline') - bot('#areapick')).toFixed(1);
-    });
-    if (d === null) continue;
-    ok(`${w}px: dateline bottom meets the controls`, Math.abs(d) < 0.5, `Δ${d}px`);
-    await p.close();
-  }
-});
-
-/* Three bars compared by length, so each one's SOLID length has to carry the
- * figure printed beside it. This asserts the solid part only.
- * The marketplace row also carries a hatched subsidy on the end of it, drawn at
- * full height by deliberate choice -- its texture and its own caption line carry
- * the distinction -- so that row's OVERALL length is longer than its figure.
- * Do not extend this to total width; the hatch is not part of the number. */
 test('comparison: every bar draws the figure printed beside it', async b => {
   for (const [w,h] of [[1440,900],[1200,900]]) {
     const p = await page(b,w,h);
@@ -550,8 +475,10 @@ test('comparison: the universal bar accounts for its whole figure', async b => {
   const p = await page(b,1440,900);
   // two formula models draw two bands; the four allocated models add a third.
   // 500ms wait: same-composition switches transition their widths over 350ms.
+  // by model id: the pills run cheapest first for this household, so position moves
+  const IDS = ['sanders1', 'galvani', 'rand', 'cbo5', 'blahous', 'urban'];
   for (const [model,bands] of [[0,2],[1,2],[2,3],[3,3],[4,3],[5,3]]) {
-    await p.locator('#pills button').nth(model).click();
+    await p.locator(`#pills button[data-m="${IDS[model]}"]`).click();
     await p.waitForTimeout(500);
     for (const unit of ['y','m']) {
       const r = await p.evaluate(()=>{
@@ -588,17 +515,18 @@ test('narrative: the cliff precedes the turn, and the turn wears teal', async b 
     const eyebrows=[...document.querySelectorAll('.eyebrow')]
       .filter(e=>e.offsetParent !== null)
       .map(e=>e.textContent.trim()).filter(t=>/^\d\d/.test(t));
-    const cliffY=document.getElementById('cliff').offsetTop;
-    const cmpY=document.getElementById('pills').closest('section').offsetTop;
-    const em=[...document.querySelectorAll('h2 em')].find(e=>/Another way/.test(e.textContent));
+    const top = e => e.getBoundingClientRect().top + scrollY;
+    const cliffY=top(document.getElementById('foldSlot'));
+    const cmpY=top(document.getElementById('pills'));
+    const em=document.querySelector('.sstep[data-step="3"] .snum');
     return { seq: eyebrows.map(t=>t.slice(0,2)).join(','),
              cliffFirst: cliffY < cmpY,
              teal: em ? getComputedStyle(em).color : 'missing' };
   });
-  ok('visible sections number 01-07 in page order', r.seq === '01,02,03,04,05,06,07', r.seq);
-  // the 08 eyebrow lives on /methodology now; the routing test asserts it
+  ok('no section wears a number any more (the order is the scroll)', r.seq === '', r.seq);
+  // the methodology eyebrow lives on /methodology now; the routing test asserts it
   ok('the cliff sits before the comparison', r.cliffFirst);
-  ok('"Another way" wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
+  ok('the universal figure wears universal teal', r.teal === 'rgb(63, 181, 174)', r.teal);
   await p.close();
 });
 
@@ -614,7 +542,8 @@ test('slot 03: the cliff for the covered, the bad year for the uninsured', async
     cliff: !document.getElementById('cliffView').hidden,
     bad: !document.getElementById('badYear').hidden,
     intro: document.getElementById('cliffIntro').textContent,
-    eyebrows: [...document.querySelectorAll('#cliff .eyebrow')]
+    // The sheet's own title names the slot; inside, the visible headline does.
+    heads: [...document.querySelectorAll('#cliff h2')]
       .filter(e=>e.offsetParent !== null).map(e=>e.textContent.trim()) }));
 
   let r = await view();
@@ -629,7 +558,8 @@ test('slot 03: the cliff for the covered, the bad year for the uninsured', async
   await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(300);
   r = await view();
   ok('uninsured: the bad year replaces the cliff', !r.cliff && r.bad);
-  ok('and keeps slot number 03', r.eyebrows.join() === '03 · The bad year', r.eyebrows.join());
+  ok('and the slot names itself for it, on the fold and inside', r.heads.length === 1 && /a bad year/.test(r.heads[0])
+     && await p.evaluate(()=>document.getElementById('slotK').textContent === 'The bad year' && /Nothing in law caps/.test(document.getElementById('slotS').textContent)), r.heads.join());
   const txt = await p.evaluate(()=>document.getElementById('badYear').innerText);
   ok('the modeled figure is labelled where it appears', /57,000/.test(txt) && /modeled/.test(txt));
   ok('the statutory ceiling contrast is stated', /\$12,000/.test(txt) && /No limit/.test(txt));
@@ -657,8 +587,9 @@ test('models: six pills spanning the published spectrum', async b => {
   const p = await page(b,1440,900);
   const pills = await p.evaluate(()=>[...document.querySelectorAll('#pills button')].map(e=>e.textContent));
   ok('six models on offer', pills.length === 6, pills.join(' | '));
+  // the pills run cheapest to priciest for this household: Sanders at one end, Urban at the other
   ok('the spectrum is labelled at both ends',
-     /Sanders/.test(pills[0]) && /peer-reviewed/.test(pills[1]) && /priciest/.test(pills[5]),
+     /Sanders/.test(pills[0]) && pills.some(x => /peer-reviewed/.test(x)) && /priciest/.test(pills[5]),
      pills.join(' | '));
 
   const totals = [], notes = new Set();
@@ -686,21 +617,82 @@ test('models: six pills spanning the published spectrum', async b => {
  * columns, every label inside its pill -- and below 900px (measured: the
  * longest role line needs ~106px and a 901px viewport gives ~112px per pill)
  * the native select takes over and drives the same state. */
-test('models: equal pills in one row, a picker on phones', async b => {
+test('models: picking another estimate moves the bar and nothing else in step 3', async b => {
+  // A chip that came and went with the estimate shifted the whole step by 14px (28 on a phone).
+  // $250,000: the estimates fall on both sides of today, so both phrasings of the sentence occur
+  for (const [w, h, m, inc] of [[1280, 800, false, 0], [390, 844, true, 0], [1280, 800, false, 250000]]) {
+    const p = inc ? await page(b, w, h, m) : await page(b, w, h, m, 'index.html', true);
+    if (inc) await setIncome(p, inc);
+    await p.evaluate(() => document.querySelector('.sstep[data-step="3"]').scrollIntoView({ block: 'center', inline: 'center' })); await p.waitForTimeout(700);
+    const seen = [], said = new Set();
+    for (const id of ['sanders1', 'galvani', 'rand', 'cbo5', 'blahous', 'urban', 'sanders1']) {
+      await p.evaluate(id => { const s = document.getElementById('modelPick'); s.value = id; s.dispatchEvent(new Event('change')); }, id);
+      await p.waitForTimeout(250);
+      said.add(await p.evaluate(() => /more/.test(document.getElementById('st3say').textContent)));
+      seen.push(await p.evaluate(inc => ['st3k', 'st3say', 'st3basis', 'mline', 'mwho'].map(i => { const r = document.getElementById(i).getBoundingClientRect(); return Math.round(r.top) + '/' + Math.round(r.height); })
+        .concat([...document.querySelectorAll('.sstep[data-step="3"] .folds > details > summary')].slice(0, inc ? 1 : 9).map(x => Math.round(x.getBoundingClientRect().top))).join(' '), inc));   // all on one page the first fold stands open and its text is the estimate's own
+    }
+    ok(`${w}px${inc ? ' at $' + inc : ''}: the step's blocks stand still through all six estimates`, new Set(seen).size === 1 && (!inc || said.size === 2), JSON.stringify([...new Set(seen), [...said]]));
+    ok(`${w}px: every estimate wears one basis chip`, await p.evaluate(() => document.querySelectorAll('#st3basis .btag').length === 1));
+    await p.close();
+  }
+});
+test('bar: a sliding figure label holds the ink of its dollar sign', async b => {
+  // Newsreader's "$" inks above a normal line box; a label that slides by layout left that
+  // sliver behind each frame, a dotted trail through the "$".
+  const p = await page(b, 1280, 800, false, 'index.html', true);
+  const r = await p.evaluate(async () => { await document.fonts.ready;
+    return ['#sbarGap b', '.sbar-cap b'].map(sel => { const el = document.querySelector(sel), cs = getComputedStyle(el), c = document.createElement('canvas').getContext('2d');
+      c.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; const m = c.measureText('$'), lh = parseFloat(cs.lineHeight);
+      const room = (lh - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + m.fontBoundingBoxAscent;
+      return { sel, room: +room.toFixed(2), ink: +m.actualBoundingBoxAscent.toFixed(2) }; }); });
+  ok('the "no longer paid" figure and the bar total have room above their "$"', r.every(x => x.room >= x.ink + 0.5), JSON.stringify(r));
+  await p.close();
+});
+test('models: the dots on the line are taps too, with a finger-sized band', async b => {
+  for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m);
+    const before = await p.evaluate(() => ({ band: document.getElementById('mline').getBoundingClientRect().height }));
+    for (const id of ['urban', 'rand', 'sanders1']) {
+      const c = await p.evaluate(id => { const d = document.querySelector('#mline i[data-m="' + id + '"]'); d.scrollIntoView({ block: 'center', inline: 'center' }); const r = d.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, id);
+      await p.waitForTimeout(200);
+      const c2 = await p.evaluate(id => { const r = document.querySelector('#mline i[data-m="' + id + '"]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, id);
+      if (m) await p.touchscreen.tap(c2.x, c2.y + 12); else await p.mouse.click(c2.x, c2.y + 12);   // 12px below the dot: inside the band, off the dot
+      await p.waitForTimeout(300);
+      const r = await p.evaluate(id => ({ on: document.querySelector('#mline i.on').getAttribute('data-m'), pill: document.querySelector('#pills .pill.on')?.getAttribute('data-m'), pick: document.getElementById('modelPick').value }), id);
+      ok(`${w}px: tapping the ${id} dot picks it, and the chips and picker follow`, r.on === id && r.pick === id && (r.pill === id || r.pill === undefined), JSON.stringify(r));
+    }
+    ok(`${w}px: the line is a 44px band for a finger`, before.band >= 44, JSON.stringify(before));
+    await p.close();
+  }
+});
+test('models: six circles on a line and six chips, a picker on phones', async b => {
   for (const w of [1440, 1100, 901]) {
     const p = await page(b,w,900);
     const r = await p.evaluate(()=>{
-      const bs=[...document.querySelectorAll('#pills button')];
-      const ws=bs.map(x=>x.getBoundingClientRect().width);
+      const bs=[...document.querySelectorAll('#pills button')], num = t => parseFloat(t.replace(/[^0-9.]/g,''));
+      const dots=[...document.querySelectorAll('#mline i')], line=document.getElementById('mline').getBoundingClientRect();
+      const lo=num(document.querySelector('.mends [data-fig="uni.rangeLo"]').textContent), hi=num(document.querySelector('.mends [data-fig="uni.rangeHi"]').textContent);
+      const on=dots.findIndex(d=>d.classList.contains('on')), dr=dots[on].getBoundingClientRect();
       return { rows:[...new Set(bs.map(x=>Math.round(x.getBoundingClientRect().top)))].length,
-               spread: Math.max(...ws)-Math.min(...ws),
-               clipped: bs.filter(x=>[...x.children].some(c=>c.scrollWidth > x.clientWidth-16)).length,
-               pick: getComputedStyle(document.getElementById('modelPick')).display };
+               minH: Math.min(...bs.map(x=>x.getBoundingClientRect().height)),
+               clipped: bs.filter(x=>x.scrollWidth > x.clientWidth+1).length, names: bs.map(x=>x.querySelector('.pill-n').textContent).join(),
+               // each chip's model, placed by its circle on the line (the line keeps the models' own order)
+               order: bs.map(x=>{ const k=[...document.querySelectorAll('#pills button')].length && window.WholeBill ? window.WholeBill.MODELS.findIndex(m=>m.id===x.getAttribute('data-m')) : -1; return k < 0 ? NaN : parseFloat(dots[k].style.left); }),
+               idOrder: bs.map(x=>x.getAttribute('data-m')).join(), optOrder: [...document.querySelectorAll('#modelPick option')].map(o=>o.value).join(),
+               dots: dots.length, on, pos: (dr.left+dr.width/2-line.left)/line.width, lo, hi,
+               total: num(document.querySelector('.sstep[data-step="3"] .snum').textContent),
+               who: document.getElementById('mwho').textContent, pick: getComputedStyle(document.getElementById('modelPick')).display };
     });
-    ok(`${w}px: six equal pills on one row`, r.rows === 1 && r.spread < 1.5,
-       `${r.rows} rows, ${r.spread.toFixed(1)}px spread`);
-    ok(`${w}px: every label fits its pill`, r.clipped === 0, `${r.clipped} clipped`);
+    ok(`${w}px: six chips of 44px, one row or two, every name whole`, r.rows <= (w > 1000 ? 1 : 2) && r.minH >= 44 && r.clipped === 0 && r.names.split(',').length === 6, `${r.rows} rows, ${r.minH}px, ${r.names}`);
+    ok(`${w}px: the chips run from the cheapest estimate for this household to the priciest`, r.order.every((v, i) => !i || v >= r.order[i - 1]) && r.optOrder === r.idOrder, `${r.names} at ${r.order.map(v => v.toFixed(0)).join(' ')}`);
+    ok(`${w}px: six circles, the chosen one filled, at its place between the lowest and the highest`, r.dots === 6 && r.on === 0 && Math.abs(r.pos - (r.total - r.lo) / (r.hi - r.lo)) < 0.02, JSON.stringify([r.dots, r.on, r.pos.toFixed(3), r.total, r.lo, r.hi]));
+    ok(`${w}px: the sentence under them names the model, its maker's role and both figures`, /^Sanders, .+: \$[\d,]+ a year, \$[\d,]+ (less|more) than today\.$/.test(r.who), r.who);
     ok(`${w}px: no picker at this width`, r.pick === 'none');
+    await p.locator('#pills .pill').nth(5).click(); await p.waitForTimeout(250);
+    const u = await p.evaluate(()=>{ const dots=[...document.querySelectorAll('#mline i')], line=document.getElementById('mline').getBoundingClientRect(), on=dots.findIndex(d=>d.classList.contains('on')), dr=dots[on].getBoundingClientRect();
+      return { on, pos:(dr.left+dr.width/2-line.left)/line.width, who: document.getElementById('mwho').textContent }; });
+    ok(`${w}px: picking the priciest moves the filled circle to the far end`, u.on === 5 && u.pos > 0.97 && /^Urban, /.test(u.who), JSON.stringify(u));
     await p.close();
   }
   for (const [w,h,m] of [[900,900,false],[390,844,true]]) {
@@ -1242,7 +1234,7 @@ test('rise: three years on one scale, each bar its own value', async b => {
          okc.map(total).map(v => v.toFixed(1)).join('/') + ' of ' + okc[0].H);
       ok(`${w}px ${route}: nothing overflows its column`, Math.max(...r.plots.flatMap(x => x.over)) <= 0.5, r.plots.map(x => x.over.join(',')).join(' | '));
       ok(`${w}px ${route}: labels stay clear of the intro`, okc.every(x => x.labTop >= r.introBottom + 8), `${okc.map(x => x.labTop.toFixed(0)).join('/')} vs ${r.introBottom.toFixed(0)}`);
-      ok(`${w}px ${route}: two key entries, figures in the sans`, r.key === 2 && /Hanken/.test(r.font), r.font);
+      ok(`${w}px ${route}: two key entries, figures in the serif like every other figure`, r.key === 2 && /^Newsreader/.test(r.font), r.font);
     }
     await p.close();
   }
@@ -1402,7 +1394,11 @@ test('objections: every footnote marker has its anchor', async b => {
   const p = await page(b,1440,900);
   const bad = await p.evaluate(()=>{
     const out=[];
-    document.querySelectorAll('#objections .grid2 > .card-p').forEach(c=>{
+    const cards = document.querySelectorAll('#objections .objlist > .obj');
+    if (cards.length !== 5) out.push('expected five objections, found ' + cards.length);
+    cards.forEach(c=>{
+      if (!c.querySelector('summary .quote') || !c.querySelector('.fold-in > .obj-a')) out.push('an objection without its question or its one-line answer');
+      if (c.querySelector('summary .obj-a')) out.push('the short answer belongs inside the fold, not on the shut row');
       const fn=c.querySelector('.fn'), body=c.querySelector('p.body');
       if(!fn) return;
       if(!fn.querySelector('.fnm')) out.push('note without marker: '+fn.textContent.slice(0,30));
@@ -1589,12 +1585,12 @@ test('routing: methodology is its own page; the artifact keeps the hash', async 
   const pm = await page(b,1440,900,false,'methodology/index.html');
   const m = await pm.evaluate(()=>({
     title: document.title,
-    eyebrow: [...document.querySelectorAll('.eyebrow')].some(e=>/^08/.test(e.textContent.trim())),
+    eyebrow: [...document.querySelectorAll('.eyebrow')].some(e=>/^Methodology$/.test(e.textContent.trim())),   // no section wears a number
     visible: !document.getElementById('methodology').hidden && !document.getElementById('methBack').hidden,
     back: (document.querySelector('#methBack a.q')||{}).getAttribute?.('href'),
     scripts: document.querySelectorAll('script:not([type="application/ld+json"])').length }));   // structured data is a data block, not a script
   ok('the page carries its own title', /^Methodology.*· The Whole Bill$/.test(m.title), m.title);
-  ok('the 08 eyebrow lives here', m.eyebrow);
+  ok('the methodology eyebrow lives here', m.eyebrow);
   ok('nothing is hidden and the back link goes home', m.visible && m.back === '/', m.back);
   ok('the document is fully static', m.scripts === 0, m.scripts + ' scripts');
   await pm.close();
@@ -1706,8 +1702,8 @@ test('letter: built from the route, honest about the comparison', async b => {
     return cs.position === 'relative' && cs.zIndex === '1';
   }));
   ok('a neighbour clears the ring', await p.evaluate(()=>{
-    const rows = [...document.querySelectorAll('#senRows .rec-hit')].map(x=>x.getBoundingClientRect());
-    return rows.length === 2 && rows[1].top - rows[0].bottom >= 2;
+    const rows = [...document.querySelectorAll('#recips .rec-hit')].map(x=>x.getBoundingClientRect());
+    return rows.length === 3 && rows[1].left - rows[0].right >= 4 && rows[2].left - rows[1].right >= 4;
   }));
   await p.locator('#route button[data-r="marketplace"]').click(); await p.waitForTimeout(250);
   ok('the self-employed line goes statewide for a senator',
@@ -1876,7 +1872,7 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
   ok('an at-large seat never says 0th', /at-large district/.test(r.dist) && !/0th/.test(r.dist), r.dist);
 
   // a sample button is a real ZIP now, so it resolves the card like typing one
-  await p.locator('#areapick button[data-z="75201"]').click(); await p.waitForTimeout(400);
+  await p.locator('#zip').fill('75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   r = await st();
   ok('a sample click is a ZIP: the card follows', /Crockett/.test(r.name), r.name);
 
@@ -1888,14 +1884,14 @@ test('rep: named from the ZIP, asked when the ZIP is ambiguous', async b => {
       n: x.querySelector('.sen-n').textContent,
       s: x.querySelector('.sen-s').textContent,
       src: (x.querySelector('img').getAttribute('src')||''),
-      oneLine: x.getBoundingClientRect().height < 58 })),   // 42px portrait + the hit's 6px padding each side
+      kind: x.querySelector('.rtile-k').textContent })),
     bill: document.getElementById('senBillLbl').textContent,
     bio: REPS.senate.TX.map(m=>m.b) }));
   ok('two senators for the state', !sen.hidden && sen.rows.length === 2, JSON.stringify(sen.rows.map(x=>x.n)));
   ok('the block names the companion bill', sen.bill === 'S. 1506', sen.bill);
-  ok('each carries a position', sen.rows.every(x=>/^(Cosponsor|Not yet)$/.test(x.s)), sen.rows.map(x=>x.s).join('/'));
+  ok('each carries a position on the Senate bill', sen.rows.every(x=>/^(Cosponsor of S\. 1506|Not yet a cosponsor)$/.test(x.s)), sen.rows.map(x=>x.s).join('/'));
   ok('portraits keyed by bioguide', sen.rows.every((x,i)=>x.src.includes(sen.bio[i])), sen.rows.map(x=>x.src.slice(-16)).join(' '));
-  ok('rows stay compact', sen.rows.every(x=>x.oneLine));
+  ok('each tile says whose senator it is', sen.rows.every(x=>x.kind === 'Your senator'));
 
   await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
   ok('a split hides the senators until the pick', await p.evaluate(()=>document.getElementById('senBlock').hidden));
@@ -2084,7 +2080,8 @@ test('rep card: hidden blocks are actually hidden, across ZIP changes', async b 
   await p.locator('#zip').fill('33313'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
   r = await box('repPick'); s = await box('senBlock');
   ok('next ZIP: the stale chooser is gone', r.hidden && r.h === 0, JSON.stringify(r));
-  ok('next ZIP: the senators are Florida\'s', !s.hidden && /Scott|Moody/.test(s.text), s.text);
+  const fl = await p.evaluate(() => document.getElementById('senRows').textContent);
+  ok('next ZIP: the senators are Florida\'s', !s.hidden && /Scott|Moody/.test(fl), fl);
   await p.close();
 });
 
@@ -2561,7 +2558,7 @@ test('accessibility: reduced motion, whole-page print, sticky at 1024, structure
   await p.emulateMedia({ reducedMotion: 'no-preference' });
   // A8: Cmd+P on the whole page prints the ink sections dark on white
   await p.emulateMedia({ media: 'print' }); await p.waitForTimeout(100);
-  const pr = await p.evaluate(() => { const s = document.getElementById('cliff'), h = s.querySelector('h2'); const cs = getComputedStyle(s);
+  const pr = await p.evaluate(() => { const s = document.getElementById('story'), h = s.querySelector('h2'); const cs = getComputedStyle(s);
     return { bg: cs.backgroundColor, color: getComputedStyle(h).color, letter: document.body.classList.contains('print-letter') }; });
   ok('ink sections print dark on white', !pr.letter && lum(pr.bg) > 0.9 && lum(pr.color) < 0.2, JSON.stringify(pr));
   await p.emulateMedia({ media: 'screen' });
@@ -2577,8 +2574,15 @@ test('accessibility: reduced motion, whole-page print, sticky at 1024, structure
   const q = await page(b, 1024, 900);
   await q.evaluate(() => window.scrollTo(0, 2400)); await q.waitForTimeout(300);
   const who = await q.evaluate(() => { const e = document.getElementById('who-line'); return { sw: e.scrollWidth, cw: e.clientWidth, t: e.textContent }; });
-  ok('sticky context line is not truncated at 1024', who.sw <= who.cw + 1 && /^4 · /.test(who.t), JSON.stringify(who));
+  ok('sticky context line is not truncated at 1024', who.sw <= who.cw + 1 && /^4\s· /.test(who.t), JSON.stringify(who));
   await q.close();
+  // and at 320, beside "Per year / Per month", it wraps rather than losing the income
+  const n = await page(b, 320, 640, true, 'index.html', true);
+  await n.evaluate(() => document.querySelector('.sstep[data-step="1"]').scrollIntoView({ block: 'center', inline: 'center' })); await n.waitForTimeout(400);
+  const wn = await n.evaluate(() => { const e = document.getElementById('who-line'), u = document.getElementById('unit').getBoundingClientRect(), r = e.getBoundingClientRect();
+    return { sw: e.scrollWidth, cw: e.clientWidth, sh: e.scrollHeight, ch: e.clientHeight, gap: u.left - r.right, t: e.textContent, ln: [...document.querySelectorAll('.unit-l')].map(l => l.textContent) }; });
+  ok('320px: the whole household line shows beside the Per year switch', wn.sw <= wn.cw + 1 && wn.sh <= wn.ch + 1 && wn.gap >= 0 && /k$/.test(wn.t) && wn.ln.join('|') === 'Per year|Per month', JSON.stringify(wn));
+  await n.close();
   // A10: the methodology document and the 404
   const m = await page(b, 1280, 900, false, 'methodology/index.html');
   const ms = await m.evaluate(() => ({ h1: [...document.querySelectorAll('h1')].map(h => h.textContent), main: !!document.querySelector('main'),
@@ -2747,7 +2751,10 @@ test('hygiene: the minor list from the launch review', async b => {
   const t0 = await body();
   ok('footer no longer hedges with "live preview", and names what leaves the page', !/live preview|still being built/i.test(t0) && /nothing else leaves this page/.test(t0));
   ok('American spellings', !/labelled|modelled|modelling|maths/.test(t0));
-  ok('"try a city", not "try a sample"', /try a city/.test(t0) && !/try a sample/.test(t0));
+  await p.locator('#zip').fill('00000'); await p.locator('#zipGo').click(); await p.waitForTimeout(200);
+  const tBad = await body();   // the sample cities are offered only when a ZIP cannot be priced
+  ok('"try a city", not "try a sample"', /try a city/.test(tBad) && !/try a sample/.test(tBad));
+  await p.locator('#zip').fill('75201'); await p.locator('#zipGo').click(); await p.waitForTimeout(300);
   ok('the rep card date reads as a long date', /Cosponsor status as of \d{1,2} [A-Z][a-z]+ 20\d\d/.test(t0), (t0.match(/Cosponsor status as of [^.]*/) || [''])[0]);
   ok('no motive attribution for Mercatus beyond its funding', !/built to be damning|written to show|written to make it look bad|written to argue/.test(t0));
   ok('no "anyone has published" on the calculator', !/anyone has published/.test(t0));
@@ -2797,7 +2804,10 @@ test('hygiene: the minor list from the launch review', async b => {
   const q = await page(b, 390, 844, true);
   await q.locator('#zip').fill('10001'); await q.locator('#zipGo').click(); await q.waitForTimeout(400);
   const sen = await q.evaluate(() => [...document.querySelectorAll('.sen-n')].map(e => ({ t: e.textContent, over: e.scrollWidth > e.clientWidth + 1 })));
-  ok('senator names wrap instead of ellipsizing on a phone', sen.length === 2 && sen.every(s => !s.over), JSON.stringify(sen));
+  ok('senator names wrap instead of ellipsizing on a phone', sen.length === 0, JSON.stringify(sen));   // a split ZIP shows no senators until the district is picked
+  await q.locator('#repPickBtns button[data-d="NY-12"]').click(); await q.waitForTimeout(400);
+  const sen2 = await q.evaluate(() => [...document.querySelectorAll('.sen-n')].map(e => ({ t: e.textContent, over: e.scrollWidth > e.clientWidth + 1 })));
+  ok('and once picked, both names show in full', sen2.length === 2 && sen2.every(s => !s.over), JSON.stringify(sen2));
   const wl = await q.evaluate(() => Math.min(...[...document.querySelectorAll('#wf .wlab')].map(e => parseFloat(getComputedStyle(e).fontSize))));
   ok('waterfall labels are at least 10px on a phone', wl >= 10, wl + 'px');
   await q.close();
@@ -2890,17 +2900,20 @@ test('updates: the log renders the hero box, its own page and the feed', async b
   ok('every document advertises the feed', [index, doc, readFileSync(resolve(HERE, '../dist/methodology/index.html'), 'utf8')].every(h => /rel="alternate" type="application\/rss\+xml"/.test(h)));
   ok('the headers file types the feed and keeps /updates scriptless', /\n\/updates\.xml\n\s+Content-Type: application\/rss\+xml/.test(readFileSync(resolve(HERE, '../dist/_headers'), 'utf8')) && /\n\/updates\/\n\s+Content-Security-Policy: default-src 'none'; style-src/.test(readFileSync(resolve(HERE, '../dist/_headers'), 'utf8')));
 
-  // the hero box: pins plus the newest, three in all, each a real entry, in date order
+  // the hero box: pins plus the newest, six in all, each a real entry, in date order, a date and a short headline
   const sorted = U.slice().sort((a, b2) => b2.date.localeCompare(a.date));
-  const want = sorted.filter(e => e.pin).concat(sorted.filter(e => !e.pin)).slice(0, 3).sort((a, b2) => b2.date.localeCompare(a.date)).map(e => e.id);
+  const want = sorted.filter(e => e.pin).concat(sorted.filter(e => !e.pin)).slice(0, 6).sort((a, b2) => b2.date.localeCompare(a.date)).map(e => e.id);
+  ok('every entry in the box has a head of 48 characters or fewer, with no dashes', want.every(id => { const e = U.find(x => x.id === id); return e.head && e.head.replace(/&\w+;/g, 'x').length <= 48 && !/[–—]/.test(e.head); }));
   const p = await page(b, 1280, 900);
   const box = await p.evaluate(() => ({
-    k: document.querySelector('.dateline .k').textContent,
+    k: document.querySelector('#changed .fly-k').textContent,
     ids: [...document.querySelectorAll('.dateline .upd-when')].map(a => a.getAttribute('href')),
     more: (document.querySelector('.dateline .more') || {}).getAttribute?.('href'),
+    rows: [...document.querySelectorAll('.dateline .upd-when')].map(a => [a.querySelector('time').textContent, a.querySelector('.upd-t').textContent]),
     nav: [...document.querySelectorAll('.nav a')].map(a => a.getAttribute('href')),
     foot: [...document.querySelectorAll('footer a')].map(a => a.getAttribute('href')) }));
   ok('the hero box is titled What changed and shows the pins plus the newest', box.k === 'What changed' && JSON.stringify(box.ids) === JSON.stringify(want.map(id => '/updates/#u-' + id)), JSON.stringify(box.ids));
+  ok('each row is a short date and a headline, and nothing else', box.rows.length === 6 && box.rows.every(([d, t]) => /^\d{1,2} [A-Z][a-z]{2}( \d{4})?$/.test(d) && t.length > 8 && t.length <= 48), JSON.stringify(box.rows));
   ok('it links to the full log, as do the header and footer', box.more === '/updates' && box.nav.includes('/updates') && box.foot.includes('/updates') && box.foot.includes('/updates.xml'), JSON.stringify([box.more, box.nav, box.foot]));
   await p.close();
   const m = await page(b, 390, 800, true);
@@ -2943,7 +2956,7 @@ test('seo: titles, structured data, robots, llms.txt and the markdown methodolog
   ok('index carries WebSite, WebApplication and FAQPage', li.length === 1 && JSON.stringify(li[0]['@graph'].map(x => x['@type'])) === '["WebSite","WebApplication","FAQPage"]');
   const faq = li[0]['@graph'][2].mainEntity;
   const src = rd('src/page.html');
-  const obj = src.slice(src.indexOf('id="objections"')); const cards = (obj.slice(0, obj.indexOf('</section>')).match(/<div class="quote">/g) || []).length;
+  const obj = src.slice(src.indexOf('id="objections"')); const cards = (obj.slice(0, obj.indexOf('</section>')).match(/<span class="quote">/g) || []).length;
   ok('the FAQ block has one question per objection card, in the cards\' own words', faq.length === cards && faq.every(q => q.name.length > 10 && q.acceptedAnswer.text.length > 80 && !/<|&[a-z]+;/.test(q.name + q.acceptedAnswer.text)), faq.length + ' of ' + cards);
   ok('no dashes in the structured data', ![index, meth, upd].some(h => /[–—]/.test((h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || ['', ''])[1])));
   ok('methodology and updates carry a WebPage that names the site and the subject', [lm, lu].every(l => l.length === 1 && l[0]['@type'] === 'WebPage' && l[0].isPartOf.name === 'The Whole Bill' && l[0].about.some(a => /Medicare for All/.test(a.name))));
@@ -2993,8 +3006,8 @@ test('other coverage: the pointer, the objection and the methodology row agree',
   const p = await page(b, 1280, 900);
   const r = await p.evaluate(() => {
     const cov = document.getElementById('otherCov'), a = cov.querySelector('a.term');
-    const cards = [...document.querySelectorAll('#objections .card-p')];
-    const grid = document.querySelector('#objections .grid2').getBoundingClientRect();
+    const cards = [...document.querySelectorAll('#objections .obj')];
+    const grid = document.querySelector('#objections .objlist').getBoundingClientRect();
     const last = cards[cards.length - 1].getBoundingClientRect();
     return { covText: cov.textContent, href: a.getAttribute('href'), n: cards.length,
       lastQuote: cards[cards.length - 1].querySelector('.quote').textContent, lastSpans: Math.abs(last.width - grid.width) < 2,
@@ -3030,7 +3043,7 @@ test('footer: copyright on every document, contact underline on the text', async
  * reading, Newsreader roman for reading. Newsreader loads without an italic, so any
  * italic left in the page would be a synthesized slant; none may render. */
 /* Newsroom type (2026-10): Newsreader for headlines and reading, with its real italic;
- * Hanken Grotesk for figures, labels and controls, roman only. So an italic is fine in
+ * Inter for labels and controls, roman only (Hanken Grotesk until 2026-11-12); figures in Newsreader since 2026-11-12. So an italic is fine in
  * the serif and a synthesized one in the sans. Buttons do not inherit the page font,
  * which is how the model pills once rendered in Arial: a third family fails here. */
 test('newsroom type: two font families, italic only where a real italic loads', async b => {
@@ -3049,48 +3062,20 @@ test('newsroom type: two font families, italic only where a real italic loads', 
     return { link, used: [...used], italic: italic.length, fake: fake.slice(0, 5),
              loaded: [...document.fonts].filter(x => x.status === 'loaded').map(x => x.family.replace(/['"]/g, '') + ' ' + x.style) };
   });
-  ok('one stylesheet link: Newsreader with its italic, Hanken Grotesk roman, nothing else',
-     /family=Newsreader:ital,opsz,wght@0,6\.\.72,400\.\.500;1,6\.\.72,400\.\.500/.test(f.link) && /family=Hanken\+Grotesk:wght@400\.\.500/.test(f.link)
+  ok('one stylesheet link: Newsreader with its italic, Inter roman, nothing else',
+     /family=Newsreader:ital,opsz,wght@0,6\.\.72,400\.\.500;1,6\.\.72,400\.\.500/.test(f.link) && /family=Inter:wght@400\.\.500/.test(f.link)
      && (f.link.match(/family=/g) || []).length === 2, f.link);
-  ok('rendered text uses only the two families', f.used.every(x => x === 'Hanken Grotesk' || x === 'Newsreader'), f.used.join(', '));
+  ok('rendered text uses only the two families', f.used.every(x => x === 'Inter' || x === 'Newsreader'), f.used.join(', '));
   ok('the italics on the page are the serif\'s own', f.italic > 0 && f.loaded.some(x => x === 'Newsreader italic'), f.italic + ' italic runs; ' + [...new Set(f.loaded)].join(', '));
   ok('nothing in the sans is set in italic (it would be synthesized)', f.fake.length === 0, f.fake.join(' | '));
   await p.close();
 });
 
-/* The stat bands are data-figs like any other, so the app fills them. The universal
- * band's sentence must follow the sign of the savings, as the label beside the figure
- * does, or it would tell a household that pays more that it keeps money. */
-test('public notice: the stat bands carry the live figures and follow the savings sign', async b => {
-  const p = await page(b, 1280, 900);
-  const read = () => p.evaluate(() => ({
-    hidden: document.querySelector('.band-stat [data-fig="emp.invisible"]').textContent,
-    callout: document.querySelector('.callout [data-fig="emp.invisible"]').textContent,
-    band: document.querySelector('.band-stat.teal [data-fig="uni.savings"]').textContent,
-    save: document.getElementById('save').textContent,
-    lbl: document.getElementById('saveLbl').textContent,
-    k: document.getElementById('bandSaveK').textContent,
-    say: document.getElementById('bandSaveSay').textContent }));
-  let r = await read();
-  ok('the paystub band matches the callout', r.hidden === r.callout && /^\$\d/.test(r.hidden), JSON.stringify([r.hidden, r.callout]));
-  ok('the universal band matches the savings panel', r.band === r.save, JSON.stringify([r.band, r.save]));
-  ok('keeping money: the band says so', /keep/.test(r.lbl) && /back in your household/.test(r.say) && !/more/.test(r.k), r.say);
-  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
-  r = await read();
-  const pays = /pay/.test(r.lbl);
-  ok('the band follows the label when the sign flips', pays ? (/more for this household/.test(r.say) && /more/.test(r.k)) : /back in your household/.test(r.say), JSON.stringify([r.lbl, r.k, r.say]));
-  await p.locator('#unit').click(); await p.waitForTimeout(200);
-  ok('month view: the band sentence says a month', /^a month/.test((await read()).say), (await read()).say);
-  await p.close();
-});
-
-/* Motion: figures count up and bars wipe in. It may decorate, never decide: once it
- * settles, every figure must read exactly what the reduced-motion page reads, the
- * letter must be untouched, and an unrevealed figure must hold its real value. */
 test('public notice: motion settles on the same figures and leaves the letter alone', async b => {
   const still = await page(b, 1280, 900);
   const grab = q => q.evaluate(() => ({ figs: [...document.querySelectorAll('[data-fig]')].map(e => e.textContent),
                                          letter: document.getElementById('letterBd').innerText }));
+  await still.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)); await still.waitForTimeout(300);
   const want = await grab(still);
   ok('reduced motion: no motion class', !(await still.evaluate(() => document.documentElement.classList.contains('motion'))));
   await still.close();
@@ -3100,7 +3085,12 @@ test('public notice: motion settles on the same figures and leaves the letter al
   ok('motion on: the class is set', await q.evaluate(() => document.documentElement.classList.contains('motion')));
   const early = await q.evaluate(() => document.querySelector('.save .v').textContent);
   ok('a figure below the fold holds its real value before it is revealed', /^\$[1-9]/.test(early), early);
-  for (let y = 0; y < 12000; y += 600) { await q.evaluate(y => window.scrollTo(0, y), y); await q.waitForTimeout(120); }
+  // the same state the settled page was read in: folds open, letter unfolded, bottom of the page
+  await q.evaluate(() => { document.querySelectorAll('details.fold').forEach(d => { d.open = true; }); document.getElementById('letterBd').classList.remove('clamp'); window.dispatchEvent(new Event('resize')); });
+  await q.waitForTimeout(400);
+  const tall = await q.evaluate(() => document.documentElement.scrollHeight);
+  for (let y = 0; y < tall; y += 600) { await q.evaluate(y => window.scrollTo(0, y), y); await q.waitForTimeout(120); }
+  await q.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await q.waitForTimeout(1800);
   const got = await grab(q);
   ok('every figure settles exactly on the reduced-motion value', JSON.stringify(got.figs) === JSON.stringify(want.figs),
@@ -3109,7 +3099,7 @@ test('public notice: motion settles on the same figures and leaves the letter al
   await q.evaluate(() => { const i = document.getElementById('income'); i.value = '148000'; i.dispatchEvent(new Event('input', { bubbles: true })); });
   await q.waitForTimeout(900);
   ok('after an input change, the eased figures land on the new values', await q.evaluate(() =>
-    document.querySelector('.save .v').textContent === document.querySelector('.band-stat.teal .band-v').textContent));
+    document.querySelector('.save .v').textContent === document.querySelector('#sbarGap [data-fig="uni.savings"]').textContent));
   // a model change replays the comparison bars' wipe; the same model does not
   const wipe = () => q.evaluate(() => getComputedStyle(document.getElementById('uBar')).clipPath);
   await q.evaluate(() => document.getElementById('uBar').scrollIntoView({ block: 'center' })); await q.waitForTimeout(1500);
@@ -3146,23 +3136,6 @@ test('letter buttons: one row, two rows or a stack, never a stray button', async
   }
 });
 
-/* The ZIP field is the page's one action: on load it must be fully on screen, at the
- * window sizes people actually have (Tyler's laptop browser was about 1000x625). */
-test('hero: the ZIP field is on screen at load', async b => {
-  for (const [w, h, m] of [[1440, 800], [1280, 720], [1000, 625], [1024, 640], [1536, 760], [390, 740, true], [375, 600, true]]) {
-    const p = await page(b, w, h, !!m);
-    const r = await p.evaluate(() => {
-      const z = document.querySelector('.zipbar').getBoundingClientRect(), h1 = document.querySelector('h1').getBoundingClientRect();
-      const lh = parseFloat(getComputedStyle(document.querySelector('h1')).lineHeight) || parseFloat(getComputedStyle(document.querySelector('h1')).fontSize) * .86;
-      return { bottom: Math.round(z.bottom), vh: innerHeight, lines: Math.round(h1.height / lh) };
-    });
-    ok(`${w}x${h}: ZIP field fully visible (bottom ${r.bottom}px of ${r.vh}), headline ${r.lines} lines`, r.bottom <= r.vh, JSON.stringify(r));
-    await p.close();
-  }
-});
-
-/* What leaves the page is plain text for a contact form, and many forms collapse a
- * single line break, so paragraphs are joined by a blank line. */
 test('letter: copied text keeps its paragraphs apart', async b => {
   const p = await page(b, 1280, 900);
   await p.evaluate(() => { window.__clip = ''; navigator.clipboard.writeText = t => { window.__clip = t; return Promise.resolve(); }; });
@@ -3216,11 +3189,745 @@ test('footer: its links match the header navigation', async b => {
   }
 });
 
+/* ---------- the story: one pinned bar, four steps ----------
+ * The page's argument is now carried by a single bar that stays on screen while
+ * the reader scrolls. Its pixels are the data, so the same rule as every other
+ * chart here applies: measure the render. These run on the page as a reader first
+ * sees it (folds shut), across all three routes and at phone and desktop widths. */
+const storyStep = async (p, i) => p.evaluate(async i => {
+  // on a phone, step by step, the steps are cards in a sideways row: go there the way Next does
+  if (document.documentElement.classList.contains('cards')) {
+    const row = document.getElementById('ssteps');
+    scrollTo(0, scrollY + document.getElementById('sticks').getBoundingClientRect().top - document.querySelector('.sticky').offsetHeight);   // past the opening, the cards at the top
+    row.scrollTo({ left: i * row.clientWidth });
+    await new Promise(r => setTimeout(r, 320));
+    return [...document.querySelectorAll('.sstep')].findIndex(e => e.classList.contains('on'));
+  }
+  const s = document.querySelectorAll('.sstep')[i], st = document.getElementById('stage');
+  const sh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-h')) || 0;
+  scrollTo(0, scrollY + s.getBoundingClientRect().top - (innerWidth <= 900 ? sh + st.offsetHeight + 8 : innerHeight * 0.2));
+  await new Promise(r => setTimeout(r, 260));
+  return [...document.querySelectorAll('.sstep')].findIndex(e => e.classList.contains('on'));
+}, i);
+const setRoute = async (p, r) => {
+  await p.evaluate(r => { const f = document.getElementById('foldHh'), was = f.open; f.open = true;
+    document.querySelector(`#route button[data-r="${r}"]`).click(); f.open = was; }, r);
+  await p.waitForTimeout(150);
+};
+const barRead = p => p.evaluate(() => {
+  const st = document.getElementById('stage'), H = parseFloat(st.style.getPropertyValue('--H'));
+  const num = t => parseFloat(t.replace(/[^0-9.]/g, ''));
+  const sr = st.getBoundingClientRect();
+  const segs = [...document.querySelectorAll('.sseg.on')].map(e => {
+    const r = e.getBoundingClientRect(), l = e.querySelector('.sseg-l').getBoundingClientRect();
+    return { k: e.dataset.k, h: r.height, v: num(e.querySelector('b').textContent), f: parseFloat(e.style.getPropertyValue('--f')),
+             lt: l.top, lb: l.bottom, ll: l.left, lr: l.right, shrink: getComputedStyle(e).flexShrink };
+  });
+  return { H, trackH: document.getElementById('sbarTrack').getBoundingClientRect().height, segs,
+           run: num(document.getElementById('sbarRun').textContent), uni: document.querySelector('.inkzone').classList.contains('uni'),
+           cards: document.documentElement.classList.contains('cards'), stageW: sr.width, stageBottom: sr.bottom, vw: innerWidth, vh: innerHeight,
+           stageTop: sr.top, stageLeft: sr.left, stageRight: sr.right, stickyBottom: document.querySelector('.sticky').getBoundingClientRect().bottom,
+           label: document.getElementById('sbar').getAttribute('aria-label'), away: st.classList.contains('yield') };
+});
+
+test('story: every segment of the pinned bar is drawn at its value', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    for (const route of ['employer', 'marketplace', 'none']) {
+      await setRoute(p, route);
+      for (let i = 0; i < 4; i++) {
+        const at = await storyStep(p, i), r = await barRead(p);
+        const tag = `${w}px ${route} step ${i + 1}`;
+        // desktop: pinned under the results bar. Phone: a slim column beside the card, on screen, a sixth of the width at most
+        ok(`${tag}: is the step in focus, and the bar is ${r.cards ? 'a slim column beside the card' : 'pinned under the results bar'}`,
+           at === i && (r.cards ? (r.stageW <= r.vw * 0.17 && r.stageRight <= r.vw && r.stageTop >= r.stickyBottom - 1 && r.stageBottom <= r.vh + 1)
+                                : Math.abs(r.stageTop - r.stickyBottom) < 1.5),
+           `at ${at}, stage ${r.stageTop.toFixed(1)} to ${r.stageBottom.toFixed(1)}, ${r.stageW.toFixed(0)}px wide, bar ${r.stickyBottom.toFixed(1)}`);
+        const off = r.segs.map(s => Math.abs(s.h - s.f * r.H)), sum = r.segs.reduce((a, s) => a + s.v, 0);
+        ok(`${tag}: each segment is its share of the scale, to the pixel`, r.segs.length > 0 && Math.max(...off) < 0.75 && r.segs.every(s => s.shrink === '0') && Math.abs(r.trackH - r.H) < 0.75,
+           r.segs.map(s => `${s.k} ${s.h.toFixed(1)}`).join(' '));
+        ok(`${tag}: the standing segments add up to the running total`, Math.abs(sum - r.run) <= r.segs.length, `${sum} vs ${r.run}`);
+        // one scale for everything: dollars per pixel agree between any two real segments
+        const big = r.segs.filter(s => s.v >= 1500).map(s => s.v / s.h);
+        ok(`${tag}: one scale across segments`, big.length < 2 || Math.max(...big) / Math.min(...big) < 1.03, big.map(x => x.toFixed(1)).join(' '));
+        ok(`${tag}: the bar says what it shows`, /Total \$[\d,]+ per year/.test(r.label), r.label);
+        ok(`${tag}: the ground turns teal at the universal step, and only there`, r.uni === (i === 3));
+      }
+    }
+    await p.close();
+  }
+});
+
+test('story: one scale per route across its steps and models, and the units switch reaches the bar', async b => {
+  const p = await page(b, 1280, 800, false, 'index.html', true);
+  const perPx = async () => { const r = await barRead(p); const s = r.segs.reduce((a, x) => a.h > x.h ? a : x); return s.v / s.h; };
+  const scales = [];
+  // One scale per route, shared by its steps and all six models; the whole bill
+  // fills the bar unless an estimate costs more (or the bill has no ceiling).
+  for (const route of ['employer', 'marketplace']) {
+    await setRoute(p, route); await storyStep(p, 2);
+    const two = await barRead(p), s2 = await perPx();
+    const fill = await p.evaluate(() => { const t = document.getElementById('sbarTrack').getBoundingClientRect(); const top = Math.min(...[...document.querySelectorAll('#sbarTrack .sseg.on')].map(e => e.getBoundingClientRect().top)); return (t.bottom - top) / t.height; });
+    const uniHi = await p.evaluate(() => { const v = t => parseFloat(t.replace(/[^0-9.]/g, '')); return v(document.querySelector('.mends [data-fig="uni.rangeHi"]').textContent); });
+    ok(`${route}: the whole bill reaches the top of the bar unless an estimate costs more`, uniHi > two.run ? fill < 1 : fill > 0.995, `${(fill * 100).toFixed(1)}% full, bill ${two.run}, priciest estimate ${uniHi}`);
+    await storyStep(p, 3); scales.push(s2, await perPx());
+  }
+  ok('within a route, the bill and the estimate draw on the same dollars per pixel', scales[0] / scales[1] < 1.03 && scales[1] / scales[0] < 1.03 && scales[2] / scales[3] < 1.03 && scales[3] / scales[2] < 1.03, scales.map(x => x.toFixed(1)).join(' '));
+  await setRoute(p, 'employer'); await storyStep(p, 3);
+  const before = await barRead(p);
+  await p.locator('#pills .pill').nth(5).click(); await p.waitForTimeout(250);
+  const urban = await barRead(p);
+  ok('picking the priciest model grows the universal bar and its total together', urban.run > before.run && urban.segs.reduce((a, s) => a + s.h, 0) > before.segs.reduce((a, s) => a + s.h, 0) + 5,
+     `${before.run} to ${urban.run}`);
+  ok('the model\'s segments still add up', Math.abs(urban.segs.reduce((a, s) => a + s.v, 0) - urban.run) <= urban.segs.length);
+  await p.locator('#unit').click(); await p.waitForTimeout(250);
+  const mo = await barRead(p);
+  ok('monthly: the same heights, a twelfth of the figures', Math.abs(mo.run - urban.run / 12) < 1 && Math.abs(mo.segs[0].h - urban.segs[0].h) < 0.5, `${mo.run} vs ${urban.run}`);
+  const said = await p.evaluate(() => document.getElementById('st3say').textContent);
+  ok('and the sentence beside it follows', /a month/.test(said), said);
+  await p.close();
+});
+
+test('story: bar labels never overlap or leave the stage', async b => {
+  // phones show the bar without labels (the card carries them), so this is the two layouts that print them
+  for (const [w, h, m] of [[1280, 800, false], [820, 1000, false]]) {
+    const p = await page(b, w, h, m);   // all on one page, so the household controls are in the flow
+    const bad = [];
+    for (const ages of [[30], [41, 39, 12, 9]]) {
+      await setAges(p, ages);
+      for (const inc of [18000, 95000, 250000]) {
+        await setIncome(p, inc);
+        for (const route of ['employer', 'marketplace', 'none']) {
+          await p.evaluate(r => document.querySelector(`#route button[data-r="${r}"]`).click(), route);
+          for (const i of [2, 3]) {
+            await storyStep(p, i);
+            const r = await barRead(p), ls = r.segs.slice().sort((a, c) => a.lt - c.lt);
+            for (let j = 1; j < ls.length; j++) if (ls[j].lt < ls[j - 1].lb - 0.5) bad.push(`${ages.length}p $${inc} ${route} s${i + 1}: ${ls[j - 1].k}/${ls[j].k} overlap`);
+            for (const s of ls) if (s.ll < r.stageLeft - 0.5 || s.ll < 0) bad.push(`${ages.length}p $${inc} ${route} s${i + 1}: ${s.k} runs off the left`);
+          }
+        }
+      }
+    }
+    ok(`${w}px: every label clear across households, incomes, routes`, bad.length === 0, bad.slice(0, 4).join(' | '));
+    await p.close();
+  }
+});
+
+test('story: text holds its contrast on the teal ground', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m);          // folds open: the charts inside sit on teal too
+    await storyStep(p, 3);
+    const r = await p.evaluate(() => {
+      const lum = c => { const a = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]; };
+      const rgb = s => { const m = /rgba?\(([^)]+)\)/.exec(s); if (!m) return null; const q = m[1].split(/[, /]+/).map(parseFloat); return { c: q.slice(0, 3), a: q.length > 3 ? q[3] : 1 }; };
+      // a bar label sits beside its segment, on the stage's ground, not on the segment's colour
+      const bgOf = el => { for (let n = el.closest('.sseg-l') ? document.getElementById('stage') : el; n; n = n.parentElement) { const cs = getComputedStyle(n); if (cs.backgroundImage !== 'none') return null; const c = rgb(cs.backgroundColor); if (c && c.a > 0.9) return c.c; } return null; };
+      const out = [], uni = document.querySelector('.inkzone').classList.contains('uni');
+      document.querySelectorAll('.sticky *, .sstep[data-step="3"] *, .stage *').forEach(el => {
+        if (el.closest('[hidden], svg, .unit') || !el.offsetWidth) return;   // the unit switch's thumb is its own element; the accessibility check measures it
+        if (![...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) return;
+        const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || +cs.opacity === 0) return;
+        if (el.closest('.sseg-l') && !el.closest('.sseg.on')) return;
+        const fg = rgb(cs.color), bg = bgOf(el); if (!fg || !bg) return;
+        const a = lum(fg.c), c = lum(bg), ratio = (Math.max(a, c) + 0.05) / (Math.min(a, c) + 0.05);
+        const big = parseFloat(cs.fontSize) >= 24 || (parseFloat(cs.fontSize) >= 18.66 && +cs.fontWeight >= 700);
+        if (ratio < (big ? 3 : 4.5)) out.push(`${(typeof el.className === 'string' && el.className) || el.tagName} "${el.textContent.trim().slice(0, 18)}" ${ratio.toFixed(2)}`);
+      });
+      return { uni, out: [...new Set(out)] };
+    });
+    ok(`${w}px: the zone is on teal`, r.uni);
+    ok(`${w}px: every piece of text on it clears its floor`, r.out.length === 0, r.out.slice(0, 5).join(' | '));
+    await p.close();
+  }
+});
+
+/* Folds. Every chart the long page showed at once is behind one now. Step by
+ * step, a wide fold rises over the page as a sheet: the first build opened it in
+ * the flow, which pushed a screen of chart under the step and sent the bar away,
+ * and the owner called it unnatural. So the thing measured here is that NOTHING
+ * underneath moves: not the scroll position, not the bar. */
+test('folds: shut at load; a wide one opens as a floating box and the page stays put', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const at = await p.evaluate(() => ({
+      n: document.querySelectorAll('details.fold').length, open: document.querySelectorAll('details.fold[open]').length,
+      wf: document.getElementById('wf').checkVisibility() ? 1 : 0, screens: document.documentElement.scrollHeight / innerHeight,
+      twists: [...document.querySelectorAll('details.fold > summary')].filter(s => s.offsetHeight).every(s => s.querySelector('.fold-x') && s.getBoundingClientRect().height >= 44) }));
+    ok(`${w}px: every fold is shut on arrival`, at.n >= 13 && at.open === 0 && at.wf === 0, JSON.stringify(at));
+    ok(`${w}px: each fold's summary is a 44px target with its twist`, at.twists);
+    ok(`${w}px: the page a reader meets is far shorter than the old one`, at.screens < (m ? 13 : 11), at.screens.toFixed(1) + ' screens');   // was 15.3 at 1280 by 800
+    await storyStep(p, 1);
+    const read = () => p.evaluate(() => { const d = document.getElementById('foldRise'), bd = d.querySelector('.fold-bd'), r = bd.getBoundingClientRect(), x = d.querySelector('.sheet-x').getBoundingClientRect();
+      return { open: d.open, pos: getComputedStyle(bd).position, round: parseFloat(getComputedStyle(bd).borderTopLeftRadius), top: r.top, bottom: r.bottom, left: r.left, right: r.right, vw: innerWidth, vh: innerHeight, y: scrollY,
+        role: bd.getAttribute('role'), label: bd.getAttribute('aria-label'), shade: !document.getElementById('shade').hidden,
+        focusX: document.activeElement === d.querySelector('.sheet-x'), focusSum: document.activeElement === d.querySelector('summary'),
+        away: document.getElementById('stage').classList.contains('yield'), bar: document.getElementById('sbarTrack').getBoundingClientRect().top,
+        chart: document.getElementById('riseChart').checkVisibility(), x: Math.min(x.width, x.height) }; });
+    // Playwright scrolls a control clear of the pinned bar before clicking it; let it, then take the reading
+    await p.locator('#foldRise > summary').scrollIntoViewIfNeeded(); await p.locator('#foldRise > summary').hover(); await p.waitForTimeout(200);
+    const was = await read();
+    await p.locator('#foldRise > summary').click(); await p.waitForTimeout(300);
+    const s = await read();
+    ok(`${w}px: the fold opens as a box floating clear of every edge, its chart showing`, s.open && s.pos === 'fixed' && s.chart && s.round > 0 && s.top >= 9 && s.bottom <= s.vh - 9 && s.left >= 9 && s.right <= s.vw - 9,
+       JSON.stringify([s.pos, s.round, s.top.toFixed(0), s.bottom.toFixed(0), s.left.toFixed(0), s.right.toFixed(0)]));
+    ok(`${w}px: nothing underneath moved, and the bar is still there`, s.y === was.y && Math.abs(s.bar - was.bar) < 0.5 && !s.away, `scroll ${was.y} to ${s.y}, bar ${was.bar.toFixed(1)} to ${s.bar.toFixed(1)}`);
+    ok(`${w}px: it is a labelled dialog with a 44px close button holding focus`, s.role === 'dialog' && s.label === 'How premiums have risen' && s.shade && s.focusX && s.x >= 44, JSON.stringify([s.role, s.label, s.shade, s.focusX, s.x]));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(250);
+    const c = await read();
+    ok(`${w}px: Escape closes it and hands focus back to where the reader was`, !c.open && !c.shade && c.focusSum && c.y === was.y, JSON.stringify([c.open, c.shade, c.focusSum, c.y]));
+    await p.locator('#foldRise > summary').click(); await p.waitForTimeout(250);
+    await p.mouse.click(12, 60); await p.waitForTimeout(250);
+    ok(`${w}px: a click on the dimmed page closes it too`, !(await read()).open);
+    const prov = await p.evaluate(() => document.getElementById('provS').textContent);
+    ok(`${w}px: shut, the provenance fold still names the model and the kind of figure`, /^Sanders, .+\. [A-Z].+\.$/.test(prov), prov);
+    await p.locator('#foldWhy > summary').click(); await p.waitForTimeout(250);
+    const inl = await p.evaluate(() => { const d = document.getElementById('foldWhy'); return { open: d.open, pos: getComputedStyle(d.querySelector('.fold-bd')).position, shade: !document.getElementById('shade').hidden }; });
+    ok(`${w}px: a fold that only holds a paragraph opens in place`, inl.open && inl.pos === 'static' && !inl.shade, JSON.stringify(inl));
+    await p.close();
+  }
+});
+
+test('views: step by step for readers; the one-page view kept for print and the suite', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const read = () => p.evaluate(() => ({ all: document.documentElement.classList.contains('onepage'),
+      open: document.querySelectorAll('details.fold[open]').length, n: document.querySelectorAll('details.fold').length,
+      fixed: [...document.querySelectorAll('details.fold > .fold-bd')].filter(x => getComputedStyle(x).position === 'fixed').length,
+      clamp: document.getElementById('letterBd').classList.contains('clamp'),
+      pressed: [document.getElementById('viewStory'), document.getElementById('viewAll')].map(x => x.getAttribute('aria-pressed')).join(),
+      shown: !!document.getElementById('viewpick').offsetParent,
+      wfW: document.getElementById('wf').getBoundingClientRect().width, wrapW: (() => { const e = document.querySelector('.story-in'), cs = getComputedStyle(e); return e.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); })(),
+      dead: getComputedStyle(document.querySelector('#foldWf > summary')).pointerEvents }));
+    const a = await read();
+    ok(`${w}px: step by step, with no switch on screen (the owner withdrew it)`, !a.all && a.open === 0 && !a.shown, JSON.stringify(a));
+    await p.evaluate(() => document.getElementById('viewAll').click()); await p.waitForTimeout(350);
+    const o = await read();
+    ok(`${w}px: all on one page opens every fold in the flow, none as a sheet`, o.all && o.open === o.n && o.fixed === 0 && !o.clamp && o.pressed === 'false,true', JSON.stringify(o));
+    ok(`${w}px: charts get the full column, and the summaries become headings`, Math.abs(o.wfW - o.wrapW) < 2 && o.dead === 'none', `${o.wfW.toFixed(0)} of ${o.wrapW.toFixed(0)}`);
+    await p.evaluate(() => { const r = document.querySelector('#foldWf .fold-bd').getBoundingClientRect(); scrollBy(0, r.top - innerHeight * 0.3); }); await p.waitForTimeout(260);
+    ok(`${w}px: there the bar ${m ? 'is put away, since every chart is already in the flow' : 'steps aside for a chart that needs its space'}`, await p.evaluate(m => { const st = document.getElementById('stage'); return m ? !st.offsetHeight : st.classList.contains('yield'); }, m));
+    await p.evaluate(() => localStorage.setItem('wb-view', 'all')); await p.reload(); await p.waitForTimeout(1200);
+    ok(`${w}px: an old stored choice no longer strands a reader in it`, !(await read()).all);
+    await p.evaluate(() => document.getElementById('viewAll').click()); await p.waitForTimeout(350);
+    await p.evaluate(() => document.getElementById('viewStory').click()); await p.waitForTimeout(350);
+    const z = await read();
+    ok(`${w}px: and step by step shuts them again`, !z.all && z.open === 0 && z.clamp && z.pressed === 'true,false', JSON.stringify(z));
+    await p.close();
+  }
+});
+
+/* The opening. It began as a paper hero with a banner, a ZIP field, five city
+ * buttons and a three-entry change log; the owner cut it back three times and
+ * then asked for the first prototype's: the question on the dark ground, the
+ * empty bar beside it, and the household as a pill that opens the sheet where
+ * the ZIP and the family details live together. The change log is one slow
+ * line of news that pops out the dated list. */
+test('opening: the line under the question is two sentences on two lines, neither broken', async b => {
+  // Owner, 12 November: "make these two lines"; 13 November: the first "should not wrap, we have room".
+  for (const [w, h, m] of [[1440, 900, false], [1000, 760, false], [768, 900, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const r = await p.evaluate(() => { const ss = [...document.querySelectorAll('.shero .lede span')], lh = parseFloat(getComputedStyle(ss[0]).lineHeight);
+      return { t: ss.map(x => x.textContent), lines: ss.map(x => Math.round(x.getBoundingClientRect().height / lh)), tops: ss.map(x => Math.round(x.getBoundingClientRect().top)),
+        right: Math.max(...ss.map(x => { const g = document.createRange(); g.selectNodeContents(x); return g.getBoundingClientRect().right; })), vw: innerWidth }; });
+    ok(`${w}px: two lines, one sentence each, each whole, on screen`, r.t.join('|') === 'Not the number on your paystub.|The whole number.' && r.lines.every(n => n === 1) && r.tops[1] > r.tops[0] && r.right <= r.vw - 8, JSON.stringify(r));
+    await p.close();
+  }
+});
+test('opening: the question, the empty bar, the household pill and one line of news', async b => {
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true);
+    const read = () => p.evaluate(() => { const sh = document.getElementById('shero'), r = sh.getBoundingClientRect(), f = document.getElementById('changed'), bd = f.querySelector('.fly-bd'), fr = bd.getBoundingClientRect();
+      const pill = document.getElementById('hhPill').getBoundingClientRect(), zone = document.querySelector('.inkzone'), tk = document.getElementById('tickIn');
+      const rgb = getComputedStyle(document.getElementById('story')).backgroundColor;
+      return { words: sh.innerText.split(/\s+/).filter(Boolean).length - tk.innerText.split(/\s+/).filter(Boolean).length, h: sh.offsetHeight, bottom: r.bottom, vh: innerHeight, vw: innerWidth,
+        ground: rgb, intro: zone.classList.contains('intro'), segs: document.querySelectorAll('.sseg.on').length, track: document.getElementById('sbarTrack').getBoundingClientRect().height,
+        cap: +getComputedStyle(document.querySelector('.sbar-cap')).opacity, sticky: +getComputedStyle(document.querySelector('.sticky')).opacity,
+        pill: document.getElementById('hhPillT').textContent.replace(/\u00a0/g, ' '), pillA: document.getElementById('hhPillA').textContent, pillH: pill.height, pillBottom: pill.bottom, zipVisible: document.getElementById('zip').checkVisibility(),
+        open: f.open, k: f.querySelector('.fly-k').textContent, items: tk.querySelectorAll('span').length, entries: f.querySelectorAll('.upd-when').length,
+        moving: getComputedStyle(tk).animationName, tickW: tk.scrollWidth, stripW: tk.parentElement.clientWidth, sumH: f.querySelector('summary').getBoundingClientRect().height,
+        fly: [fr.left, fr.right], vis: bd.checkVisibility(), docW: document.documentElement.scrollWidth }; });
+    const r = await read();
+    ok(`${w}px: the page opens on the dark ground with the pill on the first screen`, r.ground === 'rgb(18, 20, 26)' && r.intro && r.pillBottom <= r.vh, `${r.ground}, pill ends ${r.pillBottom.toFixed(0)} of ${r.vh}`);
+    ok(`${w}px: about forty words of its own, where the first hero had 174`, r.words < 45, r.words + ' words');
+    ok(`${w}px: the bar ${m ? 'is not drawn yet' : 'stands empty beside it'}, with no total, and the results bar waits out of sight`, r.segs === 0 && r.cap === 0 && r.sticky === 0 && (m || r.track > 200), JSON.stringify([r.segs, r.cap, r.sticky, r.track]));
+    ok(`${w}px: until the reader changes something, the pill says it holds an example, and is a 44px target`, r.pill === 'Example household' && r.pillA === 'Enter yours' && r.pillH >= 44 && !r.zipVisible, JSON.stringify([r.pill, r.pillA, r.pillH]));
+    ok(`${w}px: the news line carries the six entries twice over, in a 44px control`, !r.open && r.k === 'What changed' && r.items === 12 && r.entries === 6 && r.sumH >= 44 && r.tickW > r.stripW && r.docW <= w, JSON.stringify([r.items, r.tickW, r.stripW, r.docW]));
+    ok(`${w}px: it holds still when the reader has asked for less motion`, r.moving === 'none', r.moving);
+    await p.locator('#changed > summary').click(); await p.waitForTimeout(250);
+    const o = await read();
+    ok(`${w}px: the dated list pops out over the page, on screen, and the opening has not grown`, o.open && o.vis && o.h === r.h && o.fly[0] >= 0 && o.fly[1] <= o.vw + 0.5, JSON.stringify([o.h, r.h, o.fly.map(x => Math.round(x))]));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(150);
+    ok(`${w}px: Escape shuts it`, !(await read()).open);
+    // the pill: ZIP and household in one sheet, and a new ZIP reprices without leaving it
+    await p.locator('#hhPill').click(); await p.waitForTimeout(300);
+    const s = await p.evaluate(() => { const d = document.getElementById('foldHh'), bd = d.querySelector('.fold-bd'); return { open: d.open, pos: getComputedStyle(bd).position, zip: document.getElementById('zip').checkVisibility(), route: document.getElementById('route').checkVisibility(), y: scrollY, label: bd.getAttribute('aria-label') }; });
+    ok(`${w}px: the pill opens the household sheet with the ZIP and the family details together`, s.open && s.pos === 'fixed' && s.zip && s.route && s.label === 'Change the household', JSON.stringify(s));
+    await p.locator('#zip').fill('60601'); await p.locator('#zipGo').click(); await p.waitForTimeout(350);
+    const z = await p.evaluate(() => ({ a: document.getElementById('hhPillA').textContent, pill: document.getElementById('hhPillT').textContent, open: document.getElementById('foldHh').open, y: scrollY, scope: document.getElementById('scope').textContent }));
+    ok(`${w}px: a new ZIP reprices in place: the sheet stays, the page does not move, the pill follows`, z.open && z.y === s.y && /Cook/.test(z.pill) && /^Showing Cook County, Illinois/.test(z.scope), JSON.stringify(z));
+    ok(`${w}px: once the reader enters a ZIP, the pill names their household`, (m ? /^4 people · Cook · \$95k$/ : /^Household of 4 · Cook County · \$95,000$/).test(z.pill.replace(/\u00a0/g, ' ')) && z.a === 'Change', JSON.stringify([z.pill, z.a]));
+    await p.locator('#zip').fill('00000'); await p.locator('#zipGo').click(); await p.waitForTimeout(250);
+    ok(`${w}px: a ZIP we cannot price offers the sample cities`, await p.evaluate(() => document.querySelectorAll('#areapick button[data-z]').length === 5 && /try a city/.test(document.getElementById('scope').textContent)));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(250);
+    ok(`${w}px: closing hands focus back to the pill`, await p.evaluate(() => document.activeElement === document.getElementById('hhPill')));
+    await p.close();
+  }
+  // with motion on, the line moves, and stops under the pointer
+  {
+    // the pill pulses with motion on, until it has been opened once; never under reduced motion
+    const pm = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
+    await pm.goto('file://' + process.cwd() + '/dist/index.html'); await pm.waitForTimeout(400);
+    const pulse = () => pm.evaluate(() => getComputedStyle(document.getElementById('hhPill'), '::after').animationName);
+    const before = await pulse();
+    await pm.locator('#hhPill').click(); await pm.waitForTimeout(300); await pm.keyboard.press('Escape'); await pm.waitForTimeout(300);
+    const after = await pulse(); await pm.close();
+    const pr = await page(b, 1280, 800, false, 'index.html', true), still = await pr.evaluate(() => getComputedStyle(document.getElementById('hhPill'), '::after').animationName); await pr.close();
+    ok('the household pill pulses until it is opened, and holds still under reduced motion', before === 'hh-pulse' && after === 'none' && still === 'none', JSON.stringify([before, after, still]));
+  }
+  const q = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
+  await q.goto(URL); await q.waitForTimeout(1500);
+  const x = () => q.evaluate(() => document.getElementById('tickIn').getBoundingClientRect().left);
+  const x0 = await x(); await q.waitForTimeout(700); const x1 = await x();
+  await q.locator('#changed > summary').hover(); await q.waitForTimeout(150); const x2 = await x(); await q.waitForTimeout(600); const x3 = await x();
+  ok('motion on: the news line drifts left, and holds still under the pointer', x1 < x0 - 3 && Math.abs(x3 - x2) < 0.6, JSON.stringify([x0, x1, x2, x3].map(v => +v.toFixed(1))));
+  await q.close();
+});
+test('sheets: with motion on, a box grows out of what was tapped and shrinks back into it', async b => {
+  // The owner asked for boxes that "fly out" of their icon and "minimize back into" it.
+  // Sampled frame by frame: the first frames are small and centred near the tapped point,
+  // the box only grows, and closing ends small near the same point.
+  for (const [w, h, mobile] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await b.newPage({ viewport: { width: w, height: h }, isMobile: mobile, hasTouch: mobile, reducedMotion: 'no-preference' });
+    await p.goto(URL); await p.waitForTimeout(900);
+    const r = await p.evaluate(async () => {
+      const d = document.getElementById('foldWf'), bd = d.querySelector('.fold-bd'), icon = d.querySelector('summary .fold-x');
+      d.closest('.sstep').scrollIntoView({ block: 'center', inline: 'center' });
+      await new Promise(r => setTimeout(r, 900));
+      const ic = icon.getBoundingClientRect(), at = [ic.left + ic.width / 2, ic.top + ic.height / 2];
+      const track = async ms => { const out = [], t0 = performance.now();
+        while (performance.now() - t0 < ms) { await new Promise(r => requestAnimationFrame(r)); const q = bd.getBoundingClientRect(); if (d.open && q.width) out.push([q.left + q.width / 2, q.top + q.height / 2, q.width]); }   // a shut <details> still reports its in-flow size
+        return out; };
+      d.querySelector('summary').click(); const open = await track(800);
+      const full = bd.getBoundingClientRect().width;
+      d.querySelector('.sheet-x').click(); const close = await track(700);
+      const near = f => Math.hypot(f[0] - at[0], f[1] - at[1]);
+      const grows = open.every((f, i) => i === 0 || f[2] >= open[i - 1][2] - 0.5), shrinks = close.every((f, i) => i === 0 || f[2] <= close[i - 1][2] + 0.5);
+      return { n: open.length, first: open[0] && { w: Math.round(open[0][2]), off: Math.round(near(open[0])) }, full: Math.round(full), grows,
+               shut: close.length && { w: Math.round(close[close.length - 1][2]), off: Math.round(near(close[close.length - 1])) }, shrinks, open: d.open };
+    });
+    ok(`${w}px: opening, the box starts small at the tapped icon and only grows`, r.n > 5 && r.first.w < r.full * 0.25 && r.first.off < 80 && r.grows, JSON.stringify(r));
+    ok(`${w}px: closing, it shrinks back into the icon, then is gone`, r.shrinks && r.shut.w < r.full * 0.25 && r.shut.off < 80 && !r.open, JSON.stringify(r));
+    // controls that measure themselves (the route switch's highlight) must not keep the in-flight size
+    await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(400);
+    await p.evaluate(() => document.getElementById('hhPill').click()); await p.waitForTimeout(900);
+    const g = await p.evaluate(() => { const a = document.getElementById('routeGlide').getBoundingClientRect(), o = document.querySelector('#route button.on').getBoundingClientRect();
+      return [a.width - o.width, a.height - o.height, a.left - o.left, a.top - o.top].map(v => Math.round(Math.abs(v))); });
+    ok(`${w}px: after the household box flies in, the route highlight sits on its button`, g.every(v => v <= 1), g.join(','));
+    // a switch is one track: its thumb lives inside it and its buttons carry no fill or edge
+    // of their own, so the slide never shows through gaps between opaque buttons (owner, 2026-11-13)
+    const tr = await p.evaluate(() => ['route', 'tone'].map(id => {
+      const t = document.getElementById(id), g = document.getElementById(id + 'Glide'), bs = [...t.querySelectorAll('button')];
+      const tb = t.getBoundingClientRect(), gb = g.getBoundingClientRect();
+      return { id, inside: g.parentNode === t && gb.left >= tb.left - 0.5 && gb.right <= tb.right + 0.5,
+        bare: bs.every(x => { const c = getComputedStyle(x); return c.backgroundColor === 'rgba(0, 0, 0, 0)' && parseFloat(c.borderTopWidth) === 0; }) };
+    }));
+    ok(`${w}px: the route and tone switches are tracks with the thumb inside and bare buttons`, tr.every(t => t.inside && t.bare), JSON.stringify(tr));
+    await p.close();
+  }
+});
+test('corners: every box takes one of the site\'s corners; only data shapes stay square', async b => {
+  // Owner, 13 November: "some boxes have squared edges, and some have rounded edges". The rule:
+  // 10px for every box, 4px for small marks, 16px for a floating sheet, a pill or a circle for
+  // round controls. Bars, bands and ranges are data, and their geometry stays square.
+  const OK = ['10px', '4px', '16px', '6px', '999px', '50%'], DATA = /\b(band|rbar|bar-bg|bar-fill|range|sbar-ghost|band-t)\b/;
+  for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m);
+    const bad = await p.evaluate(([OK, DATA]) => { const re = new RegExp(DATA), out = new Set();
+      document.querySelectorAll('details').forEach(d => d.open = true);
+      for (const e of document.querySelectorAll('body *')) {
+        if (e.closest('svg') || !e.checkVisibility()) continue;
+        const cs = getComputedStyle(e), q = e.getBoundingClientRect(); if (q.width < 20 || q.height < 16 || q.width > innerWidth - 8) continue;
+        const bord = parseFloat(cs.borderTopWidth) > 0 && parseFloat(cs.borderRightWidth) > 0;
+        const pb = e.parentElement ? getComputedStyle(e.parentElement).backgroundColor : '';
+        const fill = cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== pb;
+        if ((bord || fill) && !OK.includes(cs.borderRadius) && !re.test(e.className)) out.add(e.tagName.toLowerCase() + '.' + [...e.classList].join('.') + ' ' + cs.borderRadius);
+      }
+      return [...out]; }, [OK, DATA.source]);
+    ok(`${w}px: no box outside the corner system`, bad.length === 0, bad.slice(0, 6).join(' | '));
+    await p.close();
+  }
+});
+test('sheets: each one fits a single screen, with nothing to scroll inside it', async b => {
+  // Owner, 13 November: "ideally the information and data on the flyouts also fit into one page".
+  // Short phones (360 by 740) are allowed to scroll; these sizes are not.
+  for (const [w, h, m] of [[1280, 800, false], [1440, 900, false], [1024, 768, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m, 'index.html', true), over = [];
+    for (const id of ['foldHh', 'foldWf', 'foldRise', 'foldSlot', 'foldCmp']) {
+      await p.evaluate(id => document.getElementById(id).querySelector('summary').click(), id); await p.waitForTimeout(250);
+      const r = await p.evaluate(id => { const bd = document.getElementById(id).querySelector('.fold-bd'); return [bd.scrollHeight - bd.clientHeight, bd.scrollWidth - bd.clientWidth]; }, id);
+      if (r[0] > 0 || r[1] > 0) over.push(id + ' ' + r.join('/'));
+      await p.keyboard.press('Escape'); await p.waitForTimeout(150);
+    }
+    ok(`${w}x${h}: all five sheets fit without scrolling inside`, over.length === 0, over.join(', '));
+    // The household box changes with the route and the income: the marketplace credit box, the
+    // cliff and Medicaid warnings, the uninsured bad year. Owner, 13 November: the marketplace
+    // view "is causing a slight scroll".
+    // It also holds one size, so the route switch never moves under the pointer (owner, 13 November).
+    const hh = [], geo = new Set();
+    await p.evaluate(() => document.getElementById('foldHh').querySelector('summary').click()); await p.waitForTimeout(250);
+    for (const [route, inc] of [['employer', 95000], ['marketplace', 95000], ['marketplace', 150000], ['marketplace', 60000], ['marketplace', 30000], ['none', 95000], ['employer', 20000]]) {
+      const r = await p.evaluate(([route, inc]) => {
+        document.querySelector(`#route button[data-r="${route}"]`).click();
+        const s = document.getElementById('income'); s.value = inc; s.dispatchEvent(new Event('input', { bubbles: true }));
+        const bd = document.getElementById('foldHh').querySelector('.fold-bd'), b = bd.getBoundingClientRect(), sw = document.getElementById('route').getBoundingClientRect();
+        return { over: bd.scrollHeight - bd.clientHeight, geo: [b.top, b.height, sw.top].map(Math.round).join('/') }; }, [route, inc]);
+      if (r.over > 0) hh.push(route + ' ' + inc + ' +' + r.over);
+      geo.add(r.geo);
+    }
+    ok(`${w}x${h}: the household box and its route switch hold still across routes and incomes`, geo.size === 1, [...geo].join(' | '));
+    ok(`${w}x${h}: the household box fits in every route, including the cliff and Medicaid warnings`, hh.length === 0, hh.join(', '));
+    await p.keyboard.press('Escape');
+    await p.close();
+  }
+});
+test('news: with motion on, the pop-out hangs from the arrow, over the headline, and the arrow turns', async b => {
+  // The strip's entrance animation made it a stacking context, so the headline painted
+  // over the open list; the suite reads with reduced motion and never saw it.
+  for (const [w, h, m] of [[1280, 800, false], [390, 844, true]]) {
+    const p = await b.newPage({ viewport: { width: w, height: h }, isMobile: m, hasTouch: m, reducedMotion: 'no-preference' });
+    await p.goto(URL); await p.waitForTimeout(1800);
+    await p.locator('#changed > summary').click(); await p.waitForTimeout(700);
+    const r = await p.evaluate(() => { const bd = document.querySelector('#changed .fly-bd'), q = bd.getBoundingClientRect(), sum = document.querySelector('#changed > summary').getBoundingClientRect();
+      let hid = 0, n = 0; for (let y = q.top + 6; y < q.bottom - 6; y += 14) for (let x = q.left + 6; x < q.right - 6; x += 14) { n++; if (!bd.contains(document.elementFromPoint(x, y))) hid++; }
+      const t = getComputedStyle(document.querySelector('#changed .fold-x')).transform.match(/-?[\d.]+/g).map(Number);
+      return { hid, n, right: q.right, sumRight: sum.right, deg: Math.round(Math.atan2(t[1], t[0]) * 180 / Math.PI) }; });
+    ok(`${w}px: nothing covers the open list`, r.hid === 0 && r.n > 100, JSON.stringify(r));
+    ok(`${w}px: the list hangs from the arrow's edge`, Math.abs(r.right - r.sumRight) < 1, JSON.stringify(r));
+    ok(`${w}px: open, the arrow has turned to point down`, r.deg === 135, JSON.stringify(r));
+    await p.close();
+  }
+});
+test('folds: with motion on, folds and sheets move over time and end clean', async b => {
+  const p = await b.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
+  p.on('pageerror', e => ok('no page errors', false, e.message));
+  await p.goto(URL); await p.waitForTimeout(1200);
+  for (const sel of ['#foldWhy', '#obj2', '#adv']) {
+    if (sel === '#adv') { await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(400); await p.locator('#hhPill').click(); await p.waitForTimeout(900); }
+    else { await p.evaluate(s => document.querySelector(s).scrollIntoView({ block: 'center' }), sel); await p.waitForTimeout(500); }
+    await p.locator(sel + ' > summary').click();
+    const mid = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
+    await p.waitForTimeout(1300);
+    const end = await p.evaluate(s => { const d = document.querySelector(s), bd = d.querySelector('.fold-bd, .adv-bd');
+      return { open: d.open, cls: d.className, overflow: bd.style.overflow, h: bd.offsetHeight, running: bd.getAnimations().length,
+               twist: getComputedStyle(d.querySelector('.fold-x, .adv-x')).transform }; }, sel);
+    ok(`${sel}: opens at once for the reader, animating`, mid.open && /opening/.test(mid.cls), JSON.stringify(mid));
+    ok(`${sel}: settles open with nothing left running or clipped`, end.open && !/opening|closing/.test(end.cls) && end.overflow === '' && end.h > 20 && end.running === 0, JSON.stringify(end));
+    ok(`${sel}: its twist has turned`, end.twist !== 'none' && !/^matrix\(1, 0, 0, 1,/.test(end.twist), end.twist);
+    await p.locator(sel + ' > summary').click();
+    const midc = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
+    await p.waitForTimeout(1000);
+    const shut = await p.evaluate(s => { const d = document.querySelector(s); return { open: d.open, cls: d.className }; }, sel);
+    ok(`${sel}: stays in the page while it closes, then is shut`, midc.open && /closing/.test(midc.cls) && !shut.open && !/closing/.test(shut.cls), JSON.stringify([midc, shut]));
+    if (sel === '#adv') {
+      const thumb = await p.evaluate(async () => {
+        const g = document.getElementById('routeGlide'), on = () => document.querySelector('#route button.on').getBoundingClientRect();
+        document.querySelector('#route button[data-r="none"]').click(); await new Promise(r => setTimeout(r, 900));
+        const a = g.getBoundingClientRect(), o = on();
+        return { dx: Math.abs(a.left - o.left), dw: Math.abs(a.width - o.width), dy: Math.abs(a.top - o.top) };
+      });
+      ok('the sliding thumb lands on the chosen route', thumb.dx < 1 && thumb.dw < 1 && thumb.dy < 1, JSON.stringify(thumb));
+      await p.keyboard.press('Escape'); await p.waitForTimeout(700);
+    }
+  }
+  // a click during the close reopens it instead of fighting it
+  await p.evaluate(() => document.querySelector('#obj1').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400);
+  await p.locator('#obj1 > summary').click(); await p.waitForTimeout(1200);
+  await p.locator('#obj1 > summary').click(); await p.waitForTimeout(80);
+  await p.locator('#obj1 > summary').click(); await p.waitForTimeout(1300);
+  ok('a second click mid-close reopens the fold', await p.evaluate(() => { const d = document.getElementById('obj1'); return d.open && d.className.indexOf('closing') < 0; }));
+  // the sheet: growing at once, settled as a centred box over a dimmed, unmoved page, and still in the page while it leaves
+  await p.evaluate(() => document.querySelector('#foldWf').scrollIntoView({ block: 'center' })); await p.waitForTimeout(500);
+  const y0 = await p.evaluate(() => scrollY);
+  await p.locator('#foldWf > summary').click(); await p.waitForTimeout(60);
+  const rise = () => p.evaluate(() => { const d = document.getElementById('foldWf'), r = d.querySelector('.fold-bd').getBoundingClientRect();
+    return { open: d.open, shown: d.classList.contains('shown'), w: r.width, top: r.top, bottom: r.bottom, vh: innerHeight, y: scrollY, shade: +getComputedStyle(document.getElementById('shade')).opacity }; });
+  const up = await rise();
+  await p.waitForTimeout(1000);
+  const there = await rise();
+  ok('the box starts small and grows', up.open && up.shown && up.w < there.w * 0.6, `${up.w.toFixed(0)} to ${there.w.toFixed(0)}`);
+  ok('it settles centred with the page dimmed and unmoved', Math.abs((there.vh - there.bottom) - there.top) < 1.5 && there.shade === 1 && there.y === y0, JSON.stringify(there));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(80);
+  const leaving = await rise();
+  await p.waitForTimeout(600);
+  const gone = await rise();
+  ok('closing, it is still in the page as it shrinks, then shut', leaving.open && !leaving.shown && !gone.open && gone.y === y0, JSON.stringify([leaving.open, gone.open]));
+  await p.close();
+});
+test('send: three portraits are the recipient control', async b => {
+  for (const [w, h, m] of [[1280, 900, false], [390, 844, true]]) {
+    const p = await page(b, w, h, m);
+    const r = await p.evaluate(() => {
+      const tiles = [...document.querySelectorAll('#recips .rtile')];
+      return { n: tiles.length, on: tiles.filter(t => t.classList.contains('on') && t.getAttribute('aria-pressed') === 'true').length,
+        boxes: tiles.map(t => { const q = t.getBoundingClientRect(), ph = t.querySelector('.repph').getBoundingClientRect(); return { w: q.width, h: q.height, top: q.top, pw: ph.width, ph: ph.height }; }),
+        names: tiles.map(t => t.querySelector('.rtile-n, .sen-n').textContent), kinds: tiles.map(t => t.querySelector('.rtile-k').textContent) };
+    });
+    ok(`${w}px: the member and both senators, one of them chosen`, r.n === 3 && r.on === 1, JSON.stringify(r.names));
+    ok(`${w}px: each says who they are to the reader`, r.kinds[0] === 'Your representative' && r.kinds[1] === 'Your senator' && r.kinds[2] === 'Your senator', r.kinds.join('|'));
+    ok(`${w}px: portraits are 4:5 and large enough to recognise`, r.boxes.every(x => Math.abs(x.pw / x.ph - 0.8) < 0.02 && x.pw >= 72), r.boxes.map(x => x.pw + 'x' + x.ph).join(' '));
+    ok(`${w}px: tiles are equal and clear 44px`, Math.max(...r.boxes.map(x => x.w)) - Math.min(...r.boxes.map(x => x.w)) < 1.5 && r.boxes.every(x => x.h >= 44), r.boxes.map(x => x.w.toFixed(0)).join(' '));
+    ok(`${w}px: ${m ? 'stacked on a phone' : 'side by side on a desktop'}`, m ? r.boxes[1].top > r.boxes[0].top + 40 : Math.abs(r.boxes[0].top - r.boxes[2].top) < 1.5);
+    await p.locator('#senRows .rtile').nth(1).click(); await p.waitForTimeout(250);
+    const s = await p.evaluate(() => ({ on: [...document.querySelectorAll('#recips .rtile')].map(t => t.classList.contains('on') ? 1 : 0).join(''),
+      dear: document.getElementById('letterBd').textContent.slice(0, 40), badge: getComputedStyle(document.querySelectorAll('#recips .rtile')[2].querySelector('.rtile-go')).transform }));
+    ok(`${w}px: picking a senator moves the ring, the tick and the salutation`, s.on === '001' && /Dear Senator/.test(s.dear) && s.badge !== 'matrix(0, 0, 0, 0, 0, 0)', JSON.stringify(s));
+    await p.locator('#zip').fill('10001'); await p.locator('#zipGo').click(); await p.waitForTimeout(400);
+    const split = await p.evaluate(() => ({ sens: document.querySelectorAll('#senRows .rtile').length, repOff: document.getElementById('recRep').disabled, block: document.getElementById('senBlock').hidden }));
+    ok(`${w}px: an unresolved ZIP shows no senators from the last one`, split.sens === 0 && split.repOff && split.block, JSON.stringify(split));
+    await p.close();
+  }
+});
+
+test('letter: opens on its first lines and unfolds on request or on a click into it', async b => {
+  const p = await page(b, 1280, 900, false, 'index.html', true);
+  const read = () => p.evaluate(() => { const bd = document.getElementById('letterBd'), m = document.getElementById('letterMore');
+    return { clamp: bd.classList.contains('clamp'), h: bd.clientHeight, full: bd.scrollHeight, exp: m.getAttribute('aria-expanded'), t: m.textContent.trim(), btn: m.getBoundingClientRect().height,
+             send: document.getElementById('formBtn').getBoundingClientRect().height }; });
+  const a = await read();
+  ok('the letter shows its opening, with the send buttons already on the page', a.clamp && a.h < a.full - 100 && a.exp === 'false' && a.send > 40, JSON.stringify(a));
+  ok('the control says what it does and is a 44px target', /Read the whole letter/.test(a.t) && a.btn >= 44, a.t);
+  await p.locator('#letterMore').click(); await p.waitForTimeout(200);
+  const o = await read();
+  ok('it unfolds to the whole letter', !o.clamp && o.h >= o.full - 1 && o.exp === 'true' && /Show less/.test(o.t), JSON.stringify(o));
+  await p.locator('#letterMore').click(); await p.waitForTimeout(200);
+  ok('and folds back', (await read()).clamp);
+  await p.locator('#letterBd').click(); await p.waitForTimeout(200);
+  ok('clicking into the letter to edit unfolds it', !(await read()).clamp);
+  await p.close();
+});
+
+test('story: the universal step follows the savings sign and the unit', async b => {
+  const p = await page(b, 1280, 900);
+  const read = () => p.evaluate(() => ({ say: document.getElementById('st3say').textContent, gapK: document.getElementById('sbarGapK').textContent,
+    gap: document.querySelector('#sbarGap [data-fig="uni.savings"]').textContent, save: document.getElementById('save').textContent, lbl: document.getElementById('saveLbl').textContent }));
+  let r = await read();
+  ok('the bar\'s gap label matches the savings panel', r.gap === r.save && /^\$\d/.test(r.gap), JSON.stringify([r.gap, r.save]));
+  ok('keeping money: the step says it stays with the household', /keep/.test(r.lbl) && /stays with your household/.test(r.say) && r.gapK === 'no longer paid', r.say);
+  await p.locator('#route button[data-r="none"]').click(); await p.waitForTimeout(250);
+  r = await read();
+  const pays = /pay/.test(r.lbl);
+  ok('the step follows the label when the sign flips', pays ? (/would pay \$[\d,]+ more/.test(r.say) && r.gapK === 'more than today') : /stays with your household/.test(r.say), JSON.stringify([r.lbl, r.gapK, r.say]));
+  await p.locator('#unit').click(); await p.waitForTimeout(200);
+  ok('month view: the sentence says a month', /a month/.test((await read()).say), (await read()).say);
+  await p.close();
+});
+
+/* The fold icons (owner, 13 November: "Engraved line"): one idea per fold, in one
+ * hairline weight. Two stay live and are checked: the house holds a figure a person,
+ * the children smaller, and on the uninsured route the cliff becomes a bill with no top. */
+test('glyphs: every story fold wears its icon, and the live ones follow the household', async b => {
+  const p = await page(b, 1280, 800);
+  const read = () => p.evaluate(() => {
+    const g = id => document.getElementById(id);
+    return { all: ['gHh', 'gWhy', 'gRise', 'gWf', 'gSlot', 'gRest', 'gProv', 'gCmp', 'gLives'].every(id => g(id) && g(id).querySelector('svg path, svg circle') && g(id).getAttribute('aria-hidden') === 'true' && g(id).getBoundingClientRect().width === 56),
+      people: document.querySelectorAll('#gHh circle.gp').length, kids: document.querySelectorAll('#gHh circle.gp.kid').length,
+      inside: (() => { const h = g('gHh').querySelector('svg').getBBox(); return h.x >= 0 && h.x + h.width <= 56; })(),
+      cliff: !!g('gSlot').querySelector('.g-cliff'), bad: !!g('gSlot').querySelector('.g-bad'),
+      weights: [...new Set([...document.querySelectorAll('.fold-g svg [stroke-width]')].map(e => +e.getAttribute('stroke-width')))].sort() };
+  });
+  let r = await read();
+  ok('all nine are there, 56px wide and hidden from assistive tech', r.all);
+  ok('the house holds a figure a person, the children smaller', r.people === 4 && r.kids === 2, `${r.people} figures, ${r.kids} children`);
+  ok('marketplace and employer readers see the cliff', r.cliff && !r.bad);
+  ok('one hairline weight, plus the fine hatching and the amber totals', r.weights.every(w => [.8, .9, 1, 1.1, 1.2, 1.3, 2.2, 2.4].includes(w)), r.weights.join(', '));
+  await p.evaluate(() => { const f = document.getElementById('foldHh'); f.open = true; for (let k = 0; k < 4; k++) document.getElementById('sizeUp').click(); document.querySelector('#route button[data-r="none"]').click(); f.open = false; });
+  await p.waitForTimeout(250);
+  r = await read();
+  ok('they follow the household and the route: eight figures inside a wider house, and a bill with no top', r.people === 8 && r.inside && r.bad && !r.cliff, JSON.stringify([r.people, r.inside, r.bad]));
+  await p.close();
+});
+
+/* The household box (owner, 14 November): Enter did not seem to apply a ZIP (a
+ * browser's address autofill can swallow it), nothing said the change had taken,
+ * and there was no Done. Five digits now apply on their own, the ZIP button and
+ * the title bar say Saved, and Done closes the box. */
+test('household box: a ZIP applies at five digits, says Saved, and Done closes', async b => {
+  for (const [w, h] of [[1280, 800], [390, 844]]) {
+    const p = await page(b, w, h, w < 500, 'index.html', true);
+    await p.evaluate(() => document.querySelector('#foldHh > summary').click()); await p.waitForTimeout(700);
+    const st = () => p.evaluate(() => ({ btn: document.getElementById('zipGo').textContent.trim(), saved: !document.getElementById('hhSaved').hidden,
+      place: document.getElementById('hhSum').textContent, open: document.getElementById('foldHh').open,
+      done: (() => { const d = document.querySelector('#foldHh .sheet-done'), r = d.getBoundingClientRect(); return d.textContent === 'Done' && r.height >= 44 && r.right <= innerWidth; })() }));
+    let r = await st();
+    ok(`${w}px: the box opens with Update, no Saved mark, and a Done button`, r.btn === 'Update' && !r.saved && r.done, JSON.stringify(r));
+    await p.locator('#zip').fill('0646'); await p.waitForTimeout(200);
+    r = await st();
+    ok(`${w}px: four digits change nothing`, /Dallas/.test(r.place) && r.btn === 'Update' && !r.saved, JSON.stringify(r));
+    await p.locator('#zip').pressSequentially('8'); await p.waitForTimeout(500);
+    r = await st();
+    ok(`${w}px: the fifth digit applies the ZIP with no Enter and no button, and both say Saved`, /Fairfield/.test(r.place) && r.btn === 'Saved' && r.saved, JSON.stringify(r));
+    await p.locator('#zip').fill('0646'); await p.waitForTimeout(200);
+    ok(`${w}px: editing the ZIP again turns the button back to Update`, (await st()).btn === 'Update');
+    await p.click('#foldHh .sheet-done'); await p.waitForTimeout(700);
+    r = await st();
+    ok(`${w}px: Done closes the box and the household stays changed`, !r.open && /Fairfield/.test(r.place), JSON.stringify(r));
+    await p.close();
+  }
+});
+
+/* Phone cards (owner, 14 November): the universal card scrolled inside itself, its
+ * first dot was cut off, and the slim bar had no way to say what its parts are. */
+test('cards: no card scrolls inside, the dots sit whole, and a tap names a part of the bar', async b => {
+  for (const [w, h] of [[430, 720], [390, 690], [375, 600], [360, 640]]) {
+    const p = await page(b, w, h, true, 'index.html', true);
+    const over = [];
+    for (const r of ['employer', 'marketplace', 'none']) {
+      await p.evaluate(r => { const f = document.getElementById('foldHh'); f.open = true; document.querySelector('#route button[data-r="' + r + '"]').click(); f.open = false; }, r);
+      await p.waitForTimeout(200);
+      over.push(...await p.evaluate(() => [...document.querySelectorAll('.sstep, #lives > .wrap, .ob-hd, .obj')].filter(e => e.offsetHeight).map(e => Math.max(e.scrollHeight - e.clientHeight, e.scrollWidth - e.clientWidth))));
+    }
+    ok(`${w}x${h}: no card scrolls inside, up and down or side to side, in any route`, over.every(o => o <= 1), over.join(' '));
+    await storyStep(p, 3); await p.waitForTimeout(300);
+    const dots = await p.evaluate(() => { const l = document.getElementById('mline'); if (!l.checkVisibility()) return 'hidden';
+      const c = document.querySelector('.sstep[data-step="3"]').getBoundingClientRect(); return [...l.children].every(i => { const r = i.getBoundingClientRect(); return r.left >= c.left - .5 && r.right <= c.right + .5; }); });
+    ok(`${w}x${h}: every estimate's dot is whole inside the card`, dots === true || dots === 'hidden', String(dots));
+    const at = await p.evaluate(() => { const e = [...document.querySelectorAll('.sseg.on')].pop(), r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, k: e.querySelector('.sseg-t').textContent, v: e.querySelector('b').textContent }; });
+    await p.mouse.click(at.x, at.y); await p.waitForTimeout(150);
+    const tip = await p.evaluate(() => { const t = document.getElementById('stip'), r = t.getBoundingClientRect(); return { on: !t.hidden, text: t.textContent, inside: r.left >= 0 && r.right <= innerWidth, dim: document.getElementById('sbar').classList.contains('tipping') }; });
+    ok(`${w}x${h}: tapping a part of the bar names it and its value, on screen`, tip.on && tip.text === at.k + at.v && tip.inside && tip.dim, JSON.stringify(tip));
+    await p.mouse.click(20, 20); await p.waitForTimeout(150);
+    ok(`${w}x${h}: a tap anywhere else puts it away`, await p.evaluate(() => document.getElementById('stip').hidden));
+    await p.close();
+  }
+});
+
+/* The second deck (owner, 14 November: "Story and objections"). On a phone the other
+ * number and the five objections are cards like the story's; each objection shows its
+ * question and one-line answer, and the full answer opens over the page. Past the last
+ * card, Next goes to the letter. Elsewhere the page is unchanged. */
+test('deck: on a phone the other number and the objections are cards, then the letter', async b => {
+  for (const [w, h] of [[430, 720], [375, 600], [360, 640]]) {
+    const p = await page(b, w, h, true, 'index.html', true);
+    await p.evaluate(() => document.getElementById('deck').scrollIntoView({ block: 'start' })); await p.waitForTimeout(300);
+    const r = await p.evaluate(() => { const cs = [...document.querySelectorAll('#lives > .wrap, .ob-hd, .obj')], row = document.getElementById('drow').getBoundingClientRect();
+      return { n: cs.length, over: cs.map(c => c.scrollHeight - c.clientHeight), wide: cs.every(c => Math.abs(c.getBoundingClientRect().width - row.width) < 1),
+        ticks: document.querySelectorAll('#dticks i').length, page: document.documentElement.scrollWidth <= innerWidth,
+        short: [...document.querySelectorAll('.obj')].every(o => o.querySelector('.obj-a2').textContent === o.querySelector('.obj-a').textContent && o.querySelector('.obj-a2').checkVisibility()) }; });
+    ok(`${w}x${h}: seven cards a screen wide, one tick each, nothing scrolls inside or sideways`, r.n === 7 && r.ticks === 7 && r.wide && r.page && r.over.every(o => o <= 1), JSON.stringify(r.over));
+    ok(`${w}x${h}: each objection card shows its question and its one-line answer`, r.short);
+    await p.click('#dNext'); await p.waitForTimeout(600); await p.click('#dNext'); await p.waitForTimeout(600);
+    const at = await p.evaluate(() => [document.querySelectorAll('#dticks i.on').length, !document.getElementById('dPrev').disabled]);
+    ok(`${w}x${h}: Next moves a card at a time and the ticks follow`, at[0] === 3 && at[1], at.join());
+    await p.click('#obj1 .obj-more'); await p.waitForTimeout(500);
+    const sh = await p.evaluate(() => { const d = document.getElementById('obj1'), bd = d.querySelector('.fold-bd'), r = bd.getBoundingClientRect();
+      return { open: d.open, fixed: getComputedStyle(bd).position === 'fixed', inside: r.top >= 0 && r.bottom <= innerHeight + 1, title: d.querySelector('.sheet-t').textContent, body: d.querySelector('.body').checkVisibility() }; });
+    ok(`${w}x${h}: the full answer opens over the page, titled by its question`, sh.open && sh.fixed && sh.inside && sh.body && /taxes/.test(sh.title), JSON.stringify(sh));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+    await p.evaluate(() => { const r = document.getElementById('drow'); r.scrollTo({ left: 0 }); }); await p.waitForTimeout(400);
+    await p.click('#lives details.src > summary'); await p.waitForTimeout(500);
+    const src = await p.evaluate(() => { const d = document.querySelector('#lives details.src'), bd = d.querySelector('.src-bd'), r = bd.getBoundingClientRect(), c = document.querySelector('#lives > .wrap');
+      return { open: d.open, fixed: getComputedStyle(bd).position === 'fixed', inside: r.top >= 0 && r.bottom <= innerHeight + 1, title: d.querySelector('.sheet-t').textContent, card: c.scrollHeight - c.clientHeight }; });
+    ok(`${w}x${h}: who produced the number opens over the page too, and its card never scrolls`, src.open && src.fixed && src.inside && /Who produced/i.test(src.title) && src.card <= 1, JSON.stringify(src));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+    await p.evaluate(() => { const r = document.getElementById('drow'); r.scrollTo({ left: 6 * r.clientWidth }); }); await p.waitForTimeout(500);
+    ok(`${w}x${h}: the last card's Next says it goes to the letter`, /Write to them/.test(await p.textContent('#dNext')));
+    await p.click('#dNext'); await p.waitForTimeout(900);
+    const sendTop = await p.evaluate(() => document.getElementById('send').getBoundingClientRect().top);
+    ok(`${w}x${h}: and it does`, Math.abs(sendTop) < 140, String(sendTop));
+    await p.close();
+  }
+  const p = await page(b, 1280, 800, false, 'index.html', true);
+  const d = await p.evaluate(() => { const o = document.getElementById('obj1'); o.querySelector('summary').click(); return { open: o.open, pos: getComputedStyle(o.querySelector('.fold-bd')).position, nav: document.getElementById('dnav').checkVisibility(), card: document.querySelector('.obj-c').checkVisibility() }; });
+  ok('1280: objections still open in place, with no deck controls', d.open && d.pos !== 'fixed' && !d.nav && !d.card, JSON.stringify(d));
+  const sd = await p.evaluate(() => { const o = document.querySelector('#lives details.src'); o.querySelector('summary').click(); return new Promise(r => setTimeout(() => r({ open: o.open, pos: getComputedStyle(o.querySelector('.src-bd')).position, hd: o.querySelector('.sheet-hd').checkVisibility() }), 500)); });
+  ok('1280: who produced the number still opens in place, with no title bar', sd.open && sd.pos !== 'fixed' && !sd.hd, JSON.stringify(sd));
+  await p.close();
+});
+
+/* Who pays the rest. The universal bar drops far below the whole bill, and readers
+ * ask where the difference went (owner, 14 November). The fold answers in words and
+ * adds no figure of its own: each number it prints is one the bar already shows. */
+test('who pays the rest: the fold names the money the bar no longer shows', async b => {
+  const p = await page(b, 1280, 800);
+  const read = () => p.evaluate(() => {
+    const t = id => document.getElementById(id).textContent, seg = k => { const e = document.querySelector('.sseg[data-k="' + k + '"] b'); return e ? e.textContent : null; };
+    return { lead: t('restLead'), uni: document.querySelector('[data-fig="uni.total"]').textContent, own: document.getElementById('restOwn').hidden ? null : t('restOwn'),
+      you: t('restYou'), sav: document.querySelector('#sbarGap b').textContent, gapK: t('sbarGapK'), tax: t('restTax'), taxSeg: seg('tax'), credit: seg('subsidy'), emp: seg('employer'),
+      link: !!document.getElementById('wrong-medicare'), visible: document.getElementById('foldRest').checkVisibility() };
+  });
+  const route = r => p.evaluate(r => { const f = document.getElementById('foldHh'); f.open = true; document.querySelector('#route button[data-r="' + r + '"]').click(); f.open = false; }, r);
+  for (const r of ['marketplace', 'employer', 'none']) {
+    await route(r); await p.waitForTimeout(200);
+    const x = await read();
+    ok(`${r}: it is under the universal step and prints this household's own contribution`, x.visible && x.lead.includes(x.uni), x.lead);
+    ok(`${r}: what stays or goes matches the bar's gap, in the same direction`, x.you.includes(x.sav) && (x.gapK === 'no longer paid') === / less than /.test(x.you), x.you);
+    ok(`${r}: the Medicare tax it says the figures leave out is the one on the bar`, x.tax === ' (' + x.taxSeg + ')', JSON.stringify([x.tax, x.taxSeg]));
+    if (r === 'marketplace') ok('marketplace: the public money is the tax credit on the bar', x.own && x.credit && x.own.includes(x.credit), x.own);
+    if (r === 'employer') ok("employer: the employer's share on the bar is the one replaced", x.own && x.emp && x.own.includes(x.emp), x.own);
+    if (r === 'none') ok('uninsured: no credit or employer share to name', x.own === null);
+  }
+  await p.close();
+});
+
+/* Cards. On a phone the first build pinned the bar across the top third of the
+ * screen; the owner: "the bars currently cover half the screen". The story is
+ * now read like a story there: one step a card, the bar a slim column beside
+ * it, Back and Next under it. The row is the browser's own sideways scrolling,
+ * so nothing is hijacked. */
+test('cards: on a phone the story is tapped or swiped through, one step a screen', async b => {
+  for (const [w, h] of [[390, 844], [360, 640], [430, 932]]) {
+    const p = await page(b, w, h, true, 'index.html', true);
+    await storyStep(p, 0);
+    const read = () => p.evaluate(() => { const row = document.getElementById('ssteps'), cs = [...row.querySelectorAll('.sstep')], on = cs.findIndex(e => e.classList.contains('on'));
+      const rr = row.getBoundingClientRect(), st = document.getElementById('stage').getBoundingClientRect(), nav = document.getElementById('snav').getBoundingClientRect(), sb = document.querySelector('.sticky').getBoundingClientRect();
+      const c = cs[on].getBoundingClientRect(), num = cs[on].querySelector('.snum, .ssend').getBoundingClientRect();
+      return { cards: document.documentElement.classList.contains('cards'), n: cs.filter(e => e.offsetHeight).length, on,
+        cardW: c.width, rowW: rr.width, left: c.left - rr.left, yOver: cs[on].scrollHeight - cs[on].clientHeight, xOver: cs[on].scrollWidth - cs[on].clientWidth,
+        barShare: st.width / innerWidth, barLeft: st.left, numRight: num.right, navBottom: nav.bottom, vh: innerHeight, top: rr.top, stickyBottom: sb.bottom,
+        ticks: [...document.querySelectorAll('#sticks i')].filter(i => i.classList.contains('on')).length, uni: document.querySelector('.inkzone').classList.contains('uni'),
+        prev: document.getElementById('sPrev').disabled, next: document.getElementById('sNext').textContent, btn: Math.min(...[...document.querySelectorAll('#snav button')].map(x => x.getBoundingClientRect().height)),
+        figs: getComputedStyle(document.querySelector('.sticky .figs')).display, docW: document.documentElement.scrollWidth, y: scrollY,
+        hx: getComputedStyle(row).overflowX, snap: getComputedStyle(row).scrollSnapType, labels: [...document.querySelectorAll('.sseg.on .sseg-l')].filter(l => l.offsetWidth).length }; });
+    let r = await read();
+    ok(`${w}px: five cards, the first in view, in a native snap row`, r.cards && r.n === 5 && r.on === 0 && r.hx === 'auto' && /x mandatory/.test(r.snap), JSON.stringify([r.n, r.on, r.snap]));
+    ok(`${w}px: a card is exactly the row wide and nothing spills sideways`, Math.abs(r.cardW - r.rowW) < 1 && r.xOver <= 0 && r.docW <= w, `${r.cardW} of ${r.rowW}, page ${r.docW}`);
+    ok(`${w}px: the bar is a slim column, a sixth of the width at most, clear of the number`, r.barShare <= 0.17 && r.numRight <= r.barLeft && r.labels === 0, `${(r.barShare * 100).toFixed(0)}%, number ends ${r.numRight.toFixed(0)}, bar starts ${r.barLeft.toFixed(0)}`);
+    ok(`${w}px: the whole card and its buttons fit the screen under the results bar`, r.top >= r.stickyBottom - 1 && (h < 700 || r.navBottom <= r.vh + 1), `row ${r.top.toFixed(0)}, bar ${r.stickyBottom.toFixed(0)}, buttons end ${r.navBottom.toFixed(0)} of ${r.vh}`);
+    ok(`${w}px: Back is off on the first card, buttons are 48px, and the three totals leave the bar`, r.prev && r.btn >= 48 && r.figs === 'none' && r.ticks === 1, JSON.stringify([r.prev, r.btn, r.figs, r.ticks]));
+    const y0 = r.y, fit = [];
+    for (let i = 1; i < 5; i++) {
+      await p.locator('#sNext').click(); await p.waitForTimeout(350);
+      r = await read(); fit.push(r.yOver);
+      ok(`${w}px: Next goes to card ${i + 1}, ticks follow, teal from the universal card on`, r.on === i && r.ticks === i + 1 && r.uni === (i >= 3) && Math.abs(r.left) < 1 && r.y === y0, JSON.stringify([r.on, r.ticks, r.uni, r.left, r.y]));
+    }
+    ok(`${w}px: every card fits without scrolling inside it, even on a short phone`, fit.every(o => o <= 1), fit.join(' '));
+    ok(`${w}px: the last card says the story is done and Next carries on`, /Keep reading/.test(r.next), r.next);
+    await p.locator('#sPrev').click(); await p.waitForTimeout(350);
+    ok(`${w}px: Back returns`, (await read()).on === 3);
+    await p.evaluate(() => { const row = document.getElementById('ssteps'); row.scrollTo({ left: 0 }); }); await p.waitForTimeout(350);
+    ok(`${w}px: a swipe (the row's own scroll) moves the step and the bar with it`, (await read()).on === 0 && (await barRead(p)).segs.length === 2);
+    await p.evaluate(() => { const row = document.getElementById('ssteps'); row.scrollTo({ left: 4 * row.clientWidth }); }); await p.waitForTimeout(350);
+    await p.locator('#toSend').click(); await p.waitForTimeout(350);
+    ok(`${w}px: the last card's button lands on the letter`, await p.evaluate(() => Math.abs(document.getElementById('send').getBoundingClientRect().top) < 80));
+    await p.close();
+  }
+  // wider than a phone, or all on one page, there are no cards
+  const d = await page(b, 1280, 800, false, 'index.html', true);
+  ok('1280px: no cards, no Back and Next, no closing card', await d.evaluate(() => !document.documentElement.classList.contains('cards') && !document.getElementById('snav').offsetHeight && !document.querySelector('.send-card').offsetHeight && getComputedStyle(document.getElementById('ssteps')).overflowX === 'visible'));
+  await d.close();
+  const q = await page(b, 390, 844, true);
+  ok('390px, all on one page: the steps stack again and the bar is put away', await q.evaluate(() => !document.documentElement.classList.contains('cards') && !document.getElementById('stage').offsetHeight && document.querySelectorAll('.sstep')[1].getBoundingClientRect().top > document.querySelectorAll('.sstep')[0].getBoundingClientRect().bottom - 1));
+  await q.close();
+});
+
 const b = await chromium.launch();
 for (const c of checks) {
   if (only && !c.name.toLowerCase().includes(only.toLowerCase())) continue;
   console.log(`\n\x1b[1m${c.name}\x1b[0m`);
-  await c.fn(b);
+  // a check that throws (a selector that no longer exists, say) is one failure,
+  // not the end of the run: the rest of the suite still reports
+  try { await c.fn(b); }
+  catch (e) { ok('ran to the end', false, String(e && e.message || e).split('\n')[0].slice(0, 200)); }
 }
 await b.close();
 console.log(`\n${fail ? '\x1b[31m' : '\x1b[32m'}${pass} passed, ${fail} failed\x1b[0m`);

@@ -9,26 +9,46 @@
  *
  * Every entry: id (a stable slug; it is the permalink and the RSS guid), date
  * (ISO), kind, title (one sentence, inline markup allowed), body (a short
- * paragraph). A world entry must carry its primary source over https. `see`
+ * paragraph). An entry that shows in the hero box also needs head: a short
+ * headline, no more than 48 characters, that the pop-out and the moving line
+ * show beside its date (the owner: "people are not going to read all these
+ * words"); the build refuses a box entry without one. A world entry must carry its primary source over https. `see`
  * points at the methodology section that explains the number. `pin: true`
  * keeps an entry in the hero box regardless of age (at most three pins; the
- * box shows the pins plus the newest entries to fill three). The suite checks
+ * box shows the pins plus the newest entries to fill six). The suite checks
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'who-pays-the-rest', date: '2026-11-14', kind: 'site',
+    head: 'New: who pays the rest',
+    title: 'New explainer under universal coverage: who pays the part of the bill your household no longer pays.',
+    body: 'Under universal coverage the bar drops far below the whole bill, and the first question is where the difference went. Most of it does not disappear: it is paid by everyone else. A tax credit is public money already, an employer&rsquo;s premium share is replaced by the payroll tax counted in your figure, and what Medicare and Medicaid spend today goes into one national plan, with taxes that rise with income. The studies disagree on whether total spending would go up or down. The explainer adds no new figure, and it says plainly that leaving out the Medicare tax you pay today flatters universal coverage.',
+    see: { id: 'universal', text: 'Universal coverage' }
+  },
+  {
+    id: 'one-bar-at-a-time', date: '2026-11-12', kind: 'site',
+    head: 'The page, rebuilt around one bar',
+    title: 'The page is rebuilt around one bar. The same figures now arrive one at a time, and every chart opens from the step it supports.',
+    body: 'No figure changed and nothing was removed. The page used to show every chart at once, about fifteen screens of them. It now opens on four steps beside a single bar drawn to scale: what a paystub shows, the part it never shows, the whole bill, and the same care under universal coverage. The calculator inputs, the waterfall, how premiums have risen, the cliff and the side by side comparison each open over the page from the step they belong to. On a phone the steps are cards to swipe or tap through. Each objection shows its question and a one line answer, with the full answer and its footnote one click below. The letter section now starts with your representative and both senators.',
+    see: { id: 'kinds', text: 'Three kinds of number' }
+  },
+  {
     id: 'who-paid-the-rise', date: '2026-11-12', kind: 'site',
-    title: 'New figure: who paid the rise. The same household&rsquo;s premium in 2025, 2026 and 2027 on one scale, split by who pays it.',
+    head: 'New chart: how premiums have risen',
+    title: 'New figure: how premiums have risen. The same household&rsquo;s premium in 2025, 2026 and 2027 on one scale, split by who pays it.',
     body: 'It sits under the reveal and follows the route you pick. On the marketplace it prices your household on each year&rsquo;s own benchmark and credit schedule, from new 2025 and 2026 tables built entirely from CMS&rsquo;s files. For the example family of four in Dallas at $95,000, their share went from $5,807 in 2025 to $9,332 in 2026, when the enhanced credits expired, and to $9,350 in 2027, when the credit absorbed nearly all of a $2,963 rise in the premium. At work it uses KFF&rsquo;s averages, so 2027 stays empty until KFF&rsquo;s survey next October. Nothing in it is modeled.',
-    see: { id: 'rise', text: 'Who paid the rise' }
+    see: { id: 'rise', text: 'How premiums have risen' }
   },
   {
     id: 'plan-year-2027', date: '2026-11-11', kind: 'site', pin: true,
+    head: 'Plan year 2027 in 41 states and DC',
     title: 'The calculator now uses plan year 2027 in 41 states and DC: the 2027 credit schedule, the 2026 poverty guidelines and 2027 benchmark premiums. Nine states stay on 2026 for now.',
     body: 'Open enrollment for 2027 began on 1 November, so every dated figure moved together. The share of income a household is expected to pay toward the benchmark plan rises in every band of the IRS schedule (Rev. Proc. 2026-26): 2.15% at the bottom, up from 2.10%, and 10.22% from 300% to 400% of the poverty line, up from 9.96%. The credit is now measured against the 2026 poverty guidelines, $33,000 for a family of four in the 48 states and DC, up from $32,150, so for that family the 400% cliff falls at $132,000 instead of $128,600. The statutory out-of-pocket maximum is $12,000 for one person and $24,000 for a family, up from $10,600 and $21,200. Benchmark premiums are every county&rsquo;s second-lowest-cost silver plan for 2027: from CMS&rsquo;s plan files for the 29 HealthCare.gov states, and, because CMS posts the state exchanges&rsquo; files only next May, from the published rates of 12 state exchanges and the District&rsquo;s own, every source listed on the methodology page. For the default family of four in Dallas the benchmark rises 11.5%, from $25,788 a year to $28,752; across the counties priced in both years the median rise is 11.7%, in line with KFF&rsquo;s national 12%. California&rsquo;s rates are still labeled preliminary by Covered California, and the page says so for a household there. Colorado, Kentucky, Maine, Maryland, Massachusetts, New Jersey and Virginia had published nothing usable yet, and Illinois and Pennsylvania published figures that contradict each other, so those nine stay wholly on plan year 2026 (benchmark, poverty line and credit schedule) and the page says that too; each moves when its rates can be used. The Sanders exemption uses the 2027 standard deduction, $33,200 for a joint return and $16,600 for a single filer (IRS Rev. Proc. 2026-35), which lowers every model&rsquo;s figure for the default family by $40. Last year&rsquo;s tables stay on the methodology page.',
     see: { id: 'credit', text: 'The premium tax credit' }
   },
   {
     id: 'kff-benchmark-2027', date: '2026-11-06', kind: 'world',
+    head: 'KFF: 2027 benchmark premiums up 12%',
     title: 'KFF&rsquo;s benchmark premium indicator, corrected 6 November 2026, puts the national average 2027 benchmark silver premium at $703 a month, up from $625 in 2026.',
     body: 'KFF&rsquo;s &ldquo;Marketplace Average Monthly Benchmark Premiums&rdquo; indicator, updated 6 November 2026 to fix its Oregon and California figures, tracks the same thing this calculator prices by county: the second lowest cost silver, or benchmark, premium for a 40 year old before any tax credit. Its national average rises from $625 a month in 2026 to $703 in 2027, about 12 percent. The calculator&rsquo;s own benchmark table still runs on CMS&rsquo;s 2026 plan year files; the annual rebuild onto 2027&rsquo;s files is due this fall.',
     source: { title: 'KFF, Marketplace Average Monthly Benchmark Premiums', url: 'https://www.kff.org/affordable-care-act/state-indicator/marketplace-average-benchmark-premiums/' },
@@ -36,12 +56,14 @@ var UPDATES = [
   },
   {
     id: 'employer-2026-survey', date: '2026-10-28', kind: 'site',
+    head: 'Employer figures move to KFF&rsquo;s 2026 survey',
     title: 'Employer figures now use KFF&rsquo;s 2026 survey: the example family&rsquo;s whole bill rises from $32,171 to $33,481 a year.',
     body: 'The calculator&rsquo;s employer premiums moved from KFF&rsquo;s 2025 averages to its 2026 ones: family $28,303 (worker $7,471, employer $20,832) and single $9,804 (worker $1,672, employer $8,132). For the household the page opens with (a family of four in Dallas on $95,000 with employer coverage), the share on the paystub rises from $8,228 to $8,849, the share that never appears on it from $23,943 to $24,632, and the difference from the Sanders financing model from $22,534 to $23,844 a year. The one model that would cost this household more than today at a high enough income now crosses over at about $248,000, up from $238,000. Marketplace and universal figures do not use the survey and are unchanged. A reader who types their own premium into the drawer is unaffected.',
     see: { id: 'employer', text: 'Employer coverage' }
   },
   {
     id: 'reps-2026-10-28', date: '2026-10-28', kind: 'site',
+    head: 'Who backs the bills, refreshed',
     title: 'The representatives snapshot is refreshed as of 28 October: 117 House members and 19 senators now marked as sponsor or cosponsor.',
     body: 'Rebuilt after the weekly watcher found H.R. 3069&rsquo;s cosponsor list had moved, so the rep card now shows Rep. Jason Crow as a cosponsor. Membership is unchanged: Florida&rsquo;s 20th and Texas&rsquo;s 23rd are still vacant. S. 1506 is unchanged. Every cosponsor claim on the card carries the new as-of date.',
     see: { id: 'src-congress', text: 'Members and cosponsors' }

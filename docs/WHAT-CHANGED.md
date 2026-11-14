@@ -1,7 +1,7 @@
 # What changed: keeping the log
 
 The log is `src/updates.js`. `tools/build-updates.mjs` renders it into the hero's "What
-changed" box (pins plus the newest, three in all), the `/updates` page and `/updates.xml`.
+changed" box (pins plus the newest, six in all, each a date and a short `head`), the `/updates` page and `/updates.xml`.
 The box is never edited by hand: to change it, add an entry. The suite enforces the shape
 of every entry (ISO date no later than today, newest first, unique slug, a world entry's
 https primary source, methodology pointers that exist, no em or en dashes, at most three

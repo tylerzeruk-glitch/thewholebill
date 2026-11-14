@@ -63,7 +63,136 @@ Three separate defects shipped past code review and were caught only by measurin
 behaviour without checking the screen.** It caught the axis caption rendering at 8.5px on its
 first run.
 
+## The story and its folds (since 2026-11-12)
+
+The page is one pinned bar beside four steps (paystub, the hidden part, the whole bill, universal
+coverage), inside `.inkzone`. `storyPlan()` in the page script holds each route's steps and copy;
+`renderStory()` sizes the segments on every paint and `paintStory()` decides which stand for the
+step in focus. Segments are the route's own parts (`W.routeBreakdown`) and the model's
+(`S.universal.parts`) on one scale shared by the route on the bar and all six models
+(`storyScale()`), so a segment's height is always value / scale. It is not shared across
+routes (owner, 2026-11-12): borrowing the marketplace's larger total left an empty sliver
+above an employer household's whole bill. The comparison fold, which shows the routes
+together, keeps its own shared scale. `--H` (the bar's height in px) and `--sticky-h` are set
+by `sizeStory()`; the stylesheet never guesses them.
+
+Every chart the long page used to show at once (calculator inputs, waterfall, rise, cliff or bad
+year, side-by-side comparison) is a real `<details class="fold">` under the step it supports,
+and the page has two views of them (`setView()`). Readers get only the first: the owner
+withdrew the on-screen switch on 2026-11-12, and an old stored choice is cleared on load.
+
+- **Step by step** (default, `html.sheets`): a `.wide` fold opens as a floating box over a
+  dimmed page (`openSheet(d, from)`), a labelled dialog with Escape and a close button. Nothing
+  underneath moves. The first build opened wide folds in the flow; the owner found that unnatural
+  (a screen of chart pushed in under the step, and the bar left to make room). Since 2026-11-13
+  the box grows out of whatever was tapped (the row's corner-arrows icon, the household pill's
+  button, the results bar's pencil) and shrinks back into it, and **each box fits one screen**
+  at 1280x800, 1440x900, 1024x768 and 390x844 (the suite checks, and checks the household box in
+  every route and at the cliff, floor and Medicaid incomes; a 360x740 phone may scroll three boxes
+  a little). The fit rules are scoped to `.fold.wide[open]` in the sheets view, so the one-page
+  view keeps its full-size charts; on a phone the household box drops its four breakdown cards
+  and the TRICARE pointer (objection 05 carries it), and compare drops the model strip. In the
+  household box the inputs sit on their own panel with filled fields and the estimate reads off
+  the ground beside it: inputs on the left, results on the right (owner, 2026-11-13). A ZIP applies at its fifth digit (address autofill can eat Enter); its button and the title
+  bar then say Saved, and Done replaces the cross. The household box holds one height in every route and at every income (it is
+  centred, so a growing box moved the route switch under the pointer); the suite checks. New copy in
+  the eligibility box (`#elig`) has to fit that box; the subtitle under the total already says
+  "full price", so the warnings do not repeat it.
+  Folds that hold only a paragraph open in place, with the plus.
+- **All on one page** (`html.onepage`): every fold stands open in the flow at full width, the
+  summaries become headings, and the bar steps aside (`.stage.yield`) where a wide chart needs
+  its space. Printing borrows this view, and the suite reaches it through the hidden switch.
+
+With no script the same `<details>` simply open in place.
+
+**On a phone (760px and under) the steps are cards** (`html.cards`, set by `applyCards()` in the
+step-by-step view): `.ssteps` becomes a native scroll-snap row, the bar a slim column beside it
+without labels, with ticks above and Back and Next below, and a fifth closing card. The step in
+focus comes from the row's own scroll position, so swiping is the browser's scrolling and nothing
+is hijacked. The first build pinned the bar across the top third of a phone; the owner's verdict
+was "the bars cover half the screen". No card scrolls inside itself (owner, 2026-11-14): `fitCards()` tightens the
+fullest card in up to five levels (`.fit1` to `.fit5`), and the suite checks down to 360x640 and
+375x600. The slim bar answers a tap (`#stip`): the part under the finger shows its name and value
+beside the bar and the rest dims; it names the hidden part once by itself, the first time. All on one page, on a phone, puts the bar away entirely.
+
+**After the story, a second deck** (owner, 2026-11-14, "Story and objections"): on a phone the
+other number and the five objections are cards too (`#deck`, `#drow`, `#dticks`, `#dnav`). The
+sections dissolve with `display:contents`; each objection card shows its question and a copy of
+its one-line answer (`.obj-c`, aria-hidden), and the full answer opens as a sheet (the deck's folds
+take `.wide` only while cards are on). Past the last card Next goes to the letter, which stays a
+scrolling page on purpose: editing text in a swipe row fights the swipe. The other number's card
+tightens in two levels like the story's, and its "Who produced this number" opens as a sheet
+too (`.src.wide`). No card scrolls inside in either direction; the suite checks both.
+
+- **The suite reads the page all on one page** (`page()` in `test/test.mjs` clicks the hidden
+  switch), because most checks measure what is inside the folds. Checks about the story,
+  the sheets and the hero pass `shut = true` to get the page as a reader first meets it.
+- **New copy in a step goes through `storyPlan()`**, per route, and a modeled part says so in its
+  bar label ("(estimate)") and in the step's basis line.
+- **The teal turn re-points the grey tokens** (`.inkzone.uni`). Panels go darker than the ground
+  there, not lighter: small teal and amber labels sit on them. The suite measures contrast in
+  that state.
+- A static `data-fig` needs a default in `tools/default-figures.mjs` or the build refuses.
+- **Small text is the thing the owner keeps cutting.** A step carries one basis chip (`tag` in
+  `storyPlan()`: "Survey average", "Set in law", "Includes our estimate"), not a sentence with
+  links. Detail and links belong inside the fold. Before adding a note, ask whether a chip, a
+  glyph or the fold can carry it.
+- **Fold icons** (`renderGlyphs()`) are 56 by 36 engraved pictograms, one idea per fold (owner's
+  choice, 2026-11-13, after rejecting charts-in-miniature): a home, a paystub with the sheet behind
+  it, a climbing price tag, a receipt, a ledge, a bill with no top, a seal, a balance, a pulse. One
+  hairline weight with hatching for shade; amber marks the household's money and teal only the
+  universal side. Two stay live and the suite checks them: the house holds a figure a person
+  (children smaller), and on the uninsured route the cliff becomes the bill with no top.
+- **The opening is the story's first rows** (`.shero`), on the dark ground with the empty bar
+  beside it. While it has the screen the zone is `.intro`: the bar's empty box, the running
+  total and the results bar all wait out of sight, and a bouncing arrow (`#cue`) is the way down. There is no ZIP field on it. The household pill
+  (`#hhPill`), and the household line in the results bar, open the household sheet, which
+  holds the ZIP and the family details together.
+- **"What changed" is one slow line of news** in a strip under the header's rule, beside the
+  plan year (`.newsbar`, `details.flyout#changed`), that pops the dated list out over the page. The owner asked for the moving line on 2026-11-12,
+  reversing the earlier "static, no ticker" choice. It never moves under reduced motion and
+  stops under the pointer; the scrolling text is an aria-hidden copy of the entries.
+- **After the turn the page stays teal**: the other number, the objections and the letter are
+  `section.paper.onteal` inside `.inkzone`, with the paper tokens re-pointed. The letter is the
+  exception, a sheet of paper with its own tokens put back. No section wears a number.
+- **Step by step, the results bar shows only the household and the unit switch.** Its three
+  totals are what the steps reveal; they return in the all-on-one-page view.
+- **"Who pays the rest"** (`#foldRest`, owner's ask, 2026-11-14) answers the empty part of the
+  universal bar in words: the credit or the employer's share by name, everyone's taxes, and the
+  studies' disagreement on total spending, plus the Medicare tax caveat. It adds no figure of its
+  own; filling the bar with an "everyone else pays" segment is still parked decision 1 below.
+- **The six estimates are circles on a line** (`renderModelLine()`), each at the calculator's
+  own total for that model and this household, with name chips under it. The chips (and the
+  phone's picker) run cheapest to priciest for this household, so their order moves with
+  income; address a pill by `data-m`, never by index. The dots are taps too (a 44px band; a tap
+  picks the nearest dot within 24px); the chips stay the keyboard and screen-reader control, so the
+  line stays aria-hidden.
+
 ## Traps that have bitten this codebase
+
+- **`.steps` and `.step` are the household stepper.** A new container named `.steps` inherited
+  its flex row and laid four story steps out side by side. Grep a class name before reusing it.
+- **A closed `<details>` still reports sizes.** Chrome hides its content with content-visibility,
+  so `offsetHeight` on a chart inside a shut fold is its full height. Ask `checkVisibility()`, or
+  select on `[open]`.
+- **A share-of-itself IntersectionObserver threshold can be unreachable.** The reveal waited for
+  18% of a section to be on screen; the story is several screens tall, so its bars would have
+  stayed clipped. Tall sections reveal on any intersection.
+- **A shut `<details>` is a containing block for fixed children.** Its hidden content box has
+  containment, so a sheet styled `position:fixed` while shut was laid out against its own card.
+  Sheet rules are scoped to `[open]`.
+- **Absolute children escape a scroll row.** The visually hidden fold lines (`.vh`) sat in the
+  phone card row with no positioned ancestor inside it, so they were placed against the page
+  and widened it to 841px at 390. `.sstep` is `position:relative` for that reason.
+- **A transition in force when an element turns `position:fixed` animates from its old place.**
+  The sheets slid in from the right (their spot in the flow under `left:50%`) before rising.
+  Park a sheet with transitions off, then release it; the suite samples its path with motion on.
+- **An entrance animation makes a stacking context.** The news strip rises in with a transform,
+  so its pop-out's z-index counted only inside the strip and the headline painted over the open
+  list. The suite reads with reduced motion and missed it; `.top` now sits at z-index 40, and a
+  check with motion on samples the open list for anything covering it.
+- **A transition can be caught by print.** The ink-to-teal background change printed mid-colour
+  until `@media print` turned transitions off.
 
 - **`overflow-x: hidden` on html/body kills `position: sticky`** — it computes `overflow-y` to
   `auto`, making them scroll containers. Use `overflow-x: clip`.
@@ -112,15 +241,37 @@ figure or copy written before that assumed the old schedule and is wrong.
 
 ## Type
 
-Two families (Newsroom type, since 2026-10-09): Newsreader for headlines and reading, with
-its real italic for emphasis (headlines are regular weight, sentence case, set by size);
-Hanken Grotesk for figures, labels and controls, roman only, tabular figures. **Italic only in
+Two families: Newsreader for headlines, reading and figures (its own lining, tabular
+figures through `--fig`; the large ones at regular weight), with its real italic for emphasis
+(headlines are regular weight, sentence case, set by size); Inter for labels and controls,
+roman only. On 2026-11-12 Inter replaced Hanken Grotesk for figures (the owner found Hanken's
+numerals did not read well as numbers), and the same day, after six faces side by side, the
+owner chose Newsreader for figures. Its digits were measured tabular with a
+narrow comma before it went in; measure any replacement the same way. **Italic only in
 the serif**: the sans loads no italic, so `i`/`em` inside sans notes and table cells are set
 roman, and the suite fails on a third family or on any italic in the sans. Buttons do not
 inherit the page font: give every button a font-family (the model pills rendered in Arial
 until the font test caught it). Phone widths are checked for odd wrapping, not only overflow:
 `body` inherits `text-wrap:pretty` so labels and notes do not end on one word. Details:
 `docs/design-brief.md`.
+
+## Corners
+
+One system since 2026-11-13 (owner: "some boxes have squared edges, and some have rounded edges"):
+`--r` (10px) for every box, control, card and panel; `--r-s` (4px) for small marks (checkboxes,
+tags, the text highlight); `--r-lg` (16px) for a floating sheet; a pill (999px) or a circle for
+round controls; `--r-in` (6px) for a thumb inside a 10px track. Bars, bands and ranges are data
+and stay square. The suite fails on any box outside the system.
+
+**Things that read as AI-made, removed in the 2026-11-13 cleanup** (owner: "I do not want it to
+look like it's been AI-generated"). Don't bring them back:
+- A switch is one track (`.track`, `#tone`): one boundary, bare buttons, and the thumb sliding
+  *inside* it. Outlined buttons with a highlight sliding behind them showed the slide through the
+  gaps. The suite checks the thumb's parent and the buttons' empty fill.
+- No thick coloured left edge on a box (asides, the plan-numbers drawer, warnings, footnotes).
+  Every box takes one even hairline.
+- No glow (coloured box-shadow) on a control, no gradient on a data band, no endless pulse.
+- A box inside a fold does not repeat the fold's own title.
 
 ## Accessibility floors
 
@@ -166,8 +317,8 @@ first is now met, so it is ready for a decision whenever the owner wants):
     state-sourced states to them (a CMS reader for them was removed with this change; it is
     in git history before PR #95's merge).
 
-3b. **Past plan years: on the page as "Who paid the rise"** (inside section 02, under the
-    waterfall; `renderRise` in the page, `riseSeries` in `calc.js`). `src/benchmarks-2025.js` and
+3b. **Past plan years: on the page as "How premiums have risen"** (a fold under step 02 of the
+    story; `renderRise` in the page, `riseSeries` in `calc.js`). `src/benchmarks-2025.js` and
     `src/benchmarks-2026.js` come from `tools/build-benchmarks-history.mjs <year>`, entirely
     from CMS's files (HealthCare.gov plus every state exchange's, which CMS posts the May
     after). Checks: landscape to the cent, VT/DC/RI against KFF's published averages, and
@@ -196,7 +347,7 @@ Ops hygiene (small, anytime):
     law or data under it moves, add an entry to `src/updates.js` (the rules, the source
     calendar and the watcher: `docs/WHAT-CHANGED.md`; `node tools/watch-sources.mjs` prints
     the leads). It renders the hero's
-    "What changed" box (pins plus the newest, three in all), `/updates` and `/updates.xml`;
+    "What changed" box (pins plus the newest, six in all, each a date and a short `head`), `/updates` and `/updates.xml`;
     the suite holds entries to the site's rules (world entries need a primary source, no
     dashes, anchors must exist). A log that goes quiet reads as abandonment, so a benchmark
     or reps regeneration is an entry too. Never edit the hero box by hand.

@@ -736,3 +736,146 @@ member's actual position.
 
 The letter no longer claims the reader "did the arithmetic this week" — a small falsehood, but
 the letter is the one artifact that leaves the site and lands on a staffer's desk.
+
+---
+
+# Session: one bar, four steps (2026-11-12)
+
+The owner's review: the page was right and overwhelming. Measured at 1280 by 800 it ran 15.3
+screens, 2,488 words, 97 dollar and percent figures and 36 text sizes, with the universal
+comparison starting at screen 8 and the letter at screen 13. Three directions were pitched (a
+bill drawn to scale, one thing at a time, a year of 365 dots); the owner previewed the second
+with a plain bar and with the bill, and chose the bar.
+
+**What changed.** The argument is now four steps beside one pinned bar that grows and then
+shrinks: what a paystub shows, the part it never shows, the whole bill, the same care under
+universal coverage. The ink ground turns teal at the fourth step, the page's one large gesture.
+Everything the long page showed at once still exists and opens from the step it supports. The
+objections show their question and a one-line answer; the full answer and footnote are a click
+below. The send section starts with three portraits (the member and both senators), which are
+the recipient control, and the letter shows its opening until asked for the rest. The page a
+reader first meets is 10.3 screens at the same window.
+
+**What did not change.** No figure, no source, no disclosure. Two typefaces. Amber for today,
+teal for universal. Every modeled figure still says so where it is shown.
+
+**Motion budget.** One moving thing per step (the bar), figures ticking in place, the teal
+turn. Folds open over time with a turning chevron and their contents rising in; the segmented
+controls have a sliding thumb; ticks draw; the chosen portrait comes up in colour. All of it is
+off under reduced motion, and none of it computes anything.
+
+**Not done.** The 365-dot "your year" direction would add a derived figure (cost over total pay)
+that is not on the site; it waits on the owner. A plain "everything on one page" view was
+proposed with this direction and is not built: opening the folds is the current answer.
+
+## Same day, second pass (owner's review of the first build)
+
+- **Wide folds are sheets.** "It disappears, the running total bar, and a section appears below,
+  requiring some scrolling." A wide fold now rises over the page; the scroll position and the
+  bar are measured not to move.
+- **All on one page** is a switch at the first step, remembered for the reader. It is the long
+  page again (about 17 screens at 1280 by 800), for people who would rather scan.
+- **The hero** went from 174 words to under 70: the question, one sentence, the ZIP field, the
+  place being priced with its source, and the change log as one line carrying its newest date.
+  The five sample cities appear only when a ZIP cannot be priced.
+- **"Who produced this estimate"** is a fold under the model picker; its one line names the model
+  and the kind of figure, so the provenance is still on the page when shut.
+- **The other number** shows the figure and the one finding; what it is made of is a fold. The
+  not-peer-reviewed disclosure stays visible at the same volume as before.
+- **The other side** is one row per objection on a wide screen: the question, its one-line
+  answer, the twist.
+
+## Same day, third pass
+
+- **Figures in Inter.** "I don't really like the fonts we're using for the numbers. They just
+  don't read well as numbers." Inter replaces Hanken Grotesk for everything operated or scanned.
+  Still two families. Measured before adopting: every digit the same width at 40px, comma about
+  four tenths of a digit. The letter's button row breakpoint moved from 663px to 720px for it.
+- **Hero.** The notice strip and the footline are gone, the button's arrow points down, and
+  "What changed" is a flyout to the right of the ZIP (under it on a phone) that opens over the
+  page. Under 60 words.
+- **Chips, not sentences.** Each step's basis line became a one-chip tag; the story's closing
+  note is one sentence with one link.
+- **Glyphs on the folds.** Small live drawings in place of sub-lines: household dots, the rise's
+  three years, the waterfall's columns, this household's cliff curve, where six models land,
+  the three-way comparison.
+- **Section 06** shows only the questions; the one-line answer leads each fold when opened.
+- **Widths.** The model buttons, the folds and the text in a step share one 34rem column.
+
+## Same day, fourth pass: the phone is a story
+
+"The bars currently cover half the screen on mobile... like a TikTok, Instagram story type
+format where you're tapping through each one." Under 760px the four steps are cards in a
+sideways snap row, plus a closing "Send it" card. The bar is a slim column at the right edge (a
+sixth of the width at most) with only its running total above it; the card's number and
+sentence do the labelling. Ticks above, Back and Next below (not tap-anywhere: the cards have
+controls on them). The results bar keeps the household and the Year and Month switch and drops
+its three totals while the cards are up. The model picker on the universal card is the native
+select the phone already had. Not checked on a real iPhone: fixed-position sheets inside a
+scrolling row have a history of Safari bugs, so that is the first thing to try on a device.
+
+## Same day, fifth pass: back toward the first prototype
+
+The owner pointed at the first scroll prototype: "I kind of liked how minimal this initial
+version was", and later "cut back even more on the text... giving the key features of the
+site a little more room to breathe".
+
+- **The opening is on the dark ground** with the empty bar beside it, as in the prototype. The
+  ZIP field left the hero: the household pill opens one sheet with the ZIP and the family
+  details together, and a new ZIP reprices without leaving it.
+- **What changed** is a slow line of news on the opening that pops out the dated list. This
+  reverses the earlier decision to keep the log static.
+- **The universal step** has the dotted line with six circles and name chips again, and one
+  sentence naming the model, its maker's role and both figures.
+- **Teal to the end.** The other number, the objections and the letter sit on the teal ground;
+  the letter stays a sheet of paper on it.
+- **Steps are down to the prototype's parts:** a grey label with no number, the figure, one
+  sentence, and plain fold rows with a plus that turns. A chip appears only where the figure
+  leans on our own estimate. The results bar keeps the household and the unit switch and gives
+  up its three totals in this view. The bar is wider and sits nearer the text, in two even
+  columns. The view switch moved from the first step to the end of the story.
+
+## Same day, sixth pass: inside the sheets
+
+- **One title per sheet.** The sheet's bar names it, so the headings that repeated it inside are
+  gone: "Who paid the rise." above the rise, and the "The cliff" and "The bad year" eyebrows in
+  slot 03 (its headline now names it; the slot test reads the headline).
+- **The household sheet** lost its "Tell it about you" header and the read-only "Where you live"
+  box, which restated the ZIP row above it. The rating-area line moved under the ZIP's scope
+  line, where it still says when a state is priced on last year's tables. The ZIP field lost its
+  inner "ZIP" prefix (the label says it) and the button reads "Update", not "UPDATE".
+- **Dead rules out.** The old paper hero's `.hero-inner`, `.hero-head`, `.hero-body` and
+  `.footline` rules, and the unused `.rise-h`.
+- **Phone sheets** were driven in Chromium's phone emulation at 390 by 844: each wide fold opens
+  as a fixed sheet over the card row without widening the page. Still not run in WebKit or on a
+  real iPhone.
+
+## Same day, seventh pass: the owner's comments on the preview
+
+- **Opening.** The sub-line sits on two lines. "Scroll to add it up" became a bouncing arrow
+  centred at the foot of the opening. The bar's empty box waits out of sight until the story
+  starts. "What changed" moved out of the opening into a strip under the header's rule, beside
+  the plan year; on a phone the strip keeps the year and the moving line.
+- **The bar fills.** It used to share one scale with every route, so an employer household's
+  whole bill stopped short of the top under the marketplace's larger total. It now shares a
+  scale with its own route and all six models.
+- **Sheets look like sheets.** A fold that rises as a sheet wears a panel icon; a fold that
+  opens in place keeps the plus. Sheets sink back into the bottom the way they rose, at the
+  same pace (0.5s, eased), instead of leaving faster than they came.
+- **"Who paid the rise" is "How premiums have risen"**, which says what the reader will see.
+- **The six estimates run cheapest to priciest** for this household, in the chips and the
+  phone's picker. The order follows income (Lancet is a formula and moves).
+- **No view switch.** "All on one page" is gone from the screen; print and the suite still use
+  that view.
+- **Rows.** A fold's label sits on its glyph's centre line (the grid had a second row for a
+  sub-line no fold has any more). The objections end on one rule of the same weight as the rest,
+  with no second rule and empty row under them.
+- **Glyphs.** The cliff is the cliff chart in small: a baseline, this household's curve from
+  zero, the jump marked open and filled as the chart marks it, and the household's own income
+  as a teal dot. The estimates are six bars from zero, cheapest first, the chosen one lit.
+- **Figures in Newsreader.** Shown six faces side by side (Inter, IBM Plex Sans, Geist, Public
+  Sans, Source Sans 3, Newsreader), the owner chose Newsreader for the numbers. Measured first:
+  every digit one width with tabular figures on, comma 0.41 of a digit (Inter's was the same).
+  Labels and controls stay in Inter, so the page is still two families. The large figures are
+  set at the headlines' regular weight, with a little more line height for the taller dollar
+  sign.
