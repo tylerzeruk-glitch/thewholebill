@@ -19,6 +19,13 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 'who-pays-the-rest', date: '2026-11-14', kind: 'site',
+    head: 'New: who pays the rest',
+    title: 'New explainer under universal coverage: who pays the part of the bill your household no longer pays.',
+    body: 'Under universal coverage the bar drops far below the whole bill, and the first question is where the difference went. Most of it does not disappear: it is paid by everyone else. A tax credit is public money already, an employer&rsquo;s premium share is replaced by the payroll tax counted in your figure, and what Medicare and Medicaid spend today goes into one national plan, with taxes that rise with income. The studies disagree on whether total spending would go up or down. The explainer adds no new figure, and it says plainly that leaving out the Medicare tax you pay today flatters universal coverage.',
+    see: { id: 'universal', text: 'Universal coverage' }
+  },
+  {
     id: 'one-bar-at-a-time', date: '2026-11-12', kind: 'site',
     head: 'The page, rebuilt around one bar',
     title: 'The page is rebuilt around one bar. The same figures now arrive one at a time, and every chart opens from the step it supports.',

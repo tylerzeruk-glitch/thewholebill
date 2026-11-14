@@ -144,6 +144,10 @@ was "the bars cover half the screen". All on one page, on a phone, puts the bar 
   exception, a sheet of paper with its own tokens put back. No section wears a number.
 - **Step by step, the results bar shows only the household and the unit switch.** Its three
   totals are what the steps reveal; they return in the all-on-one-page view.
+- **"Who pays the rest"** (`#foldRest`, owner's ask, 2026-11-14) answers the empty part of the
+  universal bar in words: the credit or the employer's share by name, everyone's taxes, and the
+  studies' disagreement on total spending, plus the Medicare tax caveat. It adds no figure of its
+  own; filling the bar with an "everyone else pays" segment is still parked decision 1 below.
 - **The six estimates are circles on a line** (`renderModelLine()`), each at the calculator's
   own total for that model and this household, with name chips under it. The chips (and the
   phone's picker) run cheapest to priciest for this household, so their order moves with

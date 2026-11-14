@@ -3729,14 +3729,14 @@ test('glyphs: every story fold wears its icon, and the live ones follow the hous
   const p = await page(b, 1280, 800);
   const read = () => p.evaluate(() => {
     const g = id => document.getElementById(id);
-    return { all: ['gHh', 'gWhy', 'gRise', 'gWf', 'gSlot', 'gProv', 'gCmp', 'gLives'].every(id => g(id) && g(id).querySelector('svg path, svg circle') && g(id).getAttribute('aria-hidden') === 'true' && g(id).getBoundingClientRect().width === 56),
+    return { all: ['gHh', 'gWhy', 'gRise', 'gWf', 'gSlot', 'gRest', 'gProv', 'gCmp', 'gLives'].every(id => g(id) && g(id).querySelector('svg path, svg circle') && g(id).getAttribute('aria-hidden') === 'true' && g(id).getBoundingClientRect().width === 56),
       people: document.querySelectorAll('#gHh circle.gp').length, kids: document.querySelectorAll('#gHh circle.gp.kid').length,
       inside: (() => { const h = g('gHh').querySelector('svg').getBBox(); return h.x >= 0 && h.x + h.width <= 56; })(),
       cliff: !!g('gSlot').querySelector('.g-cliff'), bad: !!g('gSlot').querySelector('.g-bad'),
       weights: [...new Set([...document.querySelectorAll('.fold-g svg [stroke-width]')].map(e => +e.getAttribute('stroke-width')))].sort() };
   });
   let r = await read();
-  ok('all eight are there, 56px wide and hidden from assistive tech', r.all);
+  ok('all nine are there, 56px wide and hidden from assistive tech', r.all);
   ok('the house holds a figure a person, the children smaller', r.people === 4 && r.kids === 2, `${r.people} figures, ${r.kids} children`);
   ok('marketplace and employer readers see the cliff', r.cliff && !r.bad);
   ok('one hairline weight, plus the fine hatching and the amber totals', r.weights.every(w => [.8, .9, 1, 1.1, 1.2, 1.3, 2.2, 2.4].includes(w)), r.weights.join(', '));
@@ -3744,6 +3744,31 @@ test('glyphs: every story fold wears its icon, and the live ones follow the hous
   await p.waitForTimeout(250);
   r = await read();
   ok('they follow the household and the route: eight figures inside a wider house, and a bill with no top', r.people === 8 && r.inside && r.bad && !r.cliff, JSON.stringify([r.people, r.inside, r.bad]));
+  await p.close();
+});
+
+/* Who pays the rest. The universal bar drops far below the whole bill, and readers
+ * ask where the difference went (owner, 14 November). The fold answers in words and
+ * adds no figure of its own: each number it prints is one the bar already shows. */
+test('who pays the rest: the fold names the money the bar no longer shows', async b => {
+  const p = await page(b, 1280, 800);
+  const read = () => p.evaluate(() => {
+    const t = id => document.getElementById(id).textContent, seg = k => { const e = document.querySelector('.sseg[data-k="' + k + '"] b'); return e ? e.textContent : null; };
+    return { lead: t('restLead'), uni: document.querySelector('[data-fig="uni.total"]').textContent, own: document.getElementById('restOwn').hidden ? null : t('restOwn'),
+      you: t('restYou'), sav: document.querySelector('#sbarGap b').textContent, gapK: t('sbarGapK'), tax: t('restTax'), taxSeg: seg('tax'), credit: seg('subsidy'), emp: seg('employer'),
+      link: !!document.getElementById('wrong-medicare'), visible: document.getElementById('foldRest').checkVisibility() };
+  });
+  const route = r => p.evaluate(r => { const f = document.getElementById('foldHh'); f.open = true; document.querySelector('#route button[data-r="' + r + '"]').click(); f.open = false; }, r);
+  for (const r of ['marketplace', 'employer', 'none']) {
+    await route(r); await p.waitForTimeout(200);
+    const x = await read();
+    ok(`${r}: it is under the universal step and prints this household's own contribution`, x.visible && x.lead.includes(x.uni), x.lead);
+    ok(`${r}: what stays or goes matches the bar's gap, in the same direction`, x.you.includes(x.sav) && (x.gapK === 'no longer paid') === / less than /.test(x.you), x.you);
+    ok(`${r}: the Medicare tax it says the figures leave out is the one on the bar`, x.tax === ' (' + x.taxSeg + ')', JSON.stringify([x.tax, x.taxSeg]));
+    if (r === 'marketplace') ok('marketplace: the public money is the tax credit on the bar', x.own && x.credit && x.own.includes(x.credit), x.own);
+    if (r === 'employer') ok("employer: the employer's share on the bar is the one replaced", x.own && x.emp && x.own.includes(x.emp), x.own);
+    if (r === 'none') ok('uninsured: no credit or employer share to name', x.own === null);
+  }
   await p.close();
 });
 
