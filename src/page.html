@@ -631,10 +631,11 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
    count-up is the script's job. */
 @media (prefers-reduced-motion:no-preference){
   @keyframes pn-rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-  .motion .track,.motion .bar-bg{clip-path:inset(0 0 0 0);transition:clip-path 1.2s cubic-bezier(.2,.7,.2,1)}
+  /* .track:not(.seg): the route switch is a .track too, and must never wipe (it vanished in the teal household box) */
+  .motion .track:not(.seg),.motion .bar-bg{clip-path:inset(0 0 0 0);transition:clip-path 1.2s cubic-bezier(.2,.7,.2,1)}
   .motion .range{clip-path:inset(-12px 0 -12px 0);transition:clip-path 1.2s cubic-bezier(.2,.7,.2,1)}
   .motion .wcol{clip-path:inset(-60px 0 0 0);transition:clip-path 1s cubic-bezier(.2,.7,.2,1)}
-  .motion .reveal:not(.in) .track,.motion .reveal:not(.in) .bar-bg{clip-path:inset(0 100% 0 0)}
+  .motion .reveal:not(.in) .track:not(.seg),.motion .reveal:not(.in) .bar-bg{clip-path:inset(0 100% 0 0)}
   .motion .reveal:not(.in) .range{clip-path:inset(-12px 100% -12px 0)}
   .motion .reveal:not(.in) .wcol{clip-path:inset(100% 0 0 0)}
   /* a model change replays the comparison bars' wipe: snap hidden, then release */
@@ -642,7 +643,7 @@ h1.as-h2{font-family:var(--serif);font-weight:400;letter-spacing:-.026em;margin:
   .motion .bar-row:nth-child(2) .bar-bg{transition-delay:.18s} .motion .bar-row:nth-child(3) .bar-bg{transition-delay:.36s}
   .motion .wcol:nth-child(2){transition-delay:.18s} .motion .wcol:nth-child(3){transition-delay:.36s}
   .motion .wcol:nth-child(4){transition-delay:.54s} .motion .wcol-total{transition-delay:.8s}
-  .motion .track > div,.motion .bar-bg > div{transition:width .55s cubic-bezier(.4,0,.2,1)}
+  .motion .track:not(.seg) > div,.motion .bar-bg > div{transition:width .55s cubic-bezier(.4,0,.2,1)}
   /* --- the story, folds and controls (added with the pinned bar) --- */
   .inkzone,section.ink,.sticky,.stage{transition:background-color .9s ease,border-color .9s ease}
   .motion .sseg{transition:height .8s cubic-bezier(.3,.75,.2,1)}
@@ -936,6 +937,9 @@ footer{background:var(--ink);color:var(--im);padding:52px 0;font-size:13px;line-
 .inkzone.uni{--ink:#0A3F3C;--ink-surface:#083835;--ink-raised:#093B38;--ink-chip:#0F4B47;--irule:#1C5F5A;--irule-2:#266E68;--ictrl:#86BAB5;
   --ib:#D6E7E4;--im:#B8D5D1;--ilabel:#B8D5D1;--ifaint:#A9CBC7}
 .inkzone.uni .sticky{background:rgba(10,63,60,.93);border-bottom-color:var(--irule-2)}
+/* On teal the ink slate thumb read as purple: the route switch takes the household's amber, like the unit switch */
+.inkzone.uni #route{--thumb:var(--c2)}
+.inkzone.uni #route > button.on{color:#1E1509}
 
 /* After the turn the page stays on teal: the other number, the objections and
    the letter are all about the same proposal. Those sections were built on the
@@ -5106,7 +5110,7 @@ section.paper.onteal{background:var(--paper);background-image:none}
     bd.setAttribute("role", "dialog"); bd.setAttribute("aria-modal", "true"); bd.setAttribute("aria-label", title);
     sheetBack = d.querySelector("summary"); sheetFrom = from || null;
     d.open = true; sheetOf = d;
-    if (d.id === "foldHh"){ hhAtOpen = hhSig(); hhShown = null; byId("hhSaved").hidden = true; }
+    if (d.id === "foldHh"){ renderAges(); hhAtOpen = hhSig(); hhShown = null; byId("hhSaved").hidden = true; }   // every box shows its age when the box opens
     byId("shade").hidden = false;
     bd.getAnimations({ subtree: true }).forEach(function(a){ a.cancel(); });
     void bd.offsetWidth;

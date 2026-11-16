@@ -3557,6 +3557,28 @@ test('corners: every box takes one of the site\'s corners; only data shapes stay
     await p.close();
   }
 });
+test('sheets: the household box on teal shows its route switch in amber and every age', async b => {
+  // Opened from the teal part of the page with motion on, the route switch used to be
+  // clipped away by the bar charts' wipe (it is a .track too) or drawn with the ink
+  // zone's slate thumb, which read as purple on teal (owner, 16 November).
+  const p = await b.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'no-preference' });
+  await p.goto(URL); await p.waitForTimeout(300);
+  await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(1200);
+  await p.locator('#who-line').click(); await p.waitForTimeout(1300);
+  const r = await p.evaluate(() => {
+    const t = document.getElementById('route'), on = t.querySelector('button.on'), g = t.querySelector('.glide');
+    const q = t.getBoundingClientRect(), mid = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2);
+    return { uni: document.querySelector('.inkzone').classList.contains('uni'), clip: getComputedStyle(t).clipPath,
+      seen: t.contains(mid), thumb: getComputedStyle(g || on).backgroundColor, ink: getComputedStyle(on).color,
+      ages: [...document.querySelectorAll('#agesBoxes input')].map(i => i.value) };
+  });
+  ok('the box opened on the teal ground', r.uni);
+  ok('the route switch is not clipped', r.clip === 'none' && r.seen, r.clip);
+  ok('its thumb is the household amber on teal', r.thumb === 'rgb(217, 154, 63)', r.thumb);
+  ok('the chosen route reads dark on the amber', r.ink === 'rgb(30, 21, 9)', r.ink);
+  ok('every age box holds an age', r.ages.length === 4 && r.ages.every(v => /^\d+$/.test(v)), r.ages.join(','));
+  await p.close();
+});
 test('sheets: each one fits a single screen, with nothing to scroll inside it', async b => {
   // Owner, 13 November: "ideally the information and data on the flyouts also fit into one page".
   // Short phones (360 by 740) are allowed to scroll; these sizes are not.
