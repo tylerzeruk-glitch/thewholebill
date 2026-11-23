@@ -19,6 +19,14 @@
  * all of this, and that no entry carries an em or en dash. */
 var UPDATES = [
   {
+    id: 's1506-cosponsors-2026-11-19', date: '2026-11-19', kind: 'world',
+    head: 'S. 1506 gains a 19th cosponsor',
+    title: 'S. 1506 gained a cosponsor: Sen. Tammy Duckworth of Illinois signed on 19 November, bringing the Senate bill to 19.',
+    body: 'Govinfo&rsquo;s BILLSTATUS record for S. 1506, updated 20 November, lists 19 cosponsors alongside the sponsor, up from 18. The bill has not moved out of committee; its latest action is still the 29 April 2025 referral to the Committee on Finance.',
+    source: { title: 'govinfo BILLSTATUS, S. 1506, 119th Congress', url: 'https://www.govinfo.gov/bulkdata/BILLSTATUS/119/s/BILLSTATUS-119s1506.xml' },
+    see: { id: 'src-congress', text: 'Members and cosponsors' }
+  },
+  {
     id: 'who-pays-the-rest', date: '2026-11-14', kind: 'site',
     head: 'New: who pays the rest',
     title: 'New explainer under universal coverage: who pays the part of the bill your household no longer pays.',
